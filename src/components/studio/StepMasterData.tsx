@@ -42,7 +42,6 @@ import { ConfirmDeleteDialog } from './common/ConfirmDeleteDialog';
 import { useMasterDataWorkflow } from '../../hooks/useMasterDataWorkflow';
 import { useMasterProfileCompleteness } from '../../hooks/useMasterProfileCompleteness';
 import { ProfileCompletenessBar } from './profile/ProfileCompletenessBar';
-
 import { MasterDataChoiceView } from './profile/MasterDataChoiceView';
 
 const GuidedProfileForm = React.lazy(() =>
@@ -60,6 +59,11 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
   const completeness = useMasterProfileCompleteness(content);
+
+  const wordCount = React.useMemo(() => {
+    if (!content || !content.trim()) return 0;
+    return content.trim().split(/\s+/).length;
+  }, [content]);
 
   const {
     editMode,
@@ -191,8 +195,8 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             <Box sx={{ maxWidth: 720 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Chip
-                  icon={editMode === 'freeText' ? <EditNoteRoundedIcon sx={{ fontSize: 16 }} /> : <FormatListBulletedRoundedIcon sx={{ fontSize: 16 }} />}
-                  label={editMode === 'freeText' ? t('profile:modes.freeTextShort', 'Free Text Mode') : t('profile:modes.guidedShort', 'Guided Mode')}
+                  icon={editMode === 'guided' ? <FormatListBulletedRoundedIcon sx={{ fontSize: 16 }} /> : <EditNoteRoundedIcon sx={{ fontSize: 16 }} />}
+                  label={editMode === 'guided' ? t('profile:modes.guidedShort', 'Guided Form Mode') : t('profile:modes.freeTextShort', 'Career Notes Mode')}
                   size="small"
                   color="primary"
                   variant="outlined"
@@ -207,21 +211,32 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                 >
                   {t('profile:choice.switchMethod', 'Change Method')}
                 </Button>
+                <Button
+                  size="small"
+                  variant="text"
+                  color="primary"
+                  onClick={() => handleSwitchMode(editMode === 'guided' ? 'freeText' : 'guided')}
+                  sx={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'none' }}
+                >
+                  {editMode === 'guided'
+                    ? t('profile:choice.switchToFreeText', 'Switch to Plain Notes')
+                    : t('profile:choice.switchToGuided', 'Switch to Guided Form')}
+                </Button>
               </Box>
               <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
-                {editMode === 'freeText'
-                  ? t('profile:modes.freeTextTitle', 'Free Text & Career Notes')
-                  : t('profile:modes.guidedTitle', 'Guided Profile Form')}
+                {editMode === 'guided'
+                  ? t('profile:modes.guidedTitle', 'Guided Profile Form')
+                  : t('profile:modes.freeTextTitle', 'Free Text & Career Notes')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {editMode === 'freeText'
+                {editMode === 'guided'
                   ? t(
-                      'profile:modes.freeTextHint',
-                      'Paste raw text, LinkedIn summary, or unformatted notes. No Markdown syntax required—the AI synthesizes and structures everything automatically.'
-                    )
-                  : t(
                       'profile:subtitle',
                       'Add your career history and skills once. We will automatically adapt it for every job you apply to.'
+                    )
+                  : t(
+                      'profile:modes.freeTextHint',
+                      'Paste raw text, LinkedIn summary, or unformatted notes. No Markdown syntax required—the AI synthesizes and structures everything automatically.'
                     )}
               </Typography>
             </Box>
@@ -236,19 +251,16 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                 flexShrink: 0,
               }}
             >
-
-              {editMode === 'freeText' && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CloudUploadRoundedIcon />}
-                  onClick={openFileDialog}
-                  disabled={isProcessing}
-                  sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
-                >
-                  {t('profile:actions.importResume', 'Import File')}
-                </Button>
-              )}
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CloudUploadRoundedIcon />}
+                onClick={openFileDialog}
+                disabled={isProcessing}
+                sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
+              >
+                {t('profile:actions.importResume', 'Import File')}
+              </Button>
 
               {hasData && (
                 <Tooltip title={t('profile:actions.clearProfileTip', 'Clear all profile fields and start from a blank slate')}>
@@ -299,7 +311,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             </>
           )}
 
-          {/* VIEW 3: Pure Free Text / Notes Editor (When in freeText mode - ZERO guided form mounted) */}
+          {/* VIEW 3: Pure Free Text / Notes Editor */}
           {editMode === 'freeText' && (
             <Paper
               sx={{
@@ -319,18 +331,36 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                   py: 1,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
+                  justifyContent: 'space-between',
+                  gap: 1.5,
                   bgcolor: alpha(theme.palette.primary.main, 0.04),
                   borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
               >
-                <AutoAwesomeRoundedIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                  {t(
-                    'profile:modes.freeTextHint',
-                    'Paste raw text, LinkedIn summary, or unformatted notes. No Markdown syntax required—the AI synthesizes and structures everything automatically.'
-                  )}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                  <AutoAwesomeRoundedIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} />
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                    {t(
+                      'profile:modes.freeTextHint',
+                      'Paste raw text, LinkedIn summary, or unformatted notes. No Markdown syntax required—the AI synthesizes and structures everything automatically.'
+                    )}
+                  </Typography>
+                </Box>
+                {wordCount > 0 && (
+                  <Chip
+                    label={`${wordCount} ${t('common:units.words', 'words')}`}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      height: 22,
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      flexShrink: 0,
+                      borderColor: theme.palette.divider,
+                      bgcolor: alpha(theme.palette.background.paper, 0.6),
+                    }}
+                  />
+                )}
               </Box>
               <TextField
                 multiline

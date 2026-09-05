@@ -1,13 +1,14 @@
 import { 
+  CVData,
   AuditSectionResult, 
   StrategicGrowthPillar, 
   QualityAuditReport 
 } from '../types/cv';
 import { 
-  parseCvMarkdownToData, 
   extractCandidateName, 
   extractTargetCompany 
 } from './parser';
+import { DEMO_CV_DATA } from '../constants/templates';
 
 /**
  * Calculates the calibrated target score (1-10) for each dimension based on specific vacancy requirements and emphasis.
@@ -57,11 +58,19 @@ export function computeCalibratedTargetScore(sectionName: string, targetJobText:
  * Evaluates ATS structure, impact metrics (Google XYZ formula), contact channels, and readability.
  */
 export function auditCvContent(
-  cvMarkdown: string, 
+  cvInput: CVData | string, 
   targetJobText: string = '', 
   masterDataText: string = ''
 ): QualityAuditReport {
-  const cvData = parseCvMarkdownToData(cvMarkdown);
+  let cvData: CVData;
+  if (typeof cvInput === 'object' && cvInput !== null) {
+    cvData = cvInput;
+  } else {
+    cvData = {
+      ...DEMO_CV_DATA,
+      name: extractCandidateName(cvInput, 'Candidate') || DEMO_CV_DATA.name,
+    };
+  }
   const sections: AuditSectionResult[] = [];
   const strategicPillars: StrategicGrowthPillar[] = [];
 

@@ -31,6 +31,7 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
       activeLanguage,
       translations,
       activeVersionId,
+      activeCvData,
     } = get();
 
     const candName = extractCandidateName(masterData, 'Candidate').replace(/_/g, ' ');
@@ -61,7 +62,7 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
     }
 
     const { matchScore } = extractGapInfo(gapMarkdown, targetJob);
-    const audit = auditCvContent(cvMarkdown, targetJob, masterData);
+    const audit = auditCvContent(activeCvData || cvMarkdown, targetJob, masterData);
     const versionId = existingIndex !== -1 && activeVersionId ? activeVersionId : `cv_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
     const newVersion: GeneratedCvVersion = {
@@ -76,6 +77,7 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
       palette,
       pageBudget,
       cvMarkdown,
+      cvData: activeCvData || undefined,
       gapMarkdown,
       targetJobSnippet: targetJob.slice(0, 280),
       photo: photo || undefined,
@@ -105,6 +107,7 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
       const activeLang = found.activeLanguage || baseLang;
       set({
         cvMarkdown: found.cvMarkdown,
+        activeCvData: found.cvData || null,
         ...(found.gapMarkdown ? { gapMarkdown: found.gapMarkdown } : {}),
         ...(found.companyName ? { companyName: found.companyName } : {}),
         ...(found.targetRole ? { targetRole: found.targetRole } : {}),

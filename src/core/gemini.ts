@@ -6,8 +6,7 @@ import { generatePdfFromMarkdown } from './pdf-generator';
 import {
   sanitizeFileName,
   extractCandidateName,
-  extractTargetCompany,
-  parseCvMarkdownToData
+  extractTargetCompany
 } from './parser';
 import { generateQualityAuditReport } from './audit';
 import { ThemeId, PaletteId, FontFamilyId, SpacingDensity } from '../types/cv';
@@ -134,8 +133,8 @@ export async function tailorCvWithGemini({
 
   let candidateName = extractCandidateName(masterData);
   if (!candidateName) {
-    const parsed = parseCvMarkdownToData(cvContent);
-    candidateName = sanitizeFileName(parsed.name || 'Candidate');
+    const rawName = extractCandidateName(cvContent, 'Candidate');
+    candidateName = sanitizeFileName(rawName);
   }
 
   const baseFileName = candidateName ? `CV_${candidateName}_${sanitizedCompany}` : `CV_${sanitizedCompany}`;

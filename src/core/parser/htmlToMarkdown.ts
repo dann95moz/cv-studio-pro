@@ -1,79 +1,57 @@
-import TurndownService from 'turndown';
-
 /**
- * Singleton Turndown instance configured for ATS-compliant, standard Markdown output.
- * Guarantees that visual edits produce consistent, clean ATX Markdown.
- */
-const turndownService = new TurndownService({
-  headingStyle: 'atx',
-  bulletListMarker: '-',
-  codeBlockStyle: 'fenced',
-  emDelimiter: '*',
-  strongDelimiter: '**',
-  hr: '---',
-});
-
-// Ignore non-print or hover action UI elements inside contentEditable
-turndownService.addRule('ignoreActionElements', {
-  filter: (node) => {
-    return (
-      node.nodeType === 1 &&
-      ((node as HTMLElement).classList.contains('no-print') ||
-        (node as HTMLElement).classList.contains('cv-ai-hover-actions'))
-    );
-  },
-  replacement: () => '',
-});
-
-// Preserve ++keyword++ highlights
-turndownService.addRule('highlightKeywords', {
-  filter: (node) => {
-    return (
-      node.nodeName === 'MARK' ||
-      (node.nodeType === 1 &&
-        ((node as HTMLElement).classList.contains('cv-highlight-keyword') ||
-          (node as HTMLElement).classList.contains('cv-keyword-highlight')))
-    );
-  },
-  replacement: (content) => `++${content.trim()}++`,
-});
-
-// Remove unnecessary elements or inline spans with empty text
-turndownService.addRule('cleanSpans', {
-  filter: ['span'],
-  replacement: (content) => content,
-});
-
-// Ensure clean linebreaks inside paragraphs
-turndownService.addRule('paragraphSpacing', {
-  filter: 'p',
-  replacement: (content) => {
-    const trimmed = content.trim();
-    if (!trimmed) return '\n\n';
-    return `\n\n${trimmed}\n\n`;
-  },
-});
-
-// IMPORTANT: Bypass Turndown's default character escaping.
-// Turndown by default escapes [, ], +, *, _, -, etc. with backslashes (\), which corrupts resume text (e.g. [+123] -> \[\+123\]).
-turndownService.escape = (content: string) => content;
-
-/**
- * Converts sanitized HTML from the visual WYSIWYG editor into clean Markdown.
- * Preserves Google XYZ bullets, ATX headers, dividers, and emphasis.
+ * Lightweight, zero-dependency HTML to inline Markdown converter.
+ * Converts contentEditable browser HTML (b, i, mark, p, br) to clean inline Markdown
+ * without requiring the turndown library.
  */
 export function htmlToMarkdown(html: string): string {
   if (!html || !html.trim()) return '';
 
-  try {
-    const markdown = turndownService.turndown(html);
-    // Normalize multiple consecutive blank lines to standard double newline and remove any rogue backslashes
-    return markdown
-      .replace(/\\([\[\]+*`_~\\-])/g, '$1')
+  if (typeof document !== 'undefined') {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+
+    // 1. Remove non-print action UI elements
+    temp.querySelectorAll('.no-print, .cv-ai-hover-actions').forEach((el) => el.remove());
+
+    // 2. Convert highlights: <mark> or .cv-highlight-keyword -> ++text++
+    temp.querySelectorAll('mark, .cv-highlight-keyword, .cv-keyword-highlight').forEach((el) => {
+      const text = el.textContent?.trim();
+      el.textContent = text ? `++${text}++` : '';
+    });
+
+    // 3. Convert bold elements: <b>, <strong> -> **text**
+    temp.querySelectorAll('b, strong').forEach((el) => {
+      const text = el.textContent?.trim();
+      el.textContent = text ? `**${text}**` : '';
+    });
+
+    // 4. Convert italic elements: <i>, <em> -> *text*
+    temp.querySelectorAll('i, em').forEach((el) => {
+      const text = el.textContent?.trim();
+      el.textContent = text ? `*${text}*` : '';
+    });
+
+    // 5. Convert line breaks and paragraph spacing
+    temp.querySelectorAll('br').forEach((el) => el.replaceWith('\n'));
+    temp.querySelectorAll('p, div').forEach((el) => {
+      const text = el.textContent?.trim();
+      el.replaceWith(text ? `\n${text}\n` : '\n');
+    });
+
+    return (temp.textContent || '')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
-  } catch (err) {
-    console.error('Failed to convert HTML to Markdown:', err);
-    return html;
   }
+
+  // Server-side / Node fallback regex
+  return html
+    .replace(/<span[^>]*class="[^"]*(?:no-print|cv-ai-hover-actions)[^"]*"[^>]*>.*?<\/span>/gi, '')
+    .replace(/<(?:mark|span[^>]*class="[^"]*(?:cv-highlight-keyword|cv-keyword-highlight)[^"]*")[^>]*>(.*?)<\/(?:mark|span)>/gi, '++$1++')
+    .replace(/<(?:strong|b)[^>]*>(.*?)<\/(?:strong|b)>/gi, '**$1**')
+    .replace(/<(?:em|i)[^>]*>(.*?)<\/(?:em|i)>/gi, '*$1*')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?(?:p|div)[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }

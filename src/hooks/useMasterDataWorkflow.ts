@@ -151,11 +151,7 @@ export const useMasterDataWorkflow = ({
     details?: PdfImportResult
   ) => {
     const finalContent = loadedContent;
-    if (fileName.toLowerCase().endsWith('.md') && /^##\s+/m.test(loadedContent)) {
-      setEditMode('guided');
-    } else {
-      setEditMode('freeText');
-    }
+    setEditMode('freeText');
 
     if (hasData) {
       setPendingFile({ content: finalContent, fileName, isPdf, details });

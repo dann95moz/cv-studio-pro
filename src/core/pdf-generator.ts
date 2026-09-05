@@ -14,9 +14,10 @@ import path from 'path';
 import os from 'os';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { parseCvMarkdownToData, sanitizeFileName } from './parser';
+import { sanitizeFileName, extractCandidateName } from './parser';
 import { CVRenderer } from '../components/CVRenderer';
-import { ThemeId, PaletteId, FontFamilyId, SpacingDensity } from '../types/cv';
+import { CVData, ThemeId, PaletteId, FontFamilyId, SpacingDensity } from '../types/cv';
+import { DEMO_CV_DATA } from '../constants/templates';
 import { getWorkspaceRoot, getOutputsDir } from './workspace';
 import { escapeHtml } from '../utils/textFormatting';
 
@@ -147,7 +148,7 @@ export interface RenderCvOptions {
 }
 
 export function renderCvToHtml(
-  markdownContent: string,
+  markdownContent: string | CVData,
   themeOrOptions: ThemeId | RenderCvOptions = 'modern-tech',
   legacyBaseDir?: string
 ): string {
@@ -165,7 +166,19 @@ export function renderCvToHtml(
   } = options;
 
   const rootDir = getWorkspaceRoot(baseDir);
-  const cvData = parseCvMarkdownToData(markdownContent);
+  let cvData: CVData;
+  if (typeof markdownContent === 'object' && markdownContent !== null) {
+    cvData = markdownContent;
+  } else {
+    try {
+      cvData = JSON.parse(markdownContent);
+    } catch {
+      cvData = {
+        ...DEMO_CV_DATA,
+        name: extractCandidateName(markdownContent, 'Candidate') || DEMO_CV_DATA.name,
+      };
+    }
+  }
 
   // Render React component tree to static HTML markup with complete design options
   const componentHtml = renderToStaticMarkup(
@@ -339,8 +352,8 @@ export async function generatePdfFromMarkdown({
   }
 
   if (!finalOutputPath) {
-    const parsed = parseCvMarkdownToData(content);
-    const candidateName = sanitizeFileName(parsed.name || 'Candidato');
+    const name = extractCandidateName(content, 'Candidato');
+    const candidateName = sanitizeFileName(name);
     finalOutputPath = path.join(rootDir, 'outputs', `CV_${candidateName}.pdf`);
   }
 

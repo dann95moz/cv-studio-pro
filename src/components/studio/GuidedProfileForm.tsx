@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { parseCvMarkdownToData, serializeCvDataToMarkdown } from '../../core/parser';
+import { serializeCvDataToMarkdown } from '../../core/parser';
 import { CVData, ContactItem, ContactType, ExperienceItem, SkillCategory } from '../../types/cv';
+import { BLANK_CV_DATA } from '../../constants/templates';
+import { useResumeStore } from '../../store/useResumeStore';
 import { ProfileNavRail, ProfileSectionKey } from './profile/ProfileNavRail';
 import { PersonalInfoSection } from './profile/PersonalInfoSection';
 import { SummarySection } from './profile/SummarySection';
@@ -33,9 +35,11 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   markdownContent,
   onChange,
   onFlushRef,
+  data,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
-  const [formData, setFormData] = useState<CVData>(() => parseCvMarkdownToData(markdownContent));
+  const activeCvData = useResumeStore((s) => s.activeCvData);
+  const [formData, setFormData] = useState<CVData>(() => data || activeCvData || BLANK_CV_DATA);
   const [activeSection, setActiveSection] = useState<ProfileSectionKey>('personal');
   
   const lastEmittedMarkdownRef = useRef<string>(markdownContent);
@@ -60,6 +64,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
       lastEmittedMarkdownRef.current = newMarkdown;
       onChange(newMarkdown);
     }
+    useResumeStore.getState().setActiveCvData(formDataRef.current);
   }, [onChange]);
 
   // Hook up onFlushRef for parent components
@@ -88,25 +93,18 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           lastEmittedMarkdownRef.current = newMarkdown;
           onChange(newMarkdown);
         }
+        useResumeStore.getState().setActiveCvData(formDataRef.current);
       }
     };
   }, [onChange]);
 
-  // Synchronize when external markdownContent changes (e.g. sample loaded or file imported)
+  // Synchronize when external data changes
   useEffect(() => {
-    if (markdownContent === lastEmittedMarkdownRef.current) {
-      return;
+    if (data) {
+      setFormData(data);
+      formDataRef.current = data;
     }
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-    isDirtyRef.current = false;
-    lastEmittedMarkdownRef.current = markdownContent;
-    const parsed = parseCvMarkdownToData(markdownContent);
-    setFormData(parsed);
-    formDataRef.current = parsed;
-  }, [markdownContent]);
+  }, [data]);
 
   const scheduleEmit = useCallback(() => {
     if (debounceTimerRef.current) {
@@ -121,6 +119,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           lastEmittedMarkdownRef.current = newMarkdown;
           onChange(newMarkdown);
         }
+        useResumeStore.getState().setActiveCvData(formDataRef.current);
       }
     }, 250);
   }, [onChange]);

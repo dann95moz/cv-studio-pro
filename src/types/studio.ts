@@ -6,6 +6,7 @@
  */
 
 import { ThemeId, PaletteId, ProfilePhotoConfig } from './theme';
+import { CVData } from './cv';
 
 export type WizardStep = 
   | 'profile' 
@@ -40,6 +41,7 @@ export interface CvTranslationVariant {
   language: string; // 'en' | 'es' | 'de' | 'fr' | 'it'
   languageLabel: string;
   cvMarkdown: string;
+  cvData?: CVData;
   updatedAt: string; // ISO string
   isOutdated?: boolean;
   baseMarkdownHash?: string;
@@ -58,6 +60,7 @@ export interface GeneratedCvVersion {
   palette: PaletteId;
   pageBudget: 1 | 2;
   cvMarkdown: string;
+  cvData?: CVData;
   gapMarkdown?: string;
   targetJobSnippet?: string;
   photo?: ProfilePhotoConfig | null;

@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useResumeStore } from './useResumeStore';
-import { parseCvMarkdownToData } from '../core/parser';
 import { auditCvContent } from '../core/audit-engine';
 import { CVData, QualityAuditReport } from '../types/cv';
 import { extractGapInfo } from '../utils/sanitize';
+import { DEMO_CV_DATA } from '../constants/templates';
 
 export { extractGapInfo };
 
@@ -20,46 +20,35 @@ export const checkHasGapReport = (gapMarkdown: string): boolean => {
 };
 
 /**
- * Hook to get memoized parsed CV data from current tailored Markdown
+ * Hook to get memoized CV data from current tailored state
  */
 export const useParsedCv = (): CVData => {
   const activeCvData = useResumeStore((s) => s.activeCvData);
-  const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
   const activeLanguage = useResumeStore((s) => s.activeLanguage);
   const currentBaseLanguage = useResumeStore((s) => s.currentBaseLanguage);
   const translations = useResumeStore((s) => s.translations);
 
-  const activeMarkdown = useMemo(() => {
-    if (activeLanguage && currentBaseLanguage && activeLanguage !== currentBaseLanguage && translations[activeLanguage]) {
-      return translations[activeLanguage].cvMarkdown;
-    }
-    return cvMarkdown;
-  }, [cvMarkdown, activeLanguage, currentBaseLanguage, translations]);
-
   return useMemo(() => {
-    if (activeCvData && (!activeLanguage || activeLanguage === currentBaseLanguage)) {
-      return activeCvData;
+    if (
+      activeLanguage &&
+      currentBaseLanguage &&
+      activeLanguage !== currentBaseLanguage &&
+      translations[activeLanguage]?.cvData
+    ) {
+      return translations[activeLanguage].cvData!;
     }
-    return parseCvMarkdownToData(activeMarkdown);
-  }, [activeCvData, activeMarkdown, activeLanguage, currentBaseLanguage]);
-};
-
-/**
- * Hook to get memoized parsed Master CV data from candidate master data
- */
-export const useParsedMasterCv = (): CVData => {
-  const masterData = useResumeStore((s) => s.masterData);
-  return useMemo(() => parseCvMarkdownToData(masterData), [masterData]);
+    return activeCvData || DEMO_CV_DATA;
+  }, [activeCvData, activeLanguage, currentBaseLanguage, translations]);
 };
 
 /**
  * Hook to get memoized Quality Audit Report
  */
 export const useAuditReport = (): QualityAuditReport => {
-  const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
+  const cvData = useParsedCv();
   const targetJob = useResumeStore((s) => s.targetJob);
   const masterData = useResumeStore((s) => s.masterData);
-  return useMemo(() => auditCvContent(cvMarkdown, targetJob, masterData), [cvMarkdown, targetJob, masterData]);
+  return useMemo(() => auditCvContent(cvData, targetJob, masterData), [cvData, targetJob, masterData]);
 };
 
 /**

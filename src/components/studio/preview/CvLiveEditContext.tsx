@@ -83,6 +83,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
   const targetJob = useResumeStore((s) => s.targetJob);
   const providerSettings = useResumeStore((s) => s.providerSettings);
   const setCvMarkdown = useResumeStore((s) => s.setCvMarkdown);
+  const setActiveCvData = useResumeStore((s) => s.setActiveCvData);
 
   const formatSelection = useCallback((command: 'bold' | 'italic' | 'highlight') => {
     if (activeFormatter) {
@@ -93,8 +94,9 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
   const applyCvUpdate = useCallback((updater: (prev: CVData) => CVData) => {
     const updated = updater(parsedCv);
     const serialized = serializeCvDataToMarkdown(updated);
+    setActiveCvData(updated);
     setCvMarkdown(serialized);
-  }, [parsedCv, setCvMarkdown]);
+  }, [parsedCv, setCvMarkdown, setActiveCvData]);
 
   const updateName = useCallback((name: string) => {
     applyCvUpdate((prev) => ({

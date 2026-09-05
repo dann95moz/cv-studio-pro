@@ -15,7 +15,8 @@ import html2canvas from 'html2canvas';
 import { PageFormat } from '../types/theme';
 import { GeneratedCvVersion } from '../types/studio';
 import { getPageFormatConfig } from '../theme/dimensions';
-import { parseCvMarkdownToData, sanitizeFileName } from './parser';
+import { sanitizeFileName } from './parser';
+import { DEMO_CV_DATA } from '../constants/templates';
 import { CVRenderer } from '../components/CVRenderer';
 
 export interface DirectPdfOptions {
@@ -192,11 +193,9 @@ export async function generateVersionDirectPdf(
 
   const requestedLang = options.language || version.activeLanguage;
   const isVariant = Boolean(requestedLang && version.translations && version.translations[requestedLang]);
-  const markdownToRender = isVariant
-    ? version.translations![requestedLang!].cvMarkdown
-    : version.cvMarkdown;
-
-  const cvData = parseCvMarkdownToData(markdownToRender);
+  const cvData = isVariant && version.translations?.[requestedLang!]?.cvData
+    ? version.translations[requestedLang!].cvData!
+    : (version.cvData || DEMO_CV_DATA);
   const candidateName = sanitizeFileName(version.candidateName || cvData.name || 'Candidate');
   const cleanCompany = sanitizeFileName(version.companyName || 'Application');
   const langSuffix = isVariant ? `_${requestedLang!.toUpperCase()}` : '';

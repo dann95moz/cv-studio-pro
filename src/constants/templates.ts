@@ -1,7 +1,4 @@
-/**
- * CV Studio Pro - Static Templates & Initial Markdown Documents
- * Separated from presentation logic to adhere to Single Responsibility Principle (SRP).
- */
+import { CVData } from '../types/cv';
 
 export const BLANK_MASTER_DATA = '';
 
@@ -10,6 +7,83 @@ export const BLANK_TARGET_JOB = '';
 export const BLANK_TAILORED_CV = '';
 
 export const BLANK_GAP_REPORT = '';
+
+export const BLANK_CV_DATA: CVData = {
+  name: '',
+  title: '',
+  contacts: [],
+  summary: '',
+  skillGroups: [],
+  experience: [],
+  projects: [],
+  education: [],
+  languages: [],
+  sections: [],
+};
+
+export const DEMO_CV_DATA: CVData = {
+  name: 'ALEX MORGAN',
+  title: 'Senior Frontend Engineer – Core Payments Platform',
+  contacts: [
+    { type: 'location', label: 'San Francisco, CA' },
+    { type: 'email', label: 'alex.morgan@example.com', url: 'mailto:alex.morgan@example.com' },
+    { type: 'phone', label: '+1 415 555 0192' },
+    { type: 'linkedin', label: 'LinkedIn', url: 'https://linkedin.com/in/alexmorgan-eng' },
+    { type: 'github', label: 'GitHub', url: 'https://github.com/alexmorgan-eng' },
+    { type: 'globe', label: 'Portfolio', url: 'https://alexmorgan.dev' },
+  ],
+  summary:
+    'Senior Frontend Engineer with 6+ years of experience specialized in **TypeScript**, **React**, and **Microfrontends**, building resilient user experiences for high-volume transactions. Proven track record of cutting CI/CD build times by **50%**, reducing production runtime errors by **40%**, and architecting payment onboarding workflows handling over **$80M+ in transaction volume**.',
+  skillGroups: [
+    {
+      category: 'Languages & Core Fundamentals',
+      skills: ['TypeScript', 'JavaScript (ESNext)', 'Python', 'SQL', 'HTML5', 'CSS3', 'Core Web Vitals'],
+    },
+    {
+      category: 'Frameworks, Architecture & Ecosystem',
+      skills: ['React', 'Next.js', 'Webpack Module Federation', 'Node.js', 'Zustand', 'Redux', 'RESTful APIs'],
+    },
+    {
+      category: 'Tooling, Testing, CI/CD & AI Integrations',
+      skills: ['Jest', 'React Testing Library', 'Playwright', 'Vite', 'Docker', 'GitHub Actions CI/CD', 'AWS'],
+    },
+  ],
+  experience: [
+    {
+      company: 'FinScale Technologies',
+      role: 'Staff Frontend Engineer',
+      date: 'Oct 2022 – Present',
+      location: 'San Francisco, CA (Remote)',
+      bullets: [
+        '**Spearheaded** modular **Microfrontend Architecture** using **Webpack Module Federation**, reducing core bundle sizes by **45%** and accelerating cross-team deployments by **3.5x**.',
+        '**Engineered** high-resilience payment onboarding flows with **TypeScript** and **React**, driving a **28% reduction in checkout drop-offs** across **$80M+ in annual payments**.',
+        '**Standardized** automated testing with **Jest** and **Playwright**, boosting test coverage to **84%** and cutting production bug escapes by **40%**.',
+      ],
+    },
+    {
+      company: 'Nova Cloud Systems',
+      role: 'Senior Frontend Engineer',
+      date: 'Jan 2020 – Sep 2022',
+      location: 'Austin, TX',
+      bullets: [
+        '**Architected** high-performance transactional dashboards with **React** and **Zustand**, maintaining **60 FPS** across 50,000+ live data streams.',
+        '**Streamlined** automated CI/CD deployment pipelines, cutting build and test execution cycles by **52%**.',
+        '**Standardized** accessibility standards across customer interfaces, achieving **100% WCAG 2.1 AA compliance**.',
+      ],
+    },
+  ],
+  projects: [],
+  education: [
+    '**B.S. in Computer Science** – University of California, Berkeley, 2019',
+    '**AWS Certified Developer – Associate** – Amazon Web Services, 2023',
+    '**Meta Certified Front-End Developer** – Meta, 2022',
+  ],
+  languages: [
+    '**English:** Native',
+    '**Spanish:** C1 – Professional Working Proficiency',
+  ],
+  sections: [],
+};
 
 export const DEMO_MASTER_DATA = `# ALEX MORGAN
 **Senior Frontend Engineer | UI Architecture & High-Scale Systems**  
