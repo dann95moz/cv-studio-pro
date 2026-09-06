@@ -11,6 +11,7 @@ export interface DetectedLanguage {
     projects: string;
     education: string;
     languages: string;
+    websites: string;
   };
   skillsCategories: {
     languages: string;
@@ -39,7 +40,8 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       experience: 'EXPERIENCIA LABORAL',
       projects: 'PROYECTOS DESTACADOS',
       education: 'EDUCACIÓN Y CERTIFICACIONES',
-      languages: 'IDIOMAS'
+      languages: 'IDIOMAS',
+      websites: 'SITIOS WEB Y PERFILES'
     },
     skillsCategories: {
       languages: 'Lenguajes y Fundamentos',
@@ -66,7 +68,8 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       experience: 'BERUFLICHER WERDEGANG',
       projects: 'AUSGEWÄHLTE PROJEKTE',
       education: 'AUSBILDUNG & ZERTIFIZIERUNGEN',
-      languages: 'SPRACHKENNTNISSE'
+      languages: 'SPRACHKENNTNISSE',
+      websites: 'WEBSITES & PROFILE'
     },
     skillsCategories: {
       languages: 'Programmiersprachen & Grundlagen',
@@ -93,7 +96,8 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       experience: 'EXPÉRIENCE PROFESSIONNELLE',
       projects: 'PROJETS NOTABLES',
       education: 'FORMATION & CERTIFICATIONS',
-      languages: 'LANGUES'
+      languages: 'LANGUES',
+      websites: 'SITES WEB & PROFILS'
     },
     skillsCategories: {
       languages: 'Langages et Fondamentaux',
@@ -120,7 +124,8 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       experience: 'ESPERIENZA PROFESSIONALE',
       projects: 'PROGETTI PRINCIPALI',
       education: 'ISTRUZIONE E CERTIFICAZIONI',
-      languages: 'LINGUE'
+      languages: 'LINGUE',
+      websites: 'SITI WEB E PROFILI'
     },
     skillsCategories: {
       languages: 'Linguaggi e Fondamenti',
@@ -147,7 +152,8 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       experience: 'PROFESSIONAL EXPERIENCE',
       projects: 'FEATURED PROJECTS',
       education: 'EDUCATION & CERTIFICATIONS',
-      languages: 'LANGUAGES'
+      languages: 'LANGUAGES',
+      websites: 'WEBSITES, PORTFOLIOS, PROFILES'
     },
     skillsCategories: {
       languages: 'Languages & Core Fundamentals',

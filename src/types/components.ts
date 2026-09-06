@@ -397,6 +397,7 @@ export interface SettingsViewProps {
   onRulesChange?: (rules: string) => void;
   onResetDefaults: () => void;
   onSave?: (settings: AIProviderSettings) => void;
+  onOpenSync?: () => void;
 }
 
 export interface SettingsAiTabProps {

@@ -109,7 +109,7 @@ export const ExecutiveTemplate: React.FC<CVTemplateProps> = ({ slots, theme }) =
             {/* Websites, Portfolios, Profiles */}
             {linkContacts.length > 0 && (
               <div className="banner-side-section banner-links-block">
-                <h3 className="banner-side-title">Websites, Portfolios, Profiles</h3>
+                <h3 className="banner-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
                 <ul className="banner-link-list">
                   {linkContacts.map((c, i) => (
                     <li key={i} className="banner-link-item">

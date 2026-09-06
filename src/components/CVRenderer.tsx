@@ -46,7 +46,7 @@ export const CVRenderer: React.FC<CVRendererProps> = ({
     ...data,
     photo: photo !== undefined ? photo : data.photo,
   };
-  const slots = mapDataToSlots(effectiveData);
+  const slots = mapDataToSlots(effectiveData, effectiveData.language);
   const palConfig = getPaletteConfig(palette, customColor);
   const density = DENSITY_MAP[spacingDensity] || DENSITY_MAP.standard;
   const fontFam = FONT_FAMILY_CSS_MAP[fontFamily] || FONT_FAMILY_CSS_MAP.inter;

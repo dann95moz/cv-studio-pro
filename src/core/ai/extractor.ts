@@ -3,10 +3,10 @@ import {
   MULTILINGUAL_KEYWORDS_REGEX
 } from '../parser/metadataExtractor';
 import { extractJobKeywords } from '../matching/quickMatcher';
-import { CVData } from '../../types/cv';
-import { SupportedLanguage } from '../../constants/languages';
-import { serializeCvDataToMarkdown } from '../parser/markdownSerializer';
-import { extractCandidateName } from '../parser/metadataExtractor';
+import { CVData, CVSection } from '../../types/cv';
+import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
+import { serializeCvDataToMarkdown, parseMarkdownToCvData, extractCandidateName } from '../parser';
+import { inferDocumentLanguage, normalizeSkillCategory } from '../parser/markdownToCvData';
 
 export interface ExtractedCvAndGap {
   cvMarkdown: string;
@@ -81,14 +81,50 @@ function tryParseJsonCv(
         url: c.url?.replace(/\\/g, '').trim(),
       }));
 
+    const inferred = inferDocumentLanguage(parsed.cvData.summary || rawText);
+    const detectedLang: SupportedLanguage = parsed.detectedLanguage && ['es', 'en', 'de', 'fr', 'it'].includes(parsed.detectedLanguage.toLowerCase())
+      ? (parsed.detectedLanguage.toLowerCase() as SupportedLanguage)
+      : inferred;
+    const langDef = LANGUAGE_DEFINITIONS[detectedLang] || LANGUAGE_DEFINITIONS.es;
+
+    const sections: CVSection[] = [];
+    if (parsed.cvData.summary) {
+      sections.push({ id: 'summary', type: 'summary', title: langDef.sections.summary });
+    }
+    if (parsed.cvData.skills && parsed.cvData.skills.length > 0) {
+      sections.push({ id: 'skills', type: 'skills', title: langDef.sections.skills });
+    }
+    if (parsed.cvData.experience && parsed.cvData.experience.length > 0) {
+      sections.push({ id: 'experience', type: 'experience', title: langDef.sections.experience });
+    }
+    if (parsed.cvData.projects && parsed.cvData.projects.length > 0) {
+      sections.push({ id: 'projects', type: 'projects', title: langDef.sections.projects });
+    }
+    if ((parsed.cvData.education && parsed.cvData.education.length > 0) || (parsed.cvData.certifications && parsed.cvData.certifications.length > 0)) {
+      sections.push({ id: 'education', type: 'education', title: langDef.sections.education });
+    }
+    if (parsed.cvData.languages && parsed.cvData.languages.length > 0) {
+      sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages });
+    }
+
     const cvData: CVData = {
       name: candidateName,
       title: role,
       contacts,
-      sections: [],
+      sections,
+      sectionTitles: {
+        summary: langDef.sections.summary,
+        skills: langDef.sections.skills,
+        experience: langDef.sections.experience,
+        projects: langDef.sections.projects,
+        education: langDef.sections.education,
+        languages: langDef.sections.languages,
+        websites: langDef.sections.websites,
+      },
+      language: detectedLang,
       summary: parsed.cvData.summary || '',
       skillGroups: (parsed.cvData.skills || []).map((sg) => ({
-        category: (sg.category || '').replace(/[:*_\s]+$/, '').replace(/^[:*_\s]+/, '').trim(),
+        category: normalizeSkillCategory((sg.category || '').replace(/[:*_\s]+$/, '').replace(/^[:*_\s]+/, '').trim(), detectedLang),
         skills: (sg.skills || [])
           .map((sk) => sk.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '').trim())
           .filter(Boolean),
@@ -112,7 +148,7 @@ function tryParseJsonCv(
       languages: parsed.cvData.languages || [],
     };
 
-    const cvMarkdown = serializeCvDataToMarkdown(cvData);
+    const cvMarkdown = serializeCvDataToMarkdown(cvData, detectedLang);
     const score = parsed.gapReport?.estimatedScore ?? parsed.gapReport?.estimatedMatchScore ?? 0;
     const keywords = parsed.gapReport?.criticalKeywords ?? parsed.gapReport?.criticalIntegratedKeywords ?? [];
 
@@ -130,10 +166,6 @@ function tryParseJsonCv(
       `- **Strategic Narrative:** ${narrative}`,
       `- **Addressed Gaps:** ${gaps}`,
     ].join('\n');
-
-    const detectedLang = parsed.detectedLanguage && ['es', 'en', 'de', 'fr', 'it'].includes(parsed.detectedLanguage.toLowerCase())
-      ? (parsed.detectedLanguage.toLowerCase() as SupportedLanguage)
-      : undefined;
 
     return {
       cvMarkdown,
@@ -221,10 +253,14 @@ export function extractCvAndGap(
     keywords = extractJobKeywords(gapContent || rawText).slice(0, 6);
   }
 
+  const fallbackCvData = parseMarkdownToCvData(cvContent);
+
   return {
     cvMarkdown: cvContent,
     gapMarkdown: gapContent,
     score,
-    keywords
+    keywords,
+    cvData: fallbackCvData,
+    detectedLanguage: fallbackCvData.language,
   };
 }

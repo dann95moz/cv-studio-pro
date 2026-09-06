@@ -71,7 +71,7 @@ export const AcademicResearchTemplate: React.FC<CVTemplateProps> = ({ slots, the
           {/* Websites & Profiles */}
           {linkContacts.length > 0 && (
             <div className="dualtone-side-block">
-              <h3 className="dualtone-side-title">Websites, Portfolios, Profiles</h3>
+              <h3 className="dualtone-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
               <ul className="dualtone-link-list">
                 {linkContacts.map((c, i) => (
                   <li key={i} className="dualtone-link-item">

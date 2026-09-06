@@ -13,7 +13,8 @@ export type SectionType =
   | 'projects' 
   | 'education' 
   | 'languages' 
-  | 'generic';
+  | 'generic'
+  | 'custom';
 
 export type ContactType = 
   | 'email' 
@@ -57,7 +58,7 @@ export interface CVSection {
   id: string;
   type: SectionType;
   title: string;
-  rawContent: string;
+  rawContent?: string;
 }
 
 import { ProfilePhotoConfig } from './theme';
@@ -86,11 +87,14 @@ export interface CustomSection {
   items: string[];
 }
 
+import { SupportedLanguage } from '../constants/languages';
+
 export interface CVData {
   name: string;
   title: string;
   contacts: ContactItem[];
   sections: CVSection[];
+  language?: SupportedLanguage;
   summary?: string;
   skillGroups?: SkillCategory[];
   experience?: ExperienceItem[];

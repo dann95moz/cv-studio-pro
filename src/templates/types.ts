@@ -1,4 +1,5 @@
 import { CVData, ThemeId, ContactItem, SkillCategory, ExperienceItem, ProfilePhotoConfig, LanguageItem } from '../types/cv';
+import { SupportedLanguage } from '../constants/languages';
 
 export interface HeaderSlotData {
   name: string;
@@ -49,6 +50,8 @@ export interface CVSlotMap {
   languages?: ListSlotData;
   genericSections: GenericSlotData[];
   photo?: ProfilePhotoConfig | null;
+  websitesTitle?: string;
+  language?: SupportedLanguage;
 }
 
 export interface CVTemplateProps {

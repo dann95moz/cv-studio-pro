@@ -82,7 +82,13 @@ export const DEMO_CV_DATA: CVData = {
     '**English:** Native',
     '**Spanish:** C1 – Professional Working Proficiency',
   ],
-  sections: [],
+  sections: [
+    { id: 'summary', type: 'summary', title: 'Professional Summary & Pitch' },
+    { id: 'skills', type: 'skills', title: 'Master Tech Stack & Competencies' },
+    { id: 'experience', type: 'experience', title: 'Career History & Key Achievements' },
+    { id: 'education', type: 'education', title: 'Education & Certifications' },
+    { id: 'languages', type: 'languages', title: 'Languages' },
+  ],
 };
 
 export const DEMO_MASTER_DATA = `# ALEX MORGAN

@@ -109,7 +109,7 @@ export const DesignerUiuxTemplate: React.FC<CVTemplateProps> = ({ slots, theme }
             {/* Websites & Profiles */}
             {linkContacts.length > 0 && (
               <div className="pastel-section pastel-links-block">
-                <h3 className="cv-section-title">Websites, Portfolios, Profiles</h3>
+                <h3 className="cv-section-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
                 <ul className="pastel-links-list">
                   {linkContacts.map((c, i) => (
                     <li key={i}>

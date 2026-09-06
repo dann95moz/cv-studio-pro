@@ -49,8 +49,11 @@ export interface CvDataSlice {
   companyName: string;
   targetRole: string;
   lastBackupTimestamp: number;
+  lastModifiedTimestamp?: number;
   unsavedChangesCount: number;
   recordBackup: () => void;
+  recordLastModified: () => void;
+  restoreFullSnapshot: (snapshotData: Partial<ResumeStore>) => void;
   setMasterData: (val: string | ((prev: string) => string)) => void;
   setTargetJob: (val: string | ((prev: string) => string)) => void;
   setCvMarkdown: (val: string | ((prev: string) => string)) => void;

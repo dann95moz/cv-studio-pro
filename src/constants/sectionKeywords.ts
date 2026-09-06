@@ -8,7 +8,7 @@ import { SectionType } from '../types/cv';
  * - French (fr)
  * - Italian (it)
  */
-export const SECTION_KEYWORDS: Record<Exclude<SectionType, 'generic'>, string[]> = {
+export const SECTION_KEYWORDS: Record<Exclude<SectionType, 'generic' | 'custom'>, string[]> = {
   summary: [
     // English
     'summary', 'professional summary', 'executive summary', 'profile', 'about me', 'career objective', 'pitch',
@@ -118,7 +118,7 @@ export function classifySectionType(rawTitle: string): SectionType {
   }
 
   // Check categories in priority order
-  const categories: Array<Exclude<SectionType, 'generic'>> = [
+  const categories: Array<Exclude<SectionType, 'generic' | 'custom'>> = [
     'summary',
     'skills',
     'experience',

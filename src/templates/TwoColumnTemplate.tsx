@@ -125,7 +125,7 @@ export const TwoColumnTemplate: React.FC<CVTemplateProps> = ({ slots, theme }) =
           {/* Websites, Portfolios, Profiles */}
           {linkContacts.length > 0 && (
             <div className="contrast-side-block">
-              <h3 className="contrast-side-title">Websites, Portfolios, Profiles</h3>
+              <h3 className="contrast-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
               <ul className="contrast-link-list">
                 {linkContacts.map((c, i) => (
                   <li key={i} className="contrast-link-item">

@@ -15,6 +15,8 @@ import {
   extractCandidateName,
   extractTargetCompany,
   extractTargetRole,
+  serializeCvDataToMarkdown,
+  parseMarkdownToCvData,
 } from '../../core/parser';
 import { downloadTextFile, buildTimestampedFileName } from '../../utils/fileUtils';
 import { CvTranslationVariant } from '../../types/cv';
@@ -36,10 +38,47 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   activeVersionId: null,
   translations: {},
   lastBackupTimestamp: Date.now(),
+  lastModifiedTimestamp: Date.now(),
   unsavedChangesCount: 0,
 
   recordBackup: () => {
     set({ lastBackupTimestamp: Date.now(), unsavedChangesCount: 0 });
+  },
+
+  recordLastModified: () => {
+    set({ lastModifiedTimestamp: Date.now() });
+  },
+
+  restoreFullSnapshot: (snapshot) => {
+    const validUpdates: Partial<ResumeStore> = {};
+    if (typeof snapshot.masterData === 'string') validUpdates.masterData = snapshot.masterData;
+    if (typeof snapshot.targetJob === 'string') validUpdates.targetJob = snapshot.targetJob;
+    if (typeof snapshot.cvMarkdown === 'string') validUpdates.cvMarkdown = snapshot.cvMarkdown;
+    if (typeof snapshot.gapMarkdown === 'string') validUpdates.gapMarkdown = snapshot.gapMarkdown;
+    if (typeof snapshot.coverLetterMarkdown === 'string') validUpdates.coverLetterMarkdown = snapshot.coverLetterMarkdown;
+    if (typeof snapshot.rules === 'string') validUpdates.rules = snapshot.rules;
+    if (typeof snapshot.companyName === 'string') validUpdates.companyName = snapshot.companyName;
+    if (typeof snapshot.targetRole === 'string') validUpdates.targetRole = snapshot.targetRole;
+    if (Array.isArray(snapshot.savedVersions)) validUpdates.savedVersions = snapshot.savedVersions;
+    if (Array.isArray(snapshot.applications)) validUpdates.applications = snapshot.applications;
+    if (Array.isArray(snapshot.kanbanColumns)) validUpdates.kanbanColumns = snapshot.kanbanColumns;
+    if (snapshot.translations && typeof snapshot.translations === 'object') validUpdates.translations = snapshot.translations;
+    if (snapshot.theme) validUpdates.theme = snapshot.theme;
+    if (snapshot.palette) validUpdates.palette = snapshot.palette;
+    if (snapshot.customColor) validUpdates.customColor = snapshot.customColor;
+    if (snapshot.fontFamily) validUpdates.fontFamily = snapshot.fontFamily;
+    if (snapshot.spacingDensity) validUpdates.spacingDensity = snapshot.spacingDensity;
+    if (snapshot.pageBudget) validUpdates.pageBudget = snapshot.pageBudget;
+    if (snapshot.pageFormat) validUpdates.pageFormat = snapshot.pageFormat;
+    if (snapshot.photo !== undefined) validUpdates.photo = snapshot.photo;
+    if (snapshot.providerSettings && typeof snapshot.providerSettings === 'object') {
+      validUpdates.providerSettings = snapshot.providerSettings;
+    }
+
+    validUpdates.lastModifiedTimestamp = snapshot.lastModifiedTimestamp || Date.now();
+    validUpdates.unsavedChangesCount = 0;
+
+    set(validUpdates);
   },
 
   setMasterData: (val) => {
@@ -109,10 +148,24 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       }
     }
 
+    const currentActiveCvData = get().activeCvData;
+    let nextActiveCvData = currentActiveCvData;
+    if (hasChanged) {
+      if (currentActiveCvData) {
+        const currentSerialized = serializeCvDataToMarkdown(currentActiveCvData);
+        if (currentSerialized.trim() !== nextVal.trim()) {
+          nextActiveCvData = parseMarkdownToCvData(nextVal);
+        }
+      } else if (nextVal && nextVal.trim().length > 30) {
+        nextActiveCvData = parseMarkdownToCvData(nextVal);
+      }
+    }
+
     set({
       cvMarkdown: nextVal,
+      activeCvData: nextActiveCvData,
       ...(translationsChanged ? { translations: updatedTranslations } : {}),
-      ...(hasChanged ? { activeCvData: null, unsavedChangesCount: get().unsavedChangesCount + 1 } : {}),
+      ...(hasChanged ? { unsavedChangesCount: get().unsavedChangesCount + 1 } : {}),
     });
   },
 

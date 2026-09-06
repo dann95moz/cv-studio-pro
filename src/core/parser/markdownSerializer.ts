@@ -1,10 +1,11 @@
 import { CVData } from '../../types/cv';
+import { LANGUAGE_DEFINITIONS, SupportedLanguage } from '../../constants/languages';
 
 /**
  * Serializes a structured CVData object back into standardized Markdown.
  * Principle: Single Responsibility (S) - focuses exclusively on converting CV model to Markdown text.
  */
-export function serializeCvDataToMarkdown(data: CVData): string {
+export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLanguage): string {
   const hasContent = Boolean(
     (data.name && data.name.trim()) ||
     (data.title && data.title.trim()) ||
@@ -24,6 +25,8 @@ export function serializeCvDataToMarkdown(data: CVData): string {
   }
 
   const parts: string[] = [];
+  const lang: SupportedLanguage = language || data.language || 'es';
+  const langDef = LANGUAGE_DEFINITIONS[lang] || LANGUAGE_DEFINITIONS.es;
 
   // Name
   parts.push(`# ${data.name || ''}`);
@@ -50,38 +53,48 @@ export function serializeCvDataToMarkdown(data: CVData): string {
   }
 
   // Helper to get formatted section title preserving user's edit or emoji prefix
-  const getSectionTitle = (type: string, defaultTitle: string, defaultEmoji = '') => {
+  const getSectionTitle = (type: string, defaultEmoji = '') => {
     const custom = data.sectionTitles?.[type] || data.sections?.find(s => s.type === type)?.title;
     if (custom && custom.trim()) {
-      return custom.trim();
+      const isEnglishDefault = /^(?:🎯\s*)?PROFESSIONAL SUMMARY(?:\s*&\s*PITCH)?$/i.test(custom) ||
+        /^(?:🛠️\s*)?(?:CORE\s*)?SKILLS(?:\s*&\s*COMPETENCIES)?$/i.test(custom) ||
+        /^(?:💼\s*)?(?:CAREER\s*HISTORY|WORK\s*EXPERIENCE|PROFESSIONAL\s*EXPERIENCE)(?:\s*&\s*KEY\s*ACHIEVEMENTS)?$/i.test(custom) ||
+        /^(?:🚀\s*)?(?:PROJECTS|FEATURED\s*PROJECTS)(?:\s*&\s*EXTRAS)?$/i.test(custom) ||
+        /^(?:🎓\s*)?EDUCATION(?:\s*&\s*CERTIFICATIONS)?$/i.test(custom) ||
+        /^(?:🌐\s*)?LANGUAGES?$/i.test(custom);
+
+      if (!isEnglishDefault || langDef.code === 'en') {
+        return custom.trim();
+      }
     }
-    return defaultEmoji ? `${defaultEmoji} ${defaultTitle}` : defaultTitle;
+    const defTitle = langDef.sections[type as keyof typeof langDef.sections] || type.toUpperCase();
+    return defaultEmoji ? `${defaultEmoji} ${defTitle}` : defTitle;
   };
 
   // Summary
   if (data.summary && data.summary.trim()) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('summary', 'PROFESSIONAL SUMMARY & PITCH', '🎯')}`);
+    parts.push(`## ${getSectionTitle('summary', '🎯')}`);
     parts.push(data.summary.trim());
   }
 
   // Skills
   if (data.skillGroups && data.skillGroups.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('skills', 'CORE SKILLS & COMPETENCIES', '🛠️')}`);
+    parts.push(`## ${getSectionTitle('skills', '🛠️')}`);
     for (const group of data.skillGroups) {
       const cat = group.category ? group.category.replace(/[:*_\s]+$/, '').replace(/^[*_\s]+/, '').trim() : '';
       const skl = group.skills && group.skills.length > 0
         ? group.skills.map((s) => s.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '').trim()).filter(Boolean).join(', ')
         : '';
-      parts.push(`- **${cat}:** ${skl}`);
+      parts.push(`- **${cat}**: ${skl}`);
     }
   }
 
   // Experience
   if (data.experience && data.experience.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('experience', 'CAREER HISTORY & KEY ACHIEVEMENTS', '💼')}\n`);
+    parts.push(`## ${getSectionTitle('experience', '💼')}\n`);
     const expItemsFormatted = data.experience.map(exp => {
       const company = exp.company || '';
       const role = exp.role || '';
@@ -96,7 +109,7 @@ export function serializeCvDataToMarkdown(data: CVData): string {
   // Projects & Extras
   if (data.projects && data.projects.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('projects', 'PROJECTS & EXTRAS', '🚀')}\n`);
+    parts.push(`## ${getSectionTitle('projects', '🚀')}\n`);
     const projItemsFormatted = data.projects.map(proj => {
       const company = proj.company || '';
       const role = proj.role || '';
@@ -124,7 +137,7 @@ export function serializeCvDataToMarkdown(data: CVData): string {
   const hasCert = Boolean(data.certifications && data.certifications.length > 0);
   if (hasEdu || hasCert) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('education', 'EDUCATION & CERTIFICATIONS', '🎓')}`);
+    parts.push(`## ${getSectionTitle('education', '🎓')}`);
     if (data.education) {
       for (const edu of data.education) {
         let cleanEdu = edu.replace(/^(?:[-•]\s*|\*\s+)/, '');
@@ -148,7 +161,7 @@ export function serializeCvDataToMarkdown(data: CVData): string {
   // Languages
   if (data.languages && data.languages.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('languages', 'LANGUAGES', '🌐')}`);
+    parts.push(`## ${getSectionTitle('languages', '🌐')}`);
     for (const lang of data.languages) {
       let cleanLang = lang.replace(/^(?:[-•]\s*|\*\s+)/, '');
       if (/^\*?[^*]+\*\*/.test(cleanLang)) {

@@ -4,6 +4,8 @@ import { auditCvContent } from '../core/audit-engine';
 import { CVData, QualityAuditReport } from '../types/cv';
 import { extractGapInfo } from '../utils/sanitize';
 import { DEMO_CV_DATA } from '../constants/templates';
+import { parseMarkdownToCvData } from '../core/parser';
+import { SupportedLanguage } from '../constants/languages';
 
 export { extractGapInfo };
 
@@ -24,21 +26,45 @@ export const checkHasGapReport = (gapMarkdown: string): boolean => {
  */
 export const useParsedCv = (): CVData => {
   const activeCvData = useResumeStore((s) => s.activeCvData);
+  const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
   const activeLanguage = useResumeStore((s) => s.activeLanguage);
   const currentBaseLanguage = useResumeStore((s) => s.currentBaseLanguage);
   const translations = useResumeStore((s) => s.translations);
 
   return useMemo(() => {
+    const rawLang = (activeLanguage || currentBaseLanguage || 'es').toLowerCase();
+    const effectiveLang: SupportedLanguage = (['es', 'en', 'de', 'fr', 'it'].includes(rawLang)
+      ? rawLang
+      : 'es') as SupportedLanguage;
+
     if (
       activeLanguage &&
       currentBaseLanguage &&
       activeLanguage !== currentBaseLanguage &&
       translations[activeLanguage]?.cvData
     ) {
-      return translations[activeLanguage].cvData!;
+      return {
+        ...translations[activeLanguage].cvData!,
+        language: effectiveLang,
+      };
     }
-    return activeCvData || DEMO_CV_DATA;
-  }, [activeCvData, activeLanguage, currentBaseLanguage, translations]);
+    if (activeCvData) {
+      return {
+        ...activeCvData,
+        language: activeCvData.language || effectiveLang,
+      };
+    }
+    if (cvMarkdown && cvMarkdown.trim().length > 30) {
+      const parsed = parseMarkdownToCvData(cvMarkdown, effectiveLang);
+      if (parsed.name || parsed.summary || parsed.experience?.length || parsed.skillGroups?.length) {
+        return {
+          ...parsed,
+          language: parsed.language || effectiveLang,
+        };
+      }
+    }
+    return DEMO_CV_DATA;
+  }, [activeCvData, cvMarkdown, activeLanguage, currentBaseLanguage, translations]);
 };
 
 /**
