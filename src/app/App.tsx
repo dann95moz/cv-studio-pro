@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import {
   useResumeStore,
   useDerivedFlags,
@@ -9,6 +9,9 @@ import { LockedViewCard } from '../components/studio/LockedViewCard';
 import { SynthesisErrorBanner } from '../components/studio/SynthesisErrorBanner';
 import { StudioSkeleton } from '../components/studio/StudioSkeleton';
 import { AiGeneratingOverlay } from '../components/studio/ai/AiGeneratingOverlay';
+import { DeviceSyncModal } from '../components/studio/sync/DeviceSyncModal';
+import { SnapshotConflictModal } from '../components/studio/sync/SnapshotConflictModal';
+import { useDeviceSync } from '../hooks/useDeviceSync';
 import {
   BLANK_MASTER_DATA,
   DEMO_MASTER_DATA,
@@ -79,10 +82,30 @@ export const App: React.FC = () => {
   // Derived state via optimized memoized hooks
   const { hasTargetJob, hasGeneratedCv, hasGapReport } = useDerivedFlags();
 
+  // Multidevice Sync State & Hook
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
+  const sync = useDeviceSync();
+
+  // Listen for hash-based sync parameters on mount & hashchange (e.g. #sync?id=...#key=...)
+  useEffect(() => {
+    const handleCheckSync = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#sync')) {
+        sync.handlePullSnapshot(hash);
+        // Clear hash so it doesn't re-trigger on subsequent refreshes
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+
+    handleCheckSync();
+    window.addEventListener('hashchange', handleCheckSync);
+    return () => window.removeEventListener('hashchange', handleCheckSync);
+  }, [sync.handlePullSnapshot]);
+
   return (
     <div className="studio-app">
       {/* Top Navbar */}
-      <StudioNavbar />
+      <StudioNavbar onOpenSync={() => setIsSyncModalOpen(true)} />
 
       {/* Stepper Bar for Guided Wizard */}
       {activeTab === 'wizard' && (
@@ -245,6 +268,7 @@ export const App: React.FC = () => {
                 rules={rules}
                 onRulesChange={setRules}
                 onResetDefaults={handleResetWorkspace}
+                onOpenSync={() => setIsSyncModalOpen(true)}
               />
             </div>
           </Suspense>
@@ -264,6 +288,34 @@ export const App: React.FC = () => {
 
       {/* Full-Screen Blocking AI Synthesis Screen */}
       <AiGeneratingOverlay />
+
+      {/* Device Sync Modal (Export / Import) */}
+      <DeviceSyncModal
+        open={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        isExporting={sync.isExporting}
+        exportUrl={sync.exportUrl}
+        exportId={sync.exportId}
+        secondsRemaining={sync.secondsRemaining}
+        includeApiKeys={sync.includeApiKeys}
+        onToggleApiKeys={sync.setIncludeApiKeys}
+        onGenerateExport={sync.handleGenerateExport}
+        isImporting={sync.isImporting}
+        importError={sync.importError}
+        onPullSnapshot={(input) => {
+          sync.handlePullSnapshot(input);
+          setIsSyncModalOpen(false);
+        }}
+      />
+
+      {/* Snapshot Conflict & Safety Review Modal */}
+      <SnapshotConflictModal
+        open={Boolean(sync.pendingSnapshot && sync.conflictComparison)}
+        comparison={sync.conflictComparison}
+        onConfirmOverwrite={sync.handleConfirmOverwrite}
+        onDownloadSafetyBackup={sync.handleDownloadSafetyBackup}
+        onCancel={sync.handleCancelConflict}
+      />
 
       {/* Global Toast Notification */}
       {globalNotification && (

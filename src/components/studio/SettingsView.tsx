@@ -12,6 +12,8 @@ import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import RateReviewRoundedIcon from '@mui/icons-material/RateReviewRounded';
+import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import { useTranslation } from 'react-i18next';
 import { SettingsAiTab } from './settings/SettingsAiTab';
 import { FeedbackModal } from '../feedback/FeedbackModal';
@@ -24,6 +26,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   settings,
   onSettingsChange,
   onResetDefaults,
+  onOpenSync,
 }) => {
   const { t } = useTranslation(['settings', 'common', 'feedback']);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState<boolean>(false);
@@ -70,6 +73,69 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </Typography>
         </Box>
       </Paper>
+
+      {/* Multidevice Sync Card */}
+      {onOpenSync && (
+        <Paper
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            border: `1px solid ${muiTheme.palette.divider}`,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 1,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            gap: 2,
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                bgcolor: alpha(muiTheme.palette.primary.main, 0.12),
+                color: 'primary.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <DevicesRoundedIcon sx={{ fontSize: 24 }} />
+            </Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '0.95rem', sm: '1.05rem' } }}
+              >
+                {t('common:sync.settingsCardTitle', 'Sincronización Multidispositivo (Snapshot Pull & Push)')}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.78rem', sm: '0.875rem' } }}>
+                {t(
+                  'common:sync.settingsCardSubtitle',
+                  'Transfiere todo tu espacio de trabajo (Master CV, versiones, vacantes y Kanban) entre PC y smartphone mediante código QR o enlace efímero con cifrado E2EE.'
+                )}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={<QrCode2RoundedIcon sx={{ fontSize: 18 }} />}
+            onClick={onOpenSync}
+            sx={{ width: { xs: '100%', sm: 'auto' }, flexShrink: 0, textTransform: 'none', px: 2.5 }}
+          >
+            {t('common:sync.openSyncAction', 'Sincronizar Dispositivos')}
+          </Button>
+        </Paper>
+      )}
 
       {/* Main AI Configuration Panel */}
       <SettingsAiTab

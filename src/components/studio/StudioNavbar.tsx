@@ -27,17 +27,20 @@ import { BackupStatusDot } from './common/BackupStatusDot';
 import { useBackupReminder } from '../../hooks/useBackupReminder';
 import { useTranslation } from 'react-i18next';
 import { Snackbar, Alert, Button } from '@mui/material';
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 
 export interface StudioNavbarProps {
   activeTab?: StudioTab;
   onSelectTab?: (tab: StudioTab) => void;
   badgeCount?: number;
+  onOpenSync?: () => void;
 }
 
 export const StudioNavbar: React.FC<StudioNavbarProps> = ({
   activeTab: controlledTab,
   onSelectTab: controlledOnSelectTab,
   badgeCount: controlledBadgeCount,
+  onOpenSync,
 }) => {
   const { mode, toggleThemeMode } = useThemeMode();
   const { t } = useTranslation('common');
@@ -242,6 +245,30 @@ export const StudioNavbar: React.FC<StudioNavbarProps> = ({
             unsavedChangesCount={unsavedChangesCount}
             onClickBackup={handleExportBackup}
           />
+
+          {/* Multidevice Sync Button */}
+          {onOpenSync && (
+            <Tooltip title={t('common:sync.navbarButton', 'Sincronizar con Móvil / PC (QR & Código)')}>
+              <IconButton
+                onClick={onOpenSync}
+                size="small"
+                aria-label={t('common:sync.navbarButton', 'Sincronizar Dispositivos')}
+                sx={{
+                  p: { xs: 0.5, sm: 0.75 },
+                  border: `1px solid ${muiTheme.palette.divider}`,
+                  color: 'primary.main',
+                  bgcolor: alpha(muiTheme.palette.primary.main, 0.04),
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: alpha(muiTheme.palette.primary.main, 0.12),
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+              >
+                <QrCode2RoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
 
           {/* Prominent Language Selector */}
           <LanguageSelector variant="navbar" />
