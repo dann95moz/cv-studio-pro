@@ -272,14 +272,31 @@
   display: block !important;
 }
 
+/* Sidebar Links & General Anchor Contrast */
+.theme-two-column .contrast-sidebar-col a {
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+  text-underline-offset: 2.5px;
+  transition: color 0.15s ease, opacity 0.15s ease, text-decoration-color 0.15s ease;
+  word-break: break-all;
+}
+
+.theme-two-column .contrast-sidebar-col a:hover {
+  color: #ffffff !important;
+  text-decoration-color: #ffffff;
+  opacity: 0.92;
+}
+
 .theme-two-column .contrast-contact-item a {
-  color: #ffffff;
+  color: #ffffff !important;
   text-decoration: none;
   word-break: break-all;
 }
 
 .theme-two-column .contrast-contact-item a:hover {
   text-decoration: underline;
+  text-decoration-color: #ffffff;
 }
 
 /* Link List */
@@ -301,17 +318,21 @@
   content: "•";
   position: absolute;
   left: 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .theme-two-column .contrast-link-item a {
-  color: #ffffff;
-  text-decoration: none;
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+  text-underline-offset: 2.5px;
   word-break: break-all;
 }
 
 .theme-two-column .contrast-link-item a:hover {
-  text-decoration: underline;
+  color: #ffffff !important;
+  text-decoration-color: #ffffff;
+  opacity: 0.92;
 }
 
 /* Skills List */
@@ -337,7 +358,7 @@
 
 .theme-two-column .contrast-skill-bullets li {
   font-size: 8.3pt;
-  color: var(--cv-border-light);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 2.5px;
   position: relative;
   padding-left: 10px;

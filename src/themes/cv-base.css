@@ -64,7 +64,12 @@
 
 /* Document Content Links (Projects, Portfolios, GitHub, Publications) */
 a.cv-link,
-.cv-container a:not(.cv-contact-item a) {
+.cv-container a:not(
+  .cv-contact-item a,
+  .dualtone-sidebar-col a,
+  .contrast-sidebar-col a,
+  .banner-header a
+) {
   color: var(--cv-accent-color);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -74,9 +79,33 @@ a.cv-link,
 }
 
 a.cv-link:hover,
-.cv-container a:not(.cv-contact-item a):hover {
+.cv-container a:not(
+  .cv-contact-item a,
+  .dualtone-sidebar-col a,
+  .contrast-sidebar-col a,
+  .banner-header a
+):hover {
   color: var(--cv-accent-hover, var(--cv-primary-color));
   opacity: 0.85;
+}
+
+/* Links inside solid-colored/dark sidebars and headers: always high-contrast white */
+.dualtone-sidebar-col a,
+.contrast-sidebar-col a,
+.banner-header a {
+  color: #ffffff !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+  text-underline-offset: 2px;
+  transition: color 0.15s ease, opacity 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.dualtone-sidebar-col a:hover,
+.contrast-sidebar-col a:hover,
+.banner-header a:hover {
+  color: #ffffff !important;
+  text-decoration-color: #ffffff;
+  opacity: 0.92;
 }
 
 .cv-contact-item svg {
