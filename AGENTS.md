@@ -28,6 +28,7 @@ All agent operations in this repository must strictly adhere to the following ru
 3. **Design Tokens & Styling**: See [styling-rules.md](file:///.agents/rules/styling-rules.md) for theme tokens, responsive mobile-first layouts, and A4 page dimensions.
 4. **Internationalization (i18n)**: See [i18n-rules.md](file:///.agents/rules/i18n-rules.md) for multilingual synchronization across `src/i18n/locales/`.
 5. **Anti-Patterns & Code Hygiene**: See [anti-patterns-rules.md](file:///.agents/rules/anti-patterns-rules.md) for zero-tolerance on native alerts, burned dummy scores, raw hex/border radiuses in JSX, and direct SDK calls in UI.
+6. **Mobile-First UX Architecture**: See [mobile-first-ux-rules.md](file:///.agents/rules/mobile-first-ux-rules.md) for strict mobile (`xs`) heuristics: clean top headers, `•••` overflow menus, bottom sheets, FAB triggers, and bottom navigation.
 
 ---
 

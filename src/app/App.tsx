@@ -20,7 +20,8 @@ import {
 } from '../constants/templates';
 import { downloadTextFile, buildTimestampedFileName } from '../utils/fileUtils';
 import { useTranslation } from 'react-i18next';
-import { Snackbar, Alert, Button } from '@mui/material';
+import { Box, Snackbar, Alert, Button } from '@mui/material';
+import { MobileTopHeader, MobileBottomNav } from '../components/studio/mobile';
 import './App.css';
 
 // Dynamically loaded tab views and wizard steps
@@ -50,7 +51,7 @@ const SettingsView = lazy(() =>
 );
 
 export const App: React.FC = () => {
-  const { t } = useTranslation(['audit', 'gap', 'common', 'target']);
+  const { t } = useTranslation(['audit', 'gap', 'common', 'target', 'profile']);
   const activeTab = useResumeStore((s) => s.activeTab);
   const setActiveTab = useResumeStore((s) => s.setActiveTab);
   const wizardStep = useResumeStore((s) => s.wizardStep);
@@ -110,22 +111,72 @@ export const App: React.FC = () => {
 
   return (
     <div className="studio-app">
-      {/* Top Navbar */}
-      <StudioNavbar onOpenSync={() => setIsSyncModalOpen(true)} />
+      {/* Top Navbar: Visible on Desktop */}
+      <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
+        <StudioNavbar onOpenSync={() => setIsSyncModalOpen(true)} />
+      </Box>
 
-      {/* Stepper Bar for Guided Wizard */}
+      {/* Stepper Bar for Guided Wizard: Visible on Desktop */}
       {activeTab === 'wizard' && (
-        <WizardStepper
-          currentStep={wizardStep}
-          onSelectStep={setWizardStep}
-          hasMasterData={hasMasterData}
-          hasTargetJob={hasTargetJob}
-          hasGeneratedCv={hasGeneratedCv}
-        />
+        <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
+          <WizardStepper
+            currentStep={wizardStep}
+            onSelectStep={setWizardStep}
+            hasMasterData={hasMasterData}
+            hasTargetJob={hasTargetJob}
+            hasGeneratedCv={hasGeneratedCv}
+          />
+        </Box>
       )}
 
+      {/* Mobile Top Header: Visible on Mobile (xs to sm) */}
+      <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
+        <MobileTopHeader
+          currentStepNumber={
+            wizardStep === 'profile' ? 1 : wizardStep === 'target' ? 2 : 3
+          }
+          totalSteps={3}
+          stepTitle={
+            activeTab === 'history'
+              ? t('common:nav.applicationsShort', 'Postulaciones')
+              : activeTab === 'settings'
+              ? t('common:nav.settings', 'Configuración')
+              : activeTab === 'landing'
+              ? t('common:appName', 'CV Studio')
+              : wizardStep === 'profile'
+              ? t('profile:stepper.profileShortLabel', 'Datos Maestro')
+              : wizardStep === 'target'
+              ? t('profile:stepper.targetShortLabel', 'Oferta y Vacante')
+              : t('profile:stepper.previewShortLabel', 'CV y PDF')
+          }
+          isWizard={activeTab === 'wizard'}
+          onSelectStep={(step) => {
+            setActiveTab('wizard');
+            setWizardStep(step);
+          }}
+          activeWizardStep={wizardStep}
+          onOpenSync={() => setIsSyncModalOpen(true)}
+        />
+      </Box>
+
       {/* Main Workspace Body */}
-      <div className="studio-body">
+      <Box
+        component="div"
+        className="studio-body"
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          height: {
+            xs: 'calc(100dvh - 52px)',
+            md: 'calc(100dvh - var(--navbar-height))',
+          },
+          pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 56px)', md: 0 },
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          boxSizing: 'border-box',
+        }}
+      >
         {/* VIEW: WELCOME & ONBOARDING LANDING */}
         {activeTab === 'landing' && (
           <Suspense fallback={<StudioSkeleton variant="landing" />}>
@@ -279,7 +330,17 @@ export const App: React.FC = () => {
             </div>
           </Suspense>
         )}
-      </div>
+      </Box>
+
+      {/* Mobile-First Bottom Navigation (Estudio & Postulaciones) */}
+      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+        <MobileBottomNav
+          activeTab={activeTab}
+          onSelectTab={(tab) => {
+            setActiveTab(tab);
+          }}
+        />
+      </Box>
 
       {/* Synthesis Error Floating Banner */}
       <SynthesisErrorBanner

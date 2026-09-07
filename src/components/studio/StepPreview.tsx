@@ -23,6 +23,11 @@ import { StudioSkeleton } from './StudioSkeleton';
 import { TrackApplicationDialog } from './history/TrackApplicationDialog';
 import { StepPreviewMobileEdit } from './preview/StepPreviewMobileEdit';
 import { useStepPreviewWorkflow } from '../../hooks/useStepPreviewWorkflow';
+import {
+  MobileDocumentBar,
+  MobileStudioFab,
+  MobileToolsBottomSheet,
+} from './mobile';
 
 // Dynamically loaded preview sidebars
 const TemplatesPanel = React.lazy(() =>
@@ -149,63 +154,83 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     handleQuickSyncOutdated,
   } = useStepPreviewWorkflow();
 
+  const [isMobileToolsOpen, setIsMobileToolsOpen] = React.useState(false);
+
   return (
     <div className="preview-workspace-layout" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      {/* Top Studio Control Bar */}
-      <StepPreviewToolbar
-        previewDocType={previewDocType}
-        onPreviewDocTypeChange={setPreviewDocType}
-        activeTemplateName={activeTemplateMeta.name}
-        onOpenTemplates={() => {
-          setActiveSidePanel('templates');
-          setIsAuditGapOpen(false);
-        }}
-        onSaveVersion={handleSaveToHistory}
-        savedSuccess={savedSuccess}
-        isSavingVersion={isSavingVersion}
-        onReTailor={handleGenerate}
-        isGenerating={isGenerating}
-        onDownloadPdf={onTriggerDirectDownloadPdf}
-        onDownloadMarkdown={handleDownloadCvMarkdown}
-        onDownloadPlainText={onTriggerDownloadPlainText}
-        onDownloadDocx={onTriggerDownloadDocx}
-        onCopyPlainText={onTriggerCopyPlainText}
-        isExportingPdf={isExportingPdf}
-        pageFormat={pageFormat}
-        onPageFormatChange={setPageFormat}
-        isOverflowing={isOverflowing}
-        onAutoFit={handleMagicAutoFit}
-        onTrackApplication={handleTrackApplication}
-        isTracked={isTracked}
-        activeLanguage={activeLanguage}
-        baseLanguage={currentBaseLanguage}
-        translations={translations}
-        onLanguageChange={setActiveLanguage}
-        onOpenTranslateModal={handleOpenTranslateModal}
-        isLanguageOutdated={isLanguageOutdated}
-        outdatedSectionsCount={outdatedSectionsCount}
-        onQuickSyncOutdated={handleQuickSyncOutdated}
-        isTranslating={isTranslating}
-      />
+      {/* Top Studio Control Bar: Desktop Toolbar */}
+      <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
+        <StepPreviewToolbar
+          previewDocType={previewDocType}
+          onPreviewDocTypeChange={setPreviewDocType}
+          activeTemplateName={activeTemplateMeta.name}
+          onOpenTemplates={() => {
+            setActiveSidePanel('templates');
+            setIsAuditGapOpen(false);
+          }}
+          onSaveVersion={handleSaveToHistory}
+          savedSuccess={savedSuccess}
+          isSavingVersion={isSavingVersion}
+          onReTailor={handleGenerate}
+          isGenerating={isGenerating}
+          onDownloadPdf={onTriggerDirectDownloadPdf}
+          onDownloadMarkdown={handleDownloadCvMarkdown}
+          onDownloadPlainText={onTriggerDownloadPlainText}
+          onDownloadDocx={onTriggerDownloadDocx}
+          onCopyPlainText={onTriggerCopyPlainText}
+          isExportingPdf={isExportingPdf}
+          pageFormat={pageFormat}
+          onPageFormatChange={setPageFormat}
+          isOverflowing={isOverflowing}
+          onAutoFit={handleMagicAutoFit}
+          onTrackApplication={handleTrackApplication}
+          isTracked={isTracked}
+          activeLanguage={activeLanguage}
+          baseLanguage={currentBaseLanguage}
+          translations={translations}
+          onLanguageChange={setActiveLanguage}
+          onOpenTranslateModal={handleOpenTranslateModal}
+          isLanguageOutdated={isLanguageOutdated}
+          outdatedSectionsCount={outdatedSectionsCount}
+          onQuickSyncOutdated={handleQuickSyncOutdated}
+          isTranslating={isTranslating}
+        />
+      </Box>
+
+      {/* Mobile-First Secondary Document Bar: Document Switcher & Language Selector */}
+      <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
+        <MobileDocumentBar
+          previewDocType={previewDocType}
+          onPreviewDocTypeChange={setPreviewDocType}
+          activeLanguage={activeLanguage}
+          baseLanguage={currentBaseLanguage}
+          translations={translations}
+          onLanguageChange={setActiveLanguage}
+          onOpenTranslateModal={handleOpenTranslateModal}
+          isLanguageOutdated={isLanguageOutdated}
+        />
+      </Box>
 
       {/* Main Studio Body: Vertical Left Rail + Side Drawer + Sheet Canvas + Right Audit/Gap Drawer */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden', position: 'relative' }}>
-        {/* 1. Left Tool Rail (Horizontal on mobile, vertical on desktop) */}
-        <StepPreviewNavRail
-          activeSidePanel={activeSidePanel}
-          onToggleSidePanel={handleToggleSidePanel}
-        />
+        {/* 1. Left Tool Rail (Desktop only, mobile uses FAB + Bottom Sheet) */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, height: '100%' }}>
+          <StepPreviewNavRail
+            activeSidePanel={activeSidePanel}
+            onToggleSidePanel={handleToggleSidePanel}
+          />
+        </Box>
 
         {/* 2. Expandable Left Side Panel */}
         {activeSidePanel && (
           <Box
             className="no-print preview-side-panel"
             sx={{
-              position: { xs: 'absolute', md: 'relative' },
-              left: { xs: 0, md: 'auto' },
+              position: { xs: 'fixed', md: 'relative' },
+              left: 0,
               right: { xs: 0, md: 'auto' },
-              top: 0,
-              bottom: 0,
+              top: { xs: 0, md: 0 },
+              bottom: { xs: 0, md: 0 },
               width: { xs: '100%', sm: 330 },
               maxWidth: { xs: '100%', sm: 360 },
               borderRight: `1px solid ${muiTheme.palette.divider}`,
@@ -215,8 +240,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
               height: '100%',
               overflowY: 'auto',
               flexShrink: 0,
-              zIndex: 10,
-              boxShadow: { xs: 8, md: 'none' },
+              zIndex: muiTheme.zIndex.modal,
+              boxShadow: { xs: 12, md: 'none' },
             }}
           >
             <React.Suspense fallback={<StudioSkeleton variant="drawer" />}>
@@ -486,14 +511,14 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                 </div>
               </Box>
 
-              {/* Bottom Navigation Bar */}
+              {/* Bottom Navigation Bar: Desktop only */}
               <Paper
                 elevation={0}
                 className="no-print preview-nav-footer"
                 sx={{
+                  display: { xs: 'none', md: 'flex' },
                   p: 1.25,
                   px: { xs: 1.5, sm: 3 },
-                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   flexWrap: 'wrap',
@@ -559,6 +584,28 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             />
           </React.Suspense>
         </Box>
+      </Box>
+
+      {/* Mobile-First FAB and Tools Bottom Sheet */}
+      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+        <MobileStudioFab onClick={() => setIsMobileToolsOpen(true)} />
+        <MobileToolsBottomSheet
+          open={isMobileToolsOpen}
+          onClose={() => setIsMobileToolsOpen(false)}
+          onSelectTool={(tool) => {
+            setIsMobileToolsOpen(false);
+            handleToggleSidePanel(tool);
+          }}
+          onOpenDiff={() => {
+            setIsMobileToolsOpen(false);
+            setIsDiffModalOpen(true);
+          }}
+          onDownloadPdf={onTriggerDirectDownloadPdf}
+          onSaveVersion={handleSaveToHistory}
+          onReTailor={handleGenerate}
+          isExportingPdf={isExportingPdf}
+          isSavingVersion={isSavingVersion}
+        />
       </Box>
 
       {/* One-Time Post-Export GitHub Star Satisfaction Toast */}

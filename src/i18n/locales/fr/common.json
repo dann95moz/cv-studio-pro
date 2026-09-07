@@ -13,7 +13,12 @@
     "starGithub": "Étoile sur GitHub ⭐",
     "switchTheme": "Passer en mode {{mode}}",
     "light": "Clair",
-    "dark": "Sombre"
+    "dark": "Sombre",
+    "appLanguage": "Langue de l'app",
+    "theme": "Thème",
+    "syncQr": "Synchroniser (QR)",
+    "viewGithub": "Voir sur GitHub",
+    "stepCounter": "Étape {{current}} sur {{total}} · {{title}}"
   },
   "badge": {
     "optional": "Optionnel",

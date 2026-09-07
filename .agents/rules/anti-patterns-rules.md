@@ -74,6 +74,15 @@ This document establishes strict prohibitions and zero-tolerance criteria agains
 
 ---
 
+### 1.7. The Mobile Desktop-Retrofitting Anti-Pattern (Viewport Theft & Toolbar Crowding)
+- ❌ **STRICTLY FORBIDDEN**:
+  - Squeezing wide desktop horizontal toolbars (10+ buttons) onto mobile viewports (`xs`) by shrinking paddings or wrapping buttons into 3–4 stacked rows.
+  - Consuming >20% of the mobile screen height with static headers and toolbars, starving the document canvas.
+  - Panning or pushing the mobile canvas off-center with desktop side-rails.
+  - Scattering global settings (Theme, Language, Sync QR) across multiple toolbars instead of a single `•••` menu.
+- ✅ **MANDATORY**:
+  - Follow [mobile-first-ux-rules.md](file:///.agents/rules/mobile-first-ux-rules.md): single-row top header + `•••` overflow menu + secondary document bar + Bottom Sheet for tools + fixed Bottom Navigation.
+
 ## 2. Atomic Design Structure Enforcement
 
 All new visual components must adhere to the atomic hierarchy:

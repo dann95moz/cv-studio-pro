@@ -88,13 +88,12 @@ All design values must strictly originate from the centralized Design System tok
 - `md`: 900px–1199px (Small Desktop / Laptop)
 - `lg`: 1200px+ (Large Desktop)
 
-### Mobile Layout Rules:
-- Toolbars and button bars on mobile must not wrap into ragged multiple lines (`flexWrap: 'nowrap'` or clean stacked rows).
-- Action buttons on mobile should hide verbose labels and display icons + tooltips:
-  ```tsx
-  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{fullLabel}</Box>
-  <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{shortLabel}</Box>
-  ```
+### Mobile Architecture Rules (Strict Compliance with [mobile-first-ux-rules.md](file:///.agents/rules/mobile-first-ux-rules.md)):
+- **Zero Desktop Retrofitting**: Never adapt desktop horizontal toolbars to mobile by merely shrinking padding or wrapping buttons into multi-line rows.
+- **Top Header Discipline**: Mobile top header must be a clean single row (`52px`–`56px`) with step title + `•••` overflow menu. Never place 5+ action buttons in the mobile header.
+- **Progressive Disclosure**: Global settings (theme, app language, sync QR, GitHub) and secondary exports must reside in the `•••` overflow menu on mobile.
+- **Thumb Zone Ergonomics**: Bottom Navigation (`Estudio`, `Postulaciones`) and Floating Action Button (FAB) triggers for slide-up Bottom Sheets (`Plantillas`, `Diseño`, `LinkedIn`, `Comparar`) must sit at the bottom within thumb reach.
+- **Maximum Canvas Focus**: The candidate's CV canvas must occupy ≥ 80% of the mobile viewport height without vertical toolbar crowding.
 
 ---
 

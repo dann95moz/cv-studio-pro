@@ -12,8 +12,13 @@
     "viewOverview": "Guida e Panoramica del Prodotto",
     "starGithub": "Stella su GitHub ⭐",
     "switchTheme": "Passa alla modalità {{mode}}",
-    "light": "Chiara",
-    "dark": "Scura"
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "appLanguage": "Lingua dell'app",
+    "theme": "Tema",
+    "syncQr": "Sincronizza (QR)",
+    "viewGithub": "Vedi su GitHub",
+    "stepCounter": "Passo {{current}} di {{total}} · {{title}}"
   },
   "badge": {
     "optional": "Opzionale",
