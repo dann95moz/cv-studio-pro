@@ -20,6 +20,9 @@ import {
   parseCvIntoSections,
   spliceTranslatedSection,
   computeContentHash,
+  buildFullCvTranslationPrompts,
+  buildSectionTranslationPrompts,
+  sanitizeLlmOutput,
 } from '../core/ai/cv-translator';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../constants/languages';
 
@@ -65,6 +68,7 @@ export const useStepPreviewWorkflow = () => {
   const targetRole = useResumeStore((s) => s.targetRole);
   const targetJob = useResumeStore((s) => s.targetJob);
   const providerSettings = useResumeStore((s) => s.providerSettings);
+  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
   const masterData = useResumeStore((s) => s.masterData);
   const applications = useResumeStore((s) => s.applications);
   const kanbanColumns = useResumeStore((s) => s.kanbanColumns);
@@ -88,6 +92,30 @@ export const useStepPreviewWorkflow = () => {
   const handleCloseTranslateModal = () => setIsTranslateModalOpen(false);
 
   const handleTranslateFull = async (targetLang: SupportedLanguage) => {
+    const langDef = LANGUAGE_DEFINITIONS[targetLang] || LANGUAGE_DEFINITIONS.en;
+
+    if (providerSettings.provider === 'manual') {
+      const prompts = buildFullCvTranslationPrompts(cvMarkdown, targetLang);
+      const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+      openManualPromptModal(bundle, `Translate CV to ${langDef.name}`, (response) => {
+        const translated = sanitizeLlmOutput(response);
+        if (translated) {
+          const variant: CvTranslationVariant = {
+            language: targetLang,
+            languageLabel: langDef.nativeName,
+            cvMarkdown: translated,
+            updatedAt: new Date().toISOString(),
+            isOutdated: false,
+            baseMarkdownHash: computeContentHash(cvMarkdown),
+            outdatedSections: [],
+          };
+          saveTranslationVariant(variant);
+          setActiveLanguage(targetLang);
+        }
+      });
+      return;
+    }
+
     setIsTranslating(true);
     try {
       const translated = await translateFullCv({
@@ -96,7 +124,6 @@ export const useStepPreviewWorkflow = () => {
         providerSettings,
       });
 
-      const langDef = LANGUAGE_DEFINITIONS[targetLang] || LANGUAGE_DEFINITIONS.en;
       const variant: CvTranslationVariant = {
         language: targetLang,
         languageLabel: langDef.nativeName,
@@ -115,14 +142,62 @@ export const useStepPreviewWorkflow = () => {
   };
 
   const handleTranslateIncremental = async (targetLang: SupportedLanguage, sections: string[]) => {
+    const langDef = LANGUAGE_DEFINITIONS[targetLang] || LANGUAGE_DEFINITIONS.en;
+    const existing = translations[targetLang];
+    let currentTranslatedText = existing?.cvMarkdown || '';
+
+    const baseSections = parseCvIntoSections(cvMarkdown);
+    const sectionsMap = new Map(baseSections.sections.map((s) => [s.title.toLowerCase(), s]));
+
+    if (providerSettings.provider === 'manual') {
+      const sectionsToTranslate = sections
+        .map((secTitle) => sectionsMap.get(secTitle.toLowerCase()))
+        .filter(Boolean);
+      const combinedTitle = sectionsToTranslate.map((s) => s!.title).join(' & ');
+      const combinedContent = sectionsToTranslate.map((s) => `## ${s!.title}\n${s!.content}`).join('\n\n');
+
+      const prompts = buildSectionTranslationPrompts(combinedTitle, combinedContent, targetLang);
+      const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+
+      openManualPromptModal(bundle, `Translate (${combinedTitle}) to ${langDef.name}`, (response) => {
+        const translated = sanitizeLlmOutput(response);
+        if (translated) {
+          const parsedTranslated = parseCvIntoSections(translated);
+          if (parsedTranslated.sections.length > 0) {
+            for (const sec of parsedTranslated.sections) {
+              currentTranslatedText = spliceTranslatedSection(
+                currentTranslatedText,
+                sec.title,
+                sec.fullText
+              );
+            }
+          } else {
+            currentTranslatedText = spliceTranslatedSection(
+              currentTranslatedText,
+              sections[0],
+              translated
+            );
+          }
+
+          const updatedVariant: CvTranslationVariant = {
+            language: targetLang,
+            languageLabel: existing?.languageLabel || langDef.nativeName,
+            cvMarkdown: currentTranslatedText,
+            updatedAt: new Date().toISOString(),
+            isOutdated: false,
+            baseMarkdownHash: computeContentHash(cvMarkdown),
+            outdatedSections: [],
+          };
+
+          saveTranslationVariant(updatedVariant);
+          setActiveLanguage(targetLang);
+        }
+      });
+      return;
+    }
+
     setIsTranslating(true);
     try {
-      const existing = translations[targetLang];
-      let currentTranslatedText = existing?.cvMarkdown || '';
-
-      const baseSections = parseCvIntoSections(cvMarkdown);
-      const sectionsMap = new Map(baseSections.sections.map((s) => [s.title.toLowerCase(), s]));
-
       for (const secTitle of sections) {
         const foundSec = sectionsMap.get(secTitle.toLowerCase());
         if (foundSec) {
@@ -140,7 +215,6 @@ export const useStepPreviewWorkflow = () => {
         }
       }
 
-      const langDef = LANGUAGE_DEFINITIONS[targetLang] || LANGUAGE_DEFINITIONS.en;
       const updatedVariant: CvTranslationVariant = {
         language: targetLang,
         languageLabel: existing?.languageLabel || langDef.nativeName,

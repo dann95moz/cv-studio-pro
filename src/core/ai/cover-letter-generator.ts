@@ -6,16 +6,15 @@ import { PromptBundle } from './prompt-builder';
 export type CoverLetterTone = 'corporate' | 'startup' | 'leadership';
 
 /**
- * Generate a tailored 3-paragraph A4 cover letter matching candidate experience with the target vacancy.
+ * Build prompts for Cover Letter generation.
  */
-export async function generateCoverLetter(
+export function buildCoverLetterPrompts(
   cvData: CVData,
   targetJob: string,
   companyName: string,
   targetRole: string,
-  tone: CoverLetterTone = 'corporate',
-  settings: AIProviderSettings
-): Promise<string> {
+  tone: CoverLetterTone = 'corporate'
+): PromptBundle {
   const role = targetRole || cvData.title || 'Target Role';
   const company = companyName || 'Target Company';
   const candidateName = cvData.name || 'Candidate';
@@ -59,11 +58,27 @@ ${targetJob || 'Standard high-impact engineering role'}
 
 Please write the tailored cover letter in markdown format.`;
 
-  const promptBundle: PromptBundle = {
+  return {
     systemInstruction,
     userPrompt,
     company
   };
+}
+
+/**
+ * Generate a tailored 3-paragraph A4 cover letter matching candidate experience with the target vacancy.
+ */
+export async function generateCoverLetter(
+  cvData: CVData,
+  targetJob: string,
+  companyName: string,
+  targetRole: string,
+  tone: CoverLetterTone = 'corporate',
+  settings: AIProviderSettings
+): Promise<string> {
+  const role = targetRole || cvData.title || 'Target Role';
+  const company = companyName || 'Target Company';
+  const promptBundle = buildCoverLetterPrompts(cvData, targetJob, companyName, targetRole, tone);
 
   try {
     const isConfigured = Boolean(

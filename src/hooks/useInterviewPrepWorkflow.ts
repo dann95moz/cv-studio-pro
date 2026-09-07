@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { CVData } from '../types/cv';
 import { InterviewPrepResult, InterviewQuestion } from '../types/audit';
 import { useResumeStore } from '../store';
-import { generateInterviewPrep } from '../core/ai-service';
+import {
+  generateInterviewPrep,
+  buildInterviewPrepPrompts,
+  parseInterviewPrepResponse,
+  generateDeterministicInterviewPrep,
+} from '../core/ai-service';
 
 export interface UseInterviewPrepWorkflowProps {
   gapKeywords: string[];
@@ -20,6 +25,7 @@ export function useInterviewPrepWorkflow({
 }: UseInterviewPrepWorkflowProps) {
   const { t } = useTranslation(['audit', 'common']);
   const providerSettings = useResumeStore((s) => s.providerSettings);
+  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
 
   const [loading, setLoading] = useState(false);
   const [prepResult, setPrepResult] = useState<InterviewPrepResult | null>(null);
@@ -28,6 +34,21 @@ export function useInterviewPrepWorkflow({
   const [expandedId, setExpandedId] = useState<string | false>('q1');
 
   const fetchInterviewPrep = useCallback(async () => {
+    if (providerSettings.provider === 'manual') {
+      const prompts = buildInterviewPrepPrompts(gapKeywords, targetRole, companyName, cvData);
+      const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+      openManualPromptModal(bundle, 'Generate Interview Questions & STAR Strategies', (response) => {
+        const parsed = parseInterviewPrepResponse(response, () =>
+          generateDeterministicInterviewPrep(gapKeywords, targetRole, companyName, cvData)
+        );
+        setPrepResult(parsed);
+        if (parsed.questions.length > 0) {
+          setExpandedId(parsed.questions[0].id);
+        }
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await generateInterviewPrep(
@@ -46,11 +67,19 @@ export function useInterviewPrepWorkflow({
     } finally {
       setLoading(false);
     }
-  }, [gapKeywords, targetRole, companyName, cvData, providerSettings]);
+  }, [gapKeywords, targetRole, companyName, cvData, providerSettings, openManualPromptModal]);
 
   useEffect(() => {
-    fetchInterviewPrep();
-  }, [fetchInterviewPrep]);
+    if (providerSettings.provider === 'manual') {
+      const initial = generateDeterministicInterviewPrep(gapKeywords, targetRole, companyName, cvData);
+      setPrepResult(initial);
+      if (initial.questions.length > 0) {
+        setExpandedId(initial.questions[0].id);
+      }
+    } else {
+      fetchInterviewPrep();
+    }
+  }, [gapKeywords, targetRole, companyName, providerSettings.provider, cvData, fetchInterviewPrep]);
 
   const handleCopyQuestion = (q: InterviewQuestion, e: React.MouseEvent) => {
     e.stopPropagation();

@@ -5,15 +5,14 @@ import { getAIStrategy } from './strategies';
 import { PromptBundle } from './prompt-builder';
 
 /**
- * Generate 3 tailored LinkedIn headlines (max 220 chars) and a 3-part storytelling About summary (max 2600 chars).
+ * Build prompts for LinkedIn Profile optimization.
  */
-export async function generateLinkedInProfile(
+export function buildLinkedInPrompts(
   cvData: CVData,
   targetJob: string,
   companyName: string,
-  targetRole: string,
-  settings: AIProviderSettings
-): Promise<LinkedInProfileResult> {
+  targetRole: string
+): PromptBundle {
   const role = targetRole || cvData.title || 'Senior Software Engineer';
   const company = companyName || 'Target Company';
   const name = cvData.name || 'Candidate';
@@ -73,11 +72,51 @@ Target Role / Industry: ${role} ${company ? `(Targeting ${company})` : ''}
 
 Generate the JSON LinkedIn Profile Optimization Package now.`;
 
-  const promptBundle: PromptBundle = {
+  return {
     systemInstruction,
     userPrompt,
     company
   };
+}
+
+/**
+ * Parses and validates raw LLM output into a typed LinkedInProfileResult.
+ */
+export function parseLinkedInResponse(
+  rawText: string,
+  fallback: () => LinkedInProfileResult
+): LinkedInProfileResult {
+  try {
+    const cleanJson = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanJson) as LinkedInProfileResult;
+
+    if (parsed.headlines && parsed.headlines.length > 0 && parsed.about?.text) {
+      parsed.headlines = parsed.headlines.map((h) => ({
+        ...h,
+        charCount: h.text.length,
+      }));
+      parsed.about.charCount = parsed.about.text.length;
+      return parsed;
+    }
+  } catch (err) {
+    console.warn('Failed to parse LinkedIn response:', err);
+  }
+  return fallback();
+}
+
+/**
+ * Generate 3 tailored LinkedIn headlines (max 220 chars) and a 3-part storytelling About summary (max 2600 chars).
+ */
+export async function generateLinkedInProfile(
+  cvData: CVData,
+  targetJob: string,
+  companyName: string,
+  targetRole: string,
+  settings: AIProviderSettings
+): Promise<LinkedInProfileResult> {
+  const role = targetRole || cvData.title || 'Senior Software Engineer';
+  const company = companyName || 'Target Company';
+  const promptBundle = buildLinkedInPrompts(cvData, targetJob, companyName, targetRole);
 
   try {
     const isConfigured = Boolean(
@@ -94,18 +133,7 @@ Generate the JSON LinkedIn Profile Optimization Package now.`;
     const result = await strategy.execute(promptBundle, settings);
     
     if (result.text) {
-      const cleanJson = result.text.replace(/```json/gi, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleanJson) as LinkedInProfileResult;
-      
-      // Validate structure
-      if (parsed.headlines && parsed.headlines.length > 0 && parsed.about?.text) {
-        parsed.headlines = parsed.headlines.map(h => ({
-          ...h,
-          charCount: h.text.length
-        }));
-        parsed.about.charCount = parsed.about.text.length;
-        return parsed;
-      }
+      return parseLinkedInResponse(result.text, () => generateDeterministicLinkedInProfile(cvData, role, company));
     }
 
     return generateDeterministicLinkedInProfile(cvData, role, company);

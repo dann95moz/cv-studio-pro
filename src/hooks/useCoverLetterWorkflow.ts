@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CVData } from '../types/cv';
 import { useResumeStore } from '../store';
-import { generateCoverLetter } from '../core/ai-service';
+import {
+  generateCoverLetter,
+  buildCoverLetterPrompts,
+  generateDeterministicCoverLetter,
+} from '../core/ai-service';
 import { useCopyToClipboard } from './useCopyToClipboard';
 
 export type CoverLetterTone = 'corporate' | 'startup' | 'leadership';
@@ -41,6 +45,7 @@ export function useCoverLetterWorkflow({
   const setCoverLetterMarkdown = useResumeStore((s) => s.setCoverLetterMarkdown);
   const coverLetterTone = useResumeStore((s) => s.coverLetterTone);
   const setCoverLetterTone = useResumeStore((s) => s.setCoverLetterTone);
+  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
 
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,6 +54,24 @@ export function useCoverLetterWorkflow({
 
   const handleGenerateLetter = useCallback(
     async (tone: CoverLetterTone = coverLetterTone) => {
+      if (providerSettings.provider === 'manual') {
+        const prompts = buildCoverLetterPrompts(
+          cvData,
+          targetJob,
+          companyName,
+          targetRole,
+          tone
+        );
+        const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+        openManualPromptModal(bundle, 'Generate Tailored Cover Letter', (response) => {
+          if (response && response.trim()) {
+            setCoverLetterMarkdown(response.trim());
+            setSnackbar(t('preview:coverLetter.generatedSuccess', 'Cover letter generated successfully!'));
+          }
+        });
+        return;
+      }
+
       setLoading(true);
       try {
         const generated = await generateCoverLetter(
@@ -67,13 +90,23 @@ export function useCoverLetterWorkflow({
         setLoading(false);
       }
     },
-    [cvData, targetJob, companyName, targetRole, coverLetterTone, providerSettings, setCoverLetterMarkdown, t]
+    [cvData, targetJob, companyName, targetRole, coverLetterTone, providerSettings, setCoverLetterMarkdown, openManualPromptModal, t]
   );
 
   // Generate initial cover letter if empty
   useEffect(() => {
     if (!coverLetterMarkdown || coverLetterMarkdown.trim().length === 0) {
-      handleGenerateLetter(coverLetterTone);
+      if (providerSettings.provider === 'manual') {
+        const initialDraft = generateDeterministicCoverLetter(
+          cvData,
+          companyName,
+          targetRole,
+          coverLetterTone
+        );
+        setCoverLetterMarkdown(initialDraft);
+      } else {
+        handleGenerateLetter(coverLetterTone);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyName, targetRole]);

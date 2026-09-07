@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { CVData } from '../types/cv';
 import { LinkedInProfileResult } from '../types/linkedin';
 import { AIProviderSettings } from '../types/ai';
-import { generateLinkedInProfile } from '../core/ai-service';
+import { useResumeStore } from '../store';
+import {
+  generateLinkedInProfile,
+  buildLinkedInPrompts,
+  parseLinkedInResponse,
+  generateDeterministicLinkedInProfile,
+} from '../core/ai-service';
 import { useCopyToClipboard } from './useCopyToClipboard';
 
 export interface UseLinkedInWorkflowProps {
@@ -31,7 +37,7 @@ export interface UseLinkedInWorkflowReturn {
 const DEFAULT_SETTINGS_FALLBACK: AIProviderSettings = {
   provider: 'gemini',
   apiKey: '',
-  model: 'gemini-3.7-flash',
+  model: 'gemini-2.5-flash',
   temperature: 0.2,
 };
 
@@ -44,6 +50,7 @@ export function useLinkedInWorkflow({
 }: UseLinkedInWorkflowProps): UseLinkedInWorkflowReturn {
   const { t } = useTranslation(['preview', 'common']);
   const { copy } = useCopyToClipboard();
+  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<LinkedInProfileResult | null>(null);
@@ -52,7 +59,22 @@ export function useLinkedInWorkflow({
   const [aboutText, setAboutText] = useState('');
   const [snackbar, setSnackbar] = useState<string | null>(null);
 
+  const activeSettings = providerSettings || DEFAULT_SETTINGS_FALLBACK;
+
   const handleGenerate = useCallback(async () => {
+    if (activeSettings.provider === 'manual') {
+      const prompts = buildLinkedInPrompts(cvData, targetJob, companyName, targetRole);
+      const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+      openManualPromptModal(bundle, 'Generate LinkedIn Profile Package', (response) => {
+        const parsed = parseLinkedInResponse(response, () =>
+          generateDeterministicLinkedInProfile(cvData, targetRole, companyName)
+        );
+        setData(parsed);
+        setAboutText(parsed.about.text);
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await generateLinkedInProfile(
@@ -60,7 +82,7 @@ export function useLinkedInWorkflow({
         targetJob,
         companyName,
         targetRole,
-        providerSettings || DEFAULT_SETTINGS_FALLBACK
+        activeSettings
       );
       setData(res);
       setAboutText(res.about.text);
@@ -69,11 +91,17 @@ export function useLinkedInWorkflow({
     } finally {
       setLoading(false);
     }
-  }, [cvData, targetJob, companyName, targetRole, providerSettings]);
+  }, [cvData, targetJob, companyName, targetRole, activeSettings, openManualPromptModal]);
 
   useEffect(() => {
-    handleGenerate();
-  }, [companyName, targetRole, handleGenerate]);
+    if (activeSettings.provider === 'manual') {
+      const initial = generateDeterministicLinkedInProfile(cvData, targetRole, companyName);
+      setData(initial);
+      setAboutText(initial.about.text);
+    } else {
+      handleGenerate();
+    }
+  }, [companyName, targetRole, activeSettings.provider, handleGenerate, cvData]);
 
   const handleCopy = useCallback(
     async (text: string, id: string, label: string) => {

@@ -3,7 +3,16 @@ import { CVData, ExperienceItem, SectionType } from '../../../types/cv';
 import { useResumeStore } from '../../../store';
 
 import { serializeCvDataToMarkdown } from '../../../core/parser';
-import { regenerateCvBullet, regenerateCvSummary } from '../../../core/ai/bullet-regenerator';
+import {
+  regenerateCvBullet,
+  regenerateCvSummary,
+  buildBulletRegenerationPrompts,
+  extractRoleExcerptFromMasterData,
+  cleanRegeneratedBulletText,
+  buildSummaryRegenerationPrompts,
+  extractSummaryExcerptFromMasterData,
+  cleanRegeneratedSummaryText,
+} from '../../../core/ai/bullet-regenerator';
 
 export interface ActiveFieldFormatter {
   executeFormat: (command: 'bold' | 'italic' | 'highlight') => void;
@@ -84,6 +93,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
   const providerSettings = useResumeStore((s) => s.providerSettings);
   const setCvMarkdown = useResumeStore((s) => s.setCvMarkdown);
   const setActiveCvData = useResumeStore((s) => s.setActiveCvData);
+  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
 
   const formatSelection = useCallback((command: 'bold' | 'italic' | 'highlight') => {
     if (activeFormatter) {
@@ -279,6 +289,24 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     userGuidance?: string;
   }) => {
     const { fieldKey, sectionType, itemIndex, bulletIndex, company, role, currentBullet, userGuidance } = params;
+
+    if (providerSettings.provider === 'manual') {
+      const roleExcerpt = extractRoleExcerptFromMasterData(masterData, company, role);
+      const prompts = buildBulletRegenerationPrompts(currentBullet, roleExcerpt, targetJob, userGuidance);
+      const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+
+      return new Promise<string>((resolve) => {
+        openManualPromptModal(bundle, 'Regenerate Experience Bullet', (response) => {
+          const cleaned = cleanRegeneratedBulletText(response);
+          if (cleaned) {
+            setUndoMap((prev) => ({ ...prev, [fieldKey]: currentBullet }));
+            updateExperienceBullet(sectionType, itemIndex, bulletIndex, cleaned);
+          }
+          resolve(cleaned);
+        });
+      });
+    }
+
     const newBullet = await regenerateCvBullet({
       currentBullet,
       company,
@@ -294,7 +322,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
       updateExperienceBullet(sectionType, itemIndex, bulletIndex, newBullet);
     }
     return newBullet;
-  }, [masterData, targetJob, providerSettings, updateExperienceBullet]);
+  }, [masterData, targetJob, providerSettings, updateExperienceBullet, openManualPromptModal]);
 
   const regenerateSummaryBlock = useCallback(async (params: {
     fieldKey: string;
@@ -302,6 +330,24 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     userGuidance?: string;
   }) => {
     const { fieldKey, currentSummary, userGuidance } = params;
+
+    if (providerSettings.provider === 'manual') {
+      const summaryExcerpt = extractSummaryExcerptFromMasterData(masterData);
+      const prompts = buildSummaryRegenerationPrompts(currentSummary, summaryExcerpt, targetJob, userGuidance);
+      const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+
+      return new Promise<string>((resolve) => {
+        openManualPromptModal(bundle, 'Regenerate Professional Summary', (response) => {
+          const cleaned = cleanRegeneratedSummaryText(response);
+          if (cleaned) {
+            setUndoMap((prev) => ({ ...prev, [fieldKey]: currentSummary }));
+            updateSummary(cleaned);
+          }
+          resolve(cleaned);
+        });
+      });
+    }
+
     const newSummary = await regenerateCvSummary({
       currentSummary,
       masterData,
@@ -315,7 +361,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
       updateSummary(newSummary);
     }
     return newSummary;
-  }, [masterData, targetJob, providerSettings, updateSummary]);
+  }, [masterData, targetJob, providerSettings, updateSummary, openManualPromptModal]);
 
   const value = useMemo<CvLiveEditContextValue>(() => ({
     isLiveEditing,

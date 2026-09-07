@@ -131,7 +131,7 @@ export function detectOutdatedSections(
 /**
  * Clean raw LLM response text from surrounding markdown code fences.
  */
-function sanitizeLlmOutput(rawText: string): string {
+export function sanitizeLlmOutput(rawText: string): string {
   let text = rawText.trim();
   text = text.replace(/^```(?:markdown|md)?\n([\s\S]*?)\n```$/i, '$1');
   text = text.replace(/^```([\s\S]*?)```$/i, '$1');
@@ -141,7 +141,7 @@ function sanitizeLlmOutput(rawText: string): string {
 /**
  * System guidelines for CV translation with strict technical term protection.
  */
-function buildTranslationSystemPrompt(targetLangName: string, targetLangCode?: string): string {
+export function buildTranslationSystemPrompt(targetLangName: string, targetLangCode?: string): string {
   const isSpanish = targetLangCode === 'es' || /spanish|español/i.test(targetLangName);
 
   return `You are an elite, ATS-specialized multilingual CV translator and executive resume editor.
@@ -172,27 +172,33 @@ export interface TranslateCvParams {
 }
 
 /**
- * Translates the entire CV into the target language using the configured AI provider.
+ * Builds prompt bundle for full CV translation.
  */
-export async function translateFullCv(params: TranslateCvParams): Promise<string> {
-  const langDef = LANGUAGE_DEFINITIONS[params.targetLanguage] || LANGUAGE_DEFINITIONS.en;
+export function buildFullCvTranslationPrompts(cvMarkdown: string, targetLanguage: SupportedLanguage): PromptBundle {
+  const langDef = LANGUAGE_DEFINITIONS[targetLanguage] || LANGUAGE_DEFINITIONS.en;
   const targetLangName = langDef.name;
 
   const systemPrompt = buildTranslationSystemPrompt(targetLangName, langDef.code);
   const userPrompt = `Translate the following complete CV into ${targetLangName}. Follow all technical preservation rules strictly:
 
 \`\`\`markdown
-${params.cvMarkdown}
+${cvMarkdown}
 \`\`\`
 
 Return ONLY the translated Markdown text.`;
 
-  const prompts: PromptBundle = {
+  return {
     systemInstruction: systemPrompt,
     userPrompt,
     company: 'CV Translation',
   };
+}
 
+/**
+ * Translates the entire CV into the target language using the configured AI provider.
+ */
+export async function translateFullCv(params: TranslateCvParams): Promise<string> {
+  const prompts = buildFullCvTranslationPrompts(params.cvMarkdown, params.targetLanguage);
   const strategy = getAIStrategy(params.providerSettings.provider);
   const result = await strategy.execute(prompts, params.providerSettings);
 
@@ -207,29 +213,39 @@ export interface TranslateSectionParams {
 }
 
 /**
- * Translates a single section of the CV (incremental diff translation to save token costs).
+ * Builds prompt bundle for single section translation.
  */
-export async function translateCvSection(params: TranslateSectionParams): Promise<string> {
-  const langDef = LANGUAGE_DEFINITIONS[params.targetLanguage] || LANGUAGE_DEFINITIONS.en;
+export function buildSectionTranslationPrompts(
+  sectionTitle: string,
+  sectionContent: string,
+  targetLanguage: SupportedLanguage
+): PromptBundle {
+  const langDef = LANGUAGE_DEFINITIONS[targetLanguage] || LANGUAGE_DEFINITIONS.en;
   const targetLangName = langDef.name;
 
   const systemPrompt = buildTranslationSystemPrompt(targetLangName, langDef.code);
-  const userPrompt = `Translate ONLY this single CV section titled "${params.sectionTitle}" into ${targetLangName}.
+  const userPrompt = `Translate ONLY this single CV section titled "${sectionTitle}" into ${targetLangName}.
 Preserve exact Markdown formatting, bullet points, and technical terms:
 
 \`\`\`markdown
-## ${params.sectionTitle}
-${params.sectionContent}
+## ${sectionTitle}
+${sectionContent}
 \`\`\`
 
 Return ONLY the translated section Markdown text (including the ## heading).`;
 
-  const prompts: PromptBundle = {
+  return {
     systemInstruction: systemPrompt,
     userPrompt,
     company: 'CV Translation',
   };
+}
 
+/**
+ * Translates a single section of the CV (incremental diff translation to save token costs).
+ */
+export async function translateCvSection(params: TranslateSectionParams): Promise<string> {
+  const prompts = buildSectionTranslationPrompts(params.sectionTitle, params.sectionContent, params.targetLanguage);
   const strategy = getAIStrategy(params.providerSettings.provider);
   const result = await strategy.execute(prompts, params.providerSettings);
 

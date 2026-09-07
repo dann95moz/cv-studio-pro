@@ -5,15 +5,14 @@ import { getAIStrategy } from './strategies';
 import { PromptBundle } from './prompt-builder';
 
 /**
- * Generate intelligent, gap-driven interview questions and STAR strategies.
+ * Build prompts for gap-driven interview questions and STAR strategies.
  */
-export async function generateInterviewPrep(
+export function buildInterviewPrepPrompts(
   gapKeywords: string[],
   targetRole: string,
   companyName: string,
-  cvData: CVData,
-  settings: AIProviderSettings
-): Promise<InterviewPrepResult> {
+  cvData: CVData
+): PromptBundle {
   const role = targetRole || cvData.title || 'Target Role';
   const company = companyName || 'Target Company';
   const topGaps = gapKeywords.slice(0, 8);
@@ -65,11 +64,50 @@ Identified Gaps for ${role} at ${company}: ${topGaps.join(', ') || 'Core Archite
 
 Generate 5 to 7 high-impact interview preparation questions focusing on these specific gaps and role requirements.`;
 
-  const promptBundle: PromptBundle = {
+  return {
     systemInstruction,
     userPrompt,
     company
   };
+}
+
+/**
+ * Parses and validates raw LLM output into a typed InterviewPrepResult.
+ */
+export function parseInterviewPrepResponse(
+  rawText: string,
+  fallback: () => InterviewPrepResult
+): InterviewPrepResult {
+  try {
+    const cleanJson = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanJson) as InterviewPrepResult;
+
+    if (parsed && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+      return {
+        ...parsed,
+        generatedAt: new Date().toISOString(),
+      };
+    }
+  } catch (err) {
+    console.warn('Failed to parse Interview Prep response:', err);
+  }
+  return fallback();
+}
+
+/**
+ * Generate intelligent, gap-driven interview questions and STAR strategies.
+ */
+export async function generateInterviewPrep(
+  gapKeywords: string[],
+  targetRole: string,
+  companyName: string,
+  cvData: CVData,
+  settings: AIProviderSettings
+): Promise<InterviewPrepResult> {
+  const role = targetRole || cvData.title || 'Target Role';
+  const company = companyName || 'Target Company';
+  const topGaps = gapKeywords.slice(0, 8);
+  const promptBundle = buildInterviewPrepPrompts(gapKeywords, targetRole, companyName, cvData);
 
   try {
     const isConfigured = Boolean(
@@ -85,18 +123,7 @@ Generate 5 to 7 high-impact interview preparation questions focusing on these sp
     const strategy = getAIStrategy(settings.provider);
     const result = await strategy.execute(promptBundle, settings);
     
-    // Clean potential markdown backticks from response
-    const cleanJson = result.text.replace(/```json/gi, '').replace(/```/g, '').trim();
-    const parsed = JSON.parse(cleanJson) as InterviewPrepResult;
-    
-    if (parsed && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
-      return {
-        ...parsed,
-        generatedAt: new Date().toISOString()
-      };
-    }
-    
-    return generateDeterministicFallback(topGaps, role, company, cvData);
+    return parseInterviewPrepResponse(result.text, () => generateDeterministicFallback(topGaps, role, company, cvData));
   } catch (err) {
     console.warn('AI Interview prep failed, falling back to heuristic generator:', err);
     return generateDeterministicFallback(topGaps, role, company, cvData);

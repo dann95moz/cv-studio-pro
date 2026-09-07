@@ -7,14 +7,43 @@ import {
 } from '../types/cv';
 import { buildPrompts, DEFAULT_RULES, PromptBundle } from './ai/prompt-builder';
 import { extractCvAndGap, ExtractedCvAndGap } from './ai/extractor';
+import {
+  generateInterviewPrep,
+  buildInterviewPrepPrompts,
+  parseInterviewPrepResponse,
+  generateDeterministicFallback as generateDeterministicInterviewPrep,
+} from './ai/interview-prep-generator';
+import {
+  generateCoverLetter,
+  buildCoverLetterPrompts,
+  generateDeterministicCoverLetter,
+} from './ai/cover-letter-generator';
+import {
+  generateLinkedInProfile,
+  buildLinkedInPrompts,
+  parseLinkedInResponse,
+  generateDeterministicLinkedInProfile,
+} from './ai/linkedin-generator';
 import { getAIStrategy } from './ai/strategies';
-import { generateInterviewPrep } from './ai/interview-prep-generator';
-import { generateCoverLetter } from './ai/cover-letter-generator';
-import { generateLinkedInProfile } from './ai/linkedin-generator';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export type { AIModelOption, AIProviderSettings, AIConnectionTestResult, TailorRequest, TailorResponse };
-export { buildPrompts, DEFAULT_RULES, extractCvAndGap, generateInterviewPrep, generateCoverLetter, generateLinkedInProfile };
+export {
+  buildPrompts,
+  DEFAULT_RULES,
+  extractCvAndGap,
+  generateInterviewPrep,
+  buildInterviewPrepPrompts,
+  parseInterviewPrepResponse,
+  generateDeterministicInterviewPrep,
+  generateCoverLetter,
+  buildCoverLetterPrompts,
+  generateDeterministicCoverLetter,
+  generateLinkedInProfile,
+  buildLinkedInPrompts,
+  parseLinkedInResponse,
+  generateDeterministicLinkedInProfile,
+};
 
 export { AVAILABLE_AI_MODELS } from '../constants/models';
 
@@ -24,6 +53,13 @@ export { AVAILABLE_AI_MODELS } from '../constants/models';
  */
 export async function testAIConnection(settings: AIProviderSettings): Promise<AIConnectionTestResult> {
   try {
+    if (settings.provider === 'manual') {
+      return {
+        success: true,
+        message: 'Bring-Your-Own-AI (Prompt & Paste) mode is ready! 100% free, no API key or local server required.'
+      };
+    }
+
     if (settings.provider === 'local') {
       const rawEndpoint = settings.customEndpoint?.trim() || 'http://localhost:11434/v1';
       let endpoint = rawEndpoint.replace(/\/$/, '');
@@ -47,6 +83,16 @@ export async function testAIConnection(settings: AIProviderSettings): Promise<AI
           const mData = await modelsRes.json().catch(() => ({}));
           if (Array.isArray(mData.data)) {
             detectedModels = mData.data.map((m: { id?: string }) => m.id || '').filter(Boolean);
+          }
+        }
+        if (!detectedModels || detectedModels.length === 0) {
+          const rootBase = baseV1.replace(/\/v1$/, '');
+          const tagsRes = await fetch(`${rootBase}/api/tags`, { method: 'GET', headers }).catch(() => null);
+          if (tagsRes && tagsRes.ok) {
+            const tData = await tagsRes.json().catch(() => ({}));
+            if (Array.isArray(tData.models)) {
+              detectedModels = tData.models.map((m: { name?: string; model?: string }) => m.name || m.model || '').filter(Boolean);
+            }
           }
         }
       } catch {
@@ -86,9 +132,26 @@ export async function testAIConnection(settings: AIProviderSettings): Promise<AI
         return { success: false, message: 'Please enter your Google Gemini API Key from aistudio.google.com' };
       }
       const genAI = new GoogleGenerativeAI(key);
-      const model = genAI.getGenerativeModel({ model: settings.model || 'gemini-3.7-flash' });
-      await model.generateContent('Say OK');
-      return { success: true, message: 'Google Gemini API Key validated successfully!' };
+      const requestedModel = settings.model || 'gemini-2.5-flash';
+      const testCandidates = [requestedModel, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'].filter((m, i, a) => a.indexOf(m) === i);
+      let lastErr: unknown = null;
+
+      for (const mName of testCandidates) {
+        try {
+          const model = genAI.getGenerativeModel({ model: mName });
+          await model.generateContent('Say OK');
+          const note = mName === requestedModel ? '' : ` (${requestedModel} experiencing temporary demand, ${mName} ready)`;
+          return { success: true, message: `Google Gemini API Key validated successfully!${note}` };
+        } catch (e: unknown) {
+          lastErr = e;
+          const msg = e instanceof Error ? e.message : String(e);
+          if (!msg.includes('503') && !msg.includes('high demand') && !msg.includes('RESOURCE_EXHAUSTED') && !msg.includes('429')) {
+            break;
+          }
+        }
+      }
+      const errMsg = lastErr instanceof Error ? lastErr.message : String(lastErr);
+      return { success: false, message: `Google Gemini error: ${errMsg}` };
     }
 
     if (settings.provider === 'claude') {
@@ -202,7 +265,7 @@ export async function tailorResume(
   const result = await strategy.execute(
     prompts,
     req.providerSettings,
-    ({ accumulatedText, wordCount }) => {
+    ({ accumulatedText, wordCount }: { chunk: string; accumulatedText: string; wordCount: number }) => {
       const lastSnippet = accumulatedText.slice(-100);
       onProgress?.({
         stage: 'synthesizing',
