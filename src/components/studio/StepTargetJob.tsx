@@ -190,6 +190,10 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
     },
   });
 
+  const hasJob = localContent.trim().length > 40 && !localContent.includes('[Paste the raw job description');
+  const wordCount = localContent.trim().split(/\s+/).filter(Boolean).length;
+  const isManual = providerSettings?.provider === 'manual';
+
   const handleTailorAndProceed = () => {
     if (isGenerating) return;
     flushAll();
@@ -199,6 +203,12 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
       return;
     }
     lastClickRef.current = now;
+
+    if (isManual) {
+      if (!hasJob) return;
+      openManualPromptModal();
+      return;
+    }
 
     const isConfigured = Boolean(
       providerSettings && (
@@ -225,9 +235,6 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
       onGenerate();
     }
   };
-
-  const wordCount = localContent.trim().split(/\s+/).filter(Boolean).length;
-  const hasJob = localContent.trim().length > 40 && !localContent.includes('[Paste the raw job description');
 
   return (
     <Box
@@ -472,10 +479,14 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               : undefined
           }
           onTailorNow={handleTailorAndProceed}
-          onOpenManualPrompt={() => {
-            flushAll();
-            openManualPromptModal();
-          }}
+          onOpenManualPrompt={
+            isManual
+              ? undefined
+              : () => {
+                  flushAll();
+                  openManualPromptModal();
+                }
+          }
           isGenerating={isGenerating}
           generationStep={generationStep}
           hasJob={hasJob}

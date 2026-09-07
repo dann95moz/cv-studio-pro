@@ -356,7 +356,7 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <AutoAwesomeRoundedIcon color="success" fontSize="small" />
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main' }}>
-                {t('settings:providers.byoAiInfoTitle', 'How Bring-Your-Own-AI Works:')}
+                {t('settings:providers.byoAiInfoTitle', 'How using your own AI works (Copy & Paste):')}
               </Typography>
             </Box>
             <Typography variant="caption" sx={{ display: 'block', mb: 0.75, color: 'text.secondary' }}>
@@ -369,62 +369,6 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
               {t('settings:providers.byoAiStep3', '3. Paste the AI response back into CV Studio. Formatting, scoring, and previewing work seamlessly!')}
             </Typography>
           </Paper>
-
-          <Box>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1 }}>
-              {t('settings:providers.quickLaunch', 'Quick Launch Web Chats:')}
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                href="https://chatgpt.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
-              >
-                {t('settings:providers.openChatGpt', 'Open ChatGPT')}
-              </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                href="https://claude.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
-              >
-                {t('settings:providers.openClaude', 'Open Claude')}
-              </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                href="https://gemini.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
-              >
-                {t('settings:providers.openGeminiWeb', 'Open Gemini Web')}
-              </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                href="https://chat.deepseek.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
-              >
-                {t('settings:providers.openDeepSeek', 'Open DeepSeek')}
-              </Button>
-            </Box>
-          </Box>
         </Box>
       ) : isLocal ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

@@ -148,7 +148,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               width: { xs: '100%', sm: 'auto' },
             }}
           >
-            {t('target:actions.byoAiPrompt', 'Prompt & Paste (BYO-AI)')}
+            {t('target:actions.byoAiPrompt', 'Copy Prompt (My Own AI)')}
           </Button>
         )}
 
@@ -158,7 +158,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
           size="large"
           startIcon={isGenerating ? <CircularProgress size={18} color="inherit" /> : <BoltRoundedIcon />}
           onClick={onTailorNow}
-          disabled={isGenerating}
+          disabled={isGenerating || !hasJob}
           sx={{
             fontWeight: 700,
             px: 3.5,

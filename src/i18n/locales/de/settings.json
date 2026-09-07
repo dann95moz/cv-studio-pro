@@ -63,8 +63,8 @@
     "byoAiModalLabel": "Eigene KI Verwenden (Prompt & Einfügen)",
     "byoAiTitle": "Eigene KI Verwenden (Prompt & Einfügen)",
     "byoAiDesc": "Kopieren Sie kalibrierte Prompts in ChatGPT, Claude, Gemini Web oder DeepSeek und fügen Sie die Antwort hier ein.",
-    "noKeyNeeded": "100% Kostenlos • Kein API-Schlüssel",
-    "byoAiInfoTitle": "So funktioniert der BYO-AI Modus:",
+    "noKeyNeeded": "100% Kostenlos • Keine API-Schlüssel",
+    "byoAiInfoTitle": "So funktioniert die Nutzung eigener KI (Kopieren & Einfügen):",
     "byoAiStep1": "1. CV Studio formatiert Ihren Master-CV, das Stellenangebot und ATS-Regeln in einen kalibrierten Prompt.",
     "byoAiStep2": "2. Klicken Sie auf Kopieren und fügen Sie es in Ihren bevorzugten Web-Chat (ChatGPT, Claude, Gemini Web) ein.",
     "byoAiStep3": "3. Fügen Sie die Antwort wieder in CV Studio ein. Formatierung, Scoring und Vorschau funktionieren nahtlos!",
@@ -77,8 +77,15 @@
     "pasteAiResponse": "KI-Antwort einfügen",
     "pasteAiResponsePlaceholder": "Fügen Sie hier die vollständige Antwort von ChatGPT, Claude, Gemini ein...",
     "processResponseAndContinue": "Antwort verarbeiten & Fortfahren",
+    "pasteToEnablePrompt": "Füge die KI-Antwort ein, um fortzufahren",
+    "viewPrompt": "Prompt anzeigen",
+    "hidePrompt": "Prompt ausblenden",
+    "viewFullPrompt": "Vollständigen Prompt anzeigen",
+    "hideFullPrompt": "Prompt ausblenden",
+    "manualModeTitle": "Deine eigene KI",
+    "manualModeDesc": "Modus: Kopieren & Einfügen (Eigene KI)",
     "invalidResponse": "Bitte fügen Sie die KI-Antwort ein, bevor Sie fortfahren.",
-    "calibratedInfo": "Kalibriert für Google XYZ-Erfolgsformulierungen & ATS-Schlüsselwortabgleich"
+    "calibratedInfo": "Kalibriert für Google XYZ Leistungssynthese & ATS-Keyword-Ausrichtung"
   },
   "rules": {
     "title": "Anpassungsrichtlinien & ATS-Regeln (rules.md)",

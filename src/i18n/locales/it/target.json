@@ -9,9 +9,9 @@
     "uploadFileTip": "Carica file della descrizione (.txt, .md)",
     "backToProfile": "Torna al Profilo",
     "tailorNow": "Adatta Curriculum Ora",
-    "tailoring": "Adattamento Curriculum...",
-    "byoAiPrompt": "Prompt & Incolla (BYO-AI)",
-    "viewExisting": "Visualizza CV Esistente"
+    "tailoring": "Adattamento IA in corso",
+    "byoAiPrompt": "Copia prompt (La mia IA)",
+    "viewExisting": "Vedi CV Esistente"
   },
   "fields": {
     "company": "Azienda / Datore di Lavoro",
