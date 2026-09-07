@@ -3,13 +3,12 @@ import {
   Box,
   Paper,
   Button,
-  Chip,
   CircularProgress,
+  Typography,
   useTheme,
+  alpha,
 } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
-import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { useTranslation } from 'react-i18next';
@@ -77,26 +76,49 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
           width: { xs: '100%', sm: 'auto' },
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
-          {hasJob ? (
-            <Chip
-              icon={<CheckCircleRoundedIcon />}
-              label={isGenerating ? (generationStep || t('target:actions.tailoring', 'Tailoring Resume...')) : t('target:status.ready', 'Job details ready')}
-              color={isGenerating ? 'info' : 'success'}
-              variant="outlined"
-              size="small"
-              sx={{ fontWeight: 600 }}
-            />
-          ) : (
-            <Chip
-              icon={<InfoRoundedIcon />}
-              label={t('target:status.missing', 'Paste a job description to tailor')}
-              color="warning"
-              variant="outlined"
-              size="small"
-              sx={{ fontWeight: 600 }}
-            />
-          )}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            px: 1,
+            py: 0.5,
+            justifyContent: { xs: 'center', sm: 'flex-start' },
+          }}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              bgcolor: isGenerating ? 'info.main' : hasJob ? 'success.main' : 'warning.main',
+              flexShrink: 0,
+              boxShadow: (theme) =>
+                `0 0 0 2px ${alpha(
+                  isGenerating
+                    ? theme.palette.info.main
+                    : hasJob
+                    ? theme.palette.success.main
+                    : theme.palette.warning.main,
+                  0.2
+                )}`,
+            }}
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              fontSize: '0.8125rem',
+              userSelect: 'none',
+            }}
+          >
+            {hasJob
+              ? isGenerating
+                ? generationStep || t('target:actions.tailoring', 'Tailoring Resume...')
+                : t('target:status.ready', 'Job details ready')
+              : t('target:status.missing', 'Paste a job description to tailor')}
+          </Typography>
         </Box>
 
         {hasGeneratedCv && !isGenerating && onViewExisting && (

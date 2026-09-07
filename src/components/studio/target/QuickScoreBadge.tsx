@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import SpeedRoundedIcon from '@mui/icons-material/SpeedRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
 import { useTranslation } from 'react-i18next';
@@ -20,9 +20,10 @@ import { QuickMatchResult } from '../../../core/matching/quickMatcher';
 
 export interface QuickScoreBadgeProps {
   result: QuickMatchResult;
+  onAddSkillToMaster?: (skill: string) => void;
 }
 
-export const QuickScoreBadge: React.FC<QuickScoreBadgeProps> = ({ result }) => {
+export const QuickScoreBadge: React.FC<QuickScoreBadgeProps> = ({ result, onAddSkillToMaster }) => {
   const { t } = useTranslation(['target', 'common']);
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
@@ -162,20 +163,40 @@ export const QuickScoreBadge: React.FC<QuickScoreBadgeProps> = ({ result }) => {
                 {result.missingKeywords.map((kw) => (
                   <Tooltip
                     key={kw}
-                    title={t(
-                      'target:quickScore.missingTooltip',
-                      'Si tienes experiencia en esto, agrégalo a tu Master CV para mejorar tu puntuación.'
-                    )}
+                    title={
+                      onAddSkillToMaster
+                        ? t('target:quickScore.addSkillTip', {
+                            skill: kw,
+                            defaultValue: `Haz clic para agregar '${kw}' a tu perfil si tienes experiencia`,
+                          })
+                        : t(
+                            'target:quickScore.missingTooltip',
+                            'Si tienes experiencia en esto, agrégalo a tu Master CV para mejorar tu puntuación.'
+                          )
+                    }
                   >
                     <Chip
                       label={kw}
                       size="small"
                       variant="outlined"
+                      color="warning"
+                      icon={<AddCircleOutlineRoundedIcon sx={{ fontSize: '13px !important' }} />}
+                      clickable={Boolean(onAddSkillToMaster)}
+                      onClick={onAddSkillToMaster ? () => onAddSkillToMaster(kw) : undefined}
                       sx={{
                         fontSize: '0.6875rem',
                         height: 22,
-                        borderColor: 'divider',
-                        color: 'text.secondary',
+                        borderColor: alpha(theme.palette.warning.main, 0.4),
+                        color: 'warning.main',
+                        cursor: onAddSkillToMaster ? 'pointer' : 'default',
+                        transition: 'all 0.15s ease',
+                        '&:hover': onAddSkillToMaster
+                          ? {
+                              bgcolor: alpha(theme.palette.warning.main, 0.12),
+                              borderColor: 'warning.main',
+                              transform: 'translateY(-1px)',
+                            }
+                          : undefined,
                       }}
                     />
                   </Tooltip>

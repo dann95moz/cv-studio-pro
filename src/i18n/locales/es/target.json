@@ -33,7 +33,9 @@
     "highlightsOn": "Resaltado: ACTIVO",
     "highlightsOff": "Resaltado: INACTIVO",
     "coveredCount": "{{count}} cubiertas",
-    "missingCount": "{{count}} pendientes"
+    "missingCount": "{{count}} pendientes",
+    "coveredLegend": "En tu perfil",
+    "gapsLegend": "Brechas a cubrir"
   },
   "progress": {
     "title": "Sintetizando Currículum Adaptado con IA...",
@@ -82,7 +84,9 @@
     "summary": "{{matched}} de {{total}} requerimientos clave detectados en tu Perfil Maestro",
     "matchedSkills": "Habilidades coincidentes encontradas en tu perfil:",
     "missingSkills": "Habilidades de la vacante no detectadas en tu perfil:",
-    "missingTooltip": "Si tienes experiencia en esto, agrégalo a tu Master CV para mejorar tu puntuación."
+    "missingTooltip": "Si tienes experiencia en esto, agrégalo a tu Master CV para mejorar tu puntuación.",
+    "addSkillTip": "Haz clic para añadir '{{skill}}' a tu Perfil Maestro si tienes experiencia",
+    "skillAddedToast": "Habilidad '{{skill}}' añadida a tu Perfil Maestro"
   },
   "highlighter": {
     "viewTitle": "Vista Analizada",

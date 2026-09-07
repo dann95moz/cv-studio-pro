@@ -33,7 +33,9 @@
     "highlightsOn": "Evidenziazione: ATTIVA",
     "highlightsOff": "Evidenziazione: DISATTIVA",
     "coveredCount": "{{count}} coperte",
-    "missingCount": "{{count}} mancanti"
+    "missingCount": "{{count}} mancanti",
+    "coveredLegend": "Nel tuo profilo",
+    "gapsLegend": "Lacune da colmare"
   },
   "progress": {
     "title": "Sintesi del curriculum personalizzato con IA...",
@@ -82,7 +84,9 @@
     "summary": "{{matched}} requisiti chiave su {{total}} rilevati nel tuo Profilo Base",
     "matchedSkills": "Competenze corrispondenti presenti nel tuo profilo:",
     "missingSkills": "Competenze richieste non ancora presenti nel tuo profilo:",
-    "missingTooltip": "Se hai esperienza in questo ambito, aggiungila al tuo profilo per migliorare il punteggio."
+    "missingTooltip": "Se hai esperienza in questo ambito, aggiungila al tuo profilo per migliorare il punteggio.",
+    "addSkillTip": "Clicca per aggiungere '{{skill}}' al tuo Profilo Master se hai esperienza",
+    "skillAddedToast": "Competenza '{{skill}}' aggiunta al tuo Profilo Master"
   },
   "highlighter": {
     "viewTitle": "Vista Analizzata",

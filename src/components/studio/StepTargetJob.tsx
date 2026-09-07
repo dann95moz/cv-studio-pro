@@ -4,12 +4,12 @@ import {
   Paper,
   Typography,
   Button,
-  Chip,
   Tooltip,
+  Snackbar,
+  Alert,
   useTheme,
-  alpha
+  alpha,
 } from '@mui/material';
-import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import AttachFileRoundedIcon from '@mui/icons-material/AttachFileRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
@@ -30,6 +30,35 @@ const ContextualAiModal = React.lazy(() =>
 );
 
 export type { StepTargetJobProps };
+
+/**
+ * Appends a skill to the user's Master CV Markdown under an existing skills header,
+ * or creates a Technical Skills section if not present.
+ */
+function addSkillToMasterMarkdown(masterMarkdown: string, skill: string): string {
+  const trimmedSkill = skill.trim();
+  if (!trimmedSkill) return masterMarkdown;
+
+  const escaped = trimmedSkill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const alreadyPresentRegex = new RegExp(`(^|[,•\\-\\s])${escaped}([,•\\-\\s]|$)`, 'i');
+  if (alreadyPresentRegex.test(masterMarkdown)) {
+    return masterMarkdown;
+  }
+
+  const skillsHeaderRegex = /(##[^\n]*(?:skills|habilidades|competencias|stack|technologies|tecnologías)[^\n]*\n)/i;
+  const match = masterMarkdown.match(skillsHeaderRegex);
+
+  if (match && match.index !== undefined) {
+    const insertPos = match.index + match[0].length;
+    return (
+      masterMarkdown.slice(0, insertPos) +
+      `- ${trimmedSkill}\n` +
+      masterMarkdown.slice(insertPos)
+    );
+  }
+
+  return `${masterMarkdown.trimEnd()}\n\n## Technical Skills\n- ${trimmedSkill}\n`;
+}
 
 export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   content,
@@ -52,6 +81,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   const theme = useTheme();
   const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
   const [highlightsEnabled, setHighlightsEnabled] = useState<boolean>(true);
+  const [skillToast, setSkillToast] = useState<string | null>(null);
   const lastClickRef = useRef<number>(0);
 
   const [localContent, setLocalContent] = useState(content);
@@ -59,10 +89,28 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   const [localRole, setLocalRole] = useState(targetRole);
 
   const masterData = useResumeStore((s) => s.masterData);
+  const setMasterData = useResumeStore((s) => s.setMasterData);
   const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
   const quickMatchResult = React.useMemo(() => {
     return calculateQuickScore(localContent, masterData);
   }, [localContent, masterData]);
+
+  const handleAddSkillToMaster = (skill: string) => {
+    const trimmed = skill.trim();
+    if (!trimmed) return;
+
+    const updated = addSkillToMasterMarkdown(masterData, trimmed);
+    if (updated !== masterData) {
+      setMasterData(updated);
+    }
+
+    setSkillToast(
+      t('target:quickScore.skillAddedToast', {
+        skill: trimmed,
+        defaultValue: `Skill '${trimmed}' added to your Master Profile`,
+      })
+    );
+  };
 
   const contentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const companyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -144,8 +192,6 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
     },
   });
 
-
-
   const handleTailorAndProceed = () => {
     if (isGenerating) return;
     flushAll();
@@ -222,52 +268,15 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
           generationStep={generationStep}
         />
 
-        {/* 2. Top Header Hero Panel */}
-        <Paper
-          sx={{
-            p: { xs: 2, sm: 2.5 },
-            borderRadius: 2,
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'flex-start', sm: 'center' },
-            justifyContent: 'space-between',
-            gap: 2,
-            bgcolor: 'background.paper',
-            border: `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Box sx={{ maxWidth: 780 }}>
-            <Chip
-              icon={<WorkRoundedIcon sx={{ fontSize: '16px !important' }} />}
-              label={t('target:stepBadge', 'Step 2 of 3 • Target Vacancy & Tailoring')}
-              size="small"
-              color="secondary"
-              variant="outlined"
-              sx={{ mb: 1, fontWeight: 700 }}
-            />
-            <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
-              {t('target:title', 'Target Job Vacancy')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t('target:subtitle', 'Paste the job posting description. The AI will automatically calibrate the optimal length, impact metrics, and keyword alignment.')}
-            </Typography>
-          </Box>
-
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<RefreshRoundedIcon />}
-            onClick={onLoadSample}
-            sx={{
-              fontWeight: 700,
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              width: { xs: '100%', sm: 'auto' },
-            }}
-          >
-            {t('target:actions.loadSample', 'Load Sample Vacancy')}
-          </Button>
-        </Paper>
+        {/* 2. Top Header Title & Description */}
+        <Box sx={{ mb: { xs: 0, sm: -0.5 } }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
+            {t('target:title', 'Target Job Vacancy')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {t('target:subtitle', 'Paste the job posting description. The AI will automatically calibrate the optimal length, impact metrics, and keyword alignment.')}
+          </Typography>
+        </Box>
 
         {/* 3. Target Metadata & Metric Inputs Bar */}
         <TargetJobMetadataBar
@@ -282,7 +291,10 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
 
         {/* 3.5. Instant Pre-generation Quick Score Match */}
         {quickMatchResult.totalKeywords > 0 && (
-          <QuickScoreBadge result={quickMatchResult} />
+          <QuickScoreBadge
+            result={quickMatchResult}
+            onAddSkillToMaster={handleAddSkillToMaster}
+          />
         )}
 
         {/* 4. Spacious Direct Job Description Editor Area */}
@@ -299,7 +311,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
             overflow: 'hidden',
           }}
         >
-          {/* Editor Header Toolbar with Highlights Toggle and Attachment Action */}
+          {/* Editor Header Toolbar with Highlights Toggle, Legend, and Input Source Actions */}
           <Box
             sx={{
               py: 0.75,
@@ -314,7 +326,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               flexWrap: 'wrap',
             }}
           >
-            {/* Live Highlights Toggle and Real-time Keyword Metrics */}
+            {/* Live Highlights Toggle and Real-time Keyword Metrics with Legend */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Button
                 size="small"
@@ -337,62 +349,104 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
 
               {quickMatchResult.totalKeywords > 0 && (
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.25, ml: 0.5 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        bgcolor: 'success.main',
-                      }}
-                    />
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                      {t('target:editor.coveredCount', '{{count}} covered', {
-                        count: quickMatchResult.matchedKeywords.length,
-                      })}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        bgcolor: 'warning.main',
-                      }}
-                    />
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                      {t('target:editor.missingCount', '{{count}} gaps', {
-                        count: quickMatchResult.missingKeywords.length,
-                      })}
-                    </Typography>
-                  </Box>
+                  <Tooltip title={t('target:editor.coveredLegend', 'In your profile')}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'success.main',
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                        {t('target:editor.coveredCount', '{{count}} covered', {
+                          count: quickMatchResult.matchedKeywords.length,
+                        })}
+                        <Box
+                          component="span"
+                          sx={{ display: { xs: 'none', md: 'inline' }, fontWeight: 500, opacity: 0.85, ml: 0.5 }}
+                        >
+                          ({t('target:editor.coveredLegend', 'In your profile')})
+                        </Box>
+                      </Typography>
+                    </Box>
+                  </Tooltip>
+                  <Tooltip title={t('target:editor.gapsLegend', 'Gaps to cover')}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'warning.main',
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                        {t('target:editor.missingCount', '{{count}} gaps', {
+                          count: quickMatchResult.missingKeywords.length,
+                        })}
+                        <Box
+                          component="span"
+                          sx={{ display: { xs: 'none', md: 'inline' }, fontWeight: 500, opacity: 0.85, ml: 0.5 }}
+                        >
+                          ({t('target:editor.gapsLegend', 'Gaps to cover')})
+                        </Box>
+                      </Typography>
+                    </Box>
+                  </Tooltip>
                 </Box>
               )}
             </Box>
 
-            <Tooltip title={t('target:actions.uploadFileTip', 'Upload job description file (.txt, .md)')}>
-              <Button
-                size="small"
-                variant="text"
-                color="inherit"
-                startIcon={<AttachFileRoundedIcon sx={{ fontSize: 16 }} />}
-                onClick={() => fileInputRef.current?.click()}
-                sx={{
-                  fontSize: '0.75rem',
-                  textTransform: 'none',
-                  color: 'text.secondary',
-                  py: 0.25,
-                  px: 1,
-                  '&:hover': {
-                    color: 'primary.main',
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-              >
-                {t('target:actions.uploadFileInline', 'Attach file (.txt, .md)')}
-              </Button>
-            </Tooltip>
+            {/* Clustered Input Sources: Load Sample & Attach File */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {onLoadSample && (
+                <Button
+                  size="small"
+                  variant="text"
+                  color="inherit"
+                  startIcon={<RefreshRoundedIcon sx={{ fontSize: 16 }} />}
+                  onClick={onLoadSample}
+                  sx={{
+                    fontSize: '0.75rem',
+                    textTransform: 'none',
+                    color: 'text.secondary',
+                    py: 0.25,
+                    px: 1,
+                    '&:hover': {
+                      color: 'primary.main',
+                      bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    },
+                  }}
+                >
+                  {t('target:actions.loadSample', 'Load Sample Vacancy')}
+                </Button>
+              )}
+
+              <Tooltip title={t('target:actions.uploadFileTip', 'Upload job description file (.txt, .md)')}>
+                <Button
+                  size="small"
+                  variant="text"
+                  color="inherit"
+                  startIcon={<AttachFileRoundedIcon sx={{ fontSize: 16 }} />}
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{
+                    fontSize: '0.75rem',
+                    textTransform: 'none',
+                    color: 'text.secondary',
+                    py: 0.25,
+                    px: 1,
+                    '&:hover': {
+                      color: 'primary.main',
+                      bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    },
+                  }}
+                >
+                  {t('target:actions.uploadFileInline', 'Attach file (.txt, .md)')}
+                </Button>
+              </Tooltip>
+            </Box>
           </Box>
 
           {/* Unified Live Interactive Editor with Backdrop Highlighting */}
@@ -417,7 +471,6 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
             />
           </Box>
         </Paper>
-
 
         {/* 5. Navigation & Direct Action Footer */}
         <TargetJobFooterActions
@@ -459,6 +512,23 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
           />
         </React.Suspense>
       )}
+
+      {/* Real-time Skill Addition Feedback Toast */}
+      <Snackbar
+        open={Boolean(skillToast)}
+        autoHideDuration={3500}
+        onClose={() => setSkillToast(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSkillToast(null)}
+          severity="success"
+          variant="filled"
+          sx={{ fontWeight: 600 }}
+        >
+          {skillToast}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

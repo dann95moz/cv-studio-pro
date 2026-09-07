@@ -33,7 +33,9 @@
     "highlightsOn": "Surlignage : ACTIF",
     "highlightsOff": "Surlignage : INACTIF",
     "coveredCount": "{{count}} couvertes",
-    "missingCount": "{{count}} manquantes"
+    "missingCount": "{{count}} manquantes",
+    "coveredLegend": "Dans votre profil",
+    "gapsLegend": "Lacunes à combler"
   },
   "progress": {
     "title": "Synthèse du CV adapté avec l'IA...",
@@ -82,7 +84,9 @@
     "summary": "{{matched}} exigences clés sur {{total}} identifiées dans votre profil",
     "matchedSkills": "Compétences correspondantes détectées dans votre profil :",
     "missingSkills": "Compétences demandées non encore trouvées dans votre profil :",
-    "missingTooltip": "Si vous avez de l'expérience dans ce domaine, ajoutez-la à votre profil pour améliorer votre score."
+    "missingTooltip": "Si vous avez de l'expérience dans ce domaine, ajoutez-la à votre profil pour améliorer votre score.",
+    "addSkillTip": "Cliquez pour ajouter '{{skill}}' à votre profil principal si vous avez de l'expérience",
+    "skillAddedToast": "Compétence '{{skill}}' ajoutée à votre profil principal"
   },
   "highlighter": {
     "viewTitle": "Vue Analysée",

@@ -33,7 +33,9 @@
     "highlightsOn": "Highlights: ON",
     "highlightsOff": "Highlights: OFF",
     "coveredCount": "{{count}} covered",
-    "missingCount": "{{count}} gaps"
+    "missingCount": "{{count}} gaps",
+    "coveredLegend": "In your profile",
+    "gapsLegend": "Gaps to cover"
   },
   "progress": {
     "title": "Synthesizing Tailored Resume with AI...",
@@ -82,7 +84,9 @@
     "summary": "{{matched}} of {{total}} key requirements detected in your Career Profile",
     "matchedSkills": "Matching skills found in your profile:",
     "missingSkills": "Vacancy skills not yet found in your profile:",
-    "missingTooltip": "If you have experience in this, add it to your Master CV to boost your match score."
+    "missingTooltip": "If you have experience in this, add it to your Master CV to boost your match score.",
+    "addSkillTip": "Click to add '{{skill}}' to your Master Profile if you have experience",
+    "skillAddedToast": "Skill '{{skill}}' added to your Master Profile"
   },
   "highlighter": {
     "viewTitle": "Analyzed View",

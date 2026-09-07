@@ -33,7 +33,9 @@
     "highlightsOn": "Hervorhebung: AN",
     "highlightsOff": "Hervorhebung: AUS",
     "coveredCount": "{{count}} abgedeckt",
-    "missingCount": "{{count}} offen"
+    "missingCount": "{{count}} offen",
+    "coveredLegend": "In deinem Profil",
+    "gapsLegend": "Zu schließende Lücken"
   },
   "progress": {
     "title": "Lebenslauf wird mit KI angepasst...",
@@ -82,7 +84,9 @@
     "summary": "{{matched}} von {{total}} Schlüsselanforderungen in Ihrem Profil erkannt",
     "matchedSkills": "Übereinstimmende Fähigkeiten in Ihrem Profil:",
     "missingSkills": "In der Stelle gefordert, aber noch nicht in Ihrem Profil:",
-    "missingTooltip": "Wenn Sie hier Erfahrung haben, ergänzen Sie diese in Ihrem Profil, um die Passgenauigkeit zu erhöhen."
+    "missingTooltip": "Wenn Sie hier Erfahrung haben, ergänzen Sie diese in Ihrem Profil, um die Passgenauigkeit zu erhöhen.",
+    "addSkillTip": "Klicken, um '{{skill}}' zu deinem Master-Profil hinzuzufügen, falls du Erfahrung hast",
+    "skillAddedToast": "Fähigkeit '{{skill}}' zu deinem Master-Profil hinzugefügt"
   },
   "highlighter": {
     "viewTitle": "Analysierte Ansicht",
