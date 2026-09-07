@@ -23,10 +23,7 @@ import { StudioTab } from '../../types/cv';
 import { Icon } from '../Icons';
 import { APP_LINKS } from '../../constants/links';
 import { LanguageSelector } from './LanguageSelector';
-import { BackupStatusDot } from './common/BackupStatusDot';
-import { useBackupReminder } from '../../hooks/useBackupReminder';
 import { useTranslation } from 'react-i18next';
-import { Snackbar, Alert, Button } from '@mui/material';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 
 export interface StudioNavbarProps {
@@ -51,17 +48,7 @@ export const StudioNavbar: React.FC<StudioNavbarProps> = ({
   const setActiveTab = controlledOnSelectTab || workflow.handleSelectTab;
   const displayBadgeCount = controlledBadgeCount !== undefined ? controlledBadgeCount : workflow.displayBadgeCount;
 
-  const {
-    lastBackupTimestamp,
-    unsavedChangesCount,
-    toastOpen,
-    handleCloseToast,
-    handleExportBackup,
-  } = useBackupReminder();
-
-
   return (
-    <>
     <AppBar
       position="sticky"
       elevation={0}
@@ -239,13 +226,6 @@ export const StudioNavbar: React.FC<StudioNavbarProps> = ({
 
         {/* Quick Actions, Language Selector & Theme Switcher */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 0.75, md: 1 }, flexShrink: 0 }}>
-          {/* Persistent Backup Status Indicator */}
-          <BackupStatusDot
-            lastBackupTimestamp={lastBackupTimestamp}
-            unsavedChangesCount={unsavedChangesCount}
-            onClickBackup={handleExportBackup}
-          />
-
           {/* Multidevice Sync Button */}
           {onOpenSync && (
             <Tooltip title={t('common:sync.navbarButton', 'Sincronizar con Móvil / PC (QR & Código)')}>
@@ -325,41 +305,5 @@ export const StudioNavbar: React.FC<StudioNavbarProps> = ({
 
       </Toolbar>
     </AppBar>
-
-    <Snackbar
-      open={toastOpen}
-      autoHideDuration={9000}
-      onClose={handleCloseToast}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-    >
-      <Alert
-        severity="info"
-        variant="filled"
-        onClose={handleCloseToast}
-        action={
-          <Button
-            color="inherit"
-            size="small"
-            onClick={handleExportBackup}
-            sx={{ fontWeight: 700, textTransform: 'none' }}
-          >
-            {t('common:backup.exportNow', 'Exportar Respaldo')}
-          </Button>
-        }
-        sx={{
-          boxShadow: 4,
-          alignItems: 'center',
-          maxWidth: 420,
-        }}
-      >
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-          {t('common:backup.toastTitle', 'Cambios sin respaldar')}
-        </Typography>
-        <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
-          {t('common:backup.toastMessage', 'Has modificado tu perfil desde el último export. ¿Deseas descargar un respaldo?')}
-        </Typography>
-      </Alert>
-    </Snackbar>
-  </>
   );
 };
