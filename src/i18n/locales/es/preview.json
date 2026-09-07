@@ -60,7 +60,11 @@
     "step2Label": "Paso 2: Vacante Objetivo",
     "step2Desc": "Ajustar descripción y calibración ATS",
     "step3Label": "Paso 3: CV en Vivo y Exportación",
-    "step3Desc": "Paso actual (edición en tiempo real)"
+    "step3Desc": "Paso actual (edición en tiempo real)",
+    "backToStep2": "Ir a Paso 2: Vacante Objetivo",
+    "allStepsMenu": "Saltar a cualquier paso del wizard",
+    "stepReady": "Listo",
+    "stepCurrent": "Paso actual"
   },
   "editor": {
     "sourceTitle": "Fuente Markdown del CV",

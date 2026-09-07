@@ -59,8 +59,12 @@
     "step1Desc": "Stammdaten & Werdegang bearbeiten",
     "step2Label": "Schritt 2: Zielstelle",
     "step2Desc": "Stellenbeschreibung & ATS-Kalibrierung anpassen",
-    "step3Label": "Schritt 3: Live-CV & Export",
-    "step3Desc": "Aktueller Schritt (Echtzeit-Bearbeitung)"
+    "step3Label": "Schritt 3: Live-Lebenslauf & Export",
+    "step3Desc": "Aktueller Schritt (Echtzeitbearbeitung)",
+    "backToStep2": "Zu Schritt 2: Zielstelle",
+    "allStepsMenu": "Zu beliebigem Schritt springen",
+    "stepReady": "Bereit",
+    "stepCurrent": "Aktuell"
   },
   "editor": {
     "sourceTitle": "CV-Markdown-Quelle",

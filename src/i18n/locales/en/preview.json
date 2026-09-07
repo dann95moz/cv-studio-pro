@@ -59,8 +59,12 @@
     "step1Desc": "Edit master data and background",
     "step2Label": "Step 2: Target Vacancy",
     "step2Desc": "Adjust job description & ATS calibration",
-    "step3Label": "Step 3: Live CV & Export",
-    "step3Desc": "Current step (real-time live editing)"
+    "step3Label": "Step 3: Live Resume & Export",
+    "step3Desc": "Current step (real-time hot editing)",
+    "backToStep2": "Go to Step 2: Target Vacancy",
+    "allStepsMenu": "Jump to any wizard step",
+    "stepReady": "Ready",
+    "stepCurrent": "Current"
   },
   "editor": {
     "sourceTitle": "CV Markdown Source",

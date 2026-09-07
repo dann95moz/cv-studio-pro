@@ -16,6 +16,7 @@ import {
   Typography,
   useTheme,
   alpha,
+  ButtonBase,
 } from '@mui/material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
@@ -35,7 +36,7 @@ import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import { useTranslation } from 'react-i18next';
 import { StepPreviewToolbarProps, PageFormat } from '../../../types';
-import { PAGE_FORMAT_CONFIGS } from '../../../theme/dimensions';
+import { PAGE_FORMAT_CONFIGS, RADIUS_TOKENS } from '../../../theme/dimensions';
 
 export type { StepPreviewToolbarProps };
 
@@ -155,56 +156,163 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
         {/* Interactive Wizard Step Breadcrumb Dropdown */}
         {onSelectWizardStep && (
           <>
-            <Button
-              size="small"
-              variant="outlined"
-              color="inherit"
-              onClick={handleOpenStepMenu}
-              startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: '15px !important', color: 'primary.main' }} />}
-              endIcon={<ArrowDropDownRoundedIcon sx={{ ml: -0.5, fontSize: 18, color: 'text.secondary' }} />}
+            <Box
               sx={{
-                px: 1.4,
-                textTransform: 'none',
-                borderColor: alpha(theme.palette.primary.main, 0.25),
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: 32,
+                borderRadius: RADIUS_TOKENS.full,
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
                 bgcolor: alpha(theme.palette.primary.main, 0.04),
+                overflow: 'hidden',
+                transition: 'border-color 0.15s ease',
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 0.1),
-                  borderColor: 'primary.main',
+                  borderColor: alpha(theme.palette.primary.main, 0.45),
                 },
               }}
             >
-              <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                  {t('preview:toolbar.step2BreadcrumbPrefix', 'Vacante')} &gt;
-                </Box>
-                <Box component="span" sx={{ color: 'primary.main' }}>
-                  {t('preview:toolbar.step3Breadcrumb', 'CV en Vivo')}
-                </Box>
+              {/* Segment 1: Step 2 Link */}
+              <Tooltip title={t('preview:toolbar.backToStep2', 'Ir a Paso 2: Vacante Objetivo')}>
+                <ButtonBase
+                  onClick={() => onSelectWizardStep('target')}
+                  aria-label={t('preview:toolbar.backToStep2', 'Ir a Paso 2: Vacante Objetivo')}
+                  sx={{
+                    px: 1.2,
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: 'text.secondary',
+                    transition: 'all 0.15s ease',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.12),
+                      color: 'primary.main',
+                    },
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: 'inherit',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('preview:toolbar.step2BreadcrumbPrefix', 'Vacante Objetivo')}
+                  </Typography>
+                </ButtonBase>
+              </Tooltip>
+
+              {/* Breadcrumb Separator */}
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: 'text.disabled',
+                  userSelect: 'none',
+                  px: 0.1,
+                }}
+              >
+                ›
               </Typography>
-            </Button>
+
+              {/* Segment 2: Step 3 Active Label */}
+              <Box
+                sx={{
+                  px: 1,
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  userSelect: 'none',
+                }}
+              >
+                <AutoAwesomeRoundedIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+                <Typography
+                  sx={{
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    color: 'primary.main',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {t('preview:toolbar.step3Breadcrumb', 'CV en Vivo')}
+                </Typography>
+              </Box>
+
+              {/* Segment 3: All Steps Jump Chevron */}
+              <Tooltip title={t('preview:toolbar.allStepsMenu', 'Saltar a cualquier paso del wizard')}>
+                <IconButton
+                  size="small"
+                  onClick={handleOpenStepMenu}
+                  aria-label={t('preview:toolbar.allStepsMenu', 'Saltar a cualquier paso del wizard')}
+                  aria-haspopup="true"
+                  aria-expanded={Boolean(stepMenuAnchor)}
+                  sx={{
+                    p: 0.5,
+                    mr: 0.3,
+                    color: 'text.secondary',
+                    borderRadius: RADIUS_TOKENS.full,
+                    transition: 'all 0.15s ease',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.15),
+                      color: 'primary.main',
+                    },
+                  }}
+                >
+                  <ArrowDropDownRoundedIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
 
             <Menu
               anchorEl={stepMenuAnchor}
               open={Boolean(stepMenuAnchor)}
               onClose={handleCloseStepMenu}
-              slotProps={{ paper: { sx: { mt: 0.75, minWidth: 260 } } }}
+              slotProps={{ paper: { sx: { mt: 0.75, minWidth: 290, p: 0.5 } } }}
             >
               <MenuItem
                 onClick={() => {
                   handleCloseStepMenu();
                   onSelectWizardStep('profile');
                 }}
+                sx={{ borderRadius: RADIUS_TOKENS.sm, mb: 0.5 }}
               >
                 <ListItemIcon>
-                  <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'primary.main', color: 'primary.contrastText', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: RADIUS_TOKENS.full,
+                      bgcolor: 'primary.main',
+                      color: 'primary.contrastText',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                    }}
+                  >
                     1
                   </Box>
                 </ListItemIcon>
                 <ListItemText
-                  primary={t('preview:toolbar.step1Label', 'Paso 1: Perfil y Experiencia')}
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                      <Typography sx={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                        {t('preview:toolbar.step1Label', 'Paso 1: Perfil del Candidato')}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={t('preview:toolbar.stepReady', 'Listo')}
+                        color="success"
+                        variant="outlined"
+                        sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                      />
+                    </Box>
+                  }
                   secondary={t('preview:toolbar.step1Desc', 'Editar master data y trayectoria')}
                   slotProps={{
-                    primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } },
                     secondary: { sx: { fontSize: '0.7rem' } },
                   }}
                 />
@@ -215,17 +323,43 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
                   handleCloseStepMenu();
                   onSelectWizardStep('target');
                 }}
+                sx={{ borderRadius: RADIUS_TOKENS.sm, mb: 0.5 }}
               >
                 <ListItemIcon>
-                  <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'secondary.main', color: 'secondary.contrastText', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: RADIUS_TOKENS.full,
+                      bgcolor: 'secondary.main',
+                      color: 'secondary.contrastText',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                    }}
+                  >
                     2
                   </Box>
                 </ListItemIcon>
                 <ListItemText
-                  primary={t('preview:toolbar.step2Label', 'Paso 2: Vacante Objetivo')}
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                      <Typography sx={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                        {t('preview:toolbar.step2Label', 'Paso 2: Vacante Objetivo')}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={t('preview:toolbar.stepReady', 'Listo')}
+                        color="success"
+                        variant="outlined"
+                        sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                      />
+                    </Box>
+                  }
                   secondary={t('preview:toolbar.step2Desc', 'Ajustar descripción y calibración ATS')}
                   slotProps={{
-                    primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } },
                     secondary: { sx: { fontSize: '0.7rem' } },
                   }}
                 />
@@ -234,17 +368,42 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
               <MenuItem
                 selected
                 onClick={handleCloseStepMenu}
+                sx={{ borderRadius: RADIUS_TOKENS.sm }}
               >
                 <ListItemIcon>
-                  <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: alpha(theme.palette.primary.main, 0.2), color: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: RADIUS_TOKENS.full,
+                      bgcolor: alpha(theme.palette.primary.main, 0.2),
+                      color: 'primary.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                    }}
+                  >
                     3
                   </Box>
                 </ListItemIcon>
                 <ListItemText
-                  primary={t('preview:toolbar.step3Label', 'Paso 3: CV en Vivo y Exportación')}
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                      <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: 'primary.main' }}>
+                        {t('preview:toolbar.step3Label', 'Paso 3: CV en Vivo y Exportación')}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={t('preview:toolbar.stepCurrent', 'Paso actual')}
+                        color="primary"
+                        sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                      />
+                    </Box>
+                  }
                   secondary={t('preview:toolbar.step3Desc', 'Paso actual (edición en tiempo real)')}
                   slotProps={{
-                    primary: { sx: { fontSize: '0.82rem', fontWeight: 700, color: 'primary.main' } },
                     secondary: { sx: { fontSize: '0.7rem' } },
                   }}
                 />

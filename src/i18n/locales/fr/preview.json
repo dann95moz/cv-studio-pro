@@ -59,8 +59,12 @@
     "step1Desc": "Modifier les données de base et le parcours",
     "step2Label": "Étape 2: Poste cible",
     "step2Desc": "Ajuster l'offre d'emploi et le calibrage ATS",
-    "step3Label": "Étape 3: CV en direct & Exportation",
-    "step3Desc": "Étape actuelle (édition en temps réel)"
+    "step3Label": "Étape 3 : CV en direct & Export",
+    "step3Desc": "Étape actuelle (édition en temps réel)",
+    "backToStep2": "Aller à l'étape 2 : Poste cible",
+    "allStepsMenu": "Aller à n'importe quelle étape",
+    "stepReady": "Prêt",
+    "stepCurrent": "Actuel"
   },
   "editor": {
     "sourceTitle": "Source Markdown du CV",

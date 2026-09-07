@@ -59,8 +59,12 @@
     "step1Desc": "Modifica dati master ed esperienza",
     "step2Label": "Passo 2: Posizione target",
     "step2Desc": "Regola descrizione del lavoro e calibrazione ATS",
-    "step3Label": "Passo 3: CV dal vivo ed Esportazione",
-    "step3Desc": "Passaggio corrente (modifica in tempo reale)"
+    "step3Label": "Passaggio 3: CV dal vivo & Esportazione",
+    "step3Desc": "Passaggio attuale (modifica in tempo reale)",
+    "backToStep2": "Vai al Passaggio 2: Posizione target",
+    "allStepsMenu": "Passa a qualsiasi passaggio",
+    "stepReady": "Pronto",
+    "stepCurrent": "Attuale"
   },
   "editor": {
     "sourceTitle": "Sorgente Markdown del CV",
