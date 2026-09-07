@@ -1,4 +1,4 @@
-# 🎯 Target Job Posting (target-job.example.md)
+# Target Job Posting (target-job.example.md)
 
 > **Instructions:** Copy this template to `target-job.md` (which is git-ignored for privacy) and paste your target vacancy details.
 

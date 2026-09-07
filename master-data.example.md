@@ -1,4 +1,4 @@
-# 🧠 Master Data & Professional Brain (master-data.example.md)
+# Master Data & Professional Profile (master-data.example.md)
 
 > **Instructions:** Copy this file to `master-data.md` (which is git-ignored for privacy) and fill in your comprehensive background.
 
@@ -9,19 +9,19 @@
 
 ---
 
-## 🎯 PITCH & CAREER OBJECTIVE
+## PROFESSIONAL SUMMARY & CAREER OBJECTIVE
 Brief 2-3 paragraph summary of your overall career trajectory, core technical domain, and high-level achievements...
 
 ---
 
-## 🛠️ MASTER TECH STACK & COMPETENCIES
+## TECHNICAL SKILLS & COMPETENCIES
 - **Languages:** TypeScript, JavaScript, Python, SQL, HTML5, CSS3/SASS...
 - **Frameworks & State:** React, Angular, Next.js, Node.js, Zustand, Redux...
 - **Testing & Tooling:** Jest, Vitest, Git, Webpack, Vite, Docker, CI/CD...
 
 ---
 
-## 💼 CAREER HISTORY & ACHIEVEMENTS
+## PROFESSIONAL EXPERIENCE & ACHIEVEMENTS
 
 ### **[Company Name]** | [Location / Remote]
 *[Job Title]* | [Month YYYY – Month YYYY / Present]
@@ -30,12 +30,12 @@ Brief 2-3 paragraph summary of your overall career trajectory, core technical do
 
 ---
 
-## 🎓 EDUCATION & CERTIFICATIONS
+## EDUCATION & CERTIFICATIONS
 - **[Degree / Program]** – [University / Institution], [Year]
 - **[Official Certification]** – [Issuer], [Year]
 
 ---
 
-## 🌐 LANGUAGES
+## LANGUAGES
 - **[Language 1]:** [Proficiency Level]
 - **[Language 2]:** [Proficiency Level]

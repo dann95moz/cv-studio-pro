@@ -43,7 +43,7 @@ The repository includes dedicated on-demand skills located in `.agents/skills/`:
 - ⚡ **`ai-tailoring-workflow`**: Gemini/OpenAI synthesis prompts, Google XYZ formula, integrity safeguards, and ATS gap scoring.
 - 🌐 **`i18n-workflow`**: 5-locale synchronization (`en`, `es`, `de`, `fr`, `it`), namespace organization, and fallback standards.
 - 🧪 **`qa-testing-compliance`**: Typechecking (`tsc --noEmit`), build verification, i18n parity audits, and print rendering validation.
-- 🎯 **`product-owner-strategy`**: Product discovery, user friction analysis, value vs. effort prioritization (RICE/Kano), user stories with acceptance criteria, and feature innovation radar.
+-  **`product-owner-strategy`**: Product discovery, user friction analysis, value vs. effort prioritization (RICE/Kano), user stories with acceptance criteria, and feature innovation radar.
 
 ---
 

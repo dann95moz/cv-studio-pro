@@ -18,6 +18,9 @@ This document defines the strict styling, formatting, content, and ATS optimizat
   - ❌ Do NOT write passive job duty lists (*"Responsible for developing APIs"*). Use strong active impact verbs (*"Architected RESTful microservices..."*).
 - **No Graphic Elements That Break ATS:**
   - ❌ Do NOT use complex nested tables, multi-column floating boxes, skill percentage progress bars (*"Python 80%"* is meaningless to recruiters and ATS), or icons in place of text.
+- **No Emojis in Document Headings or Content (Professional Executive Standard):**
+  - ❌ NEVER include emojis or informal pictograms (🎯, 🛠️, 💼, 🚀, 🎓, 🌐, etc.) in section titles, bullet points, or role headers.
+  - ✅ All section headings must be clean, professional text adhering to ATS and executive standards (e.g. `## PROFESSIONAL SUMMARY`, `## TECHNICAL SKILLS`, `## PROFESSIONAL EXPERIENCE`, `## EDUCATION & CERTIFICATIONS`, `## LANGUAGES`).
 - **No Redundant Sections:**
   - ❌ Do NOT include *"References available upon request"*.
   - ❌ Do NOT list high schools or secondary education if higher university education exists.
@@ -113,7 +116,7 @@ Each experience bullet point must follow the **Google XYZ Formula** ($\text{"Acc
 
 ---
 
-## 3. 🎯 ATS Optimization & Formatting Consistency
+## 3. ATS Optimization & Formatting Consistency
 
 - **Keyword Integration:** Seamlessly incorporate high-priority skills, methodologies (CI/CD, Microfrontends, Agile), and tooling explicitly mentioned in `target-job.md`.
 - **Natural Keyword Integration (No Verbatim Copying):**
