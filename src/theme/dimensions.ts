@@ -24,7 +24,7 @@ export const PAGE_FORMAT_CONFIGS: Record<PageFormat, PageFormatConfig> = {
   },
   letter: {
     id: 'letter',
-    name: 'US Letter (8.5 × 11 in)',
+    name: 'Carta / Letter (8.5 × 11 in)',
     shortLabel: 'Letter',
     width: '816px',
     height: '1056px',
@@ -34,7 +34,7 @@ export const PAGE_FORMAT_CONFIGS: Record<PageFormat, PageFormatConfig> = {
   },
   legal: {
     id: 'legal',
-    name: 'US Legal (8.5 × 14 in)',
+    name: 'Oficio / Legal (8.5 × 14 in)',
     shortLabel: 'Legal',
     width: '816px',
     height: '1344px',

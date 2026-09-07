@@ -414,7 +414,7 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
         {t('preview:panels.design.pageFormat', 'Paper Format')}
       </Typography>
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.2, lineHeight: 1.4 }}>
-        {t('preview:panels.design.pageFormatDesc', 'Select standard international A4 or North American Letter/Legal.')}
+        {t('preview:panels.design.pageFormatDesc', 'Select standard A4, Letter, or Legal format.')}
       </Typography>
 
       <ToggleButtonGroup
@@ -426,13 +426,13 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
         sx={{ mb: 2.5 }}
       >
         <ToggleButton value="a4" sx={{ fontSize: '0.72rem', fontWeight: 700, py: 0.6 }}>
-          {t('preview:panels.design.pageFormatA4', 'A4 (Europe / Global)')}
+          {t('preview:panels.design.pageFormatA4', 'A4')}
         </ToggleButton>
         <ToggleButton value="letter" sx={{ fontSize: '0.72rem', fontWeight: 700, py: 0.6 }}>
-          {t('preview:panels.design.pageFormatLetter', 'US Letter')}
+          {t('preview:panels.design.pageFormatLetter', 'Letter')}
         </ToggleButton>
         <ToggleButton value="legal" sx={{ fontSize: '0.72rem', fontWeight: 700, py: 0.6 }}>
-          {t('preview:panels.design.pageFormatLegal', 'US Legal')}
+          {t('preview:panels.design.pageFormatLegal', 'Legal')}
         </ToggleButton>
       </ToggleButtonGroup>
 

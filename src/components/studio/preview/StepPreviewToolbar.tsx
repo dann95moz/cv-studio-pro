@@ -24,7 +24,6 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
-import AspectRatioRoundedIcon from '@mui/icons-material/AspectRatioRounded';
 import ViewKanbanRoundedIcon from '@mui/icons-material/ViewKanbanRounded';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
@@ -36,7 +35,7 @@ import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import { useTranslation } from 'react-i18next';
 import { StepPreviewToolbarProps, PageFormat } from '../../../types';
-import { PAGE_FORMAT_CONFIGS, RADIUS_TOKENS } from '../../../theme/dimensions';
+import { RADIUS_TOKENS } from '../../../theme/dimensions';
 
 export type { StepPreviewToolbarProps };
 
@@ -79,7 +78,6 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
   const [stepMenuAnchor, setStepMenuAnchor] = useState<null | HTMLElement>(null);
   const [pdfMenuAnchor, setPdfMenuAnchor] = useState<null | HTMLElement>(null);
   const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null);
-  const [formatMenuAnchor, setFormatMenuAnchor] = useState<null | HTMLElement>(null);
   const [docMenuAnchor, setDocMenuAnchor] = useState<null | HTMLElement>(null);
   const [copiedAts, setCopiedAts] = useState<boolean>(false);
 
@@ -121,14 +119,6 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
 
   const handleCloseLangMenu = () => {
     setLangMenuAnchor(null);
-  };
-
-  const handleOpenFormatMenu = (e: React.MouseEvent<HTMLElement>) => {
-    setFormatMenuAnchor(e.currentTarget);
-  };
-
-  const handleCloseFormatMenu = () => {
-    setFormatMenuAnchor(null);
   };
 
   return (
@@ -643,115 +633,6 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
           </>
         )}
 
-        {/* Page Format Selector (A4 / Letter / Legal) */}
-        {onPageFormatChange && (
-          <>
-            <Tooltip title={t('preview:toolbar.pageFormatTooltip', 'Paper Format (A4, US Letter, US Legal)')}>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                onClick={handleOpenFormatMenu}
-                startIcon={<AspectRatioRoundedIcon sx={{ fontSize: '14px !important', color: 'text.secondary' }} />}
-                endIcon={<ArrowDropDownRoundedIcon sx={{ ml: -0.5, fontSize: 18, color: 'text.secondary' }} />}
-                sx={{
-                  height: 28,
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  px: 1,
-                  borderColor: 'divider',
-                  color: 'text.primary',
-                  bgcolor: 'background.paper',
-                  display: { xs: 'none', md: 'inline-flex' },
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                  },
-                }}
-              >
-                {pageFormat === 'letter'
-                  ? `${PAGE_FORMAT_CONFIGS.letter.shortLabel} (8.5×11")`
-                  : pageFormat === 'legal'
-                  ? `${PAGE_FORMAT_CONFIGS.legal.shortLabel} (8.5×14")`
-                  : `${PAGE_FORMAT_CONFIGS.a4.shortLabel} (210×297mm)`}
-              </Button>
-            </Tooltip>
-
-            <Menu
-              anchorEl={formatMenuAnchor}
-              open={Boolean(formatMenuAnchor)}
-              onClose={handleCloseFormatMenu}
-              slotProps={{ paper: { sx: { mt: 0.75, minWidth: 200 } } }}
-            >
-              <MenuItem
-                selected={pageFormat === 'a4'}
-                onClick={() => {
-                  handleCloseFormatMenu();
-                  onPageFormatChange('a4');
-                }}
-              >
-                <ListItemIcon>
-                  {pageFormat === 'a4' ? (
-                    <CheckRoundedIcon fontSize="small" color="primary" />
-                  ) : (
-                    <Box sx={{ width: 20 }} />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography sx={{ fontSize: '0.8rem', fontWeight: pageFormat === 'a4' ? 700 : 500 }}>
-                      {PAGE_FORMAT_CONFIGS.a4.shortLabel} (210×297mm)
-                    </Typography>
-                  }
-                />
-              </MenuItem>
-              <MenuItem
-                selected={pageFormat === 'letter'}
-                onClick={() => {
-                  handleCloseFormatMenu();
-                  onPageFormatChange('letter');
-                }}
-              >
-                <ListItemIcon>
-                  {pageFormat === 'letter' ? (
-                    <CheckRoundedIcon fontSize="small" color="primary" />
-                  ) : (
-                    <Box sx={{ width: 20 }} />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography sx={{ fontSize: '0.8rem', fontWeight: pageFormat === 'letter' ? 700 : 500 }}>
-                      {PAGE_FORMAT_CONFIGS.letter.shortLabel} (8.5×11")
-                    </Typography>
-                  }
-                />
-              </MenuItem>
-              <MenuItem
-                selected={pageFormat === 'legal'}
-                onClick={() => {
-                  handleCloseFormatMenu();
-                  onPageFormatChange('legal');
-                }}
-              >
-                <ListItemIcon>
-                  {pageFormat === 'legal' ? (
-                    <CheckRoundedIcon fontSize="small" color="primary" />
-                  ) : (
-                    <Box sx={{ width: 20 }} />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography sx={{ fontSize: '0.8rem', fontWeight: pageFormat === 'legal' ? 700 : 500 }}>
-                      {PAGE_FORMAT_CONFIGS.legal.shortLabel} (8.5×14")
-                    </Typography>
-                  }
-                />
-              </MenuItem>
-            </Menu>
-          </>
-        )}
 
         {/* Magic 1-Page Auto-Fit Button */}
         {onAutoFit && (
