@@ -25,6 +25,7 @@ export const TemplatesPanel: React.FC<TemplatesPanelProps> = ({
   customColor,
   onCustomColorChange,
   onClose,
+  hideHeader = false,
 }) => {
   const { t } = useTranslation(['preview', 'common']);
   const muiTheme = useTheme();
@@ -32,20 +33,22 @@ export const TemplatesPanel: React.FC<TemplatesPanelProps> = ({
   const allTemplates = getAllTemplates();
 
   return (
-    <Box sx={{ p: 2.5, pb: 'calc(env(safe-area-inset-bottom, 0px) + 36px)', boxSizing: 'border-box' }}>
+    <Box sx={{ p: hideHeader ? 0 : 2.5, pb: hideHeader ? 0 : 'calc(env(safe-area-inset-bottom, 0px) + 36px)', boxSizing: 'border-box' }}>
       {/* Header: Title + Close Button */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -0.5 }}>
-          {t('preview:panels.templates.title', 'Templates')}
-        </Typography>
-        <IconButton
-          size="small"
-          onClick={onClose}
-          sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
-        >
-          <CloseRoundedIcon />
-        </IconButton>
-      </Box>
+      {!hideHeader && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -0.5 }}>
+            {t('preview:panels.templates.title', 'Templates')}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={onClose}
+            sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+        </Box>
+      )}
 
       {/* Color Palette Selector: Wrapped Grid (No Horizontal Scroll) */}
       <Box sx={{ mb: 3 }}>

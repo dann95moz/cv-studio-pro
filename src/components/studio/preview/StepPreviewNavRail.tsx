@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, useTheme, alpha } from '@mui/material';
-import StyleRoundedIcon from '@mui/icons-material/StyleRounded';
 import FormatPaintRoundedIcon from '@mui/icons-material/FormatPaintRounded';
 import DifferenceRoundedIcon from '@mui/icons-material/DifferenceRounded';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +19,7 @@ export const StepPreviewNavRail: React.FC<StepPreviewNavRailProps> = ({
     <Box
       className="no-print preview-side-rail"
       sx={{
-        width: { xs: '100%', md: 84 },
+        width: { xs: '100%', md: 72 },
         height: { xs: 'auto', md: '100%' },
         borderRight: { xs: 'none', md: `1px solid ${theme.palette.divider}` },
         borderTop: { xs: `1px solid ${theme.palette.divider}`, md: 'none' },
@@ -37,55 +36,7 @@ export const StepPreviewNavRail: React.FC<StepPreviewNavRailProps> = ({
         order: { xs: 2, md: 0 },
       }}
     >
-      {/* Templates Rail Button */}
-      <Box
-        onClick={() => onToggleSidePanel('templates')}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          cursor: 'pointer',
-          flex: { xs: 1, md: 'none' },
-          width: { xs: 'auto', md: '100%' },
-          px: 0.25,
-          gap: 0.25,
-          color: activeSidePanel === 'templates' ? 'primary.main' : 'text.secondary',
-          transition: 'all 0.15s ease',
-          '&:hover': { color: 'text.primary' }
-        }}
-      >
-        <Box
-          sx={{
-            width: { xs: 36, md: 44 },
-            height: { xs: 36, md: 44 },
-            borderRadius: { xs: '10px', md: '14px' },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: activeSidePanel === 'templates'
-              ? alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1)
-              : 'transparent',
-            color: activeSidePanel === 'templates' ? 'primary.main' : 'inherit',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <StyleRoundedIcon sx={{ fontSize: { xs: 20, md: 22 } }} />
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{
-            fontSize: { xs: '0.65rem', md: '0.68rem' },
-            fontWeight: activeSidePanel === 'templates' ? 700 : 500,
-            textAlign: 'center',
-            lineHeight: 1.15,
-            px: 0.25,
-          }}
-        >
-          {t('preview:navRail.templates', 'Templates')}
-        </Typography>
-      </Box>
-
-      {/* Design & Formatting Rail Button */}
+      {/* Design & Templates Rail Button */}
       <Box
         onClick={() => onToggleSidePanel('design')}
         sx={{
@@ -97,7 +48,7 @@ export const StepPreviewNavRail: React.FC<StepPreviewNavRailProps> = ({
           width: { xs: 'auto', md: '100%' },
           px: 0.25,
           gap: 0.25,
-          color: activeSidePanel === 'design' ? 'primary.main' : 'text.secondary',
+          color: (activeSidePanel === 'design' || activeSidePanel === 'templates') ? 'primary.main' : 'text.secondary',
           transition: 'all 0.15s ease',
           '&:hover': { color: 'text.primary' }
         }}
@@ -110,10 +61,10 @@ export const StepPreviewNavRail: React.FC<StepPreviewNavRailProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: activeSidePanel === 'design'
+            bgcolor: (activeSidePanel === 'design' || activeSidePanel === 'templates')
               ? alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1)
               : 'transparent',
-            color: activeSidePanel === 'design' ? 'primary.main' : 'inherit',
+            color: (activeSidePanel === 'design' || activeSidePanel === 'templates') ? 'primary.main' : 'inherit',
             transition: 'all 0.15s ease',
           }}
         >
@@ -123,13 +74,13 @@ export const StepPreviewNavRail: React.FC<StepPreviewNavRailProps> = ({
           variant="caption"
           sx={{
             fontSize: { xs: '0.65rem', md: '0.68rem' },
-            fontWeight: activeSidePanel === 'design' ? 700 : 500,
+            fontWeight: (activeSidePanel === 'design' || activeSidePanel === 'templates') ? 700 : 500,
             textAlign: 'center',
             lineHeight: 1.15,
             px: 0.25,
           }}
         >
-          {t('preview:navRail.design', 'Design & Format')}
+          {t('preview:navRail.design', 'Diseño')}
         </Typography>
       </Box>
 

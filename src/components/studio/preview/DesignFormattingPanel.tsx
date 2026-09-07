@@ -25,6 +25,8 @@ import AddAPhotoRoundedIcon from '@mui/icons-material/AddAPhotoRounded';
 import CropRoundedIcon from '@mui/icons-material/CropRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import StyleRoundedIcon from '@mui/icons-material/StyleRounded';
+import FormatPaintRoundedIcon from '@mui/icons-material/FormatPaintRounded';
 import { useTranslation } from 'react-i18next';
 import {
   FontFamilyId,
@@ -37,6 +39,7 @@ import { themeSupportsPhoto } from '../../../templates';
 import { ProfilePhotoDisplay } from '../photo/ProfilePhotoDisplay';
 import { PhotoCropperModal } from '../photo/PhotoCropperModal';
 import { usePhotoUpload } from '../../../hooks/usePhotoUpload';
+import { TemplatesPanel } from './TemplatesPanel';
 
 export type { DesignFormattingPanelProps };
 
@@ -59,6 +62,9 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
   onPhotoChange,
   onPhotoToggle,
   activeTheme = 'modern-tech',
+  theme,
+  onSelectTheme,
+  initialTab = 'templates',
   onClose,
 }) => {
 
@@ -66,8 +72,10 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
   const muiTheme = useTheme();
   const palettes = getAllPalettes();
   const [cropperOpen, setCropperOpen] = useState<boolean>(false);
+  const currentTheme = theme || activeTheme;
+  const [panelTab, setPanelTab] = useState<'templates' | 'formatting'>(initialTab);
 
-  const isPhotoSupported = themeSupportsPhoto(activeTheme);
+  const isPhotoSupported = themeSupportsPhoto(currentTheme);
 
   const {
     fileInputRef: hiddenFileInputRef,
@@ -86,29 +94,101 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
-          {t('preview:panels.design.title', 'Design & Formatting')}
+          {t('preview:panels.design.title', 'Diseño y Plantillas')}
         </Typography>
         <IconButton size="small" onClick={onClose}>
           <CloseRoundedIcon />
         </IconButton>
       </Box>
 
-      {/* Hidden File Input for quick upload */}
-      <input
-        ref={hiddenFileInputRef}
-        type="file"
-        accept="image/png, image/jpeg, image/webp"
-        style={{ display: 'none' }}
-        onChange={handlePhotoUploadFromFileInput}
-      />
+      {/* Segmented Tab Controls: Plantillas vs Formato */}
+      <ToggleButtonGroup
+        value={panelTab}
+        exclusive
+        onChange={(_, val) => { if (val) setPanelTab(val); }}
+        size="small"
+        fullWidth
+        sx={{
+          mb: 2.5,
+          bgcolor: alpha(muiTheme.palette.text.primary, 0.04),
+          p: 0.35,
+          border: `1px solid ${muiTheme.palette.divider}`,
+          borderRadius: 2,
+        }}
+      >
+        <ToggleButton
+          value="templates"
+          sx={{
+            fontWeight: 700,
+            fontSize: '0.76rem',
+            py: 0.6,
+            textTransform: 'none',
+            borderRadius: '6px !important',
+            border: 'none !important',
+            '&.Mui-selected': {
+              bgcolor: 'background.paper',
+              color: 'primary.main',
+              boxShadow: 1,
+            },
+          }}
+        >
+          <StyleRoundedIcon sx={{ fontSize: 16, mr: 0.75 }} />
+          {t('preview:panels.design.tabTemplates', 'Plantillas')}
+        </ToggleButton>
+        <ToggleButton
+          value="formatting"
+          sx={{
+            fontWeight: 700,
+            fontSize: '0.76rem',
+            py: 0.6,
+            textTransform: 'none',
+            borderRadius: '6px !important',
+            border: 'none !important',
+            '&.Mui-selected': {
+              bgcolor: 'background.paper',
+              color: 'primary.main',
+              boxShadow: 1,
+            },
+          }}
+        >
+          <FormatPaintRoundedIcon sx={{ fontSize: 16, mr: 0.75 }} />
+          {t('preview:panels.design.tabFormatting', 'Formato y Estilos')}
+        </ToggleButton>
+      </ToggleButtonGroup>
 
-      {/* Section 1: Brand Color Picker */}
-      <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
-        {t('preview:panels.design.primaryColor', 'Accent Color')}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, lineHeight: 1.4 }}>
-        {t('preview:panels.design.subtitle', 'Customize typography, spacing, and styling tokens')}
-      </Typography>
+      {/* Tab 1: Plantillas y Paletas de Colores */}
+      {panelTab === 'templates' && onSelectTheme && (
+        <TemplatesPanel
+          hideHeader
+          theme={currentTheme}
+          onSelectTheme={onSelectTheme}
+          palette={palette}
+          onSelectPalette={onSelectPalette}
+          customColor={customColor}
+          onCustomColorChange={onCustomColorChange}
+          onClose={onClose}
+        />
+      )}
+
+      {/* Tab 2: Formato, Tipografía, Espaciado y Foto */}
+      {panelTab === 'formatting' && (
+        <>
+          {/* Hidden File Input for quick upload */}
+          <input
+            ref={hiddenFileInputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/webp"
+            style={{ display: 'none' }}
+            onChange={handlePhotoUploadFromFileInput}
+          />
+
+          {/* Section 1: Brand Color Picker */}
+          <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
+            {t('preview:panels.design.primaryColor', 'Accent Color')}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, lineHeight: 1.4 }}>
+            {t('preview:panels.design.subtitle', 'Customize typography, spacing, and styling tokens')}
+          </Typography>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <Box
@@ -541,6 +621,8 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
           {Math.round((sheetHeight / a4PagePx) * 100)}% ({pageFormat.toUpperCase()})
         </Typography>
       </Paper>
+      </>
+      )}
 
       {/* Pan & Zoom Photo Cropper Modal */}
       {cropperOpen && (

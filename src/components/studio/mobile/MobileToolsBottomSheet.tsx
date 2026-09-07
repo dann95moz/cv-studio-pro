@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Drawer,
   Box,
@@ -10,6 +10,8 @@ import {
   Divider,
   Button,
   CircularProgress,
+  Menu,
+  MenuItem,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -18,6 +20,12 @@ import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
 import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
+import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
+import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
 import { useTranslation } from 'react-i18next';
 import { PreviewSidePanelType } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
@@ -28,6 +36,10 @@ export interface MobileToolsBottomSheetProps {
   onSelectTool: (panel: PreviewSidePanelType) => void;
   onOpenDiff?: () => void;
   onDownloadPdf?: () => void;
+  onDownloadDocx?: () => void;
+  onDownloadPlainText?: () => void;
+  onCopyPlainText?: () => void;
+  onDownloadMarkdown?: () => void;
   onSaveVersion?: () => void;
   onReTailor?: () => void;
   isExportingPdf?: boolean;
@@ -44,6 +56,10 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
   onSelectTool,
   onOpenDiff,
   onDownloadPdf,
+  onDownloadDocx,
+  onDownloadPlainText,
+  onCopyPlainText,
+  onDownloadMarkdown,
   onSaveVersion,
   onReTailor,
   isExportingPdf = false,
@@ -51,6 +67,9 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
 }) => {
   const { t } = useTranslation(['preview', 'common']);
   const theme = useTheme();
+
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+  const [copiedAts, setCopiedAts] = useState<boolean>(false);
 
   const toolItems = [
     {
@@ -174,32 +193,170 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
         ))}
       </List>
 
-      {/* Primary Action Button (Download PDF) */}
-      {onDownloadPdf && (
-        <Box sx={{ mt: 1.5, px: 2 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            disabled={isExportingPdf}
-            startIcon={isExportingPdf ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdfRoundedIcon />}
-            onClick={() => {
-              onClose();
-              onDownloadPdf();
-            }}
-            sx={{
-              height: 44,
-              fontWeight: 700,
-              textTransform: 'none',
-              fontSize: '0.92rem',
-            }}
-          >
-            {isExportingPdf
-              ? t('preview:toolbar.exporting', 'Exportando PDF...')
-              : t('preview:toolbar.downloadPdfDirect', 'Descargar PDF')}
-          </Button>
-        </Box>
-      )}
+      {/* Primary Action Button (Unified Download / Export Dropdown) */}
+      <Box sx={{ mt: 1.5, px: 2 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          disabled={isExportingPdf}
+          startIcon={isExportingPdf ? <CircularProgress size={16} color="inherit" /> : <DownloadRoundedIcon />}
+          endIcon={<ArrowDropDownRoundedIcon sx={{ fontSize: 22 }} />}
+          onClick={(e) => setExportMenuAnchor(e.currentTarget)}
+          sx={{
+            height: 46,
+            fontWeight: 700,
+            textTransform: 'none',
+            fontSize: '0.94rem',
+            boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.3)}`,
+          }}
+        >
+          {isExportingPdf
+            ? t('preview:toolbar.exporting', 'Exportando PDF...')
+            : t('preview:toolbar.downloadFormats', 'Descargar / Exportar')}
+        </Button>
+
+        {/* Dropdown Menu for all Export Formats */}
+        <Menu
+          anchorEl={exportMenuAnchor}
+          open={Boolean(exportMenuAnchor)}
+          onClose={() => setExportMenuAnchor(null)}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                width: 320,
+                maxWidth: '92vw',
+                borderRadius: RADIUS_TOKENS.lg,
+                mb: 1,
+                zIndex: (t) => t.zIndex.modal + 20,
+              },
+            },
+          }}
+        >
+          {onDownloadPdf && (
+            <MenuItem
+              onClick={() => {
+                setExportMenuAnchor(null);
+                onClose();
+                onDownloadPdf();
+              }}
+            >
+              <ListItemIcon>
+                <PictureAsPdfRoundedIcon fontSize="small" color="primary" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('preview:toolbar.directPdfItem', 'Descarga Directa (PDF)')}
+                secondary={t('preview:toolbar.directPdfDesc', 'Documento PDF de alta fidelidad')}
+                slotProps={{
+                  primary: { sx: { fontSize: '0.86rem', fontWeight: 700 } },
+                  secondary: { sx: { fontSize: '0.72rem' } },
+                }}
+              />
+            </MenuItem>
+          )}
+
+          {onDownloadDocx && (
+            <MenuItem
+              onClick={() => {
+                setExportMenuAnchor(null);
+                onClose();
+                onDownloadDocx();
+              }}
+            >
+              <ListItemIcon>
+                <DescriptionRoundedIcon fontSize="small" sx={{ color: '#2b579a' }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('preview:toolbar.downloadDocxItem', 'Descargar Word (.docx)')}
+                secondary={t('preview:toolbar.downloadDocxDesc', 'Formato Office editable para reclutadores')}
+                slotProps={{
+                  primary: { sx: { fontSize: '0.86rem', fontWeight: 700 } },
+                  secondary: { sx: { fontSize: '0.72rem' } },
+                }}
+              />
+            </MenuItem>
+          )}
+
+          {onDownloadPlainText && (
+            <MenuItem
+              onClick={() => {
+                setExportMenuAnchor(null);
+                onClose();
+                onDownloadPlainText();
+              }}
+            >
+              <ListItemIcon>
+                <NotesRoundedIcon fontSize="small" color="action" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('preview:toolbar.downloadTxtItem', 'Texto Plano ATS (.txt)')}
+                secondary={t('preview:toolbar.downloadTxtDesc', 'Para copiar y pegar en portales ATS')}
+                slotProps={{
+                  primary: { sx: { fontSize: '0.86rem', fontWeight: 700 } },
+                  secondary: { sx: { fontSize: '0.72rem' } },
+                }}
+              />
+            </MenuItem>
+          )}
+
+          {onCopyPlainText && (
+            <MenuItem
+              onClick={() => {
+                onCopyPlainText();
+                setCopiedAts(true);
+                setTimeout(() => {
+                  setCopiedAts(false);
+                  setExportMenuAnchor(null);
+                  onClose();
+                }, 750);
+              }}
+            >
+              <ListItemIcon>
+                <ContentCopyRoundedIcon fontSize="small" color={copiedAts ? 'success' : 'action'} />
+              </ListItemIcon>
+              <ListItemText
+                primary={copiedAts ? t('common:status.copied', '¡Copiado!') : t('preview:toolbar.copyTxtItem', 'Copiar Texto ATS')}
+                secondary={t('preview:toolbar.copyTxtDesc', 'Copia el texto limpio al portapapeles')}
+                slotProps={{
+                  primary: { sx: { fontSize: '0.86rem', fontWeight: 700, color: copiedAts ? 'success.main' : 'inherit' } },
+                  secondary: { sx: { fontSize: '0.72rem' } },
+                }}
+              />
+            </MenuItem>
+          )}
+
+          {onDownloadMarkdown && <Divider sx={{ my: 0.5 }} />}
+          {onDownloadMarkdown && (
+            <MenuItem
+              onClick={() => {
+                setExportMenuAnchor(null);
+                onClose();
+                onDownloadMarkdown();
+              }}
+            >
+              <ListItemIcon>
+                <CodeRoundedIcon fontSize="small" color="action" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('preview:toolbar.downloadMdItem', 'Descargar Markdown (.md)')}
+                secondary={t('preview:toolbar.downloadMdDesc', 'Código fuente para respaldos')}
+                slotProps={{
+                  primary: { sx: { fontSize: '0.86rem', fontWeight: 700 } },
+                  secondary: { sx: { fontSize: '0.72rem' } },
+                }}
+              />
+            </MenuItem>
+          )}
+        </Menu>
+      </Box>
     </Drawer>
   );
 };

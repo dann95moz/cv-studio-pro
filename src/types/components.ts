@@ -238,6 +238,7 @@ export interface ProjectsSectionProps {
 // 3. Preview Studio Panels & Toolbar
 // ---------------------------------------------------------------------------
 export interface StepPreviewToolbarProps {
+  onSelectWizardStep?: (step: WizardStep) => void;
   viewMode?: PreviewViewMode;
   onViewModeChange?: (mode: PreviewViewMode) => void;
   previewDocType?: 'cv' | 'cover-letter';
@@ -303,6 +304,7 @@ export interface TemplatesPanelProps {
   open?: boolean;
   activeTheme?: ThemeId;
   activePalette?: PaletteId;
+  hideHeader?: boolean;
 }
 
 export interface DesignFormattingPanelProps {
@@ -331,6 +333,9 @@ export interface DesignFormattingPanelProps {
   onPhotoChange?: (photo: ProfilePhotoConfig | null) => void;
   onPhotoToggle?: (enabled: boolean) => void;
   activeTheme?: ThemeId;
+  theme?: ThemeId;
+  onSelectTheme?: (theme: ThemeId) => void;
+  initialTab?: 'templates' | 'formatting';
 }
 
 export interface PreviewComparisonViewProps {

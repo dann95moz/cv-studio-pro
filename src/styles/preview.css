@@ -8,6 +8,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -88,6 +89,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
   background-color: var(--bg-dark);
 }
@@ -184,27 +186,30 @@
 /* ==========================================================================
    MOBILE-FIRST RESPONSIVE PREVIEW & TOUCH OPTIMIZATIONS
    ========================================================================== */
-@media (max-width: 860px) {
+@media (max-width: 899px) {
   .preview-workspace-layout {
     width: 100%;
     max-width: 100vw;
+    min-height: 0;
     overflow-x: hidden;
   }
 
   .preview-canvas-wrapper {
     width: 100%;
     max-width: 100vw;
+    min-height: 0;
     overflow-x: hidden;
   }
 
   .preview-pane-canvas {
     padding: 14px 6px 24px;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     overflow-x: auto;
     overflow-y: auto;
     width: 100%;
     max-width: 100%;
+    min-height: 0;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -216,7 +221,6 @@
 
   .paper-sheet-wrapper {
     margin: 0 auto;
-    max-width: 100%;
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -226,12 +230,6 @@
   .preview-top-toolbar {
     padding: 6px 10px !important;
     gap: 8px !important;
-    max-width: 100vw;
-    box-sizing: border-box;
-  }
-
-  .preview-nav-footer {
-    padding: 8px 12px !important;
     max-width: 100vw;
     box-sizing: border-box;
   }

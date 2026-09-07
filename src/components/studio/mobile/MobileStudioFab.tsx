@@ -14,10 +14,10 @@ export interface MobileStudioFabProps {
 export const MobileStudioFab: React.FC<MobileStudioFabProps> = ({ onClick }) => {
   const { t } = useTranslation('preview');
   const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   return (
     <Fab
-      color="primary"
       onClick={onClick}
       aria-label={t('preview:navRail.templates', 'Herramientas de edición')}
       sx={{
@@ -27,12 +27,18 @@ export const MobileStudioFab: React.FC<MobileStudioFabProps> = ({ onClick }) => 
         zIndex: theme.zIndex.speedDial || 1050,
         width: 54,
         height: 54,
-        bgcolor: 'var(--terracotta)',
-        color: '#ffffff',
-        boxShadow: '0 6px 18px var(--terracotta-glow)',
+        bgcolor: isDark ? alpha(theme.palette.background.paper, 0.9) : 'background.paper',
+        backdropFilter: 'blur(12px)',
+        border: `1.5px solid ${isDark ? alpha(theme.palette.divider, 0.8) : alpha(theme.palette.primary.main, 0.28)}`,
+        color: 'primary.main',
+        boxShadow: isDark
+          ? '0 8px 32px rgba(0, 0, 0, 0.55)'
+          : `0 8px 24px ${alpha(theme.palette.primary.main, 0.18)}`,
         '&:hover': {
-          bgcolor: 'var(--terracotta-hover)',
+          bgcolor: isDark ? theme.palette.background.paper : alpha(theme.palette.primary.main, 0.06),
+          borderColor: 'primary.main',
           transform: 'scale(1.05)',
+          boxShadow: `0 10px 28px ${alpha(theme.palette.primary.main, 0.28)}`,
         },
         '&:active': {
           transform: 'scale(0.96)',
