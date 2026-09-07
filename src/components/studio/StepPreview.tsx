@@ -439,7 +439,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           sx={{
             order: 3,
             display: { xs: isAuditGapOpen ? 'block' : 'none', md: 'flex' },
-            width: isAuditGapOpen ? { xs: '100%', sm: 330, md: 330 } : 0,
+            width: isAuditGapOpen ? { xs: '100%', sm: 380, md: 380 } : 0,
             height: { xs: 'auto', md: '100%' },
             position: isAuditGapOpen ? 'relative' : 'static',
             flexShrink: 0,

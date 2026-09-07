@@ -360,8 +360,8 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
             top: { xs: 'var(--navbar-height, 56px)', md: 'auto' },
             bottom: { xs: 0, md: 'auto' },
             right: 0,
-            width: { xs: '100%', sm: 330, md: 330 },
-            maxWidth: { xs: '100vw', sm: 330 },
+            width: { xs: '100%', sm: 380, md: 380 },
+            maxWidth: { xs: '100vw', sm: 380 },
             borderLeft: `1px solid ${theme.palette.divider}`,
             bgcolor: 'background.paper',
             display: 'flex',
@@ -407,7 +407,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
                   textOverflow: 'ellipsis',
                 }}
               >
-                {t('preview:drawer.shortScore', 'Audit')} {auditScore > 0 ? `${auditScore}/10` : '--'}
+                {t('preview:drawer.shortScore', 'Audit')} {auditScore > 0 ? auditScore : '--'}
               </Button>
               <Button
                 variant={activeTab === 'gap' ? 'contained' : 'outlined'}

@@ -79,7 +79,16 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
   const [pdfMenuAnchor, setPdfMenuAnchor] = useState<null | HTMLElement>(null);
   const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null);
   const [formatMenuAnchor, setFormatMenuAnchor] = useState<null | HTMLElement>(null);
+  const [docMenuAnchor, setDocMenuAnchor] = useState<null | HTMLElement>(null);
   const [copiedAts, setCopiedAts] = useState<boolean>(false);
+
+  const handleOpenDocMenu = (e: React.MouseEvent<HTMLElement>) => {
+    setDocMenuAnchor(e.currentTarget);
+  };
+
+  const handleCloseDocMenu = () => {
+    setDocMenuAnchor(null);
+  };
 
   const handleOpenStepMenu = (e: React.MouseEvent<HTMLElement>) => {
     setStepMenuAnchor(e.currentTarget);
@@ -246,48 +255,86 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
           </>
         )}
 
-        {/* Document Type Switcher */}
+        {/* Document Type Switcher Dropdown */}
         {onPreviewDocTypeChange && (
-          <ButtonGroup
-            size="small"
-            variant="outlined"
-            sx={{
-              p: 0.25,
-              bgcolor: alpha(theme.palette.text.primary, 0.04),
-              border: `1px solid ${theme.palette.divider}`,
-            }}
-          >
+          <>
             <Button
-              variant={previewDocType === 'cv' ? 'contained' : 'text'}
-              color="primary"
-              onClick={() => onPreviewDocTypeChange('cv')}
-              startIcon={<ArticleRoundedIcon sx={{ fontSize: '14px !important' }} />}
+              size="small"
+              variant="outlined"
+              color={previewDocType === 'cv' ? 'primary' : 'secondary'}
+              onClick={handleOpenDocMenu}
+              startIcon={
+                previewDocType === 'cv' ? (
+                  <ArticleRoundedIcon sx={{ fontSize: '15px !important' }} />
+                ) : (
+                  <EmailRoundedIcon sx={{ fontSize: '15px !important' }} />
+                )
+              }
+              endIcon={<ArrowDropDownRoundedIcon sx={{ ml: -0.5, fontSize: 18 }} />}
               sx={{
-                fontWeight: 700,
+                height: 28,
                 fontSize: '0.74rem',
+                fontWeight: 700,
                 textTransform: 'none',
-                px: { xs: 1, sm: 1.5 },
-                py: 0.35,
+                px: 1.2,
+                borderColor: alpha(previewDocType === 'cv' ? theme.palette.primary.main : theme.palette.secondary.main, 0.3),
+                bgcolor: alpha(previewDocType === 'cv' ? theme.palette.primary.main : theme.palette.secondary.main, 0.06),
+                '&:hover': {
+                  bgcolor: alpha(previewDocType === 'cv' ? theme.palette.primary.main : theme.palette.secondary.main, 0.12),
+                },
               }}
             >
-              {t('preview:toolbar.docCv', 'Resume (CV)')}
+              {previewDocType === 'cv'
+                ? t('preview:toolbar.docCv', 'Currículum (CV)')
+                : t('preview:toolbar.docCoverLetter', 'Carta de Presentación')}
             </Button>
-            <Button
-              variant={previewDocType === 'cover-letter' ? 'contained' : 'text'}
-              color="secondary"
-              onClick={() => onPreviewDocTypeChange('cover-letter')}
-              startIcon={<EmailRoundedIcon sx={{ fontSize: '14px !important' }} />}
-              sx={{
-                fontWeight: 700,
-                fontSize: '0.74rem',
-                textTransform: 'none',
-                px: { xs: 1, sm: 1.5 },
-                py: 0.35,
-              }}
+
+            <Menu
+              anchorEl={docMenuAnchor}
+              open={Boolean(docMenuAnchor)}
+              onClose={handleCloseDocMenu}
+              slotProps={{ paper: { sx: { mt: 0.5, minWidth: 230 } } }}
             >
-              {t('preview:toolbar.docCoverLetter', 'Cover Letter')}
-            </Button>
-          </ButtonGroup>
+              <MenuItem
+                selected={previewDocType === 'cv'}
+                onClick={() => {
+                  onPreviewDocTypeChange('cv');
+                  handleCloseDocMenu();
+                }}
+              >
+                <ListItemIcon>
+                  <ArticleRoundedIcon fontSize="small" color={previewDocType === 'cv' ? 'primary' : 'inherit'} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('preview:toolbar.docCv', 'Currículum (CV)')}
+                  secondary={t('preview:toolbar.docCvDesc', 'Documento ATS principal adaptado')}
+                  slotProps={{
+                    primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } },
+                    secondary: { sx: { fontSize: '0.7rem' } },
+                  }}
+                />
+              </MenuItem>
+              <MenuItem
+                selected={previewDocType === 'cover-letter'}
+                onClick={() => {
+                  onPreviewDocTypeChange('cover-letter');
+                  handleCloseDocMenu();
+                }}
+              >
+                <ListItemIcon>
+                  <EmailRoundedIcon fontSize="small" color={previewDocType === 'cover-letter' ? 'secondary' : 'inherit'} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('preview:toolbar.docCoverLetter', 'Carta de Presentación')}
+                  secondary={t('preview:toolbar.docCoverLetterDesc', 'Carta motivacional personalizada')}
+                  slotProps={{
+                    primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } },
+                    secondary: { sx: { fontSize: '0.7rem' } },
+                  }}
+                />
+              </MenuItem>
+            </Menu>
+          </>
         )}
 
         {/* CV Language Variant Selector & Translator */}
