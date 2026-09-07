@@ -7,6 +7,7 @@ import {
   Chip,
   TextField,
   Button,
+  IconButton,
   CircularProgress,
   Alert,
   useTheme,
@@ -140,21 +141,17 @@ export const AiRegeneratePopover: React.FC<AiRegeneratePopoverProps> = ({
           </Typography>
         </Box>
 
-        <Button
+        <IconButton
           size="small"
           onClick={onClose}
           disabled={isGenerating}
           sx={{
-            minWidth: 28,
-            width: 28,
-            height: 28,
-            p: 0,
             color: 'text.secondary',
-            borderRadius: '50%',
+            p: 0.5,
           }}
         >
           <CloseRoundedIcon sx={{ fontSize: 18 }} />
-        </Button>
+        </IconButton>
       </Box>
 
       {/* Quick Guidance Chips */}

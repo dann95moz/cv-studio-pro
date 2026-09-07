@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@mui/material';
 import { Icon } from '../Icons';
 import { LockedViewCardProps } from '../../types';
 
@@ -24,14 +25,16 @@ export const LockedViewCard: React.FC<LockedViewCardProps> = ({
       <h3 className="locked-title">{title}</h3>
       <p className="locked-desc">{description}</p>
       <div className="locked-actions">
-        <button
-          type="button"
-          className="studio-btn studio-btn-primary"
+        <Button
+          variant="contained"
+          color="primary"
           onClick={onAction}
           disabled={isDisabled}
+          startIcon={actionIcon ? <Icon type={actionIcon} size={14} /> : undefined}
+          sx={{ fontWeight: 700 }}
         >
-          {actionIcon && <Icon type={actionIcon} size={14} />} {actionText}
-        </button>
+          {actionText}
+        </Button>
       </div>
     </div>
   );

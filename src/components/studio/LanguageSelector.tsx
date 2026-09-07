@@ -55,43 +55,39 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         <Button
           onClick={handleClick}
           size="small"
+          variant="outlined"
+          color="inherit"
           aria-controls={open ? 'language-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
-          startIcon={<LanguageRoundedIcon sx={{ fontSize: { xs: '0.95rem', sm: '1.1rem' } }} />}
+          startIcon={<LanguageRoundedIcon sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' } }} />}
           sx={{
-            minWidth: variant === 'compact' ? 40 : 'auto',
-            px: variant === 'compact' ? 1 : { xs: 0.75, sm: 1.25 },
-            py: { xs: 0.4, sm: 0.6 },
-            borderRadius: (theme) => `${theme.shape.borderRadius}px`,
-            border: `1px solid ${theme.palette.divider}`,
+            minWidth: variant === 'compact' ? 36 : 'auto',
+            height: { xs: 28, sm: 32 },
+            px: { xs: 0.9, sm: 1.25 },
+            borderColor: 'divider',
             color: 'text.primary',
-            bgcolor: isDark ? alpha(theme.palette.common.white, 0.04) : alpha(theme.palette.common.black, 0.03),
-            fontWeight: 600,
+            bgcolor: alpha(theme.palette.text.primary, 0.04),
+            fontWeight: 700,
             fontSize: { xs: '0.75rem', sm: '0.82rem' },
             textTransform: 'none',
             transition: 'all 0.2s ease',
             '&:hover': {
-              bgcolor: isDark ? alpha(theme.palette.common.white, 0.08) : alpha(theme.palette.common.black, 0.06),
+              bgcolor: alpha(theme.palette.text.primary, 0.08),
               borderColor: alpha(theme.palette.primary.main, 0.5),
             },
           }}
         >
-          <Box component="span" sx={{ mr: { xs: 0.25, sm: 0.5 }, fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>
-            {currentLang.flag}
-          </Box>
-          {showLabel && (
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 700,
-                letterSpacing: '0.02em',
-                display: { xs: 'none', sm: 'inline' },
-              }}
-            >
-              {currentLang.code.toUpperCase()}
-            </Typography>
-          )}
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+              fontSize: 'inherit',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {currentLang.code.toUpperCase()}
+          </Typography>
         </Button>
       </Tooltip>
 

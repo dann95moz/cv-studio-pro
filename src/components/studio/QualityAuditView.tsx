@@ -9,6 +9,8 @@ import {
   alpha,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import FileDownloadRoundedIcon from '@mui/icons-material/FileDownloadRounded';
 import { Icon } from '../Icons';
 import { QualityAuditViewProps } from '../../types';
 import { HexagonRadarChart, RadarDimension } from '../atoms/HexagonRadarChart';
@@ -105,24 +107,30 @@ export const QualityAuditView: React.FC<QualityAuditViewProps> = ({
           </div>
         </div>
 
-        <div className="audit-hero-actions">
-          <button 
-            type="button"
-            className="studio-btn studio-btn-secondary btn-sm"
+        <Box className="audit-hero-actions" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Button 
+            variant="outlined"
+            size="small"
+            color="inherit"
             onClick={onRefresh}
             title={t('audit:refreshScore', 'Recalculate audit scores')}
+            startIcon={<RefreshRoundedIcon sx={{ fontSize: 16 }} />}
+            sx={{ textTransform: 'none', fontWeight: 600 }}
           >
-            <Icon type="refresh" size={13} /> {t('common:actions.refresh', 'Re-Calculate')}
-          </button>
-          <button 
-            type="button"
-            className="studio-btn studio-btn-secondary btn-sm"
+            {t('common:actions.refresh', 'Re-Calculate')}
+          </Button>
+          <Button 
+            variant="outlined"
+            size="small"
+            color="inherit"
             onClick={handleDownloadReport}
             title={t('gap:downloadReport', 'Download full markdown audit report')}
+            startIcon={<FileDownloadRoundedIcon sx={{ fontSize: 16 }} />}
+            sx={{ textTransform: 'none', fontWeight: 600 }}
           >
-            <Icon type="download" size={13} /> {t('common:actions.export', 'Export Report (.md)')}
-          </button>
-        </div>
+            {t('common:actions.export', 'Export Report (.md)')}
+          </Button>
+        </Box>
       </div>
 
       {/* Hexagonal Radar Chart Multidimensional Affinity */}

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Button, ButtonGroup } from '@mui/material';
+import { Box, Button, ButtonGroup } from '@mui/material';
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
+import FileDownloadRoundedIcon from '@mui/icons-material/FileDownloadRounded';
 import { safeMarkdown } from '../../utils/sanitize';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../Icons';
@@ -50,24 +52,30 @@ export const GapAnalysisView: React.FC<GapAnalysisViewProps> = ({
           </p>
         </div>
 
-        <div className="gap-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="studio-btn studio-btn-secondary btn-sm"
+        <Box className="gap-actions" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Button
+            variant="outlined"
+            size="small"
+            color="inherit"
             onClick={handleCopy}
             title={t('common:actions.copy', 'Copy')}
+            startIcon={<ContentCopyRoundedIcon sx={{ fontSize: 16 }} />}
+            sx={{ textTransform: 'none', fontWeight: 600 }}
           >
-            <Icon type="copy" size={13} /> {copied ? t('preview:toolbar.copied', 'Copied!') : t('common:actions.copy', 'Copy Text')}
-          </button>
-          <button
-            type="button"
-            className="studio-btn studio-btn-secondary btn-sm"
+            {copied ? t('preview:toolbar.copied', 'Copied!') : t('common:actions.copy', 'Copy Text')}
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            color="inherit"
             onClick={onDownload}
             title={t('gap:downloadReport', 'Export Gap Report (.md)')}
+            startIcon={<FileDownloadRoundedIcon sx={{ fontSize: 16 }} />}
+            sx={{ textTransform: 'none', fontWeight: 600 }}
           >
-            <Icon type="download" size={13} /> {t('common:actions.export', 'Export Report (.md)')}
-          </button>
-        </div>
+            {t('common:actions.export', 'Export Report (.md)')}
+          </Button>
+        </Box>
       </div>
 
       {/* Keywords Tag Cloud */}
