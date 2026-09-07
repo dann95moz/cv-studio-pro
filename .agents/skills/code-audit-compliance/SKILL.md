@@ -25,6 +25,8 @@ This automated script checks:
 - **Zero Burned Pixel Radiuses**: Scans for `borderRadius: '\d+px'` in component `sx`.
 - **Zero Untyped Any in Store**: Scans for `loadJson<any>`.
 - **Zero AI Service Invocation in UI**: Scans for direct imports of AI generator services in `src/components/`.
+- **Zero Raw HTML `<button>` in UI**: Scans for `<button` in `src/components/` (must use MUI `<Button>` or `<IconButton>`).
+- **Zero Button Radius Overrides**: Scans for `borderRadius` on `<Button` in `src/components/` (must inherit theme pill shape).
 - **100% i18n Parity**: Scans all 10 namespaces across `en`, `es`, `de`, `fr`, and `it`.
 
 ---
@@ -38,6 +40,9 @@ Run these searches to detect latent violations:
 | **Native Popups** | `alert\(|confirm\(|prompt\(` | Replace with MUI `<Snackbar>` or `<ConfirmDeleteDialog>` |
 | **Burned Dummy Scores** | `\|\|\s*92|\|\|\s*8\.8|matchScore\s*:\s*\d{2}` | Replace with real score, `?? 0`, or placeholder `--` |
 | **Arbitrary Border Radiuses** | `borderRadius:\s*['"][0-9]+px['"]` | Replace with `RADIUS_TOKENS` or theme numeric shape (`1`, `2`) |
+| **Button Radius Override** | `<Button[\s\S]*?borderRadius:` | Remove `borderRadius` override; inherit theme `RADIUS_TOKENS.full` |
+| **Raw HTML Buttons** | `<button\b` in `src/components/` | Replace with MUI `<Button>` or `<IconButton>` |
+| **Legacy Button Classes** | `studio-btn` | Replace with standard MUI `variant="contained|outlined|text"` |
 | **Raw Hex in JSX** | `(?:bgcolor|color|borderColor|background):\s*['"]#[0-9a-fA-F]{3,6}['"]` | Replace with `theme.palette.*` or `alpha(...)` |
 | **Direct AI in UI** | `import.*from.*ai-service.*` in `src/components/` | Extract into `src/hooks/useXWorkflow.ts` |
 | **Any in Store** | `loadJson<any>` or `:\s*any\b` | Use strict discriminated union or domain type |

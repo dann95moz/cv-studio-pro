@@ -71,13 +71,30 @@ All design values must strictly originate from the centralized Design System tok
 
 ---
 
-### ❌ 5. Never override Button and Chip backgrounds or radiuses with ad-hoc styling:
-- ❌ **Forbidden**: `borderRadius: '8px'`, `background: 'linear-gradient(...)'` inside button `sx`.
-- ✅ **Standard Practice**: Use standard MUI variants and color props:
-  - `<Button variant="contained" color="primary">`
-  - `<Button variant="outlined" color="inherit">`
-  - `<Button variant="text">`
-  - `<Chip size="small" color="primary | success | warning | error" variant="filled | outlined" />`
+### ❌ 5. Button Architecture & Taxonomy Standard (Zero Ad-hoc Button Styling)
+Buttons are the primary interactive instruments of the studio. To guarantee visual harmony across all views and toolbars, all buttons must strictly follow the Design System Taxonomy:
+
+1. **Universal Pill Shape (`RADIUS_TOKENS.full`)**:
+   - All standard buttons (`MuiButton`) inherit `borderRadius: RADIUS_TOKENS.full` (9999px) directly from `src/theme/theme.ts`.
+   - ❌ **Forbidden**: Overriding `borderRadius` on `<Button>`, `<ButtonGroup>`, or `<ToggleButtonGroup>` with ad-hoc values like `borderRadius: 1.5`, `borderRadius: 2`, `borderRadius: '8px'`, or `borderRadius: RADIUS_TOKENS.sm`.
+   - ✅ **Standard Practice**: Omit `borderRadius` in button `sx` completely. Let the centralized theme apply the pill shape automatically.
+
+2. **The 3 Official Button Hierarchy Tiers**:
+   - **Tier 1 — Contained / CTA**: `<Button variant="contained" color="primary | secondary | error | warning | success">`
+     - Used for primary forward actions (*Descargar / Exportar*, *Sintetizar con IA*, *Guardar Versión*). Inherits gradient + subtle elevation glow from theme.
+   - **Tier 2 — Outlined**: `<Button variant="outlined" color="primary | inherit | error | warning | success">`
+     - Used for secondary actions (*Cargar Ejemplo*, *Regenerar CV*, *Breadcrumb de Pasos*, *Exportar Reporte*). Inherits theme border and hover fill.
+   - **Tier 3 — Text / Ghost**: `<Button variant="text" color="inherit | primary">`
+     - Used for tertiary, low-emphasis actions (*Cancelar*, *Postular*, *Cambiar Modo*).
+   - ❌ **Forbidden Hybrid Variants**: Never graft custom borders and background colors onto `variant="text"` buttons to simulate boxy rectangles. If an outline or background is needed, use `variant="outlined"` or `<Chip>`.
+
+3. **Icon Buttons vs Text Buttons**:
+   - Circular icon micro-actions (`[X]`, `[Copy]`, `[Edit]`, `[Theme toggle]`) must use `<IconButton size="small">` or primitive dumb atoms (`ActionIconButton`).
+   - ❌ **Forbidden**: Using `<Button>` with `borderRadius: '50%'` to fake an `<IconButton>`.
+
+4. **Zero Raw HTML `<button>` in Components**:
+   - ❌ **Forbidden**: `<button className="studio-btn...">`.
+   - ✅ **Standard Practice**: All buttons in `src/components/` must use MUI `<Button>`, `<IconButton>`, or `<ButtonBase>`. Legacy CSS classes (`.studio-btn`, `.studio-btn-primary`, `.studio-btn-secondary`) are strictly forbidden.
 
 ---
 

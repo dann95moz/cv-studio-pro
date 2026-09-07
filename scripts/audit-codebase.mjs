@@ -43,9 +43,13 @@ walkDir(srcDir, (filePath) => {
 
   const content = fs.readFileSync(filePath, 'utf-8');
   const lines = content.split('\n');
-
+  let insideButton = false;
   lines.forEach((lineText, idx) => {
     const lineNum = idx + 1;
+
+    if (/<Button\b/.test(lineText)) {
+      insideButton = true;
+    }
 
     // A. Native Browser Dialogs
     const trimmed = lineText.trim();
@@ -75,6 +79,29 @@ walkDir(srcDir, (filePath) => {
     // E. Direct AI service imports inside presentational components
     if (filePath.includes(path.join('src', 'components')) && /from\s+['"].*\/core\/ai-service['"]/.test(lineText)) {
       reportError(filePath, lineNum, 'Direct AI service import inside UI component forbidden. Encapsulate in src/hooks/useXWorkflow.');
+    }
+
+    // F. Raw HTML <button> tags in UI components
+    if (filePath.includes(path.join('src', 'components')) && !isComment && /<button\b/.test(lineText)) {
+      if (!filePath.includes('CvSelectionBubble') && !lineText.includes('// audit-ignore')) {
+        reportError(filePath, lineNum, 'Raw HTML <button> tag forbidden in UI components. Use MUI <Button> or <IconButton>.');
+      }
+    }
+
+    // G. Legacy .studio-btn CSS classes in UI components
+    if (filePath.includes(path.join('src', 'components')) && !isComment && /\bstudio-btn\b/.test(lineText)) {
+      reportError(filePath, lineNum, 'Legacy CSS class .studio-btn forbidden. Use standard MUI Button variants (contained, outlined, text).');
+    }
+
+    // H. Ad-hoc borderRadius override on MUI <Button>
+    if (filePath.includes(path.join('src', 'components')) && insideButton && /borderRadius\s*:/.test(lineText)) {
+      if (!lineText.includes('// audit-ignore')) {
+        reportError(filePath, lineNum, 'Ad-hoc borderRadius on MUI <Button> forbidden. All buttons must inherit RADIUS_TOKENS.full pill shape from theme.');
+      }
+    }
+
+    if (insideButton && />/.test(lineText)) {
+      insideButton = false;
     }
   });
 });
