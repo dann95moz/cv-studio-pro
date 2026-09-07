@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import AttachFileRoundedIcon from '@mui/icons-material/AttachFileRounded';
-import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { extractTargetCompany } from '../../core/parser';
 import { useFileUploader } from '../../hooks/useFileUploader';
 import { useTranslation } from 'react-i18next';
@@ -80,7 +79,6 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   const { t } = useTranslation(['target', 'common']);
   const theme = useTheme();
   const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
-  const [highlightsEnabled, setHighlightsEnabled] = useState<boolean>(true);
   const [skillToast, setSkillToast] = useState<string | null>(null);
   const lastClickRef = useRef<number>(0);
 
@@ -311,7 +309,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
             overflow: 'hidden',
           }}
         >
-          {/* Editor Header Toolbar with Highlights Toggle, Legend, and Input Source Actions */}
+          {/* Editor Header Toolbar with Legend and Input Source Actions */}
           <Box
             sx={{
               py: 0.75,
@@ -326,37 +324,19 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               flexWrap: 'wrap',
             }}
           >
-            {/* Live Highlights Toggle and Real-time Keyword Metrics with Legend */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Button
-                size="small"
-                variant={highlightsEnabled ? 'contained' : 'outlined'}
-                color={highlightsEnabled ? 'primary' : 'inherit'}
-                startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-                onClick={() => setHighlightsEnabled((prev) => !prev)}
-                sx={{
-                  fontSize: '0.78rem',
-                  textTransform: 'none',
-                  px: 1.25,
-                  py: 0.35,
-                  fontWeight: highlightsEnabled ? 700 : 500,
-                }}
-              >
-                {highlightsEnabled
-                  ? t('target:editor.highlightsOn', 'Highlights: ON')
-                  : t('target:editor.highlightsOff', 'Highlights: OFF')}
-              </Button>
-
-              {quickMatchResult.totalKeywords > 0 && (
-                <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.25, ml: 0.5 }}>
+            {/* Real-time Keyword Metrics & Color Legend */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              {quickMatchResult.totalKeywords > 0 ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Tooltip title={t('target:editor.coveredLegend', 'In your profile')}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
                       <Box
                         sx={{
                           width: 8,
                           height: 8,
                           borderRadius: '50%',
                           bgcolor: 'success.main',
+                          flexShrink: 0,
                         }}
                       />
                       <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
@@ -365,7 +345,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
                         })}
                         <Box
                           component="span"
-                          sx={{ display: { xs: 'none', md: 'inline' }, fontWeight: 500, opacity: 0.85, ml: 0.5 }}
+                          sx={{ display: { xs: 'none', sm: 'inline' }, fontWeight: 500, opacity: 0.85, ml: 0.5 }}
                         >
                           ({t('target:editor.coveredLegend', 'In your profile')})
                         </Box>
@@ -373,13 +353,14 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
                     </Box>
                   </Tooltip>
                   <Tooltip title={t('target:editor.gapsLegend', 'Gaps to cover')}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
                       <Box
                         sx={{
                           width: 8,
                           height: 8,
                           borderRadius: '50%',
                           bgcolor: 'warning.main',
+                          flexShrink: 0,
                         }}
                       />
                       <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
@@ -388,7 +369,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
                         })}
                         <Box
                           component="span"
-                          sx={{ display: { xs: 'none', md: 'inline' }, fontWeight: 500, opacity: 0.85, ml: 0.5 }}
+                          sx={{ display: { xs: 'none', sm: 'inline' }, fontWeight: 500, opacity: 0.85, ml: 0.5 }}
                         >
                           ({t('target:editor.gapsLegend', 'Gaps to cover')})
                         </Box>
@@ -396,6 +377,10 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
                     </Box>
                   </Tooltip>
                 </Box>
+              ) : (
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                  {t('target:editor.editModeTitle', 'Job Description (Raw Text / Direct Paste)')}
+                </Typography>
               )}
             </Box>
 
@@ -466,7 +451,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               onChange={handleContentChange}
               onBlur={() => onChange(localContent)}
               masterData={masterData}
-              highlightsEnabled={highlightsEnabled}
+              highlightsEnabled={true}
               placeholder="# Job Title / Target Role&#10;Company Name • Location / Remote&#10;&#10;## About the Role&#10;Paste the full vacancy responsibilities, requirements, and tech stack here..."
             />
           </Box>
