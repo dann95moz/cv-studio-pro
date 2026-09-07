@@ -59,6 +59,9 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     if (typeof snapshot.rules === 'string') validUpdates.rules = snapshot.rules;
     if (typeof snapshot.companyName === 'string') validUpdates.companyName = snapshot.companyName;
     if (typeof snapshot.targetRole === 'string') validUpdates.targetRole = snapshot.targetRole;
+    if (typeof snapshot.currentBaseLanguage === 'string') validUpdates.currentBaseLanguage = snapshot.currentBaseLanguage;
+    if (typeof snapshot.activeLanguage === 'string') validUpdates.activeLanguage = snapshot.activeLanguage;
+    if (snapshot.activeVersionId !== undefined) validUpdates.activeVersionId = snapshot.activeVersionId;
     if (Array.isArray(snapshot.savedVersions)) validUpdates.savedVersions = snapshot.savedVersions;
     if (Array.isArray(snapshot.applications)) validUpdates.applications = snapshot.applications;
     if (Array.isArray(snapshot.kanbanColumns)) validUpdates.kanbanColumns = snapshot.kanbanColumns;
@@ -73,6 +76,22 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     if (snapshot.photo !== undefined) validUpdates.photo = snapshot.photo;
     if (snapshot.providerSettings && typeof snapshot.providerSettings === 'object') {
       validUpdates.providerSettings = snapshot.providerSettings;
+    }
+
+    if (
+      snapshot.activeCvData &&
+      (snapshot.activeCvData.name ||
+        snapshot.activeCvData.summary ||
+        snapshot.activeCvData.experience?.length ||
+        snapshot.activeCvData.skillGroups?.length)
+    ) {
+      validUpdates.activeCvData = snapshot.activeCvData;
+    } else if (snapshot.cvMarkdown && snapshot.cvMarkdown.trim().length > 30) {
+      validUpdates.activeCvData = parseMarkdownToCvData(snapshot.cvMarkdown);
+    } else if (snapshot.masterData && snapshot.masterData.trim().length > 30) {
+      validUpdates.activeCvData = parseMarkdownToCvData(snapshot.masterData);
+    } else {
+      validUpdates.activeCvData = null;
     }
 
     validUpdates.lastModifiedTimestamp = snapshot.lastModifiedTimestamp || Date.now();
@@ -255,6 +274,8 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       masterData: BLANK_MASTER_DATA,
       targetJob: BLANK_TARGET_JOB,
       cvMarkdown: BLANK_TAILORED_CV,
+      activeCvData: null,
+      activeVersionId: null,
       gapMarkdown: BLANK_GAP_REPORT,
       companyName: '',
       targetRole: '',
@@ -269,6 +290,8 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       masterData: BLANK_MASTER_DATA,
       targetJob: BLANK_TARGET_JOB,
       cvMarkdown: BLANK_TAILORED_CV,
+      activeCvData: null,
+      activeVersionId: null,
       gapMarkdown: BLANK_GAP_REPORT,
       companyName: '',
       targetRole: '',

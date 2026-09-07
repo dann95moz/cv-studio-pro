@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { serializeCvDataToMarkdown } from '../../core/parser';
+import { serializeCvDataToMarkdown, parseMarkdownToCvData } from '../../core/parser';
 import { CVData, ContactItem, ContactType, ExperienceItem, SkillCategory } from '../../types/cv';
 import { BLANK_CV_DATA } from '../../constants/templates';
 import { useResumeStore } from '../../store/useResumeStore';
@@ -98,13 +98,18 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
     };
   }, [onChange]);
 
-  // Synchronize when external data changes
+  // Synchronize when external data or markdownContent changes (from import, QR sync, sample load, etc.)
   useEffect(() => {
     if (data) {
       setFormData(data);
       formDataRef.current = data;
+    } else if (markdownContent && markdownContent !== lastEmittedMarkdownRef.current) {
+      lastEmittedMarkdownRef.current = markdownContent;
+      const parsed = parseMarkdownToCvData(markdownContent);
+      setFormData(parsed);
+      formDataRef.current = parsed;
     }
-  }, [data]);
+  }, [data, markdownContent]);
 
   const scheduleEmit = useCallback(() => {
     if (debounceTimerRef.current) {

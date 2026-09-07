@@ -27,6 +27,7 @@ export const checkHasGapReport = (gapMarkdown: string): boolean => {
 export const useParsedCv = (): CVData => {
   const activeCvData = useResumeStore((s) => s.activeCvData);
   const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
+  const masterData = useResumeStore((s) => s.masterData);
   const activeLanguage = useResumeStore((s) => s.activeLanguage);
   const currentBaseLanguage = useResumeStore((s) => s.currentBaseLanguage);
   const translations = useResumeStore((s) => s.translations);
@@ -37,6 +38,7 @@ export const useParsedCv = (): CVData => {
       ? rawLang
       : 'es') as SupportedLanguage;
 
+    // 1. Language variant cvData
     if (
       activeLanguage &&
       currentBaseLanguage &&
@@ -48,12 +50,39 @@ export const useParsedCv = (): CVData => {
         language: effectiveLang,
       };
     }
-    if (activeCvData) {
+
+    // 2. Language variant cvMarkdown
+    if (
+      activeLanguage &&
+      currentBaseLanguage &&
+      activeLanguage !== currentBaseLanguage &&
+      translations[activeLanguage]?.cvMarkdown &&
+      translations[activeLanguage].cvMarkdown.trim().length > 30
+    ) {
+      const parsedVariant = parseMarkdownToCvData(translations[activeLanguage].cvMarkdown, effectiveLang);
+      if (parsedVariant.name || parsedVariant.summary || parsedVariant.experience?.length || parsedVariant.skillGroups?.length) {
+        return {
+          ...parsedVariant,
+          language: parsedVariant.language || effectiveLang,
+        };
+      }
+    }
+
+    // 3. Active structured CV data (only if populated with real content)
+    if (
+      activeCvData &&
+      (activeCvData.name ||
+        activeCvData.summary ||
+        activeCvData.experience?.length ||
+        activeCvData.skillGroups?.length)
+    ) {
       return {
         ...activeCvData,
         language: activeCvData.language || effectiveLang,
       };
     }
+
+    // 4. Tailored CV markdown
     if (cvMarkdown && cvMarkdown.trim().length > 30) {
       const parsed = parseMarkdownToCvData(cvMarkdown, effectiveLang);
       if (parsed.name || parsed.summary || parsed.experience?.length || parsed.skillGroups?.length) {
@@ -63,8 +92,20 @@ export const useParsedCv = (): CVData => {
         };
       }
     }
+
+    // 5. Master Data fallback (if tailored markdown not generated yet)
+    if (masterData && masterData.trim().length > 30) {
+      const parsedMaster = parseMarkdownToCvData(masterData, effectiveLang);
+      if (parsedMaster.name || parsedMaster.summary || parsedMaster.experience?.length || parsedMaster.skillGroups?.length) {
+        return {
+          ...parsedMaster,
+          language: parsedMaster.language || effectiveLang,
+        };
+      }
+    }
+
     return DEMO_CV_DATA;
-  }, [activeCvData, cvMarkdown, activeLanguage, currentBaseLanguage, translations]);
+  }, [activeCvData, cvMarkdown, masterData, activeLanguage, currentBaseLanguage, translations]);
 };
 
 /**
