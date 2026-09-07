@@ -149,7 +149,7 @@ export function extractTargetRole(targetJobText: string, masterDataText: string 
     for (const level of seniorityLevels) {
       const levelRegex = new RegExp(`\\b${level}\\b`, 'i');
       if (levelRegex.test(detectedRole)) {
-        const hasLevelInMaster = levelRegex.test(masterPrimaryTitle) || (masterDataText && levelRegex.test(masterDataText.split('## 🛠️')[0]));
+        const hasLevelInMaster = levelRegex.test(masterPrimaryTitle) || (masterDataText && levelRegex.test(masterDataText.split(/##\s*(?:🛠️\s*)?(?:MASTER\s+TECH|SKILLS|TECHNICAL\s+SKILLS)/i)[0]));
         if (!hasLevelInMaster) {
           // Strip the inflated seniority level from detected role
           detectedRole = detectedRole.replace(levelRegex, '').replace(/^[–\-•|/:\s]+|[–\-•|/:\s]+$/g, '').trim();

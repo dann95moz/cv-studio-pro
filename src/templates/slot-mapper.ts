@@ -35,15 +35,6 @@ function cleanContactDisplayLabel(c: ContactItem): ContactItem {
   };
 }
 
-const SECTION_EMOJIS: Record<string, string> = {
-  summary: '🎯',
-  skills: '🛠️',
-  experience: '💼',
-  projects: '🚀',
-  education: '🎓',
-  languages: '🌐',
-};
-
 function isStandardDefaultSectionTitle(clean: string): boolean {
   return (
     /^(?:PROFESSIONAL\s+SUMMARY(?:\s*&\s*PITCH)?|SUMMARY(?:\s*&\s*OBJECTIVE)?|RESUMEN\s+PROFESIONAL|ZUSAMMENFASSUNG|RÉSUMÉ\s+PROFESSIONNEL|SOMMARIO\s+PROFESSIONALE)$/i.test(clean) ||
@@ -58,7 +49,7 @@ function isStandardDefaultSectionTitle(clean: string): boolean {
 
 /**
  * Resolves section title, converting untranslated English default titles to the active document language
- * while preserving leading emojis or custom non-standard titles entered by the user.
+ * while stripping informal emojis to guarantee clean, professional, ATS-compliant section headers.
  */
 function resolveSectionTitle(
   type: SectionType,
@@ -68,24 +59,21 @@ function resolveSectionTitle(
 ): string {
   const candidate = (explicitCustom && explicitCustom.trim()) || (rawTitle && rawTitle.trim()) || '';
   const defaultText = langDef.sections[type as keyof typeof langDef.sections] || type.toUpperCase();
-  const defaultEmoji = SECTION_EMOJIS[type] || '';
 
   if (!candidate) {
-    return defaultEmoji ? `${defaultEmoji} ${defaultText}` : defaultText;
+    return defaultText;
   }
 
-  // Extract leading emoji/icon if present
-  const emojiMatch = candidate.match(/^([\p{Emoji}\p{Extended_Pictographic}#_\-]+)\s*/u);
-  const leadingEmoji = emojiMatch ? emojiMatch[1].trim() : defaultEmoji;
+  // Strip any leading emojis, pictographs, symbols (#, _, -, bullet points)
   const cleanTitle = candidate.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s*#_\-–—|•·:]+/u, '').trim();
 
   // If candidate is a known default/standard section title, render in the active language
   if (isStandardDefaultSectionTitle(cleanTitle)) {
-    return leadingEmoji ? `${leadingEmoji} ${defaultText}` : defaultText;
+    return defaultText;
   }
 
-  // User entered a truly custom section title
-  return candidate;
+  // User entered a truly custom section title - preserve it without leading emojis
+  return cleanTitle || defaultText;
 }
 
 /**
@@ -326,23 +314,15 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
     };
   }
 
-  // Ensure live-edited customSections are mapped to genericSections
+  // Ensure live-edited customSections are mapped to genericSections without informal emojis
   if (data.customSections && data.customSections.length > 0) {
     const existingIds = new Set(genericSections.map(g => g.id));
     for (const custom of data.customSections) {
       if (!existingIds.has(custom.id) && custom.title && custom.items && custom.items.length > 0) {
-        let iconPrefix = '';
-        if (custom.presetType === 'certifications') iconPrefix = '🏆 ';
-        else if (custom.presetType === 'awards') iconPrefix = '🎖️ ';
-        else if (custom.presetType === 'publications') iconPrefix = '📚 ';
-        else if (custom.presetType === 'volunteering') iconPrefix = '🤝 ';
-        else if (custom.presetType === 'conferences') iconPrefix = '🎤 ';
-        else iconPrefix = '📌 ';
-
-        const cleanTitle = custom.title.replace(/^[🏆🎖️📚🤝🎤📌\s]+/, '').trim();
+        const cleanTitle = custom.title.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s*#_\-–—|•·:]+/u, '').trim();
         genericSections.push({
           id: custom.id,
-          title: `${iconPrefix}${cleanTitle}`,
+          title: cleanTitle || custom.presetType?.toUpperCase() || 'SECTION',
           rawContent: custom.items.map(i => `- ${i}`).join('\n')
         });
       }

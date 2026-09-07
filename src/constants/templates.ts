@@ -98,19 +98,19 @@ San Francisco, CA • alex.morgan@example.com • +1 415 555 0192
 
 ---
 
-## 🎯 PROFESSIONAL SUMMARY & PITCH
+## PROFESSIONAL SUMMARY & PITCH
 Senior Frontend Engineer with 6+ years of experience specialized in architecting high-throughput web applications, microfrontends, and design systems using TypeScript, React, and Next.js. Proven track record of cutting CI/CD build times by 50%, eliminating 40% of runtime errors through strict type systems, and scaling checkout experiences processing over $80M in annualized transactions.
 
 ---
 
-## 🛠️ MASTER TECH STACK & COMPETENCIES
+## MASTER TECH STACK & COMPETENCIES
 - **Languages & Core Fundamentals:** TypeScript, JavaScript (ESNext), Python, SQL, HTML5, CSS3, Core Web Vitals
 - **Frameworks & State Architecture:** React, Next.js, Node.js, Zustand, Redux Toolkit, React Query, RESTful APIs, GraphQL
 - **Tooling, Testing, CI/CD & Cloud:** Vite, Webpack Module Federation, Jest, React Testing Library, Playwright, Docker, CI/CD, AWS
 
 ---
 
-## 💼 CAREER HISTORY & KEY ACHIEVEMENTS
+## CAREER HISTORY & KEY ACHIEVEMENTS
 
 ### **FinScale Technologies** | San Francisco, CA (Remote)
 *Staff Frontend Engineer* | **Oct 2022 – Present**
@@ -128,14 +128,14 @@ Senior Frontend Engineer with 6+ years of experience specialized in architecting
 
 ---
 
-## 🎓 EDUCATION & CERTIFICATIONS
+## EDUCATION & CERTIFICATIONS
 - **B.S. in Computer Science** – University of California, Berkeley, 2019
 - **AWS Certified Developer – Associate** – Amazon Web Services, 2023
 - **Meta Certified Front-End Developer** – Meta, 2022
 
 ---
 
-## 🌐 LANGUAGES
+## LANGUAGES
 - **English:** Native
 - **Spanish:** C1 – Professional Working Proficiency
 `;

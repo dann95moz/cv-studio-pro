@@ -142,8 +142,8 @@ export function useAuditActions(): UseAuditActionsReturn {
         updatedCv += `\n\n## EDUCATION & CERTIFICATIONS${certLine}\n`;
       }
 
-      if (updatedMaster.includes('## EDUCATION') || updatedMaster.includes('## 🎓 EDUCATION')) {
-        updatedMaster = updatedMaster.replace(/(## [^\n]*EDUCATION[^\n]*\n)/i, `$1${certLine}\n`);
+      if (/##\s*(?:🎓\s*)?EDUCATION/i.test(updatedMaster)) {
+        updatedMaster = updatedMaster.replace(/(##\s*[^\n]*EDUCATION[^\n]*\n)/i, `$1${certLine}\n`);
       }
     } else if (type === 'summary_metric') {
       if (updatedCv.includes('## PROFESSIONAL SUMMARY')) {

@@ -52,36 +52,37 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push(contactStrings.filter(Boolean).join(' • '));
   }
 
-  // Helper to get formatted section title preserving user's edit or emoji prefix
-  const getSectionTitle = (type: string, defaultEmoji = '') => {
+  // Helper to get formatted section title preserving user's edit without emojis
+  const getSectionTitle = (type: string) => {
+    const defTitle = langDef.sections[type as keyof typeof langDef.sections] || type.toUpperCase();
     const custom = data.sectionTitles?.[type] || data.sections?.find(s => s.type === type)?.title;
     if (custom && custom.trim()) {
-      const isEnglishDefault = /^(?:🎯\s*)?PROFESSIONAL SUMMARY(?:\s*&\s*PITCH)?$/i.test(custom) ||
-        /^(?:🛠️\s*)?(?:CORE\s*)?SKILLS(?:\s*&\s*COMPETENCIES)?$/i.test(custom) ||
-        /^(?:💼\s*)?(?:CAREER\s*HISTORY|WORK\s*EXPERIENCE|PROFESSIONAL\s*EXPERIENCE)(?:\s*&\s*KEY\s*ACHIEVEMENTS)?$/i.test(custom) ||
-        /^(?:🚀\s*)?(?:PROJECTS|FEATURED\s*PROJECTS)(?:\s*&\s*EXTRAS)?$/i.test(custom) ||
-        /^(?:🎓\s*)?EDUCATION(?:\s*&\s*CERTIFICATIONS)?$/i.test(custom) ||
-        /^(?:🌐\s*)?LANGUAGES?$/i.test(custom);
+      const cleanCustom = custom.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s*#_\-–—|•·:]+/u, '').trim();
+      const isEnglishDefault = /^(?:PROFESSIONAL\s*SUMMARY(?:\s*&\s*PITCH)?|SUMMARY(?:\s*&\s*OBJECTIVE)?)$/i.test(cleanCustom) ||
+        /^(?:(?:CORE\s*)?SKILLS(?:\s*&\s*COMPETENCIES)?|TECHNICAL\s*SKILLS)$/i.test(cleanCustom) ||
+        /^(?:(?:CAREER\s*HISTORY|WORK\s*EXPERIENCE|PROFESSIONAL\s*EXPERIENCE)(?:\s*&\s*KEY\s*ACHIEVEMENTS)?)$/i.test(cleanCustom) ||
+        /^(?:(?:FEATURED\s*)?PROJECTS(?:\s*&\s*EXTRAS)?)$/i.test(cleanCustom) ||
+        /^(?:EDUCATION(?:\s*&\s*CERTIFICATIONS)?)$/i.test(cleanCustom) ||
+        /^(?:LANGUAGES?)$/i.test(cleanCustom);
 
       if (!isEnglishDefault || langDef.code === 'en') {
-        return custom.trim();
+        return cleanCustom || defTitle;
       }
     }
-    const defTitle = langDef.sections[type as keyof typeof langDef.sections] || type.toUpperCase();
-    return defaultEmoji ? `${defaultEmoji} ${defTitle}` : defTitle;
+    return defTitle;
   };
 
   // Summary
   if (data.summary && data.summary.trim()) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('summary', '🎯')}`);
+    parts.push(`## ${getSectionTitle('summary')}`);
     parts.push(data.summary.trim());
   }
 
   // Skills
   if (data.skillGroups && data.skillGroups.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('skills', '🛠️')}`);
+    parts.push(`## ${getSectionTitle('skills')}`);
     for (const group of data.skillGroups) {
       const cat = group.category ? group.category.replace(/[:*_\s]+$/, '').replace(/^[*_\s]+/, '').trim() : '';
       const skl = group.skills && group.skills.length > 0
@@ -94,7 +95,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   // Experience
   if (data.experience && data.experience.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('experience', '💼')}\n`);
+    parts.push(`## ${getSectionTitle('experience')}\n`);
     const expItemsFormatted = data.experience.map(exp => {
       const company = exp.company || '';
       const role = exp.role || '';
@@ -109,7 +110,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   // Projects & Extras
   if (data.projects && data.projects.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('projects', '🚀')}\n`);
+    parts.push(`## ${getSectionTitle('projects')}\n`);
     const projItemsFormatted = data.projects.map(proj => {
       const company = proj.company || '';
       const role = proj.role || '';
@@ -137,7 +138,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   const hasCert = Boolean(data.certifications && data.certifications.length > 0);
   if (hasEdu || hasCert) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('education', '🎓')}`);
+    parts.push(`## ${getSectionTitle('education')}`);
     if (data.education) {
       for (const edu of data.education) {
         let cleanEdu = edu.replace(/^(?:[-•]\s*|\*\s+)/, '');
@@ -161,7 +162,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   // Languages
   if (data.languages && data.languages.length > 0) {
     parts.push('\n---\n');
-    parts.push(`## ${getSectionTitle('languages', '🌐')}`);
+    parts.push(`## ${getSectionTitle('languages')}`);
     for (const lang of data.languages) {
       let cleanLang = lang.replace(/^(?:[-•]\s*|\*\s+)/, '');
       if (/^\*?[^*]+\*\*/.test(cleanLang)) {
@@ -177,16 +178,8 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     for (const custom of data.customSections) {
       if (custom.title && custom.items && custom.items.length > 0) {
         parts.push('\n---\n');
-        let iconPrefix = '';
-        if (custom.presetType === 'certifications') iconPrefix = '🏆 ';
-        else if (custom.presetType === 'awards') iconPrefix = '🎖️ ';
-        else if (custom.presetType === 'publications') iconPrefix = '📚 ';
-        else if (custom.presetType === 'volunteering') iconPrefix = '🤝 ';
-        else if (custom.presetType === 'conferences') iconPrefix = '🎤 ';
-        else iconPrefix = '📌 ';
-
-        const cleanTitle = custom.title.replace(/^[🏆🎖️📚🤝🎤📌\s]+/, '').trim();
-        parts.push(`## ${iconPrefix}${cleanTitle.toUpperCase()}`);
+        const cleanTitle = custom.title.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s*#_\-–—|•·:]+/u, '').trim();
+        parts.push(`## ${cleanTitle.toUpperCase()}`);
         for (const item of custom.items) {
           let cleanItem = item.replace(/^(?:[-•]\s*|\*\s+)/, '');
           if (cleanItem.trim()) {
