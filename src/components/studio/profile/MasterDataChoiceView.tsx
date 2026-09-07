@@ -23,14 +23,15 @@ export interface MasterDataChoiceViewProps {
   openFileDialog: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   isProcessing?: boolean;
+  hasData?: boolean;
 }
 
 /**
  * Step 1: Onboarding Choice View (Dumb Presentational Component)
  * Clean, frictionless entrance allowing the candidate to:
  * 1) Import an existing resume (PDF, TXT, MD)
- * 2) Start from scratch via Guided Step-by-Step Form
- * 3) Paste unformatted notes or free text
+ * 2) Start from scratch or continue via Guided Step-by-Step Form
+ * 3) Paste or view unformatted notes / free text
  */
 export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.memo(({
   onSelectFreeText,
@@ -40,6 +41,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
   openFileDialog,
   fileInputRef,
   isProcessing = false,
+  hasData = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -69,14 +71,6 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
 
       {/* Header Banner */}
       <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4.5 } }}>
-        <Chip
-          icon={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-          label={t('profile:choice.badge', 'Step 1 of 3 • Career Profile')}
-          size="small"
-          color="primary"
-          variant="outlined"
-          sx={{ mb: 1.5, fontWeight: 700 }}
-        />
         <Typography variant="h4" sx={{ fontWeight: 800, mb: 1.2, letterSpacing: '-0.02em' }}>
           {t('profile:choice.title', 'How would you like to start your profile?')}
         </Typography>
@@ -230,9 +224,13 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
                 <FormatListBulletedRoundedIcon fontSize="medium" />
               </Box>
               <Chip
-                label={t('profile:choice.startFromScratch', 'Start from Scratch')}
+                label={
+                  hasData
+                    ? t('profile:choice.activeProfileBadge', 'Profile Loaded')
+                    : t('profile:choice.startFromScratch', 'Start from Scratch')
+                }
                 size="small"
-                color="secondary"
+                color={hasData ? 'success' : 'secondary'}
                 variant="outlined"
                 sx={{ fontWeight: 700, fontSize: '0.7rem' }}
               />
@@ -242,23 +240,30 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
               {t('profile:choice.guidedCardTitle', 'Guided Form')}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.5, minHeight: 48 }}>
-              {t(
-                'profile:choice.guidedCardDesc',
-                'Fill out your personal info, experience, education, and skills step by step in a structured visual form.'
-              )}
+              {hasData
+                ? t(
+                    'profile:choice.guidedCardDescExisting',
+                    'Continue editing your structured profile sections: experience, education, and skills.'
+                  )
+                : t(
+                    'profile:choice.guidedCardDesc',
+                    'Fill out your personal info, experience, education, and skills step by step in a structured visual form.'
+                  )}
             </Typography>
           </Box>
 
           <Button
             variant="contained"
-            color="secondary"
+            color={hasData ? 'primary' : 'secondary'}
             size="medium"
             onClick={onSelectGuided}
             endIcon={<ArrowForwardRoundedIcon />}
             fullWidth
             sx={{ fontWeight: 700 }}
           >
-            {t('profile:choice.guidedAction', 'Start Guided Form')}
+            {hasData
+              ? t('profile:choice.continueGuidedAction', 'Continue in Guided Form')
+              : t('profile:choice.guidedAction', 'Start Guided Form')}
           </Button>
         </Paper>
 
@@ -302,10 +307,15 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
               {t('profile:choice.freeTextCardTitle', 'Paste Raw Notes')}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.5, minHeight: 48 }}>
-              {t(
-                'profile:choice.freeTextCardDesc',
-                'Paste unformatted career notes, LinkedIn summary, or bullet points. The AI handles the structure.'
-              )}
+              {hasData
+                ? t(
+                    'profile:choice.freeTextCardDescExisting',
+                    'View or edit your current career profile as plain text notes.'
+                  )
+                : t(
+                    'profile:choice.freeTextCardDesc',
+                    'Paste unformatted career notes, LinkedIn summary, or bullet points. The AI handles the structure.'
+                  )}
             </Typography>
           </Box>
 
@@ -318,7 +328,9 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
             fullWidth
             sx={{ fontWeight: 700 }}
           >
-            {t('profile:choice.freeTextAction', 'Write or Paste Notes')}
+            {hasData
+              ? t('profile:choice.continueFreeTextAction', 'Edit in Free Text / Notes')
+              : t('profile:choice.freeTextAction', 'Write or Paste Notes')}
           </Button>
         </Paper>
       </Box>

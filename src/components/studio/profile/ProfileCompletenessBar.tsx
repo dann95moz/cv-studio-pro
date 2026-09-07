@@ -33,6 +33,47 @@ export const ProfileCompletenessBar: React.FC<ProfileCompletenessBarProps> = ({
     level === 'complete' ? 'success' : level === 'good' ? 'primary' : 'warning';
   const colorMain = theme.palette[colorKey].main;
 
+  if (level === 'complete') {
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          py: 0.85,
+          px: { xs: 1.5, sm: 2 },
+          borderRadius: 2,
+          bgcolor: alpha(colorMain, 0.05),
+          border: `1px solid ${alpha(colorMain, 0.25)}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1.5,
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+          <CheckCircleRoundedIcon sx={{ color: colorMain, fontSize: 18, flexShrink: 0 }} />
+          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8125rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {t('profile:completeness.title', 'Completitud del Perfil Maestro')}:{' '}
+            <Box component="span" sx={{ color: colorMain }}>
+              100%
+            </Box>
+            <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500, ml: 1, display: { xs: 'none', sm: 'inline' } }}>
+              • {t('profile:completeness.levelComplete', '¡Perfil robusto! Listo para adaptar con alto impacto ATS.')}
+            </Box>
+          </Typography>
+        </Box>
+
+        <Chip
+          size="small"
+          color="success"
+          variant="outlined"
+          label={`${completedCount}/${totalCount} ${t('profile:completeness.sectionsDone', 'secciones')}`}
+          sx={{ fontWeight: 600, height: 22, fontSize: '0.6875rem', flexShrink: 0 }}
+        />
+      </Paper>
+    );
+  }
+
   return (
     <Paper
       elevation={0}
@@ -67,11 +108,7 @@ export const ProfileCompletenessBar: React.FC<ProfileCompletenessBarProps> = ({
               justifyContent: 'center',
             }}
           >
-            {level === 'complete' ? (
-              <CheckCircleRoundedIcon fontSize="small" />
-            ) : (
-              <AutoAwesomeRoundedIcon fontSize="small" />
-            )}
+            <AutoAwesomeRoundedIcon fontSize="small" />
           </Box>
 
           <Box>
@@ -82,9 +119,7 @@ export const ProfileCompletenessBar: React.FC<ProfileCompletenessBarProps> = ({
               </Box>
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {level === 'complete'
-                ? t('profile:completeness.levelComplete', '¡Perfil robusto! Listo para adaptar con alto impacto ATS.')
-                : level === 'good'
+              {level === 'good'
                 ? t('profile:completeness.levelGood', 'Perfil sólido. Puedes generar CVs o completar secciones para mayor afinidad.')
                 : t('profile:completeness.levelInitial', 'Perfil básico. Te sugerimos agregar más detalles para un mejor resultado.')}
             </Typography>

@@ -17,9 +17,12 @@ import {
   Snackbar,
   Alert,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
   alpha,
 } from '@mui/material';
+import { StepFooterStatus } from '../atoms/StepFooterStatus';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
@@ -101,6 +104,16 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
     onNextStep,
   });
 
+  const [showSampleConfirmDialog, setShowSampleConfirmDialog] = React.useState(false);
+
+  const handleTriggerLoadSample = () => {
+    if (hasData) {
+      setShowSampleConfirmDialog(true);
+    } else {
+      onLoadSample();
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -153,11 +166,12 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
         <MasterDataChoiceView
           onSelectFreeText={() => handleSelectMode('freeText')}
           onSelectGuided={() => handleSelectMode('guided')}
-          onLoadSample={onLoadSample}
+          onLoadSample={handleTriggerLoadSample}
           onUploadFile={handleFileUpload}
           openFileDialog={openFileDialog}
           fileInputRef={fileInputRef}
           isProcessing={isProcessing}
+          hasData={hasData}
         />
       ) : (
         <Box
@@ -193,35 +207,50 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             }}
           >
             <Box sx={{ maxWidth: 720 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Chip
-                  icon={editMode === 'guided' ? <FormatListBulletedRoundedIcon sx={{ fontSize: 16 }} /> : <EditNoteRoundedIcon sx={{ fontSize: 16 }} />}
-                  label={editMode === 'guided' ? t('profile:modes.guidedShort', 'Guided Form Mode') : t('profile:modes.freeTextShort', 'Career Notes Mode')}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25, flexWrap: 'wrap' }}>
+                <ToggleButtonGroup
                   size="small"
-                  color="primary"
-                  variant="outlined"
-                  sx={{ fontWeight: 700 }}
-                />
-                <Button
-                  size="small"
-                  variant="text"
-                  color="inherit"
-                  onClick={handleResetToChoice}
-                  sx={{ fontSize: '0.75rem', color: 'text.secondary', textTransform: 'none' }}
+                  value={editMode}
+                  exclusive
+                  onChange={(_, newMode) => {
+                    if (newMode && (newMode === 'guided' || newMode === 'freeText')) {
+                      handleSwitchMode(newMode);
+                    }
+                  }}
+                  sx={{
+                    bgcolor: alpha(theme.palette.text.primary, 0.04),
+                    p: 0.35,
+                    borderRadius: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    '& .MuiToggleButton-root': {
+                      px: 1.5,
+                      py: 0.4,
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      border: 'none',
+                      borderRadius: 1.5,
+                      color: 'text.secondary',
+                      '&.Mui-selected': {
+                        bgcolor: 'background.paper',
+                        color: 'primary.main',
+                        boxShadow: theme.shadows[1],
+                        '&:hover': {
+                          bgcolor: 'background.paper',
+                        },
+                      },
+                    },
+                  }}
                 >
-                  {t('profile:choice.switchMethod', 'Change Method')}
-                </Button>
-                <Button
-                  size="small"
-                  variant="text"
-                  color="primary"
-                  onClick={() => handleSwitchMode(editMode === 'guided' ? 'freeText' : 'guided')}
-                  sx={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'none' }}
-                >
-                  {editMode === 'guided'
-                    ? t('profile:choice.switchToFreeText', 'Switch to Plain Notes')
-                    : t('profile:choice.switchToGuided', 'Switch to Guided Form')}
-                </Button>
+                  <ToggleButton value="guided">
+                    <FormatListBulletedRoundedIcon sx={{ fontSize: 16, mr: 0.75 }} />
+                    {t('profile:modes.guidedShort', 'Guided Form')}
+                  </ToggleButton>
+                  <ToggleButton value="freeText">
+                    <EditNoteRoundedIcon sx={{ fontSize: 16, mr: 0.75 }} />
+                    {t('profile:modes.freeTextShort', 'Career Notes')}
+                  </ToggleButton>
+                </ToggleButtonGroup>
               </Box>
               <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
                 {editMode === 'guided'
@@ -412,25 +441,14 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
-            {hasData ? (
-              <Chip
-                icon={<CheckCircleRoundedIcon />}
-                label={t('profile:status.ready', 'Career profile ready for tailoring')}
-                color="success"
-                variant="outlined"
-                size="small"
-                sx={{ fontWeight: 600 }}
-              />
-            ) : (
-              <Chip
-                icon={<InfoRoundedIcon />}
-                label={t('profile:status.tipLoadSample', "Tip: Click 'Import from PDF' or 'Load Sample Profile' to start")}
-                color="warning"
-                variant="outlined"
-                size="small"
-                sx={{ fontWeight: 600 }}
-              />
-            )}
+            <StepFooterStatus
+              status={hasData ? 'ready' : 'warning'}
+              label={
+                hasData
+                  ? t('profile:status.ready', 'Career profile ready for tailoring')
+                  : t('profile:status.tipLoadSample', "Tip: Click 'Import from PDF' or 'Load Sample Profile' to start")
+              }
+            />
 
             {/* Contextual Backup Export only when there is actual profile data */}
             {hasData && (
@@ -547,6 +565,23 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
           'Are you sure you want to clear all profile data? This action cannot be undone.'
         )}
         confirmLabel={t('profile:dialog.confirmClear', 'Confirm')}
+        cancelLabel={t('profile:dialog.cancel', 'Cancel')}
+      />
+
+      {/* Confirmation Dialog Before Overwriting with Sample Profile */}
+      <ConfirmDeleteDialog
+        open={showSampleConfirmDialog}
+        onCancel={() => setShowSampleConfirmDialog(false)}
+        onConfirm={() => {
+          setShowSampleConfirmDialog(false);
+          onLoadSample();
+        }}
+        title={t('profile:dialog.confirmLoadSampleTitle', 'Load sample profile?')}
+        message={t(
+          'profile:dialog.confirmLoadSampleDesc',
+          'Loading this sample profile will replace your current profile data. Are you sure you want to proceed?'
+        )}
+        confirmLabel={t('profile:dialog.confirmLoadSample', 'Load Sample')}
         cancelLabel={t('profile:dialog.cancel', 'Cancel')}
       />
 

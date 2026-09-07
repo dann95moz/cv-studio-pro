@@ -9,3 +9,6 @@ export type { ActionIconButtonProps } from './ActionIconButton';
 
 export { SectionHeader } from './SectionHeader';
 export type { SectionHeaderProps } from './SectionHeader';
+
+export { StepFooterStatus } from './StepFooterStatus';
+export type { StepFooterStatusProps } from './StepFooterStatus';
