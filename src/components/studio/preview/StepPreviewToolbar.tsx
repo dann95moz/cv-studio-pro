@@ -7,7 +7,6 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Select,
   MenuItem,
   Menu,
   ListItemIcon,
@@ -19,14 +18,10 @@ import {
   alpha,
 } from '@mui/material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
-import StyleRoundedIcon from '@mui/icons-material/StyleRounded';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
-import FormatBoldRoundedIcon from '@mui/icons-material/FormatBoldRounded';
-import FormatItalicRoundedIcon from '@mui/icons-material/FormatItalicRounded';
-import HighlightRoundedIcon from '@mui/icons-material/HighlightRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
 import AspectRatioRoundedIcon from '@mui/icons-material/AspectRatioRounded';
 import ViewKanbanRoundedIcon from '@mui/icons-material/ViewKanbanRounded';
@@ -40,12 +35,12 @@ import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import { useTranslation } from 'react-i18next';
 import { StepPreviewToolbarProps, PageFormat } from '../../../types';
-import { useCvLiveEdit } from './CvLiveEditContext';
 import { PAGE_FORMAT_CONFIGS } from '../../../theme/dimensions';
 
 export type { StepPreviewToolbarProps };
 
 export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
+  onSelectWizardStep,
   previewDocType = 'cv',
   onPreviewDocTypeChange,
   activeTemplateName,
@@ -78,12 +73,21 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
   isTranslating = false,
 }) => {
   const { t } = useTranslation(['preview', 'target', 'common']);
-  const liveEdit = useCvLiveEdit();
   const theme = useTheme();
 
+  const [stepMenuAnchor, setStepMenuAnchor] = useState<null | HTMLElement>(null);
   const [pdfMenuAnchor, setPdfMenuAnchor] = useState<null | HTMLElement>(null);
   const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null);
+  const [formatMenuAnchor, setFormatMenuAnchor] = useState<null | HTMLElement>(null);
   const [copiedAts, setCopiedAts] = useState<boolean>(false);
+
+  const handleOpenStepMenu = (e: React.MouseEvent<HTMLElement>) => {
+    setStepMenuAnchor(e.currentTarget);
+  };
+
+  const handleCloseStepMenu = () => {
+    setStepMenuAnchor(null);
+  };
 
   const handleCopyAts = () => {
     if (onCopyPlainText) {
@@ -109,6 +113,14 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
     setLangMenuAnchor(null);
   };
 
+  const handleOpenFormatMenu = (e: React.MouseEvent<HTMLElement>) => {
+    setFormatMenuAnchor(e.currentTarget);
+  };
+
+  const handleCloseFormatMenu = () => {
+    setFormatMenuAnchor(null);
+  };
+
   return (
     <Paper
       elevation={0}
@@ -129,8 +141,111 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
         zIndex: 20,
       }}
     >
-      {/* Left: Document Switcher (CV vs Cover Letter), Language Selector & Template */}
+      {/* Left: Wizard Breadcrumb Dropdown, Document Switcher & Settings */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+        {/* Interactive Wizard Step Breadcrumb Dropdown */}
+        {onSelectWizardStep && (
+          <>
+            <Button
+              size="small"
+              variant="outlined"
+              color="inherit"
+              onClick={handleOpenStepMenu}
+              startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: '15px !important', color: 'primary.main' }} />}
+              endIcon={<ArrowDropDownRoundedIcon sx={{ ml: -0.5, fontSize: 18, color: 'text.secondary' }} />}
+              sx={{
+                px: 1.4,
+                textTransform: 'none',
+                borderColor: alpha(theme.palette.primary.main, 0.25),
+                bgcolor: alpha(theme.palette.primary.main, 0.04),
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  borderColor: 'primary.main',
+                },
+              }}
+            >
+              <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                  {t('preview:toolbar.step2BreadcrumbPrefix', 'Vacante')} &gt;
+                </Box>
+                <Box component="span" sx={{ color: 'primary.main' }}>
+                  {t('preview:toolbar.step3Breadcrumb', 'CV en Vivo')}
+                </Box>
+              </Typography>
+            </Button>
+
+            <Menu
+              anchorEl={stepMenuAnchor}
+              open={Boolean(stepMenuAnchor)}
+              onClose={handleCloseStepMenu}
+              slotProps={{ paper: { sx: { mt: 0.75, minWidth: 260 } } }}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleCloseStepMenu();
+                  onSelectWizardStep('profile');
+                }}
+              >
+                <ListItemIcon>
+                  <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'primary.main', color: 'primary.contrastText', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                    1
+                  </Box>
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('preview:toolbar.step1Label', 'Paso 1: Perfil y Experiencia')}
+                  secondary={t('preview:toolbar.step1Desc', 'Editar master data y trayectoria')}
+                  slotProps={{
+                    primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } },
+                    secondary: { sx: { fontSize: '0.7rem' } },
+                  }}
+                />
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => {
+                  handleCloseStepMenu();
+                  onSelectWizardStep('target');
+                }}
+              >
+                <ListItemIcon>
+                  <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'secondary.main', color: 'secondary.contrastText', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                    2
+                  </Box>
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('preview:toolbar.step2Label', 'Paso 2: Vacante Objetivo')}
+                  secondary={t('preview:toolbar.step2Desc', 'Ajustar descripción y calibración ATS')}
+                  slotProps={{
+                    primary: { sx: { fontSize: '0.82rem', fontWeight: 600 } },
+                    secondary: { sx: { fontSize: '0.7rem' } },
+                  }}
+                />
+              </MenuItem>
+
+              <MenuItem
+                selected
+                onClick={handleCloseStepMenu}
+              >
+                <ListItemIcon>
+                  <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: alpha(theme.palette.primary.main, 0.2), color: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                    3
+                  </Box>
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('preview:toolbar.step3Label', 'Paso 3: CV en Vivo y Exportación')}
+                  secondary={t('preview:toolbar.step3Desc', 'Paso actual (edición en tiempo real)')}
+                  slotProps={{
+                    primary: { sx: { fontSize: '0.82rem', fontWeight: 700, color: 'primary.main' } },
+                    secondary: { sx: { fontSize: '0.7rem' } },
+                  }}
+                />
+              </MenuItem>
+            </Menu>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 0.5 }} />
+          </>
+        )}
+
         {/* Document Type Switcher */}
         {onPreviewDocTypeChange && (
           <ButtonGroup
@@ -322,53 +437,114 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
           </>
         )}
 
-        {/* Active Template Chip (shown for CV mode) */}
-        {previewDocType === 'cv' && (
-          <Chip
-            icon={<StyleRoundedIcon sx={{ fontSize: '14px !important' }} />}
-            label={activeTemplateName}
-            size="small"
-            variant="outlined"
-            onClick={onOpenTemplates}
-            sx={{
-              fontWeight: 700,
-              fontSize: '0.72rem',
-              cursor: 'pointer',
-              display: { xs: 'none', sm: 'inline-flex' },
-              '&:hover': {
-                borderColor: 'primary.main',
-                bgcolor: alpha(theme.palette.primary.main, 0.08),
-              },
-            }}
-          />
-        )}
-
         {/* Page Format Selector (A4 / Letter / Legal) */}
         {onPageFormatChange && (
-          <Select
-            size="small"
-            value={pageFormat}
-            onChange={(e) => onPageFormatChange(e.target.value as PageFormat)}
-            startAdornment={<AspectRatioRoundedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />}
-            sx={{
-              height: 28,
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              bgcolor: 'background.paper',
-              display: { xs: 'none', md: 'inline-flex' },
-              '& .MuiSelect-select': { py: 0.25, px: 1, display: 'flex', alignItems: 'center', gap: 0.5 },
-            }}
-          >
-            <MenuItem value="a4" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
-              {PAGE_FORMAT_CONFIGS.a4.shortLabel} (210×297mm)
-            </MenuItem>
-            <MenuItem value="letter" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
-              {PAGE_FORMAT_CONFIGS.letter.shortLabel} (8.5×11")
-            </MenuItem>
-            <MenuItem value="legal" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
-              {PAGE_FORMAT_CONFIGS.legal.shortLabel} (8.5×14")
-            </MenuItem>
-          </Select>
+          <>
+            <Tooltip title={t('preview:toolbar.pageFormatTooltip', 'Paper Format (A4, US Letter, US Legal)')}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                onClick={handleOpenFormatMenu}
+                startIcon={<AspectRatioRoundedIcon sx={{ fontSize: '14px !important', color: 'text.secondary' }} />}
+                endIcon={<ArrowDropDownRoundedIcon sx={{ ml: -0.5, fontSize: 18, color: 'text.secondary' }} />}
+                sx={{
+                  height: 28,
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  px: 1,
+                  borderColor: 'divider',
+                  color: 'text.primary',
+                  bgcolor: 'background.paper',
+                  display: { xs: 'none', md: 'inline-flex' },
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                  },
+                }}
+              >
+                {pageFormat === 'letter'
+                  ? `${PAGE_FORMAT_CONFIGS.letter.shortLabel} (8.5×11")`
+                  : pageFormat === 'legal'
+                  ? `${PAGE_FORMAT_CONFIGS.legal.shortLabel} (8.5×14")`
+                  : `${PAGE_FORMAT_CONFIGS.a4.shortLabel} (210×297mm)`}
+              </Button>
+            </Tooltip>
+
+            <Menu
+              anchorEl={formatMenuAnchor}
+              open={Boolean(formatMenuAnchor)}
+              onClose={handleCloseFormatMenu}
+              slotProps={{ paper: { sx: { mt: 0.75, minWidth: 200 } } }}
+            >
+              <MenuItem
+                selected={pageFormat === 'a4'}
+                onClick={() => {
+                  handleCloseFormatMenu();
+                  onPageFormatChange('a4');
+                }}
+              >
+                <ListItemIcon>
+                  {pageFormat === 'a4' ? (
+                    <CheckRoundedIcon fontSize="small" color="primary" />
+                  ) : (
+                    <Box sx={{ width: 20 }} />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: pageFormat === 'a4' ? 700 : 500 }}>
+                      {PAGE_FORMAT_CONFIGS.a4.shortLabel} (210×297mm)
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+              <MenuItem
+                selected={pageFormat === 'letter'}
+                onClick={() => {
+                  handleCloseFormatMenu();
+                  onPageFormatChange('letter');
+                }}
+              >
+                <ListItemIcon>
+                  {pageFormat === 'letter' ? (
+                    <CheckRoundedIcon fontSize="small" color="primary" />
+                  ) : (
+                    <Box sx={{ width: 20 }} />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: pageFormat === 'letter' ? 700 : 500 }}>
+                      {PAGE_FORMAT_CONFIGS.letter.shortLabel} (8.5×11")
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+              <MenuItem
+                selected={pageFormat === 'legal'}
+                onClick={() => {
+                  handleCloseFormatMenu();
+                  onPageFormatChange('legal');
+                }}
+              >
+                <ListItemIcon>
+                  {pageFormat === 'legal' ? (
+                    <CheckRoundedIcon fontSize="small" color="primary" />
+                  ) : (
+                    <Box sx={{ width: 20 }} />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: pageFormat === 'legal' ? 700 : 500 }}>
+                      {PAGE_FORMAT_CONFIGS.legal.shortLabel} (8.5×14")
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+            </Menu>
+          </>
         )}
 
         {/* Magic 1-Page Auto-Fit Button */}
@@ -394,50 +570,6 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
             </Button>
           </Tooltip>
         )}
-
-        {/* Live Document Text Formatting Tools */}
-        <ButtonGroup size="small" variant="outlined" sx={{ bgcolor: 'background.paper', flexShrink: 0, display: { xs: 'none', md: 'inline-flex' } }}>
-          <Tooltip title={t('preview:toolbar.formatBold', 'Bold Selected Text (Ctrl+B)')}>
-
-            <IconButton
-              size="small"
-              onClick={() => liveEdit?.formatSelection('bold')}
-              sx={{
-                p: 0.6,
-                color: 'text.primary',
-                '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.1) },
-              }}
-            >
-              <FormatBoldRoundedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('preview:toolbar.formatItalic', 'Italic Selected Text (Ctrl+I)')}>
-            <IconButton
-              size="small"
-              onClick={() => liveEdit?.formatSelection('italic')}
-              sx={{
-                p: 0.6,
-                color: 'text.primary',
-                '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.1) },
-              }}
-            >
-              <FormatItalicRoundedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('preview:toolbar.formatHighlight', 'Highlight Keyword (++)')}>
-            <IconButton
-              size="small"
-              onClick={() => liveEdit?.formatSelection('highlight')}
-              sx={{
-                p: 0.6,
-                color: 'text.primary',
-                '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.1) },
-              }}
-            >
-              <HighlightRoundedIcon sx={{ fontSize: 17 }} />
-            </IconButton>
-          </Tooltip>
-        </ButtonGroup>
       </Box>
 
       {/* Right: Clean, Balanced Action Group */}
@@ -546,6 +678,9 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
             : t('preview:toolbar.regenerateCv', 'Regenerar CV')}
         </Button>
 
+        {/* Visual separation before Primary CTA */}
+        <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.25, sm: 0.5 }, my: 0.5, display: { xs: 'none', md: 'block' } }} />
+
         {/* 4. Download Dropdown Button (Unified Primary Action Pill) */}
         <Button
           variant="contained"
@@ -572,10 +707,10 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
           }}
         >
           <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-            {isExportingPdf ? t('preview:toolbar.generatingPdf', 'Generando PDF...') : t('preview:toolbar.downloadPdfDirect', 'Descargar PDF')}
+            {isExportingPdf ? t('preview:toolbar.generatingPdf', 'Generando PDF...') : t('preview:toolbar.downloadFormats', 'Descargar / Exportar')}
           </Box>
           <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
-            {isExportingPdf ? '...' : 'PDF'}
+            {isExportingPdf ? '...' : t('preview:toolbar.downloadFormats', 'Exportar')}
           </Box>
         </Button>
 
