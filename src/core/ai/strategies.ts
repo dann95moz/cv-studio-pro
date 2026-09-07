@@ -146,48 +146,76 @@ export class GeminiStrategy implements AIProviderStrategy {
       throw new Error('Please enter your Google Gemini API Key in AI Settings.');
     }
 
-    const modelName = settings.model?.trim() || 'gemini-3.6-flash';
+    const requestedModel = settings.model?.trim() || 'gemini-3.5-flash-lite';
+    const fallbackCandidates = [
+      requestedModel,
+      'gemini-3.5-flash-lite',
+      'gemini-2.5-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash'
+    ].filter((m, i, a) => a.indexOf(m) === i);
 
-    if (signal?.aborted) throw new Error('Generation cancelled by user.');
+    let lastError: unknown = null;
 
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        systemInstruction: prompts.systemInstruction,
-        generationConfig: {
-          temperature: typeof settings.temperature === 'number' ? settings.temperature : 0.15
+    for (let i = 0; i < fallbackCandidates.length; i++) {
+      const currentModelName = fallbackCandidates[i];
+      if (signal?.aborted) throw new Error('Generation cancelled by user.');
+
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: currentModelName,
+          systemInstruction: prompts.systemInstruction,
+          generationConfig: {
+            temperature: typeof settings.temperature === 'number' ? settings.temperature : 0.15
+          }
+        });
+
+        const resultStream = await model.generateContentStream(prompts.userPrompt);
+        let text = '';
+
+        for await (const chunk of resultStream.stream) {
+          if (signal?.aborted) throw new Error('Generation cancelled by user.');
+          const chunkText = chunk.text();
+          text += chunkText;
+          if (onProgress) {
+            const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+            onProgress({ chunk: chunkText, accumulatedText: text, wordCount });
+          }
         }
-      });
 
-      const resultStream = await model.generateContentStream(prompts.userPrompt);
-      let text = '';
-
-      for await (const chunk of resultStream.stream) {
-        if (signal?.aborted) throw new Error('Generation cancelled by user.');
-        const chunkText = chunk.text();
-        text += chunkText;
-        if (onProgress) {
-          const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-          onProgress({ chunk: chunkText, accumulatedText: text, wordCount });
+        if (!text || text.trim().length === 0) {
+          throw new Error(`Empty response from Gemini model ${currentModelName}`);
         }
-      }
 
-      if (!text || text.trim().length === 0) {
-        throw new Error(`Empty response from Gemini model ${modelName}`);
-      }
+        const modelUsed = currentModelName === requestedModel
+          ? `Google ${currentModelName}`
+          : `Google ${currentModelName} (High-Demand Fallback)`;
 
-      return {
-        text,
-        modelUsed: `Google ${modelName}`
-      };
-    } catch (err: unknown) {
-      if (signal?.aborted || (err instanceof Error && (err.name === 'AbortError' || err.message.includes('cancelled')))) {
-        throw new Error('Generation cancelled by user.');
+        return {
+          text,
+          modelUsed
+        };
+      } catch (err: unknown) {
+        if (signal?.aborted || (err instanceof Error && (err.name === 'AbortError' || err.message.includes('cancelled')))) {
+          throw new Error('Generation cancelled by user.');
+        }
+        lastError = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        const isCapacityError = msg.includes('503') || msg.includes('high demand') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('429') || msg.includes('overloaded');
+        
+        // If it's a capacity/demand error and we have more candidates, continue to fallback
+        if (isCapacityError && i < fallbackCandidates.length - 1) {
+          continue;
+        }
+        // If not a capacity error, break out immediately
+        break;
       }
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(`Gemini (${modelName}) Error: ${msg}`);
     }
+
+    const msg = lastError instanceof Error ? lastError.message : String(lastError);
+    throw new Error(`Gemini (${requestedModel}) Error: ${msg}`);
   }
 }
 
@@ -384,6 +412,8 @@ export function getAIStrategy(provider: AIProviderId): AIProviderStrategy {
     case 'openrouter':
     case 'custom':
       return openAICompatibleStrategy;
+    case 'manual':
+      throw new Error('Manual (Bring-Your-Own-AI) mode is handled interactively via the prompt-and-paste dialog.');
     default:
       throw new Error(`Unsupported AI Provider: ${provider}`);
   }
