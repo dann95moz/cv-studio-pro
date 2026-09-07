@@ -23,6 +23,7 @@ import { RADIUS_TOKENS } from '../../theme/dimensions';
 import { useStepPreviewWorkflow } from '../../hooks/useStepPreviewWorkflow';
 import {
   MobileDocumentBar,
+  MobileDiagnosticBar,
   MobileStudioFab,
   MobileToolsBottomSheet,
 } from './mobile';
@@ -255,6 +256,19 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
         />
       </Box>
 
+      {/* Mobile-First Tertiary Diagnostic Bar: Calidad, Ajuste (Brechas), Prep */}
+      <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
+        <MobileDiagnosticBar
+          auditScore={auditReport?.overallScore ?? 0}
+          matchScore={gapInfo?.matchScore ?? 0}
+          onSelectTab={(tab) => {
+            setIsAuditGapOpen(true);
+            setAuditGapTab(tab);
+            setActiveSidePanel(null);
+          }}
+        />
+      </Box>
+
       {/* Main Studio Body: Vertical Left Rail + Side Drawer + Sheet Canvas + Right Audit/Gap Drawer */}
       <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden', position: 'relative' }}>
         {/* 1. Left Tool Rail (Desktop only, mobile uses FAB + Bottom Sheet) */}
@@ -482,6 +496,12 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           onOpenDiff={() => {
             setIsMobileToolsOpen(false);
             setIsDiffModalOpen(true);
+          }}
+          onOpenAuditGap={(tab = 'gap') => {
+            setIsMobileToolsOpen(false);
+            setIsAuditGapOpen(true);
+            setAuditGapTab(tab);
+            setActiveSidePanel(null);
           }}
           onDownloadPdf={onTriggerDirectDownloadPdf}
           onDownloadDocx={onTriggerDownloadDocx}
