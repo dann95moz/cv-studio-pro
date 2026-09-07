@@ -23,6 +23,7 @@
     "pdfTip": "Esporta PDF A4/Letter. Nella finestra di stampa: Margini: Nessuno e Grafica di sfondo: Attivati",
     "pageBoundary": "Limite Pagina 1 (Standard {{format}})",
     "downloadPdfDirect": "Scarica PDF",
+    "downloadFormats": "Scarica / Esporta",
     "generatingPdf": "Generazione PDF...",
     "directPdfItem": "Download Diretto PDF",
     "directPdfDesc": "Download immediato in 1 clic",
@@ -49,7 +50,15 @@
     "docCoverLetter": "Lettera di Presentazione",
     "languageTooltip": "Variante di lingua del CV / Traduzioni",
     "syncDiffBtn": "Sincronizza modifiche ({{count}})",
-    "syncDiffTooltip": "Sincronizza solo le sezioni modificate con l'IA per risparmiare token e aggiornare la traduzione"
+    "syncDiffTooltip": "Sincronizza solo le sezioni modificate con l'IA per risparmiare token e aggiornare la traduzione",
+    "step2BreadcrumbPrefix": "Posizione target",
+    "step3Breadcrumb": "CV dal vivo",
+    "step1Label": "Passo 1: Profilo ed Esperienza",
+    "step1Desc": "Modifica dati master ed esperienza",
+    "step2Label": "Passo 2: Posizione target",
+    "step2Desc": "Regola descrizione del lavoro e calibrazione ATS",
+    "step3Label": "Passo 3: CV dal vivo ed Esportazione",
+    "step3Desc": "Passaggio corrente (modifica in tempo reale)"
   },
   "editor": {
     "sourceTitle": "Sorgente Markdown del CV",
@@ -82,6 +91,8 @@
     "design": {
       "title": "Design & Formattazione",
       "subtitle": "Personalizza tipografia, spaziatura e stili visivi",
+      "tabTemplates": "Modelli",
+      "tabFormatting": "Formattazione e Stili",
       "fontFamily": "Carattere",
       "fontSize": "Dimensione Carattere Base",
       "lineHeight": "Interlinea",
@@ -138,7 +149,13 @@
     "matchLabel": "Allineamento Posizione",
     "shortScore": "Audit",
     "shortMatch": "Match",
-    "shortInterview": "Prep"
+    "shortInterview": "Prep",
+    "hudTitle": "Diagnosi ATS",
+    "quality": "Qualità",
+    "match": "Affinità",
+    "interviewPrepBtn": "Prep Colloquio",
+    "minimizeHud": "Riduci HUD di diagnosi ATS",
+    "expandHud": "Espandi HUD di diagnosi ATS"
   },
   "aiRegen": {
     "titleBullet": "Rigenera questo risultato",

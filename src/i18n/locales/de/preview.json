@@ -23,6 +23,7 @@
     "pdfTip": "A4/Letter PDF-Export. Im Druckmenü: Ränder: Keine & Hintergrundgrafiken: Aktiviert",
     "pageBoundary": "Seite 1 Grenze ({{format}} Standard)",
     "downloadPdfDirect": "PDF herunterladen",
+    "downloadFormats": "Herunterladen / Exportieren",
     "generatingPdf": "PDF wird erstellt...",
     "directPdfItem": "Direkter PDF-Download",
     "directPdfDesc": "1-Klick direkter Dateidownload",
@@ -49,7 +50,15 @@
     "docCoverLetter": "Anschreiben",
     "languageTooltip": "CV-Sprachvariante / Übersetzungen",
     "syncDiffBtn": "Änderungen synchronisieren ({{count}})",
-    "syncDiffTooltip": "Nur geänderte Abschnitte mit KI synchronisieren, um Tokens zu sparen"
+    "syncDiffTooltip": "Nur geänderte Abschnitte mit KI synchronisieren, um Tokens zu sparen",
+    "step2BreadcrumbPrefix": "Zielstelle",
+    "step3Breadcrumb": "Live-Lebenslauf",
+    "step1Label": "Schritt 1: Profil & Erfahrung",
+    "step1Desc": "Stammdaten & Werdegang bearbeiten",
+    "step2Label": "Schritt 2: Zielstelle",
+    "step2Desc": "Stellenbeschreibung & ATS-Kalibrierung anpassen",
+    "step3Label": "Schritt 3: Live-CV & Export",
+    "step3Desc": "Aktueller Schritt (Echtzeit-Bearbeitung)"
   },
   "editor": {
     "sourceTitle": "CV-Markdown-Quelle",
@@ -82,6 +91,8 @@
     "design": {
       "title": "Design & Formatierung",
       "subtitle": "Typografie, Abstände und visuelle Elemente anpassen",
+      "tabTemplates": "Vorlagen",
+      "tabFormatting": "Formatierung & Stile",
       "fontFamily": "Schriftfamilie",
       "fontSize": "Basis-Schriftgröße",
       "lineHeight": "Zeilenhöhe",
@@ -137,7 +148,13 @@
     "matchLabel": "Stellenabgleich",
     "shortScore": "Audit",
     "shortMatch": "Passung",
-    "shortInterview": "Prep"
+    "shortInterview": "Prep",
+    "hudTitle": "ATS-Diagnose",
+    "quality": "Qualität",
+    "match": "Passung",
+    "interviewPrepBtn": "Interview-Prep",
+    "minimizeHud": "ATS-Diagnose-HUD minimieren",
+    "expandHud": "ATS-Diagnose-HUD erweitern"
   },
   "aiRegen": {
     "titleBullet": "Diesen Erfolg neu generieren",

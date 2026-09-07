@@ -116,8 +116,8 @@ export const App: React.FC = () => {
         <StudioNavbar onOpenSync={() => setIsSyncModalOpen(true)} />
       </Box>
 
-      {/* Stepper Bar for Guided Wizard: Visible on Desktop */}
-      {activeTab === 'wizard' && (
+      {/* Stepper Bar for Guided Wizard: Visible on Desktop for Steps 1 & 2 (Step 3 uses compact breadcrumb dropdown) */}
+      {activeTab === 'wizard' && wizardStep !== 'preview' && (
         <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
           <WizardStepper
             currentStep={wizardStep}

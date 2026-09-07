@@ -23,6 +23,7 @@
     "pdfTip": "Exportar PDF en A4/Letter. En la ventana de impresión: Márgenes: Ninguno y Gráficos de Fondo: Activados",
     "pageBoundary": "Límite de Página 1 (Estándar {{format}})",
     "downloadPdfDirect": "Descargar PDF",
+    "downloadFormats": "Descargar / Exportar",
     "generatingPdf": "Generando PDF...",
     "directPdfItem": "Descarga Directa (PDF)",
     "directPdfDesc": "Descarga automática en 1 clic",
@@ -49,7 +50,15 @@
     "docCoverLetter": "Carta de Presentación",
     "languageTooltip": "Variante de Idioma / Traducciones del CV",
     "syncDiffBtn": "Sincronizar cambios ({{count}})",
-    "syncDiffTooltip": "Actualizar solo las secciones modificadas con IA para sincronizar y ahorrar tokens"
+    "syncDiffTooltip": "Actualizar solo las secciones modificadas con IA para sincronizar y ahorrar tokens",
+    "step2BreadcrumbPrefix": "Vacante Objetivo",
+    "step3Breadcrumb": "CV en Vivo",
+    "step1Label": "Paso 1: Perfil y Experiencia",
+    "step1Desc": "Editar master data y trayectoria",
+    "step2Label": "Paso 2: Vacante Objetivo",
+    "step2Desc": "Ajustar descripción y calibración ATS",
+    "step3Label": "Paso 3: CV en Vivo y Exportación",
+    "step3Desc": "Paso actual (edición en tiempo real)"
   },
   "editor": {
     "sourceTitle": "Fuente Markdown del CV",
@@ -82,6 +91,8 @@
     "design": {
       "title": "Diseño y Formato",
       "subtitle": "Personaliza tipografía, espaciado y estilos visuales",
+      "tabTemplates": "Plantillas",
+      "tabFormatting": "Formato y Estilos",
       "fontFamily": "Familia Tipográfica",
       "fontSize": "Tamaño de Fuente Base",
       "lineHeight": "Interlineado",
@@ -138,7 +149,13 @@
     "matchLabel": "Alineación de Puesto",
     "shortScore": "Auditoría",
     "shortMatch": "Ajuste",
-    "shortInterview": "Prep"
+    "shortInterview": "Prep",
+    "hudTitle": "Diagnóstico ATS",
+    "quality": "Calidad",
+    "match": "Ajuste",
+    "interviewPrepBtn": "Prep Entrevista",
+    "minimizeHud": "Minimizar HUD de diagnóstico ATS",
+    "expandHud": "Expandir HUD de diagnóstico ATS"
   },
   "aiRegen": {
     "titleBullet": "Regenerar este logro",

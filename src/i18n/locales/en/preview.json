@@ -23,6 +23,7 @@
     "pdfTip": "Export A4/Letter PDF. In print dialog: Margins: None & Background Graphics: On",
     "pageBoundary": "Page 1 Boundary ({{format}} Standard)",
     "downloadPdfDirect": "Download PDF",
+    "downloadFormats": "Download / Export",
     "generatingPdf": "Generating PDF...",
     "directPdfItem": "Direct PDF Download",
     "directPdfDesc": "1-Click instant file download",
@@ -49,7 +50,15 @@
     "docCoverLetter": "Cover Letter",
     "languageTooltip": "CV Language Variant / Translations",
     "syncDiffBtn": "Sync Changes ({{count}})",
-    "syncDiffTooltip": "Sync only modified sections with AI to save tokens and update translation"
+    "syncDiffTooltip": "Sync only modified sections with AI to save tokens and update translation",
+    "step2BreadcrumbPrefix": "Target Vacancy",
+    "step3Breadcrumb": "Live Resume",
+    "step1Label": "Step 1: Profile & Experience",
+    "step1Desc": "Edit master data and background",
+    "step2Label": "Step 2: Target Vacancy",
+    "step2Desc": "Adjust job description & ATS calibration",
+    "step3Label": "Step 3: Live CV & Export",
+    "step3Desc": "Current step (real-time live editing)"
   },
   "editor": {
     "sourceTitle": "CV Markdown Source",
@@ -82,6 +91,8 @@
     "design": {
       "title": "Design & Formatting",
       "subtitle": "Customize typography, spacing, and styling tokens",
+      "tabTemplates": "Templates",
+      "tabFormatting": "Formatting & Styles",
       "fontFamily": "Font Family",
       "fontSize": "Base Font Size",
       "lineHeight": "Line Height",
@@ -137,7 +148,13 @@
     "matchLabel": "Job Match",
     "shortScore": "Audit",
     "shortMatch": "Match",
-    "shortInterview": "Prep"
+    "shortInterview": "Prep",
+    "hudTitle": "ATS Diagnostic",
+    "quality": "Quality",
+    "match": "Match",
+    "interviewPrepBtn": "Interview Prep",
+    "minimizeHud": "Minimize ATS Diagnostic HUD",
+    "expandHud": "Expand ATS Diagnostic HUD"
   },
   "aiRegen": {
     "titleBullet": "Regenerate this achievement",

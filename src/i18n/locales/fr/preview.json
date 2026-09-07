@@ -23,6 +23,7 @@
     "pdfTip": "Export PDF A4/Letter. Dans la fenêtre d'impression : Marges : Aucune & Graphismes d'arrière-plan : Activés",
     "pageBoundary": "Limite Page 1 (Standard {{format}})",
     "downloadPdfDirect": "Télécharger le PDF",
+    "downloadFormats": "Télécharger / Exporter",
     "generatingPdf": "Génération du PDF...",
     "directPdfItem": "Téléchargement Direct du PDF",
     "directPdfDesc": "Téléchargement automatique en 1 clic",
@@ -49,7 +50,15 @@
     "docCoverLetter": "Lettre de Motivation",
     "languageTooltip": "Variante de langue / Traductions du CV",
     "syncDiffBtn": "Synchroniser modifications ({{count}})",
-    "syncDiffTooltip": "Synchroniser uniquement les sections modifiées avec l'IA pour économiser des tokens"
+    "syncDiffTooltip": "Synchroniser uniquement les sections modifiées avec l'IA pour économiser des tokens",
+    "step2BreadcrumbPrefix": "Poste cible",
+    "step3Breadcrumb": "CV en direct",
+    "step1Label": "Étape 1: Profil & Expérience",
+    "step1Desc": "Modifier les données de base et le parcours",
+    "step2Label": "Étape 2: Poste cible",
+    "step2Desc": "Ajuster l'offre d'emploi et le calibrage ATS",
+    "step3Label": "Étape 3: CV en direct & Exportation",
+    "step3Desc": "Étape actuelle (édition en temps réel)"
   },
   "editor": {
     "sourceTitle": "Source Markdown du CV",
@@ -82,6 +91,8 @@
     "design": {
       "title": "Design & Mise en Page",
       "subtitle": "Personnalisez la typographie, l'espacement et les styles visuels",
+      "tabTemplates": "Modèles",
+      "tabFormatting": "Formatage & Styles",
       "fontFamily": "Police d'Écriture",
       "fontSize": "Taille de Police de Base",
       "lineHeight": "Hauteur de Ligne",
@@ -138,7 +149,13 @@
     "matchLabel": "Alignement Poste",
     "shortScore": "Audit",
     "shortMatch": "Match",
-    "shortInterview": "Prep"
+    "shortInterview": "Prep",
+    "hudTitle": "Diagnostic ATS",
+    "quality": "Qualité",
+    "match": "Adéquation",
+    "interviewPrepBtn": "Prép. Entretien",
+    "minimizeHud": "Réduire le HUD de diagnostic ATS",
+    "expandHud": "Agrandir le HUD de diagnostic ATS"
   },
   "aiRegen": {
     "titleBullet": "Régénérer cette réalisation",

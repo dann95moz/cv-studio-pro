@@ -26,9 +26,12 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import { useTranslation } from 'react-i18next';
 import { safeMarkdown } from '../../../utils/sanitize';
 import { buildRadarDimensions } from '../../../utils/auditUtils';
+import { RADIUS_TOKENS } from '../../../theme/dimensions';
 import { PreviewAuditGapDrawerProps } from '../../../types';
 import { HexagonRadarChart, RadarDimension } from '../../atoms/HexagonRadarChart';
 import { useAuditActions } from '../../../hooks/useAuditActions';
@@ -44,8 +47,8 @@ export type { PreviewAuditGapDrawerProps };
 /**
  * Unified Right-Side Audit & Gap Strategy Panel for CV Preview.
  * Reference UI:
- * - Collapsed: Floating vertical pills on the right canvas edge (Audit score + Gap % + Interview Prep).
- * - Expanded: Unified side panel with [Audit 9/10], [Gap 92%], and [Prep] segmented tabs and progressive disclosure.
+ * - Collapsed: Floating HUD Capsule on the canvas (Audit score + Gap % + Interview Prep).
+ * - Expanded: Unified 330px side panel with [Audit 9/10], [Gap 92%], and [Prep] segmented tabs.
  */
 export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React.memo(({
   auditReport,
@@ -64,6 +67,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [fullReportModalOpen, setFullReportModalOpen] = useState(false);
+  const [isHudMinimized, setIsHudMinimized] = useState<boolean>(false);
   const { copied: isReportCopied, copy: copyReport } = useCopyToClipboard();
 
   const radarDimensions: RadarDimension[] = React.useMemo(
@@ -105,139 +109,235 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
 
   return (
     <>
-      {/* 1. COLLAPSED STATE: Floating Score Pills on Right Canvas Margin (Desktop / Tablet) */}
+      {/* 1. COLLAPSED STATE: Floating HUD Capsule (Single Card) or Edge Pill */}
       {!isOpen && (
-        <Box
-          className="no-print"
-          sx={{
-            position: 'absolute',
-            right: 18,
-            top: 24,
-            display: { xs: 'none', md: 'flex' },
-            flexDirection: 'column',
-            gap: 1.5,
-            zIndex: 15,
-          }}
-        >
-          {/* Audit Pill */}
-          <Tooltip
-            title={scoreUpdated ? t('audit:liveRecalculated', 'Audit score recalculated in real-time') : t('audit:title', 'Resume Quality Audit')}
-            placement="left"
-          >
-            <Paper
-              elevation={scoreUpdated ? 8 : 4}
-              onClick={() => onToggleTab('audit')}
-              sx={{
-                width: 62,
-                height: 64,
-                p: 0.5,
-                borderRadius: 2,
-                bgcolor: alpha(theme.palette.success.main, isDark ? 0.2 : 0.15),
-                border: scoreUpdated
-                  ? `2px solid ${theme.palette.primary.main}`
-                  : `1.5px solid ${theme.palette.success.main}`,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                userSelect: 'none',
-                overflow: 'hidden',
-                boxShadow: scoreUpdated
-                  ? `0 0 16px ${alpha(theme.palette.primary.main, 0.6)}`
-                  : undefined,
-                '&:hover': {
-                  transform: 'translateX(-4px) scale(1.05)',
-                  boxShadow: `0 6px 20px ${alpha(theme.palette.success.main, 0.35)}`,
-                },
-              }}
-            >
-              <Typography
-                variant="h6"
+        <>
+          {/* A. When Minimized: Sleek Edge Pill */}
+          {isHudMinimized ? (
+            <Tooltip title={t('preview:drawer.expandHud', 'Expand ATS Diagnostic HUD')} placement="left">
+              <Paper
+                elevation={3}
+                onClick={() => setIsHudMinimized(false)}
+                className="no-print"
                 sx={{
-                  fontWeight: 900,
-                  fontSize: '1.25rem',
-                  lineHeight: 1,
-                  color: scoreUpdated
-                    ? 'primary.main'
-                    : 'success.main',
+                  position: 'absolute',
+                  top: 16,
+                  right: 0,
+                  zIndex: 10,
+                  display: { xs: 'none', md: 'flex' },
+                  alignItems: 'center',
+                  gap: 0.75,
+                  py: 0.75,
+                  px: 1.25,
+                  borderTopLeftRadius: RADIUS_TOKENS.full,
+                  borderBottomLeftRadius: RADIUS_TOKENS.full,
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRight: 'none',
+                  bgcolor: alpha(theme.palette.background.paper, isDark ? 0.85 : 0.95),
+                  backdropFilter: 'blur(12px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: 'background.paper',
+                    transform: 'translateX(-3px)',
+                  },
                 }}
               >
-                {auditScore > 0 ? auditScore : '--'}
-              </Typography>
-              <Typography variant="caption" sx={{ fontWeight: 800, fontSize: '0.62rem', letterSpacing: 0.5, color: 'text.secondary', textTransform: 'uppercase', mt: 0.35 }}>
-                {t('preview:drawer.shortScore', 'Score')}
-              </Typography>
-            </Paper>
-          </Tooltip>
-
-          {/* Gap Pill */}
-          <Tooltip title={t('gap:matchScore', 'ATS Keyword Alignment')} placement="left">
+                <AutoAwesomeRoundedIcon sx={{ fontSize: 15, color: 'primary.main' }} />
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.75rem' }}>
+                  {auditScore > 0 ? auditScore : '--'}
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.7rem' }}>•</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', fontSize: '0.75rem' }}>
+                  {matchScore > 0 ? `${matchScore}%` : '--'}
+                </Typography>
+                <ChevronLeftRoundedIcon sx={{ fontSize: 16, color: 'text.secondary', ml: 0.25 }} />
+              </Paper>
+            </Tooltip>
+          ) : (
+            /* B. When Normal: Unified Floating HUD Card */
             <Paper
               elevation={4}
-              onClick={() => onToggleTab('gap')}
+              className="no-print"
               sx={{
-                width: 62,
-                height: 64,
-                p: 0.5,
-                borderRadius: 2,
-                bgcolor: alpha(theme.palette.primary.main, isDark ? 0.2 : 0.12),
-                border: `1.5px solid ${theme.palette.primary.main}`,
-                display: 'flex',
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                zIndex: 10,
+                width: 215,
+                p: 1.25,
+                borderRadius: RADIUS_TOKENS.md,
+                bgcolor: alpha(theme.palette.background.paper, isDark ? 0.85 : 0.92),
+                backdropFilter: 'blur(16px)',
+                border: `1px solid ${scoreUpdated ? theme.palette.primary.main : theme.palette.divider}`,
+                boxShadow: scoreUpdated
+                  ? `0 0 20px ${alpha(theme.palette.primary.main, 0.4)}`
+                  : undefined,
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: { xs: 'none', md: 'flex' },
                 flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                userSelect: 'none',
-                '&:hover': {
-                  transform: 'translateX(-4px) scale(1.05)',
-                  boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.35)}`,
-                },
+                gap: 1,
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 900, fontSize: '1.15rem', lineHeight: 1, color: 'primary.main' }}>
-                {matchScore > 0 ? `${matchScore}%` : '--'}
-              </Typography>
-              <Typography variant="caption" sx={{ fontWeight: 800, fontSize: '0.62rem', letterSpacing: 0.5, color: 'text.secondary', textTransform: 'uppercase', mt: 0.35 }}>
-                {t('preview:drawer.shortMatch', 'Match')}
-              </Typography>
-            </Paper>
-          </Tooltip>
+              {/* Header: Title + Minimize Button [›] */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 0.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.6)}` }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <AutoAwesomeRoundedIcon sx={{ fontSize: 15, color: 'primary.main' }} />
+                  <Typography variant="caption" sx={{ fontWeight: 800, letterSpacing: 0.4, textTransform: 'uppercase', fontSize: '0.68rem', color: 'text.secondary' }}>
+                    {t('preview:drawer.hudTitle', 'ATS Diagnostic')}
+                  </Typography>
+                </Box>
+                <Tooltip title={t('preview:drawer.minimizeHud', 'Minimize')} placement="top">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsHudMinimized(true);
+                    }}
+                    sx={{
+                      p: 0.25,
+                      color: 'text.secondary',
+                      '&:hover': { color: 'text.primary', bgcolor: alpha(theme.palette.action.hover, 0.1) },
+                    }}
+                  >
+                    <ChevronRightRoundedIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
 
-          {/* Interview Prep Pill */}
-          <Tooltip title={t('preview:drawer.interviewPrep', 'AI Interview Gap Simulator')} placement="left">
-            <Paper
-              elevation={4}
-              onClick={() => onToggleTab('interview')}
-              sx={{
-                width: 62,
-                height: 64,
-                p: 0.5,
-                borderRadius: 2,
-                bgcolor: alpha(theme.palette.secondary.main, isDark ? 0.2 : 0.12),
-                border: `1.5px solid ${theme.palette.secondary.main}`,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                userSelect: 'none',
-                '&:hover': {
-                  transform: 'translateX(-4px) scale(1.05)',
-                  boxShadow: `0 6px 20px ${alpha(theme.palette.secondary.main, 0.35)}`,
-                },
-              }}
-            >
-              <PsychologyRoundedIcon sx={{ fontSize: 20, color: theme.palette.secondary.main }} />
-              <Typography variant="caption" sx={{ fontWeight: 800, fontSize: '0.62rem', letterSpacing: 0.5, color: 'text.secondary', textTransform: 'uppercase', mt: 0.35 }}>
-                {t('preview:drawer.shortInterview', 'Prep')}
-              </Typography>
+              {/* 2-Cell Grid: Quality Score & ATS Match */}
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.75 }}>
+                {/* Cell 1: Quality Score */}
+                <Tooltip
+                  title={scoreUpdated ? t('audit:liveRecalculated', 'Recalculated in real-time') : t('audit:title', 'Resume Quality Audit')}
+                  placement="bottom"
+                >
+                  <Box
+                    onClick={() => onToggleTab('audit')}
+                    sx={{
+                      p: 1,
+                      borderRadius: RADIUS_TOKENS.sm,
+                      bgcolor: alpha(theme.palette.success.main, isDark ? 0.18 : 0.08),
+                      border: `1px solid ${scoreUpdated ? theme.palette.primary.main : alpha(theme.palette.success.main, 0.3)}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.18s ease',
+                      '&:hover': {
+                        bgcolor: alpha(theme.palette.success.main, isDark ? 0.26 : 0.14),
+                        transform: 'translateY(-1.5px)',
+                        borderColor: theme.palette.success.main,
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 900,
+                        fontSize: '1.25rem',
+                        lineHeight: 1,
+                        color: scoreUpdated ? 'primary.main' : 'success.main',
+                      }}
+                    >
+                      {auditScore > 0 ? auditScore : '--'}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        letterSpacing: 0.4,
+                        color: 'text.secondary',
+                        textTransform: 'uppercase',
+                        mt: 0.35,
+                      }}
+                    >
+                      {t('preview:drawer.quality', 'Quality')}
+                    </Typography>
+                  </Box>
+                </Tooltip>
+
+                {/* Cell 2: ATS Match */}
+                <Tooltip title={t('gap:matchScore', 'ATS Keyword Alignment')} placement="bottom">
+                  <Box
+                    onClick={() => onToggleTab('gap')}
+                    sx={{
+                      p: 1,
+                      borderRadius: RADIUS_TOKENS.sm,
+                      bgcolor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.08),
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.18s ease',
+                      '&:hover': {
+                        bgcolor: alpha(theme.palette.primary.main, isDark ? 0.26 : 0.14),
+                        transform: 'translateY(-1.5px)',
+                        borderColor: theme.palette.primary.main,
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 900,
+                        fontSize: '1.25rem',
+                        lineHeight: 1,
+                        color: 'primary.main',
+                      }}
+                    >
+                      {matchScore > 0 ? `${matchScore}%` : '--'}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        letterSpacing: 0.4,
+                        color: 'text.secondary',
+                        textTransform: 'uppercase',
+                        mt: 0.35,
+                      }}
+                    >
+                      {t('preview:drawer.match', 'Match')}
+                    </Typography>
+                  </Box>
+                </Tooltip>
+              </Box>
+
+              {/* Bottom Action: Interview Prep */}
+              <Tooltip title={t('preview:drawer.interviewPrep', 'AI Interview Gap Simulator')} placement="bottom">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => onToggleTab('interview')}
+                  startIcon={<PsychologyRoundedIcon sx={{ fontSize: 16 }} />}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.72rem',
+                    py: 0.5,
+                    color: theme.palette.secondary.main,
+                    borderColor: alpha(theme.palette.secondary.main, 0.35),
+                    bgcolor: alpha(theme.palette.secondary.main, isDark ? 0.1 : 0.04),
+                    '&:hover': {
+                      borderColor: theme.palette.secondary.main,
+                      bgcolor: alpha(theme.palette.secondary.main, isDark ? 0.2 : 0.1),
+                    },
+                  }}
+                >
+                  {t('preview:drawer.interviewPrepBtn', 'Interview Prep')}
+                </Button>
+              </Tooltip>
             </Paper>
-          </Tooltip>
-        </Box>
+          )}
+        </>
       )}
 
       {/* 2. EXPANDED STATE: Unified Right-Side Panel */}
@@ -248,8 +348,8 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
             top: { xs: 'var(--navbar-height, 56px)', md: 'auto' },
             bottom: { xs: 0, md: 'auto' },
             right: 0,
-            width: { xs: '100%', sm: 390, md: 430 },
-            maxWidth: '100vw',
+            width: { xs: '100%', sm: 330, md: 330 },
+            maxWidth: { xs: '100vw', sm: 330 },
             borderLeft: `1px solid ${theme.palette.divider}`,
             bgcolor: 'background.paper',
             display: 'flex',

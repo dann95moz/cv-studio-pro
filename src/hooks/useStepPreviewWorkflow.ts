@@ -242,17 +242,17 @@ export const useStepPreviewWorkflow = () => {
     setActiveTab('audit');
   };
 
-  const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
-  const [trackSuccess, setTrackSuccess] = useState<boolean>(false);
-  const [sheetHeight, setSheetHeight] = useState<number>(0);
-  const [isTrackModalOpen, setIsTrackModalOpen] = useState<boolean>(false);
-  const paperRef = useRef<HTMLDivElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-
   // Page dimensions
   const formatConfig = getPageFormatConfig(pageFormat);
   const targetPagePx = formatConfig.heightPx;
   const targetPageWidthPx = formatConfig.widthPx;
+
+  const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
+  const [trackSuccess, setTrackSuccess] = useState<boolean>(false);
+  const [sheetHeight, setSheetHeight] = useState<number>(targetPagePx || 1123);
+  const [isTrackModalOpen, setIsTrackModalOpen] = useState<boolean>(false);
+  const paperRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   // Tracked state
   const isTracked = Boolean(
@@ -304,6 +304,17 @@ export const useStepPreviewWorkflow = () => {
     return 'templates';
   });
 
+  // Automatically close side panel if user resizes window into mobile breakpoint (< 900px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined' && window.innerWidth < 900) {
+        setActiveSidePanel((prev) => (prev === 'templates' ? null : prev));
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Right Side Unified Audit & Gap Drawer state
   const [isAuditGapOpen, setIsAuditGapOpen] = useState<boolean>(false);
   const [auditGapTab, setAuditGapTab] = useState<'audit' | 'gap' | 'interview'>('audit');
@@ -311,20 +322,27 @@ export const useStepPreviewWorkflow = () => {
   // Mobile mode toggle: 'edit' vs 'preview'
   const [mobileViewMode, setMobileViewMode] = useState<'edit' | 'preview'>('preview');
   const [canvasScale, setCanvasScale] = useState<number>(1);
-  const [mobileZoomMode, setMobileZoomMode] = useState<'fit' | '100%'>('100%');
+  const [mobileZoomMode, setMobileZoomMode] = useState<'fit' | '100%'>('fit');
 
   const activeTemplateMeta = getTemplateMetadata(theme);
 
   // Measure rendered paper sheet height whenever styling or content changes
   useEffect(() => {
     const updateHeight = () => {
-      if (paperRef.current) {
+      if (paperRef.current && paperRef.current.scrollHeight > 0) {
         setSheetHeight(paperRef.current.scrollHeight);
       }
     };
     updateHeight();
     const timer = setTimeout(updateHeight, 150);
-    return () => clearTimeout(timer);
+    const observer = new ResizeObserver(updateHeight);
+    if (paperRef.current) {
+      observer.observe(paperRef.current);
+    }
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, [cvMarkdown, theme, palette, customColor, fontFamily, spacingDensity, pageFormat]);
 
   // Auto-calculate scale factor for mobile/tablet canvas preview
@@ -332,12 +350,13 @@ export const useStepPreviewWorkflow = () => {
     const calculateScale = () => {
       if (!canvasContainerRef.current) return;
       const containerWidth = canvasContainerRef.current.clientWidth;
-      if (containerWidth > 0 && containerWidth < 860) {
+      if (containerWidth > 0 && containerWidth < 900) {
         if (mobileZoomMode === '100%') {
           setCanvasScale(1);
         } else {
-          const padding = containerWidth < 500 ? 16 : 32;
-          const scale = Math.min(1, Math.max(0.35, (containerWidth - padding) / targetPageWidthPx));
+          const padding = containerWidth < 500 ? 12 : 24;
+          const availableWidth = Math.max(280, containerWidth - padding);
+          const scale = Math.min(1, Math.max(0.35, availableWidth / targetPageWidthPx));
           setCanvasScale(scale);
         }
       } else {

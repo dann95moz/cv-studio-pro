@@ -1,18 +1,16 @@
 import React from 'react';
 import {
-  Paper,
   Box,
   Button,
-  ButtonGroup,
   Chip,
   Typography,
   Snackbar,
   Alert,
   useTheme,
   alpha,
+  Drawer,
+  useMediaQuery,
 } from '@mui/material';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { CVRenderer } from '../CVRenderer';
 import { CvLiveEditProvider } from './preview/CvLiveEditContext';
 import { StepPreviewToolbar } from './preview/StepPreviewToolbar';
@@ -21,7 +19,7 @@ import { StepPreviewProps } from '../../types';
 import { useTranslation } from 'react-i18next';
 import { StudioSkeleton } from './StudioSkeleton';
 import { TrackApplicationDialog } from './history/TrackApplicationDialog';
-import { StepPreviewMobileEdit } from './preview/StepPreviewMobileEdit';
+import { RADIUS_TOKENS } from '../../theme/dimensions';
 import { useStepPreviewWorkflow } from '../../hooks/useStepPreviewWorkflow';
 import {
   MobileDocumentBar,
@@ -60,6 +58,7 @@ export type { StepPreviewProps };
 export const StepPreview: React.FC<StepPreviewProps> = () => {
   const { t } = useTranslation(['preview', 'target', 'common']);
   const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
 
   const {
     paperRef,
@@ -156,16 +155,59 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
 
   const [isMobileToolsOpen, setIsMobileToolsOpen] = React.useState(false);
 
+  const panelContent = activeSidePanel && (
+    <React.Suspense fallback={<StudioSkeleton variant="drawer" />}>
+      {(activeSidePanel === 'design' || activeSidePanel === 'templates') && (
+        <DesignFormattingPanel
+          customColor={customColor}
+          onCustomColorChange={setCustomColor}
+          palette={palette}
+          onSelectPalette={setPalette}
+          fontFamily={fontFamily}
+          onFontFamilyChange={setFontFamily}
+          spacingDensity={spacingDensity}
+          onSpacingDensityChange={setSpacingDensity}
+          pageFormat={pageFormat}
+          onPageFormatChange={setPageFormat}
+          onAutoFit={handleMagicAutoFit}
+          sheetHeight={sheetHeight}
+          a4PagePx={targetPagePx}
+          estimatedPages={estimatedPages}
+          photo={photo}
+          onPhotoChange={setProfilePhoto}
+          onPhotoToggle={setProfilePhotoEnabled}
+          activeTheme={theme}
+          theme={theme}
+          onSelectTheme={setTheme}
+          initialTab={activeSidePanel === 'templates' ? 'templates' : 'formatting'}
+          onClose={() => setActiveSidePanel(null)}
+        />
+      )}
+
+      {activeSidePanel === 'linkedin' && (
+        <LinkedInPanel
+          cvData={parsedCv}
+          companyName={companyName}
+          targetRole={targetRole}
+          targetJob={targetJob}
+          providerSettings={providerSettings}
+          onClose={() => setActiveSidePanel(null)}
+        />
+      )}
+    </React.Suspense>
+  );
+
   return (
-    <div className="preview-workspace-layout" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+    <div className="preview-workspace-layout" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
       {/* Top Studio Control Bar: Desktop Toolbar */}
       <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
         <StepPreviewToolbar
+          onSelectWizardStep={setWizardStep}
           previewDocType={previewDocType}
           onPreviewDocTypeChange={setPreviewDocType}
           activeTemplateName={activeTemplateMeta.name}
           onOpenTemplates={() => {
-            setActiveSidePanel('templates');
+            setActiveSidePanel('design');
             setIsAuditGapOpen(false);
           }}
           onSaveVersion={handleSaveToHistory}
@@ -212,7 +254,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
       </Box>
 
       {/* Main Studio Body: Vertical Left Rail + Side Drawer + Sheet Canvas + Right Audit/Gap Drawer */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden', position: 'relative' }}>
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden', position: 'relative' }}>
         {/* 1. Left Tool Rail (Desktop only, mobile uses FAB + Bottom Sheet) */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, height: '100%' }}>
           <StepPreviewNavRail
@@ -221,18 +263,14 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           />
         </Box>
 
-        {/* 2. Expandable Left Side Panel */}
-        {activeSidePanel && (
+        {/* 2. Expandable Left Side Panel (Desktop only - Mobile uses Bottom Sheet Drawer) */}
+        {!isMobile && activeSidePanel && (
           <Box
             className="no-print preview-side-panel"
             sx={{
-              position: { xs: 'fixed', md: 'relative' },
-              left: 0,
-              right: { xs: 0, md: 'auto' },
-              top: { xs: 0, md: 0 },
-              bottom: { xs: 0, md: 0 },
-              width: { xs: '100%', sm: 330 },
-              maxWidth: { xs: '100%', sm: 360 },
+              position: 'relative',
+              width: 330,
+              maxWidth: 360,
               borderRight: `1px solid ${muiTheme.palette.divider}`,
               bgcolor: 'background.paper',
               display: 'flex',
@@ -240,70 +278,32 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
               height: '100%',
               overflowY: 'auto',
               flexShrink: 0,
-              zIndex: muiTheme.zIndex.modal,
-              boxShadow: { xs: 12, md: 'none' },
             }}
           >
-            <React.Suspense fallback={<StudioSkeleton variant="drawer" />}>
-              {activeSidePanel === 'templates' && (
-                <TemplatesPanel
-                  theme={theme}
-                  onSelectTheme={setTheme}
-                  palette={palette}
-                  onSelectPalette={setPalette}
-                  customColor={customColor}
-                  onCustomColorChange={setCustomColor}
-                  onClose={() => setActiveSidePanel(null)}
-                />
-              )}
-
-              {activeSidePanel === 'design' && (
-                <DesignFormattingPanel
-                  customColor={customColor}
-                  onCustomColorChange={setCustomColor}
-                  palette={palette}
-                  onSelectPalette={setPalette}
-                  fontFamily={fontFamily}
-                  onFontFamilyChange={setFontFamily}
-                  spacingDensity={spacingDensity}
-                  onSpacingDensityChange={setSpacingDensity}
-                  pageFormat={pageFormat}
-                  onPageFormatChange={setPageFormat}
-                  onAutoFit={handleMagicAutoFit}
-                  sheetHeight={sheetHeight}
-                  a4PagePx={targetPagePx}
-                  estimatedPages={estimatedPages}
-                  photo={photo}
-                  onPhotoChange={setProfilePhoto}
-                  onPhotoToggle={setProfilePhotoEnabled}
-                  activeTheme={theme}
-                  onClose={() => setActiveSidePanel(null)}
-                />
-              )}
-
-              {activeSidePanel === 'linkedin' && (
-                <LinkedInPanel
-                  cvData={parsedCv}
-                  companyName={companyName}
-                  targetRole={targetRole}
-                  targetJob={targetJob}
-                  providerSettings={providerSettings}
-                  onClose={() => setActiveSidePanel(null)}
-                />
-              )}
-            </React.Suspense>
+            {panelContent}
           </Box>
         )}
 
         {/* 3. Main Center Canvas: Document Sheet & Mobile Touch Editor or Cover Letter */}
         <div
           className="preview-canvas-wrapper"
-          style={{ position: 'relative', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', order: 2 }}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            height: '100%',
+            minHeight: 0,
+            width: '100%',
+            overflow: 'hidden',
+            order: 2,
+          }}
         >
           {previewDocType === 'cover-letter' ? (
             <Box
               sx={{
                 flex: 1,
+                minHeight: 0,
                 overflowY: 'auto',
                 overflowX: 'hidden',
                 p: { xs: 1.5, sm: 3 },
@@ -329,120 +329,26 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             </Box>
           ) : (
             <>
-              {/* Mobile View Mode Segmented Control (Visible only on mobile xs/sm) */}
-              <Box
-                className="no-print"
-                sx={{
-                  display: { xs: 'flex', md: 'none' },
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  py: 0.75,
-                  px: 1.5,
-                  bgcolor: 'background.paper',
-                  borderBottom: `1px solid ${muiTheme.palette.divider}`,
-                  zIndex: 10,
-                  gap: 1,
-                }}
-              >
-                <ButtonGroup
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    bgcolor: alpha(muiTheme.palette.primary.main, 0.06),
-                    p: 0.3,
-                    border: 'none',
-                    gap: 0.5,
-                  }}
-                >
-                  <Button
-                    onClick={() => setMobileViewMode('edit')}
-                    variant={mobileViewMode === 'edit' ? 'contained' : 'text'}
-                    sx={{
-                      px: 2.25,
-                      py: 0.5,
-                      minHeight: 32,
-                      fontWeight: 700,
-                      fontSize: '0.78rem',
-                      textTransform: 'none',
-                      boxShadow: 'none',
-                      bgcolor: mobileViewMode === 'edit' ? 'primary.main' : 'transparent',
-                      color: mobileViewMode === 'edit' ? 'common.white' : 'text.secondary',
-                    }}
-                  >
-                    {t('preview:aiRegen.mobileModeEdit', 'Edit')}
-                  </Button>
-                  <Button
-                    onClick={() => setMobileViewMode('preview')}
-                    variant={mobileViewMode === 'preview' ? 'contained' : 'text'}
-                    sx={{
-                      px: 2.25,
-                      py: 0.5,
-                      minHeight: 32,
-                      fontWeight: 700,
-                      fontSize: '0.78rem',
-                      textTransform: 'none',
-                      boxShadow: 'none',
-                      bgcolor: mobileViewMode === 'preview' ? 'primary.main' : 'transparent',
-                      color: mobileViewMode === 'preview' ? 'common.white' : 'text.secondary',
-                    }}
-                  >
-                    {t('preview:aiRegen.mobileModePreview', 'Preview')}
-                  </Button>
-                </ButtonGroup>
-
-                {/* Mobile Zoom Fit Mode Toggle */}
-                {mobileViewMode === 'preview' && (
-                  <Chip
-                    size="small"
-                    label={mobileZoomMode === 'fit' ? t('preview:toolbar.zoomFit', 'Fit Width') : t('preview:toolbar.zoom100', '100% Real')}
-                    color={mobileZoomMode === 'fit' ? 'primary' : 'default'}
-                    variant={mobileZoomMode === 'fit' ? 'filled' : 'outlined'}
-                    onClick={() => setMobileZoomMode((m) => (m === 'fit' ? '100%' : 'fit'))}
-                    sx={{ fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer' }}
-                  />
-                )}
-              </Box>
-
-              {/* Mobile 'Edit' Mode: Vertical List of Cards with Large Touch Buttons */}
-              {mobileViewMode === 'edit' && (
-                <Box
-                  className="no-print preview-mobile-edit"
-                  sx={{
-                    display: { xs: 'block', md: 'none' },
-                    flex: 1,
-                    overflowY: 'auto',
-                    bgcolor: 'background.default',
-                    '@media print': {
-                      display: 'none !important',
-                    },
-                  }}
-                >
-                  <CvLiveEditProvider parsedCv={parsedCv} isEditable={true}>
-                    <StepPreviewMobileEdit parsedCv={parsedCv} activeTheme={theme} />
-                  </CvLiveEditProvider>
-                </Box>
-              )}
-
-              {/* Desktop OR Mobile 'Preview' Mode: Standard Pristine Canvas */}
+              {/* Document Canvas: Exact A4 simulation with responsive auto-scaling */}
               <Box
                 component="main"
                 ref={canvasContainerRef}
                 className="preview-pane-canvas"
                 sx={{
                   position: 'relative',
-                  display: {
-                    xs: mobileViewMode === 'edit' ? 'none' : 'flex',
-                    md: 'flex',
-                  },
+                  display: 'flex',
                   flexDirection: 'column',
-                  alignItems: canvasScale < 1 && mobileZoomMode === 'fit' ? 'center' : 'flex-start',
+                  alignItems: 'center',
                   justifyContent: 'flex-start',
                   flex: 1,
+                  height: '100%',
+                  minHeight: 0,
+                  width: '100%',
                   overflowX: 'auto',
                   overflowY: 'auto',
                   WebkitOverflowScrolling: 'touch',
                   p: { xs: 1.5, sm: 2, md: 3.5 },
-                  pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 64px)', sm: 5, md: 6 },
+                  pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', sm: 5, md: 6 },
                   boxSizing: 'border-box',
                   '@media print': {
                     display: 'block !important',
@@ -458,7 +364,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                   className="paper-scale-container"
                   style={{
                     width: canvasScale < 1 && mobileZoomMode === 'fit' ? `${targetPageWidthPx * canvasScale}px` : `${targetPageWidthPx}px`,
-                    height: canvasScale < 1 && mobileZoomMode === 'fit' ? `${sheetHeight * canvasScale}px` : `${sheetHeight}px`,
+                    height: canvasScale < 1 && mobileZoomMode === 'fit' ? `${(sheetHeight || targetPagePx) * canvasScale}px` : (sheetHeight > 0 ? `${sheetHeight}px` : 'auto'),
+                    minHeight: canvasScale < 1 && mobileZoomMode === 'fit' ? `${targetPagePx * canvasScale}px` : `${targetPagePx}px`,
                     position: 'relative',
                     margin: '0 auto',
                     flexShrink: 0,
@@ -468,6 +375,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                     className="paper-sheet-wrapper"
                     style={{
                       width: `${targetPageWidthPx}px`,
+                      minHeight: `${targetPagePx}px`,
                       transform: canvasScale < 1 && mobileZoomMode === 'fit' ? `scale(${canvasScale})` : undefined,
                       transformOrigin: 'top left',
                       position: canvasScale < 1 && mobileZoomMode === 'fit' ? 'absolute' : 'relative',
@@ -480,6 +388,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                       className={`paper-sheet ${overflowPercentage > 0 && overflowPercentage <= 25 ? 'compact-fit' : ''}`}
                       style={{
                         width: `${targetPageWidthPx}px`,
+                        minHeight: `${targetPagePx}px`,
                         margin: '0 auto',
                       }}
                     >
@@ -510,60 +419,21 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                   </div>
                 </div>
               </Box>
-
-              {/* Bottom Navigation Bar: Desktop only */}
-              <Paper
-                elevation={0}
-                className="no-print preview-nav-footer"
-                sx={{
-                  display: { xs: 'none', md: 'flex' },
-                  p: 1.25,
-                  px: { xs: 1.5, sm: 3 },
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: 1,
-                  borderTop: `1px solid ${muiTheme.palette.divider}`,
-                  bgcolor: 'background.paper',
-                  zIndex: 10,
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowBackRoundedIcon />}
-                  onClick={() => setWizardStep('target')}
-                  size="small"
-                  sx={{ fontSize: { xs: '0.74rem', sm: '0.8rem' } }}
-                >
-                  {t('preview:actions.backToTarget', 'Back to Target Vacancy')}
-                </Button>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Chip
-                    icon={<EditRoundedIcon sx={{ fontSize: '13px !important' }} />}
-                    label={t('preview:toolbar.liveHotEdit', 'Live Hot Edit • Click text to edit & re-audit')}
-                    size="small"
-                    variant="outlined"
-                    color="primary"
-                    sx={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      height: 24,
-                      display: { xs: 'none', md: 'inline-flex' },
-                    }}
-                  />
-
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
-                    {t('preview:toolbar.pageFit', 'Estimated Length')}: <strong style={{ color: estimatedPages === 1 ? muiTheme.palette.success.main : muiTheme.palette.warning.main }}>{estimatedPages} {estimatedPages === 1 ? `Page (${pageFormat.toUpperCase()})` : 'Pages'}</strong> • Height: {sheetHeight}px / {targetPagePx}px
-                  </Typography>
-                </Box>
-              </Paper>
             </>
           )}
         </div>
 
         {/* 4. Unified Right-Side Audit & Gap Drawer */}
-        <Box sx={{ order: 3, display: 'flex', height: '100%' }}>
+        <Box
+          sx={{
+            order: 3,
+            display: { xs: isAuditGapOpen ? 'block' : 'none', md: 'flex' },
+            width: isAuditGapOpen ? { xs: '100%', sm: 330, md: 330 } : 0,
+            height: { xs: 'auto', md: '100%' },
+            position: isAuditGapOpen ? 'relative' : 'static',
+            flexShrink: 0,
+          }}
+        >
           <React.Suspense fallback={null}>
             <PreviewAuditGapDrawer
               auditReport={auditReport}
@@ -601,6 +471,10 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             setIsDiffModalOpen(true);
           }}
           onDownloadPdf={onTriggerDirectDownloadPdf}
+          onDownloadDocx={onTriggerDownloadDocx}
+          onDownloadPlainText={onTriggerDownloadPlainText}
+          onCopyPlainText={onTriggerCopyPlainText}
+          onDownloadMarkdown={handleDownloadCvMarkdown}
           onSaveVersion={handleSaveToHistory}
           onReTailor={handleGenerate}
           isExportingPdf={isExportingPdf}
@@ -665,6 +539,29 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           {t('preview:toolbar.trackedSuccess', 'Saved to My Applications')}
         </Alert>
       </Snackbar>
+
+      {/* Mobile Tool Drawer (Bottom Sheet on mobile when opened via FAB) */}
+      {isMobile && (
+        <Drawer
+          anchor="bottom"
+          open={Boolean(activeSidePanel)}
+          onClose={() => setActiveSidePanel(null)}
+          slotProps={{
+            paper: {
+              sx: {
+                maxHeight: '85vh',
+                borderTopLeftRadius: RADIUS_TOKENS.xl,
+                borderTopRightRadius: RADIUS_TOKENS.xl,
+                bgcolor: 'background.paper',
+                overflowY: 'auto',
+              },
+            },
+          }}
+        >
+          <Box sx={{ width: 36, height: 4, bgcolor: 'divider', borderRadius: RADIUS_TOKENS.full, mx: 'auto', mt: 1.5, mb: 0.5 }} />
+          {panelContent}
+        </Drawer>
+      )}
     </div>
   );
 };
