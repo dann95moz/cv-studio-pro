@@ -112,10 +112,21 @@ export interface AiSlice {
   streamedSnippet: string;
   activeModelName: string;
   generationError: string | null;
+  isManualPromptModalOpen: boolean;
+  manualPromptBundle: string;
+  manualPromptTitle?: string;
+  manualCustomSubmit?: ((response: string) => Promise<void> | void) | null;
   setProviderSettings: (val: AIProviderSettings | ((prev: AIProviderSettings) => AIProviderSettings)) => void;
   setGenerationError: (err: string | null) => void;
   handleGenerate: () => Promise<void>;
   cancelGeneration: () => void;
+  openManualPromptModal: (
+    customPrompt?: string,
+    title?: string,
+    customSubmit?: (response: string) => Promise<void> | void
+  ) => void;
+  closeManualPromptModal: () => void;
+  submitManualResponse: (response: string) => Promise<void>;
 }
 
 export interface HistorySlice {

@@ -59,6 +59,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   const [localRole, setLocalRole] = useState(targetRole);
 
   const masterData = useResumeStore((s) => s.masterData);
+  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
   const quickMatchResult = React.useMemo(() => {
     return calculateQuickScore(localContent, masterData);
   }, [localContent, masterData]);
@@ -433,6 +434,10 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               : undefined
           }
           onTailorNow={handleTailorAndProceed}
+          onOpenManualPrompt={() => {
+            flushAll();
+            openManualPromptModal();
+          }}
           isGenerating={isGenerating}
           generationStep={generationStep}
           hasJob={hasJob}

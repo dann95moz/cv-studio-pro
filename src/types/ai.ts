@@ -12,7 +12,8 @@ export type AIProviderId =
   | 'openai' 
   | 'claude' 
   | 'openrouter' 
-  | 'custom';
+  | 'custom'
+  | 'manual';
 
 export interface AIModelOption {
   id: string;

@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { ResumeStore, AiSlice } from '../types';
 import { AIProviderSettings, GeneratedCvVersion } from '../../types/cv';
-import { tailorResume } from '../../core/ai-service';
+import { tailorResume, buildPrompts, extractCvAndGap } from '../../core/ai-service';
 import {
   extractCandidateName,
   extractTargetCompany,
@@ -11,7 +11,7 @@ import {
 
 export const DEFAULT_AI_SETTINGS: AIProviderSettings = {
   provider: 'gemini',
-  model: 'gemini-3.7-flash',
+  model: 'gemini-2.5-flash',
   apiKey: '',
   temperature: 0.15,
   customEndpoint: 'http://localhost:11434/v1',
@@ -29,6 +29,10 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
   streamedSnippet: '',
   activeModelName: '',
   generationError: null,
+  isManualPromptModalOpen: false,
+  manualPromptBundle: '',
+  manualPromptTitle: undefined,
+  manualCustomSubmit: null,
 
   setProviderSettings: (val) => {
     const nextVal = typeof val === 'function' ? val(get().providerSettings) : val;
@@ -37,6 +41,115 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
 
   setGenerationError: (err: string | null) => {
     set({ generationError: err });
+  },
+
+  openManualPromptModal: (
+    customPrompt?: string,
+    title?: string,
+    customSubmit?: (response: string) => Promise<void> | void
+  ) => {
+    let bundle = customPrompt;
+    if (!bundle) {
+      const { masterData, targetJob, rules, companyName, targetRole, pageBudget, providerSettings } = get();
+      const prompts = buildPrompts({
+        masterData,
+        targetJob,
+        rules,
+        companyName: companyName || undefined,
+        targetRole: targetRole || undefined,
+        pageBudget,
+        providerSettings,
+      });
+      bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+    }
+    set({
+      isManualPromptModalOpen: true,
+      manualPromptBundle: bundle,
+      manualPromptTitle: title,
+      manualCustomSubmit: customSubmit || null,
+      isGenerating: false,
+    });
+  },
+
+  closeManualPromptModal: () => {
+    set({
+      isManualPromptModalOpen: false,
+      manualPromptTitle: undefined,
+      manualCustomSubmit: null,
+    });
+  },
+
+  submitManualResponse: async (responseRaw: string) => {
+    const { manualCustomSubmit } = get();
+    if (manualCustomSubmit) {
+      set({
+        isManualPromptModalOpen: false,
+        manualPromptTitle: undefined,
+        manualCustomSubmit: null,
+        isGenerating: false,
+      });
+      await manualCustomSubmit(responseRaw);
+      return;
+    }
+
+    const { masterData, targetJob, companyName, targetRole, pageBudget, theme, palette, savedVersions } = get();
+    const comp = companyName || extractTargetCompany(targetJob, 'Target Company');
+    const role = targetRole || extractTargetRole(targetJob, masterData, '') || '';
+
+    const extracted = extractCvAndGap(responseRaw, masterData, comp, role);
+    const tailoredCv = extracted.cvMarkdown || get().cvMarkdown;
+    const gapReport = extracted.gapMarkdown || get().gapMarkdown;
+
+    const candName = (extracted.cvData?.name && !extracted.cvData.name.includes('[') && extracted.cvData.name.toLowerCase() !== 'candidate')
+      ? extracted.cvData.name
+      : extractCandidateName(masterData, 'Candidate').replace(/_/g, ' ');
+
+    const detectedLang = extracted.detectedLanguage || 'es';
+    let nextSavedVersions = savedVersions;
+    const autoVersionId = `cv_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const autoSavedVersion: GeneratedCvVersion = {
+      id: autoVersionId,
+      createdAt: new Date().toISOString(),
+      candidateName: candName,
+      companyName: comp,
+      targetRole: role,
+      matchScore: extracted.score ?? 0,
+      qualityScore: 0,
+      theme,
+      palette,
+      pageBudget,
+      cvMarkdown: tailoredCv,
+      gapMarkdown: gapReport,
+      targetJobSnippet: targetJob.slice(0, 280),
+      baseLanguage: detectedLang,
+      activeLanguage: detectedLang,
+      translations: {},
+    };
+    nextSavedVersions = [autoSavedVersion, ...savedVersions.filter((v) => v.id !== autoSavedVersion.id)];
+
+    let nextMasterData = masterData;
+    if (extracted.cvData && (!masterData || !/^##\s+/m.test(masterData))) {
+      const structured = serializeCvDataToMarkdown(extracted.cvData);
+      if (structured && structured.trim()) {
+        nextMasterData = structured;
+      }
+    }
+
+    set({
+      masterData: nextMasterData,
+      cvMarkdown: tailoredCv,
+      activeCvData: extracted.cvData || null,
+      gapMarkdown: gapReport,
+      currentBaseLanguage: detectedLang,
+      activeLanguage: detectedLang,
+      activeVersionId: autoVersionId,
+      translations: {},
+      savedVersions: nextSavedVersions,
+      isManualPromptModalOpen: false,
+      isGenerating: false,
+      activeTab: 'wizard',
+      wizardStep: 'preview',
+    });
   },
 
   cancelGeneration: () => {
@@ -56,6 +169,11 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
   },
 
   handleGenerate: async () => {
+    if (get().providerSettings.provider === 'manual') {
+      get().openManualPromptModal();
+      return;
+    }
+
     if (get().isGenerating && !get().generationError) {
       return;
     }

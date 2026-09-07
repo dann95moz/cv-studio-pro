@@ -32,6 +32,7 @@ import LaptopRoundedIcon from '@mui/icons-material/LaptopRounded';
 import CloudQueueRoundedIcon from '@mui/icons-material/CloudQueueRounded';
 import TerminalRoundedIcon from '@mui/icons-material/TerminalRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
 import { useTranslation } from 'react-i18next';
@@ -81,7 +82,7 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
   const isLocal = settings.provider === 'local';
 
   const handleProviderChange = (provider: AIProviderId) => {
-    let defaultModel = 'gemini-3.7-flash';
+    let defaultModel = 'gemini-2.5-flash';
     let defaultEndpoint = settings.customEndpoint;
 
     if (provider === 'local') {
@@ -98,6 +99,8 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
     } else if (provider === 'custom') {
       defaultModel = 'custom-endpoint';
       defaultEndpoint = defaultEndpoint || 'http://localhost:8000/v1';
+    } else if (provider === 'manual') {
+      defaultModel = 'byo-ai-manual';
     }
 
     onSettingsChange({
@@ -154,7 +157,9 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
 
   const keyHelper = getKeyHelper(settings.provider);
   const currentModels = AVAILABLE_AI_MODELS.filter(m => m.provider === settings.provider);
-  const canSubmit = isLocal ? true : Boolean(settings.apiKey && settings.apiKey.trim().length > 5);
+  const isKnownModel = currentModels.some(m => m.id === settings.model);
+  const isManual = settings.provider === 'manual';
+  const canSubmit = isLocal || isManual ? true : Boolean(settings.apiKey && settings.apiKey.trim().length > 5);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,7 +173,7 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
     id: AIProviderId;
     title: string;
     chipLabel?: string;
-    chipColor?: 'primary' | 'secondary' | 'warning';
+    chipColor?: 'primary' | 'secondary' | 'warning' | 'success';
     desc: string;
     icon?: React.ReactNode;
   }> = [
@@ -210,6 +215,14 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
       id: 'openrouter',
       title: 'OpenRouter / Custom Remote Proxy',
       desc: t('settings:providers.openrouterDesc', 'Multi-model gateway or custom base URL.'),
+    },
+    {
+      id: 'manual',
+      title: t('settings:providers.byoAiTitle', 'Bring Your Own AI (Prompt & Paste)'),
+      chipLabel: t('settings:providers.noKeyNeeded', '100% Free • No API Key'),
+      chipColor: 'success',
+      desc: t('settings:providers.byoAiDesc', 'Copy calibrated prompts to ChatGPT, Claude, Gemini Web, or DeepSeek and paste the response back.'),
+      icon: <AutoAwesomeRoundedIcon fontSize="small" color="success" />,
     },
   ];
 
@@ -319,15 +332,101 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <KeyRoundedIcon color={isLocal ? 'secondary' : 'primary'} />
+        <KeyRoundedIcon color={isManual ? 'success' : isLocal ? 'secondary' : 'primary'} />
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {isLocal
+          {isManual
+            ? t('settings:providers.byoAiTitle', 'Bring Your Own AI (Prompt & Paste)')
+            : isLocal
             ? t('settings:providers.localServerParams', 'Local Server Parameters')
             : t('settings:providers.apiKeyParams', 'API Key & Parameters')}
         </Typography>
       </Box>
 
-      {isLocal ? (
+      {isManual ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              borderRadius: RADIUS_TOKENS.md,
+              bgcolor: isDark ? alpha(muiTheme.palette.success.main, 0.08) : alpha(muiTheme.palette.success.main, 0.04),
+              borderColor: alpha(muiTheme.palette.success.main, 0.3),
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <AutoAwesomeRoundedIcon color="success" fontSize="small" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main' }}>
+                {t('settings:providers.byoAiInfoTitle', 'How Bring-Your-Own-AI Works:')}
+              </Typography>
+            </Box>
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.75, color: 'text.secondary' }}>
+              {t('settings:providers.byoAiStep1', '1. CV Studio formats your master data, target vacancy, and ATS rules into a single calibrated prompt.')}
+            </Typography>
+            <Typography variant="caption" sx={{ display: 'block', mb: 0.75, color: 'text.secondary' }}>
+              {t('settings:providers.byoAiStep2', '2. Click Copy and paste into your favorite web AI (ChatGPT, Claude, Gemini Web, DeepSeek, Perplexity).')}
+            </Typography>
+            <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+              {t('settings:providers.byoAiStep3', '3. Paste the AI response back into CV Studio. Formatting, scoring, and previewing work seamlessly!')}
+            </Typography>
+          </Paper>
+
+          <Box>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1 }}>
+              {t('settings:providers.quickLaunch', 'Quick Launch Web Chats:')}
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                href="https://chatgpt.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
+                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
+              >
+                {t('settings:providers.openChatGpt', 'Open ChatGPT')}
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                href="https://claude.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
+                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
+              >
+                {t('settings:providers.openClaude', 'Open Claude')}
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                href="https://gemini.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
+                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
+              >
+                {t('settings:providers.openGeminiWeb', 'Open Gemini Web')}
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                color="inherit"
+                href="https://chat.deepseek.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
+                sx={{ textTransform: 'none', fontSize: '0.78rem' }}
+              >
+                {t('settings:providers.openDeepSeek', 'Open DeepSeek')}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      ) : isLocal ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Box>
             <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1 }}>
@@ -430,55 +529,76 @@ export const AiConfigForm: React.FC<AiConfigFormProps> = ({
         </Box>
       )}
 
-      <FormControl fullWidth size="small">
-        <InputLabel id="active-model-select-label">{t('settings:providers.activeModel', 'Active Model')}</InputLabel>
-        <Select
-          labelId="active-model-select-label"
-          value={settings.model}
-          label={t('settings:providers.activeModel', 'Active Model')}
-          onChange={(e) => onSettingsChange({ ...settings, model: e.target.value })}
-        >
-          {currentModels.map((m) => (
-            <MenuItem key={m.id} value={m.id}>
-              {m.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {!isManual && (
+        <>
+          <FormControl fullWidth size="small">
+            <InputLabel id="active-model-select-label">{t('settings:providers.activeModel', 'Active Model')}</InputLabel>
+            <Select
+              labelId="active-model-select-label"
+              value={settings.model}
+              label={t('settings:providers.activeModel', 'Active Model')}
+              onChange={(e) => onSettingsChange({ ...settings, model: e.target.value })}
+            >
+              {currentModels.map((m) => (
+                <MenuItem key={m.id} value={m.id}>
+                  {m.name}
+                </MenuItem>
+              ))}
+              {!isKnownModel && settings.model && settings.model !== 'custom-local-model' && (
+                <MenuItem value={settings.model}>
+                  {`Local AI — ${settings.model} (Active / Custom)`}
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl>
 
-      <Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-          {t('settings:providers.creativityAndPrecision', 'Creativity & Precision: {{value}}', {
-            value: (typeof settings.temperature === 'number' ? settings.temperature : 0.15).toFixed(2),
-          })}
-        </Typography>
-        <Slider
-          value={typeof settings.temperature === 'number' ? settings.temperature : 0.15}
-          min={0.0}
-          max={1.0}
-          step={0.05}
-          onChange={(_, val) => onSettingsChange({ ...settings, temperature: val as number })}
-          valueLabelDisplay="auto"
-        />
-        <Typography variant="caption" color="text.secondary">
-          {t('settings:providers.temperatureHelp', 'Recommended: 0.10 – 0.20 for strict factual accuracy (Zero Hallucinations).')}
-        </Typography>
-      </Box>
+          {isLocal && (settings.model === 'custom-local-model' || !isKnownModel) && (
+            <TextField
+              fullWidth
+              size="small"
+              label={t('settings:providers.customModelTag', 'Local Model Tag (Ollama / LM Studio)')}
+              placeholder="e.g. qwen2.5:14b, deepseek-r1:14b"
+              helperText={t('settings:providers.customModelTagHelp', "Specify the exact model tag (e.g., qwen2.5:14b, deepseek-r1:14b). Run 'ollama list' to view installed models.")}
+              value={settings.model === 'custom-local-model' ? '' : settings.model}
+              onChange={(e) => onSettingsChange({ ...settings, model: e.target.value.trim() || 'custom-local-model' })}
+            />
+          )}
 
-      {showTestButton && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 0.5 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            color={isLocal ? 'secondary' : 'primary'}
-            startIcon={testingConnection ? <CircularProgress size={14} color="inherit" /> : <BoltRoundedIcon />}
-            onClick={handleRunTest}
-            disabled={testingConnection}
-            sx={{ fontWeight: 700, fontSize: '0.8rem', px: 2 }}
-          >
-            {testingConnection ? t('settings:providers.testing', 'Testing...') : t('settings:providers.testConnection', 'Test Connection')}
-          </Button>
-        </Box>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              {t('settings:providers.creativityAndPrecision', 'Creativity & Precision: {{value}}', {
+                value: (typeof settings.temperature === 'number' ? settings.temperature : 0.15).toFixed(2),
+              })}
+            </Typography>
+            <Slider
+              value={typeof settings.temperature === 'number' ? settings.temperature : 0.15}
+              min={0.0}
+              max={1.0}
+              step={0.05}
+              onChange={(_, val) => onSettingsChange({ ...settings, temperature: val as number })}
+              valueLabelDisplay="auto"
+            />
+            <Typography variant="caption" color="text.secondary">
+              {t('settings:providers.temperatureHelp', 'Recommended: 0.10 – 0.20 for strict factual accuracy (Zero Hallucinations).')}
+            </Typography>
+          </Box>
+
+          {showTestButton && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 0.5 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                color={isLocal ? 'secondary' : 'primary'}
+                startIcon={testingConnection ? <CircularProgress size={14} color="inherit" /> : <BoltRoundedIcon />}
+                onClick={handleRunTest}
+                disabled={testingConnection}
+                sx={{ fontWeight: 700, fontSize: '0.8rem', px: 2 }}
+              >
+                {testingConnection ? t('settings:providers.testing', 'Testing...') : t('settings:providers.testConnection', 'Test Connection')}
+              </Button>
+            </Box>
+          )}
+        </>
       )}
     </Paper>
   );

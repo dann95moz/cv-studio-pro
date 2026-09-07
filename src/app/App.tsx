@@ -9,6 +9,7 @@ import { LockedViewCard } from '../components/studio/LockedViewCard';
 import { SynthesisErrorBanner } from '../components/studio/SynthesisErrorBanner';
 import { StudioSkeleton } from '../components/studio/StudioSkeleton';
 import { AiGeneratingOverlay } from '../components/studio/ai/AiGeneratingOverlay';
+import { ManualAiPromptModal } from '../components/studio/ai/ManualAiPromptModal';
 import { DeviceSyncModal } from '../components/studio/sync/DeviceSyncModal';
 import { SnapshotConflictModal } from '../components/studio/sync/SnapshotConflictModal';
 import { useDeviceSync } from '../hooks/useDeviceSync';
@@ -77,6 +78,11 @@ export const App: React.FC = () => {
   const handleResetWorkspace = useResumeStore((s) => s.handleResetWorkspace);
   const globalNotification = useResumeStore((s) => s.globalNotification);
   const hideNotification = useResumeStore((s) => s.hideNotification);
+  const isManualPromptModalOpen = useResumeStore((s) => s.isManualPromptModalOpen);
+  const manualPromptBundle = useResumeStore((s) => s.manualPromptBundle);
+  const manualPromptTitle = useResumeStore((s) => s.manualPromptTitle);
+  const closeManualPromptModal = useResumeStore((s) => s.closeManualPromptModal);
+  const submitManualResponse = useResumeStore((s) => s.submitManualResponse);
 
 
   // Derived state via optimized memoized hooks
@@ -288,6 +294,15 @@ export const App: React.FC = () => {
 
       {/* Full-Screen Blocking AI Synthesis Screen */}
       <AiGeneratingOverlay />
+
+      {/* Bring-Your-Own-AI (Prompt & Paste) Modal */}
+      <ManualAiPromptModal
+        open={isManualPromptModalOpen}
+        title={manualPromptTitle}
+        onClose={closeManualPromptModal}
+        promptText={manualPromptBundle}
+        onSubmitResponse={submitManualResponse}
+      />
 
       {/* Device Sync Modal (Export / Import) */}
       <DeviceSyncModal

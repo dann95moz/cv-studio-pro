@@ -11,12 +11,14 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { useTranslation } from 'react-i18next';
 
 export interface TargetJobFooterActionsProps {
   onBack: () => void;
   onViewExisting?: () => void;
   onTailorNow: () => void;
+  onOpenManualPrompt?: () => void;
   isGenerating?: boolean;
   generationStep?: string;
   hasJob: boolean;
@@ -27,6 +29,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
   onBack,
   onViewExisting,
   onTailorNow,
+  onOpenManualPrompt,
   isGenerating = false,
   generationStep,
   hasJob,
@@ -107,6 +110,23 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
             }}
           >
             {t('target:actions.viewExisting', 'View Existing CV')}
+          </Button>
+        )}
+
+        {onOpenManualPrompt && (
+          <Button
+            variant="outlined"
+            color="success"
+            startIcon={<AutoAwesomeRoundedIcon />}
+            onClick={onOpenManualPrompt}
+            disabled={isGenerating || !hasJob}
+            sx={{
+              fontWeight: 700,
+              textTransform: 'none',
+              width: { xs: '100%', sm: 'auto' },
+            }}
+          >
+            {t('target:actions.byoAiPrompt', 'Prompt & Paste (BYO-AI)')}
           </Button>
         )}
 
