@@ -46,7 +46,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
   onSelectStep,
   activeWizardStep = 'preview',
 }) => {
-  const { t, i18n } = useTranslation(['common', 'profile']);
+  const { t, i18n } = useTranslation(['common', 'profile', 'preview']);
   const theme = useTheme();
   const { mode, toggleThemeMode } = useThemeMode();
 
@@ -112,34 +112,82 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
           height: 52,
         }}
       >
-        <Box
-          onClick={isWizard && onSelectStep ? (e) => setStepMenuAnchor(e.currentTarget) : undefined}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: isWizard && onSelectStep ? 'pointer' : 'default',
-            userSelect: 'none',
-            '&:active': isWizard && onSelectStep ? { opacity: 0.7 } : undefined,
-          }}
-        >
-          <Typography
-            variant="subtitle1"
+        {isWizard && activeWizardStep === 'preview' ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography
+              component="span"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectStep?.('target');
+              }}
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.92rem',
+                color: 'text.secondary',
+                cursor: 'pointer',
+                transition: 'color 0.15s ease',
+                '&:hover': { color: 'primary.main' },
+                '&:active': { opacity: 0.7 },
+              }}
+            >
+              {t('preview:toolbar.step2BreadcrumbPrefix', 'Vacante Objetivo')}
+            </Typography>
+            <Typography
+              component="span"
+              sx={{
+                color: 'text.disabled',
+                mx: 0.25,
+                fontSize: '0.85rem',
+                fontWeight: 500,
+              }}
+            >
+              &gt;
+            </Typography>
+            <Typography
+              component="span"
+              onClick={onSelectStep ? (e) => setStepMenuAnchor(e.currentTarget) : undefined}
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.92rem',
+                color: 'text.primary',
+                cursor: onSelectStep ? 'pointer' : 'default',
+                letterSpacing: '-0.01em',
+                '&:active': onSelectStep ? { opacity: 0.7 } : undefined,
+              }}
+            >
+              {t('preview:toolbar.step3Breadcrumb', 'CV en Vivo')}
+            </Typography>
+          </Box>
+        ) : (
+          <Box
+            onClick={isWizard && onSelectStep ? (e) => setStepMenuAnchor(e.currentTarget) : undefined}
             sx={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              color: 'text.primary',
-              letterSpacing: '-0.01em',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: isWizard && onSelectStep ? 'pointer' : 'default',
+              userSelect: 'none',
+              '&:active': isWizard && onSelectStep ? { opacity: 0.7 } : undefined,
             }}
           >
-            {isWizard
-              ? t('common:nav.stepCounter', 'Paso {{current}} de {{total}} · {{title}}', {
-                  current: currentStepNumber,
-                  total: totalSteps,
-                  title: stepTitle,
-                })
-              : stepTitle}
-          </Typography>
-        </Box>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                color: 'text.primary',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {isWizard
+                ? t('common:nav.stepCounter', 'Paso {{current}} de {{total}} · {{title}}', {
+                    current: currentStepNumber,
+                    total: totalSteps,
+                    title: stepTitle,
+                  })
+                : stepTitle}
+            </Typography>
+          </Box>
+        )}
 
         <IconButton
           size="small"
