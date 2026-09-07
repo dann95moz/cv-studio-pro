@@ -15,9 +15,12 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import SpeedRoundedIcon from '@mui/icons-material/SpeedRounded';
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { useTranslation } from 'react-i18next';
 import { useFileUploader } from '../../hooks/useFileUploader';
 import { useWelcomeLandingWorkflow } from '../../hooks/useWelcomeLandingWorkflow';
+import { ConfirmDeleteDialog } from '../studio/common/ConfirmDeleteDialog';
 import { APP_LINKS } from '../../constants/links';
 
 export interface WelcomeLandingViewProps {
@@ -33,6 +36,7 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
 }) => {
   const { t } = useTranslation(['landing', 'common', 'profile']);
   const workflow = useWelcomeLandingWorkflow();
+  const [showResetConfirm, setShowResetConfirm] = React.useState(false);
 
   const { fileInputRef, isProcessing, handleFileUpload, openFileDialog } = useFileUploader({
     onFileLoaded: (content) => {
@@ -157,59 +161,117 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
 
         {/* Primary Action Buttons */}
         <div className="welcome-actions-row">
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleStart}
-            endIcon={<ArrowForwardRoundedIcon />}
-            sx={{
-              px: 3.5,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 700,
-            }}
-          >
-            {t('landing:actions.startBuilding', 'Start Building Resume')}
-          </Button>
+          {workflow.hasSavedData ? (
+            <>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={onStart || workflow.handleResumeWizard}
+                endIcon={<ArrowForwardRoundedIcon />}
+                sx={{
+                  px: 3.5,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                }}
+              >
+                {workflow.candidateFirstName
+                  ? t('landing:actions.continueWithName', {
+                      name: workflow.candidateFirstName,
+                      defaultValue: `Continuar, ${workflow.candidateFirstName}`,
+                    })
+                  : t('landing:actions.continueWhereLeft', 'Continuar donde lo dejaste')}
+              </Button>
 
-          <Button
-            variant="outlined"
-            color="primary"
-            size="large"
-            onClick={openFileDialog}
-            disabled={isProcessing}
-            startIcon={
-              isProcessing ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : (
-                <PictureAsPdfRoundedIcon />
-              )
-            }
-            sx={{
-              px: 3,
-              py: 1.5,
-              fontSize: '0.95rem',
-              fontWeight: 700,
-            }}
-          >
-            {isProcessing ? t('profile:actions.importing', 'Extracting PDF...') : t('landing:actions.importPdfHero', 'Import Existing PDF')}
-          </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="large"
+                onClick={workflow.handleViewProfile}
+                startIcon={<PersonRoundedIcon />}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                }}
+              >
+                {t('landing:actions.viewProfile', 'Ver mi Perfil')}
+              </Button>
 
-          <Button
-            variant="outlined"
-            color="secondary"
-            size="large"
-            onClick={handleDemo}
-            startIcon={<AutoAwesomeRoundedIcon />}
-            sx={{
-              px: 3,
-              py: 1.5,
-              fontSize: '0.95rem',
-              fontWeight: 600,
-            }}
-          >
-            {t('landing:actions.trySample', 'Try with Sample Data')}
-          </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="large"
+                onClick={() => setShowResetConfirm(true)}
+                startIcon={<AddRoundedIcon />}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                }}
+              >
+                {t('landing:actions.startNewResume', 'Empezar un CV nuevo')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleStart}
+                endIcon={<ArrowForwardRoundedIcon />}
+                sx={{
+                  px: 3.5,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                }}
+              >
+                {t('landing:actions.startBuilding', 'Start Building Resume')}
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="primary"
+                size="large"
+                onClick={openFileDialog}
+                disabled={isProcessing}
+                startIcon={
+                  isProcessing ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <PictureAsPdfRoundedIcon />
+                  )
+                }
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                }}
+              >
+                {isProcessing ? t('profile:actions.importing', 'Extracting PDF...') : t('landing:actions.importPdfHero', 'Import Existing PDF')}
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="large"
+                onClick={handleDemo}
+                startIcon={<AutoAwesomeRoundedIcon />}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                }}
+              >
+                {t('landing:actions.trySample', 'Try with Sample Data')}
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Capabilities Pill Ribbon */}
@@ -289,6 +351,24 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog Before Starting a New Resume */}
+      <ConfirmDeleteDialog
+        open={showResetConfirm}
+        onCancel={() => setShowResetConfirm(false)}
+        onConfirm={() => {
+          setShowResetConfirm(false);
+          workflow.handleStartNewResume();
+        }}
+        title={t('landing:dialog.confirmNewCvTitle', 'Start a new resume?')}
+        message={t(
+          'landing:dialog.confirmNewCvDesc',
+          'This will clear your current profile data so you can start fresh from scratch. Do you want to continue?'
+        )}
+        confirmLabel={t('landing:dialog.confirmNewCv', 'Start New')}
+        cancelLabel={t('common:actions.cancel', 'Cancel')}
+      />
     </div>
   );
 };
+

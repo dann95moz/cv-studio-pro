@@ -24,8 +24,17 @@
   },
   "actions": {
     "startBuilding": "Start Building Resume",
+    "continueWhereLeft": "Continue where you left off",
+    "continueWithName": "Continue, {{name}}",
+    "viewProfile": "View My Profile",
+    "startNewResume": "Start New Resume",
     "trySample": "Try with Sample Data",
     "importPdfHero": "Import Existing PDF"
+  },
+  "dialog": {
+    "confirmNewCvTitle": "Start a new resume?",
+    "confirmNewCvDesc": "This will clear your current profile data so you can start fresh from scratch. Do you want to continue?",
+    "confirmNewCv": "Start New"
   },
   "capabilities": {
     "privacy": "100% Local-First & Private",

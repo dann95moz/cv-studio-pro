@@ -25,8 +25,17 @@
   },
   "actions": {
     "startBuilding": "Comenzar a Crear Currículum",
+    "continueWhereLeft": "Continuar donde lo dejaste",
+    "continueWithName": "Continuar, {{name}}",
+    "viewProfile": "Ver mi Perfil",
+    "startNewResume": "Empezar un CV nuevo",
     "trySample": "Probar con Datos de Ejemplo",
     "importPdfHero": "Importar CV en PDF"
+  },
+  "dialog": {
+    "confirmNewCvTitle": "¿Empezar un CV nuevo?",
+    "confirmNewCvDesc": "Esto limpiará los datos actuales para que puedas comenzar un nuevo perfil desde cero. ¿Deseas continuar?",
+    "confirmNewCv": "Empezar Nuevo"
   },
   "capabilities": {
     "privacy": "100% Local y Privado",

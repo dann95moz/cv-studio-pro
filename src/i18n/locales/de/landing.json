@@ -25,8 +25,17 @@
   },
   "actions": {
     "startBuilding": "Lebenslauf erstellen",
+    "continueWhereLeft": "Weitermachen, wo Sie aufgehört haben",
+    "continueWithName": "Weiter, {{name}}",
+    "viewProfile": "Mein Profil ansehen",
+    "startNewResume": "Neuen Lebenslauf beginnen",
     "trySample": "Mit Beispieldaten testen",
     "importPdfHero": "PDF-Lebenslauf importieren"
+  },
+  "dialog": {
+    "confirmNewCvTitle": "Neuen Lebenslauf beginnen?",
+    "confirmNewCvDesc": "Dadurch werden die aktuellen Profildaten gelöscht, sodass Sie von Grund auf neu beginnen können. Möchten Sie fortfahren?",
+    "confirmNewCv": "Neu beginnen"
   },
   "capabilities": {
     "privacy": "100% Lokal & Privat",
