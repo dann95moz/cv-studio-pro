@@ -26,6 +26,7 @@ import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { useTranslation } from 'react-i18next';
 import { PreviewSidePanelType } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
@@ -35,6 +36,7 @@ export interface MobileToolsBottomSheetProps {
   onClose: () => void;
   onSelectTool: (panel: PreviewSidePanelType) => void;
   onOpenDiff?: () => void;
+  onOpenAuditGap?: (tab?: 'audit' | 'gap' | 'interview') => void;
   onDownloadPdf?: () => void;
   onDownloadDocx?: () => void;
   onDownloadPlainText?: () => void;
@@ -55,6 +57,7 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
   onClose,
   onSelectTool,
   onOpenDiff,
+  onOpenAuditGap,
   onDownloadPdf,
   onDownloadDocx,
   onDownloadPlainText,
@@ -88,6 +91,15 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
       action: () => {
         onClose();
         onSelectTool('design');
+      },
+    },
+    {
+      id: 'gap',
+      label: t('preview:drawer.hudTitle', 'Diagnóstico & Brechas ATS'),
+      icon: <AutoAwesomeRoundedIcon sx={{ fontSize: 22, color: 'text.primary' }} />,
+      action: () => {
+        onClose();
+        onOpenAuditGap?.('gap');
       },
     },
     {

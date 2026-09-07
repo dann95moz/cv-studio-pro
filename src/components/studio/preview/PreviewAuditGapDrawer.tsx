@@ -357,8 +357,9 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
         <Box
           sx={{
             position: { xs: 'fixed', md: 'relative' },
-            top: { xs: 'var(--navbar-height, 56px)', md: 'auto' },
+            top: { xs: 0, md: 'auto' },
             bottom: { xs: 0, md: 'auto' },
+            left: { xs: 0, sm: 'auto' },
             right: 0,
             width: { xs: '100%', sm: 380, md: 380 },
             maxWidth: { xs: '100vw', sm: 380 },
@@ -366,7 +367,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
             bgcolor: 'background.paper',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%',
+            height: { xs: '100dvh', md: '100%' },
             overflowY: 'auto',
             overflowX: 'hidden',
             flexShrink: 0,
