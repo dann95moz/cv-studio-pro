@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   IconButton,
-  TextField,
   Chip,
   Paper,
   Divider,
@@ -20,7 +19,6 @@ import {
   alpha,
 } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import ColorLensRoundedIcon from '@mui/icons-material/ColorLensRounded';
 import AddAPhotoRoundedIcon from '@mui/icons-material/AddAPhotoRounded';
 import CropRoundedIcon from '@mui/icons-material/CropRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
@@ -34,7 +32,6 @@ import {
   PageFormat,
   DesignFormattingPanelProps,
 } from '../../../types';
-import { getAllPalettes } from '../../../constants/palettes';
 import { themeSupportsPhoto } from '../../../templates';
 import { ProfilePhotoDisplay } from '../photo/ProfilePhotoDisplay';
 import { PhotoCropperModal } from '../photo/PhotoCropperModal';
@@ -70,7 +67,6 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
 
   const { t } = useTranslation(['preview', 'common']);
   const muiTheme = useTheme();
-  const palettes = getAllPalettes();
   const [cropperOpen, setCropperOpen] = useState<boolean>(false);
   const currentTheme = theme || activeTheme;
   const [panelTab, setPanelTab] = useState<'templates' | 'formatting'>(initialTab);
@@ -181,127 +177,6 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
             style={{ display: 'none' }}
             onChange={handlePhotoUploadFromFileInput}
           />
-
-          {/* Section 1: Brand Color Picker */}
-          <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
-            {t('preview:panels.design.primaryColor', 'Accent Color')}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, lineHeight: 1.4 }}>
-            {t('preview:panels.design.subtitle', 'Customize typography, spacing, and styling tokens')}
-          </Typography>
-
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-        <Box
-          component="label"
-          sx={{
-            width: 38,
-            height: 38,
-            borderRadius: 1,
-            bgcolor: customColor,
-            cursor: 'pointer',
-            flexShrink: 0,
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: `2px solid ${muiTheme.palette.divider}`,
-            boxShadow: 1,
-            transition: 'transform 0.15s ease',
-            '&:hover': { transform: 'scale(1.06)' },
-          }}
-        >
-          <input
-            type="color"
-            value={customColor}
-            onChange={(e) => {
-              onCustomColorChange(e.target.value);
-              onSelectPalette('custom');
-            }}
-            style={{ opacity: 0, position: 'absolute', width: '100%', height: '100%', cursor: 'pointer' }}
-          />
-          <ColorLensRoundedIcon sx={{ fontSize: 20, color: 'common.white' }} />
-        </Box>
-
-        <TextField
-          size="small"
-          value={customColor}
-          onChange={(e) => {
-            onCustomColorChange(e.target.value);
-            onSelectPalette('custom');
-          }}
-          placeholder="#1d4ed8"
-          sx={{ flex: 1 }}
-          slotProps={{
-            htmlInput: {
-              style: { fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem' },
-            },
-          }}
-        />
-        {palette === 'custom' && (
-          <Chip
-            label={t('preview:panels.design.customActive', 'Custom Active')}
-            color="primary"
-            size="small"
-            sx={{ fontWeight: 700, fontSize: '0.7rem' }}
-          />
-        )}
-      </Box>
-
-      {/* Curated Accent Palettes */}
-      <Typography
-        variant="caption"
-        sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}
-      >
-        {t('preview:panels.templates.palette', 'Color Palette')}
-      </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8, maxHeight: 180, overflowY: 'auto', pr: 0.5, mb: 2.5 }}>
-        {palettes.map((p) => {
-          const isSelected = palette === p.id;
-          return (
-            <Paper
-              key={p.id}
-              variant="outlined"
-              onClick={() => {
-                onSelectPalette(p.id);
-                onCustomColorChange(p.primaryColor);
-              }}
-              sx={{
-                p: 1,
-                borderRadius: (theme) => `${theme.shape.borderRadius}px`,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.2,
-                borderColor: isSelected ? 'primary.main' : 'divider',
-                bgcolor: isSelected ? alpha(muiTheme.palette.primary.main, 0.08) : 'background.paper',
-                transition: 'all 0.15s ease',
-                '&:hover': { borderColor: 'primary.main' },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  bgcolor: p.previewColor,
-                  flexShrink: 0,
-                  border: `1px solid ${muiTheme.palette.divider}`,
-                }}
-              />
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="caption" sx={{ fontWeight: 800, display: 'block', color: 'text.primary', fontSize: '0.78rem' }}>
-                  {p.name}
-                </Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem', display: 'block', lineHeight: 1.1 }} noWrap>
-                  {p.description}
-                </Typography>
-              </Box>
-            </Paper>
-          );
-        })}
-      </Box>
-
-      <Divider sx={{ my: 2 }} />
 
       {/* Section 2: Profile Photo (Two-Column & Regional Customization) */}
       <Box sx={{ mb: 2.5 }}>

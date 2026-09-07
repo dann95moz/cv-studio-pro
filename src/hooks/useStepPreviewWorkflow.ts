@@ -318,6 +318,7 @@ export const useStepPreviewWorkflow = () => {
   // Right Side Unified Audit & Gap Drawer state
   const [isAuditGapOpen, setIsAuditGapOpen] = useState<boolean>(false);
   const [auditGapTab, setAuditGapTab] = useState<'audit' | 'gap' | 'interview'>('audit');
+  const [isHudMinimized, setIsHudMinimized] = useState<boolean>(false);
 
   // Mobile mode toggle: 'edit' vs 'preview'
   const [mobileViewMode, setMobileViewMode] = useState<'edit' | 'preview'>('preview');
@@ -345,20 +346,28 @@ export const useStepPreviewWorkflow = () => {
     };
   }, [cvMarkdown, theme, palette, customColor, fontFamily, spacingDensity, pageFormat]);
 
-  // Auto-calculate scale factor for mobile/tablet canvas preview
+  // Auto-calculate scale factor for responsive canvas preview across all breakpoints
   useEffect(() => {
     const calculateScale = () => {
       if (!canvasContainerRef.current) return;
       const containerWidth = canvasContainerRef.current.clientWidth;
-      if (containerWidth > 0 && containerWidth < 900) {
-        if (mobileZoomMode === '100%') {
-          setCanvasScale(1);
-        } else {
-          const padding = containerWidth < 500 ? 12 : 24;
-          const availableWidth = Math.max(280, containerWidth - padding);
-          const scale = Math.min(1, Math.max(0.35, availableWidth / targetPageWidthPx));
-          setCanvasScale(scale);
-        }
+      if (containerWidth <= 0) return;
+
+      if (mobileZoomMode === '100%') {
+        setCanvasScale(1);
+        return;
+      }
+
+      // Available width accounts for container padding and floating HUD allowance on desktop
+      const isDesktop = containerWidth >= 900;
+      const hudAllowance = isDesktop && !isAuditGapOpen && !isHudMinimized ? 230 : 0;
+      const basePadding = containerWidth < 500 ? 16 : (containerWidth < 900 ? 32 : 56);
+      const totalReservedWidth = basePadding + hudAllowance;
+      const availableWidth = Math.max(280, containerWidth - totalReservedWidth);
+
+      if (availableWidth < targetPageWidthPx) {
+        const scale = Math.min(1, Math.max(0.35, availableWidth / targetPageWidthPx));
+        setCanvasScale(scale);
       } else {
         setCanvasScale(1);
       }
@@ -375,7 +384,7 @@ export const useStepPreviewWorkflow = () => {
       window.removeEventListener('resize', calculateScale);
       observer.disconnect();
     };
-  }, [targetPageWidthPx, mobileViewMode, mobileZoomMode]);
+  }, [targetPageWidthPx, mobileViewMode, mobileZoomMode, activeSidePanel, isAuditGapOpen, isHudMinimized]);
 
   const isOverflowing = sheetHeight > targetPagePx + 8;
   const estimatedPages = isOverflowing ? Math.max(2, Math.ceil(sheetHeight / targetPagePx)) : 1;
@@ -517,6 +526,8 @@ export const useStepPreviewWorkflow = () => {
     auditReport,
     gapInfo,
     isTracked,
+    isHudMinimized,
+    setIsHudMinimized,
     // Actions
     handleSaveToHistory,
     handleTrackApplication,

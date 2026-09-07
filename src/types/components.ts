@@ -129,6 +129,8 @@ export interface PreviewAuditGapDrawerProps {
   onToggleTab: (tab: 'audit' | 'gap' | 'interview') => void;
   onClose: () => void;
   onOpenFullAudit?: () => void;
+  isHudMinimized?: boolean;
+  onToggleHudMinimized?: (minimized: boolean) => void;
 }
 
 export interface StepMasterDataProps {

@@ -79,6 +79,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     setIsAuditGapOpen,
     auditGapTab,
     setAuditGapTab,
+    isHudMinimized,
+    setIsHudMinimized,
     handleToggleSidePanel,
     handleOpenFullAudit,
     mobileViewMode,
@@ -278,6 +280,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
               height: '100%',
               overflowY: 'auto',
               flexShrink: 0,
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             {panelContent}
@@ -294,7 +297,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             flex: 1,
             height: '100%',
             minHeight: 0,
-            width: '100%',
+            minWidth: 0,
             overflow: 'hidden',
             order: 2,
           }}
@@ -329,7 +332,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             </Box>
           ) : (
             <>
-              {/* Document Canvas: Exact A4 simulation with responsive auto-scaling */}
+              {/* Document Canvas: Exact A4 simulation with responsive auto-scaling and dynamic balanced centering */}
               <Box
                 component="main"
                 ref={canvasContainerRef}
@@ -348,8 +351,14 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                   overflowY: 'auto',
                   WebkitOverflowScrolling: 'touch',
                   p: { xs: 1.5, sm: 2, md: 3.5 },
+                  pr: {
+                    xs: 1.5,
+                    sm: 2,
+                    md: !isAuditGapOpen && !isHudMinimized ? 'calc(215px + 28px)' : 3.5,
+                  },
                   pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', sm: 5, md: 6 },
                   boxSizing: 'border-box',
+                  transition: 'padding 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                   '@media print': {
                     display: 'block !important',
                     visibility: 'visible !important',
@@ -363,12 +372,13 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                 <div
                   className="paper-scale-container"
                   style={{
-                    width: canvasScale < 1 && mobileZoomMode === 'fit' ? `${targetPageWidthPx * canvasScale}px` : `${targetPageWidthPx}px`,
-                    height: canvasScale < 1 && mobileZoomMode === 'fit' ? `${(sheetHeight || targetPagePx) * canvasScale}px` : (sheetHeight > 0 ? `${sheetHeight}px` : 'auto'),
-                    minHeight: canvasScale < 1 && mobileZoomMode === 'fit' ? `${targetPagePx * canvasScale}px` : `${targetPagePx}px`,
+                    width: canvasScale < 1 ? `${targetPageWidthPx * canvasScale}px` : `${targetPageWidthPx}px`,
+                    height: canvasScale < 1 ? `${(sheetHeight || targetPagePx) * canvasScale}px` : (sheetHeight > 0 ? `${sheetHeight}px` : 'auto'),
+                    minHeight: canvasScale < 1 ? `${targetPagePx * canvasScale}px` : `${targetPagePx}px`,
                     position: 'relative',
                     margin: '0 auto',
                     flexShrink: 0,
+                    transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), height 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
                   <div
@@ -376,11 +386,12 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                     style={{
                       width: `${targetPageWidthPx}px`,
                       minHeight: `${targetPagePx}px`,
-                      transform: canvasScale < 1 && mobileZoomMode === 'fit' ? `scale(${canvasScale})` : undefined,
+                      transform: canvasScale < 1 ? `scale(${canvasScale})` : undefined,
                       transformOrigin: 'top left',
-                      position: canvasScale < 1 && mobileZoomMode === 'fit' ? 'absolute' : 'relative',
+                      position: canvasScale < 1 ? 'absolute' : 'relative',
                       top: 0,
                       left: 0,
+                      transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                   >
                     <div
@@ -451,6 +462,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
               }}
               onClose={() => setIsAuditGapOpen(false)}
               onOpenFullAudit={handleOpenFullAudit}
+              isHudMinimized={isHudMinimized}
+              onToggleHudMinimized={setIsHudMinimized}
             />
           </React.Suspense>
         </Box>

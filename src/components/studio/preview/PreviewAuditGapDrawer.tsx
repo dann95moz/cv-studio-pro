@@ -62,12 +62,24 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
   onToggleTab,
   onClose,
   onOpenFullAudit,
+  isHudMinimized: propIsHudMinimized,
+  onToggleHudMinimized,
 }) => {
   const { t } = useTranslation(['audit', 'gap', 'preview', 'common']);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [fullReportModalOpen, setFullReportModalOpen] = useState(false);
-  const [isHudMinimized, setIsHudMinimized] = useState<boolean>(false);
+  const [localHudMinimized, setLocalHudMinimized] = useState<boolean>(false);
+  const isHudMinimized = propIsHudMinimized !== undefined ? propIsHudMinimized : localHudMinimized;
+
+  const handleToggleHudMinimized = (minimized: boolean) => {
+    if (onToggleHudMinimized) {
+      onToggleHudMinimized(minimized);
+    } else {
+      setLocalHudMinimized(minimized);
+    }
+  };
+
   const { copied: isReportCopied, copy: copyReport } = useCopyToClipboard();
 
   const radarDimensions: RadarDimension[] = React.useMemo(
@@ -117,7 +129,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
             <Tooltip title={t('preview:drawer.expandHud', 'Expand ATS Diagnostic HUD')} placement="left">
               <Paper
                 elevation={3}
-                onClick={() => setIsHudMinimized(false)}
+                onClick={() => handleToggleHudMinimized(false)}
                 className="no-print"
                 sx={{
                   position: 'absolute',
@@ -194,7 +206,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setIsHudMinimized(true);
+                      handleToggleHudMinimized(true);
                     }}
                     sx={{
                       p: 0.25,
