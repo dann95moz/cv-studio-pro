@@ -33,7 +33,10 @@ export const useMasterDataWorkflow = ({
 
   useEffect(() => {
     setManualText(content);
-  }, [content]);
+    if (editMode === 'choice' && content && content.trim().length > 20) {
+      setEditMode(/^##\s+/m.test(content) ? 'guided' : 'freeText');
+    }
+  }, [content, editMode]);
 
   useEffect(() => {
     return () => {
