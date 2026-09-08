@@ -21,11 +21,28 @@ export function sanitizeFileName(text: string): string {
 }
 
 /**
+ * Cleans and un-snakes raw text (e.g. 'Daniel_Corredor_Acosta' -> 'Daniel Corredor Acosta')
+ * while preserving natural accents, spaces, and casing.
+ */
+export function cleanHumanText(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
+    .replace(/^[-*•#|:\s]+/, '')
+    .replace(/[–\-•|:\s]+$/, '')
+    .replace(/^(?:CV|Resume|Curriculum)[_-\s]+/i, '')
+    .replace(/[*`#]/g, '')
+    .replace(/_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Extracts candidate initials (e.g. 'Daniel Corredor' -> 'DC') for monograms
  */
 export function extractCandidateInitials(name?: string): string {
   if (!name) return 'CV';
-  const clean = name.replace(/\[|\]/g, '').trim();
+  const clean = cleanHumanText(name).replace(/\[|\]/g, '').trim();
   const parts = clean.split(/\s+/).filter(Boolean);
   if (parts.length === 0) return 'CV';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
@@ -33,61 +50,81 @@ export function extractCandidateInitials(name?: string): string {
 }
 
 /**
- * Extracts candidate name from master-data.md or fallback
+ * Extracts candidate name from master-data.md or fallback in clean human format (with spaces & accents)
  */
 export function extractCandidateName(masterDataText: string, fallback: string = ''): string {
+  if (!masterDataText || !masterDataText.trim()) {
+    return cleanHumanText(fallback);
+  }
+
   const match = masterDataText.match(
     /(?:^|\n)\s*[-*•]?\s*\*{0,2}(?:Nombre Completo|Full Name|Candidate Name|Nombre)(?:\s*\/[^*:]*)?(?::\*{0,2}|\*{0,2}:)\s*(.+)$/im
   );
   if (match) {
     let raw = match[1].trim().replace(/^\s*\\?\[\s*|\s*\\?\]\s*$/g, '');
     raw = raw.replace(/\\([\[\]+*`_~\\-])/g, '$1').replace(/^\\+|\\+$/g, '').trim();
+    const clean = cleanHumanText(raw);
     if (
-      !raw.toLowerCase().includes('tu nombre') && 
-      !raw.toLowerCase().includes('nombre y apellido') &&
-      !raw.toLowerCase().includes('candidate full name') &&
-      !raw.toLowerCase().includes('candidate name')
+      clean &&
+      !clean.toLowerCase().includes('tu nombre') && 
+      !clean.toLowerCase().includes('nombre y apellido') &&
+      !clean.toLowerCase().includes('candidate full name') &&
+      !clean.toLowerCase().includes('candidate name')
     ) {
-      return sanitizeFileName(raw);
+      return clean;
     }
   }
 
   const headingMatch = masterDataText.match(/^#\s+([^\r\n]+)/m);
   if (headingMatch) {
     const raw = headingMatch[1].trim();
+    const clean = cleanHumanText(raw);
     if (
-      !raw.toLowerCase().includes('tu nombre') && 
-      !raw.toLowerCase().includes('nombre y apellido') &&
-      !raw.toLowerCase().includes('candidate full name') &&
-      !raw.toLowerCase().includes('candidate name') &&
-      !raw.toLowerCase().includes('ejemplo') &&
-      !raw.toLowerCase().includes('reporte') &&
-      !raw.toLowerCase().includes('gap')
+      clean &&
+      !clean.toLowerCase().includes('tu nombre') && 
+      !clean.toLowerCase().includes('nombre y apellido') &&
+      !clean.toLowerCase().includes('candidate full name') &&
+      !clean.toLowerCase().includes('candidate name') &&
+      !clean.toLowerCase().includes('ejemplo') &&
+      !clean.toLowerCase().includes('reporte') &&
+      !clean.toLowerCase().includes('gap') &&
+      !clean.toLowerCase().includes('master data') &&
+      !clean.toLowerCase().includes('master profile') &&
+      !clean.toLowerCase().includes('perfil profesional') &&
+      !clean.toLowerCase().includes('curriculum') &&
+      clean.length < 60
     ) {
-      return sanitizeFileName(raw);
+      return clean;
     }
   }
 
-  return sanitizeFileName(fallback);
+  return cleanHumanText(fallback);
 }
 
 /**
- * Extracts target company from target-job.md or fallback
+ * Extracts target company from target-job.md or fallback in clean human format
  */
 export function extractTargetCompany(targetJobText: string, fallback: string = ''): string {
-  const match = targetJobText.match(/(?:Empresa|Company):\*{0,2}\s*\[?(?:Ej:\s*|e\.g\.\s*)?([^\]\r\n*]+)\]?/i);
+  if (!targetJobText || !targetJobText.trim()) {
+    return cleanHumanText(fallback);
+  }
+
+  const match = targetJobText.match(/(?:Empresa|Company|Empresa Objetivo|Target Company)(?:\s*\/[^*:]*)?:\*{0,2}\s*\[?(?:Ej:\s*|e\.g\.\s*)?([^\]\r\n*]+)\]?/i);
   if (match) {
-    const raw = match[1].trim();
+    let raw = match[1].trim();
+    raw = raw.replace(/\\([\[\]+*`_~\\-])/g, '$1').replace(/^\\+|\\+$/g, '').trim();
+    const clean = cleanHumanText(raw);
     if (
-      !raw.toLowerCase().includes('startup x') && 
-      !raw.toLowerCase().includes('company name') && 
-      !raw.toLowerCase().includes('target company') &&
-      !raw.includes('/')
+      clean &&
+      !clean.toLowerCase().includes('startup x') && 
+      !clean.toLowerCase().includes('company name') && 
+      !clean.toLowerCase().includes('target company') &&
+      !clean.includes('/')
     ) {
-      return sanitizeFileName(raw);
+      return clean;
     }
   }
-  return sanitizeFileName(fallback);
+  return cleanHumanText(fallback);
 }
 
 /**

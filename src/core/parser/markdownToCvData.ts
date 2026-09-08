@@ -1,5 +1,5 @@
 import { CVData, CVSection, ContactItem, SkillCategory, ExperienceItem, ContactType } from '../../types/cv';
-import { extractCandidateName } from './metadataExtractor';
+import { extractCandidateName, cleanHumanText, extractTargetRole } from './metadataExtractor';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 
 /**
@@ -110,7 +110,7 @@ function parseContactsLine(line: string): ContactItem[] {
   for (const item of items) {
     const linkMatch = item.match(/\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
-      const label = linkMatch[1].trim();
+      const label = cleanHumanText(linkMatch[1]);
       const url = linkMatch[2].trim();
       contacts.push({
         type: inferContactType(label, url),
@@ -118,12 +118,26 @@ function parseContactsLine(line: string): ContactItem[] {
         url,
       });
     } else {
-      const clean = item.replace(/^[–\-*]\s*/, '').trim();
+      let clean = item.replace(/^[–\-*]\s*/, '').trim();
+      // Handle key-value prefixes e.g. "**Email:** user@example.com" or "Email: user@example.com"
+      const kvMatch = clean.match(/^\*{0,2}(Email|E-mail|Correo|Tel[ée]fono|Phone|Mobile|Celular|Ubicaci[oó]n|Location|City|Ciudad|LinkedIn|GitHub|Portfolio|Web)\*{0,2}[:\s]+(.+)$/i);
+      let detectedType: ContactType | undefined;
+      if (kvMatch) {
+        const key = kvMatch[1].toLowerCase();
+        clean = kvMatch[2].replace(/[*_`]/g, '').trim();
+        if (key.includes('email') || key.includes('correo')) detectedType = 'email';
+        else if (key.includes('tel') || key.includes('phone') || key.includes('mobile') || key.includes('celular')) detectedType = 'phone';
+        else if (key.includes('ubic') || key.includes('loc') || key.includes('city') || key.includes('ciudad')) detectedType = 'location';
+        else if (key.includes('linkedin')) detectedType = 'linkedin';
+        else if (key.includes('github')) detectedType = 'github';
+        else if (key.includes('port') || key.includes('web')) detectedType = 'globe';
+      }
       if (clean) {
+        const type = detectedType || inferContactType(clean);
         contacts.push({
-          type: inferContactType(clean),
+          type,
           label: clean,
-          url: clean.includes('@') ? `mailto:${clean}` : undefined,
+          url: type === 'email' && !clean.startsWith('mailto:') ? `mailto:${clean}` : (clean.startsWith('http') ? clean : undefined),
         });
       }
     }
@@ -149,22 +163,37 @@ function parseExperienceBlocks(content: string): ExperienceItem[] {
     let date = '';
     const bullets: string[] = [];
 
-    // Line 1: Header line (e.g. "### **Company** | Location" or "### Company | Location")
+    // Line 1: Header line (e.g. "### **Company** | Location" or "### Role | Company")
     const headerLine = lines[0].replace(/^###\s+/, '').trim();
     const headerParts = headerLine.split('|').map((p) => p.trim());
-    company = headerParts[0].replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/, '$1').trim();
-    if (headerParts.length > 1) {
-      location = headerParts.slice(1).join(' | ').trim();
+    const part0 = headerParts[0].replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/, '$1').trim();
+    const part1 = headerParts.length > 1 ? headerParts.slice(1).join(' | ').trim() : '';
+
+    const roleKeywords = /\b(developer|engineer|architect|consultant|specialist|designer|manager|lead|director|analyst|programmer|intern|assistant|desarrollador|ingeniero|l[ií]der|gerente|arquitecto|analista|consultor|especialista)\b/i;
+
+    if (part1 && roleKeywords.test(part0) && !roleKeywords.test(part1)) {
+      role = part0;
+      company = part1;
+    } else {
+      company = part0;
+      location = part1;
     }
 
-    // Line 2: Subheader line (e.g. "*Role* | **Date**" or "Role | Date")
+    // Line 2: Subheader line (e.g. "*Role* | **Date**" or "Role | Date" or "Date")
     let lineIdx = 1;
     if (lineIdx < lines.length && !lines[lineIdx].startsWith('-') && !lines[lineIdx].startsWith('* ')) {
       const subLine = lines[lineIdx];
       const subParts = subLine.split('|').map((p) => p.trim());
-      role = subParts[0].replace(/[*_]/g, '').trim();
-      if (subParts.length > 1) {
-        date = subParts.slice(1).join(' | ').replace(/[*_]/g, '').trim();
+      const sub0 = subParts[0].replace(/[*_]/g, '').trim();
+      const sub1 = subParts.length > 1 ? subParts.slice(1).join(' | ').replace(/[*_]/g, '').trim() : '';
+
+      const isDateOnly = /\b(19\d\d|20\d\d|presente|present|actualidad|current)\b/i.test(sub0) && !roleKeywords.test(sub0);
+
+      if (role && !date && isDateOnly) {
+        date = sub0;
+      } else {
+        if (!role) role = sub0;
+        if (sub1) date = sub1;
       }
       lineIdx++;
     }
@@ -257,6 +286,20 @@ function parseBulletList(content: string): string[] {
 }
 
 /**
+ * Detects whether a markdown line represents contact details (email, phone, location, links)
+ */
+function isLikelyContactLine(line: string): boolean {
+  if (line.includes('@')) return true;
+  if (/https?:\/\/|www\.|linkedin\.com|github\.com/i.test(line)) return true;
+  if (/(?:\+|tel[ée]fono|phone|celular|mobile)[\s:]*[0-9]/i.test(line)) return true;
+  if (/^(?:[-*•]\s*)?\*{0,2}(?:Email|Correo|Tel[ée]fono|Phone|Mobile|Celular|Ubicaci[oó]n|Location|City|Ciudad|LinkedIn|GitHub|Portfolio|Web)/i.test(line)) return true;
+  if (/[•|·]/.test(line)) {
+    return /@|https?:\/\/|www\.|linkedin|github|\+?\d{2,}/i.test(line);
+  }
+  return false;
+}
+
+/**
  * Parses a standardized CV Markdown string back into a complete, strongly typed CVData model.
  * Inverts serializeCvDataToMarkdown with full multilingual section awareness.
  */
@@ -279,24 +322,47 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   let title = '';
   let contacts: ContactItem[] = [];
 
-  // 1. Parse Preamble (before the first ## or ---)
-  let preambleEndIndex = lines.findIndex((l) => l.startsWith('## ') || l.startsWith('---'));
+  // 1. Parse Preamble (before the first ##)
+  let preambleEndIndex = lines.findIndex((l) => l.startsWith('## '));
   if (preambleEndIndex === -1) preambleEndIndex = lines.length;
 
   const preambleLines = lines.slice(0, preambleEndIndex).map((l) => l.trim()).filter(Boolean);
 
   for (const pLine of preambleLines) {
     if (pLine.startsWith('# ')) {
-      name = pLine.replace(/^#\s+/, '').replace(/\*\*/g, '').trim();
-    } else if (pLine.startsWith('**') && pLine.endsWith('**') && !title) {
-      title = pLine.replace(/\*\*/g, '').trim();
-    } else if (pLine.includes('•') || pLine.includes('@') || pLine.includes('http') || pLine.includes('|')) {
-      contacts = parseContactsLine(pLine);
+      const candidateHeader = cleanHumanText(pLine.replace(/^#\s+/, ''));
+      if (
+        candidateHeader &&
+        !/^(?:master\s+data|master\s+profile|perfil\s+profesional|curriculum|resume|cv|datos\s+maestros|ejemplo)/i.test(candidateHeader)
+      ) {
+        name = candidateHeader;
+      }
+    } else if (isLikelyContactLine(pLine)) {
+      const parsedContacts = parseContactsLine(pLine);
+      for (const item of parsedContacts) {
+        if (!contacts.some((c) => c.type === item.type && c.label === item.label)) {
+          contacts.push(item);
+        }
+      }
+    } else if (!title && !pLine.startsWith('---') && !pLine.startsWith('===') && !pLine.startsWith('>')) {
+      const cleanLine = cleanHumanText(pLine);
+      if (
+        cleanLine &&
+        cleanLine.length < 90 &&
+        !cleanLine.toLowerCase().includes('http') &&
+        !cleanLine.toLowerCase().includes('@')
+      ) {
+        title = cleanLine;
+      }
     }
   }
 
   if (!name) {
     name = extractCandidateName(markdown, 'Candidate');
+  }
+
+  if (!title) {
+    title = cleanHumanText(extractTargetRole(markdown, markdown));
   }
 
   // 2. Parse Sections by '## '
@@ -343,7 +409,7 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     }
   }
 
-  return {
+  return cleanCvData({
     name,
     title,
     contacts,
@@ -364,5 +430,37 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     projects: projects.length > 0 ? projects : undefined,
     education: education.length > 0 ? education : undefined,
     languages: languages.length > 0 ? languages : undefined,
+  });
+}
+
+/**
+ * Normalizes all fields of CVData to ensure clean human-readable text
+ * with no rogue underscores, clean monograms, and consistent structure.
+ */
+export function cleanCvData(data: CVData): CVData {
+  if (!data) return data;
+  return {
+    ...data,
+    name: cleanHumanText(data.name || ''),
+    title: cleanHumanText(data.title || ''),
+    contacts: data.contacts?.map((c) => ({
+      ...c,
+      label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
+        ? cleanHumanText(c.label || '')
+        : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
+      url: c.url?.trim(),
+    })),
+    experience: data.experience?.map((exp) => ({
+      ...exp,
+      company: cleanHumanText(exp.company || ''),
+      role: cleanHumanText(exp.role || ''),
+      location: exp.location ? cleanHumanText(exp.location) : exp.location,
+    })),
+    projects: data.projects?.map((proj) => ({
+      ...proj,
+      company: cleanHumanText(proj.company || ''),
+      role: cleanHumanText(proj.role || ''),
+      location: proj.location ? cleanHumanText(proj.location) : proj.location,
+    })),
   };
 }
