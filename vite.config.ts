@@ -9,9 +9,67 @@ export default defineConfig({
     {
       name: 'cv-api-middleware',
       configureServer(server) {
+        const relayStore = new Map<string, { ciphertext: string; expiresAt: number }>();
+
         server.middlewares.use(async (req, res, next) => {
           const url = new URL(req.url || '', `http://${req.headers.host}`);
           const pathname = url.pathname;
+
+          // Local Relay Push Mock: POST /api/relay/push
+          if (pathname === '/api/relay/push' && req.method === 'POST') {
+            let body = '';
+            req.on('data', (chunk) => {
+              body += chunk;
+            });
+            req.on('end', () => {
+              try {
+                const { id, ciphertext } = JSON.parse(body);
+                if (!id || !ciphertext) {
+                  res.statusCode = 400;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(JSON.stringify({ error: 'Missing id or ciphertext' }));
+                  return;
+                }
+                const sanitizedId = String(id).trim().slice(0, 32);
+                relayStore.set(sanitizedId, {
+                  ciphertext: String(ciphertext),
+                  expiresAt: Date.now() + 300 * 1000,
+                });
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ ok: true, id: sanitizedId, ttl: 300 }));
+              } catch {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: 'Invalid JSON body' }));
+              }
+            });
+            return;
+          }
+
+          // Local Relay Pull Mock: GET /api/relay/pull/:id
+          if (pathname.startsWith('/api/relay/pull/') && req.method === 'GET') {
+            const id = pathname.replace('/api/relay/pull/', '').trim().slice(0, 32);
+            const item = relayStore.get(id);
+            if (!item || item.expiresAt < Date.now()) {
+              relayStore.delete(id);
+              res.statusCode = 404;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(
+                JSON.stringify({
+                  error: 'Snapshot not found or expired',
+                  code: 'NOT_FOUND_OR_EXPIRED',
+                })
+              );
+              return;
+            }
+            // Atomic single-trip consumption
+            relayStore.delete(id);
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: true, id, ciphertext: item.ciphertext }));
+            return;
+          }
 
           // API endpoint: list output and template markdown files
           if (pathname === '/api/files') {
