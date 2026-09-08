@@ -282,13 +282,13 @@ export function auditCvContent(
   // Calculate Overall Score
   const overallScore = Number((sections.reduce((acc, s) => acc + s.score, 0) / sections.length).toFixed(1));
 
-  const candidateName = extractCandidateName(masterDataText) || cvData.name || 'Candidate';
+  const candidateName = extractCandidateName(masterDataText) || cvData.name?.replace(/_/g, ' ') || 'Candidate';
   const targetCompany = extractTargetCompany(targetJobText) || 'Target Company';
 
   // Build Markdown Document
   let md = `# 📊 CV QUALITY AUDIT REPORT (Executive Headhunter Standard)\n\n`;
-  md += `- **Candidate:** ${candidateName.replace(/_/g, ' ')}\n`;
-  md += `- **Target Company / Vacancy:** ${targetCompany.replace(/_/g, ' ')}\n`;
+  md += `- **Candidate:** ${candidateName}\n`;
+  md += `- **Target Company / Vacancy:** ${targetCompany}\n`;
   md += `- **Overall Calibrated Score:** **${overallScore} / 10.0**\n`;
   md += `- **Application Readiness:** ✅ **Ready to Submit**\n\n`;
   md += `---\n\n`;

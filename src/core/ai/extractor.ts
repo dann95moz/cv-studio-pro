@@ -70,7 +70,7 @@ function tryParseJsonCv(
 
     const rawName = parsed.cvData.name?.trim() || '';
     const isPlaceholder = !rawName || rawName.includes('[') || rawName.toLowerCase().includes('candidate full name') || rawName.toLowerCase() === 'candidate';
-    const candidateName = !isPlaceholder ? rawName : extractCandidateName(masterData, 'Candidate');
+    const candidateName = !isPlaceholder ? rawName.replace(/_/g, ' ').replace(/\s+/g, ' ').trim() : extractCandidateName(masterData, 'Candidate');
     const role = parsed.cvData.title || targetRole || '';
 
     const contacts = (parsed.cvData.contacts || [])
