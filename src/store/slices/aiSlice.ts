@@ -101,8 +101,8 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
     const gapReport = extracted.gapMarkdown || get().gapMarkdown;
 
     const candName = (extracted.cvData?.name && !extracted.cvData.name.includes('[') && extracted.cvData.name.toLowerCase() !== 'candidate')
-      ? extracted.cvData.name
-      : extractCandidateName(masterData, 'Candidate').replace(/_/g, ' ');
+      ? extracted.cvData.name.replace(/_/g, ' ').trim()
+      : extractCandidateName(masterData, 'Candidate');
 
     const detectedLang = extracted.detectedLanguage || 'es';
     let nextSavedVersions = savedVersions;
@@ -237,8 +237,8 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
       const gapReport = response.gapAnalysisMarkdown || get().gapMarkdown;
 
       const candName = (response.cvData?.name && !response.cvData.name.includes('[') && response.cvData.name.toLowerCase() !== 'candidate')
-        ? response.cvData.name
-        : extractCandidateName(masterData, 'Candidate').replace(/_/g, ' ');
+        ? response.cvData.name.replace(/_/g, ' ').trim()
+        : extractCandidateName(masterData, 'Candidate');
       const comp = companyName || extractTargetCompany(targetJob, 'Target Company');
       const role = targetRole || extractTargetRole(targetJob, masterData, '') || '';
 

@@ -17,6 +17,9 @@ import {
   extractTargetRole,
   serializeCvDataToMarkdown,
   parseMarkdownToCvData,
+  cleanCvData,
+  cleanHumanText,
+  sanitizeFileName,
 } from '../../core/parser';
 import { downloadTextFile, buildTimestampedFileName } from '../../utils/fileUtils';
 import { CvTranslationVariant } from '../../types/cv';
@@ -36,7 +39,18 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   currentBaseLanguage: 'es',
   activeLanguage: 'es',
   activeVersionId: null,
+  savedVersions: [],
+  applications: [],
+  kanbanColumns: [],
   translations: {},
+  theme: 'modern-tech',
+  palette: 'ocean-blue',
+  customColor: null,
+  fontFamily: 'Inter',
+  spacingDensity: 'standard',
+  pageBudget: 1,
+  pageFormat: 'A4',
+  photo: null,
   lastBackupTimestamp: Date.now(),
   lastModifiedTimestamp: Date.now(),
   unsavedChangesCount: 0,
@@ -51,19 +65,57 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
 
   restoreFullSnapshot: (snapshot) => {
     const validUpdates: Partial<ResumeStore> = {};
-    if (typeof snapshot.masterData === 'string') validUpdates.masterData = snapshot.masterData;
+    if (typeof snapshot.masterData === 'string') {
+      validUpdates.masterData = snapshot.masterData
+        .replace(
+          /^#\s+(?:CV[_-]+)?([^\r\n]+)/m,
+          (_, raw) => {
+            const isDocHeader = /^(?:Master\s+Data|Master\s+Profile|Perfil\s+Profesional|Curriculum|Resume|Datos\s+Maestros)/i.test(raw);
+            return isDocHeader ? `# ${raw}` : `# ${raw.replace(/_/g, ' ').trim()}`;
+          }
+        )
+        .replace(
+          /((?:Nombre Completo|Full Name|Candidate Name|Nombre)(?:\s*\/[^*:]*)?(?::\*{0,2}|\*{0,2}:)\s*)([^\r\n]+)/gi,
+          (_, prefix, val) => `${prefix}${cleanHumanText(val)}`
+        );
+    }
     if (typeof snapshot.targetJob === 'string') validUpdates.targetJob = snapshot.targetJob;
-    if (typeof snapshot.cvMarkdown === 'string') validUpdates.cvMarkdown = snapshot.cvMarkdown;
+    if (typeof snapshot.cvMarkdown === 'string') {
+      validUpdates.cvMarkdown = snapshot.cvMarkdown
+        .replace(
+          /^#\s+(?:CV[_-]+)?([^\r\n]+)/m,
+          (_, raw) => {
+            const isDocHeader = /^(?:Master\s+Data|Master\s+Profile|Perfil\s+Profesional|Curriculum|Resume)/i.test(raw);
+            return isDocHeader ? `# ${raw}` : `# ${raw.replace(/_/g, ' ').trim()}`;
+          }
+        )
+        .replace(
+          /((?:Nombre Completo|Full Name|Candidate Name|Nombre)(?:\s*\/[^*:]*)?(?::\*{0,2}|\*{0,2}:)\s*)([^\r\n]+)/gi,
+          (_, prefix, val) => `${prefix}${cleanHumanText(val)}`
+        );
+    }
     if (typeof snapshot.gapMarkdown === 'string') validUpdates.gapMarkdown = snapshot.gapMarkdown;
     if (typeof snapshot.coverLetterMarkdown === 'string') validUpdates.coverLetterMarkdown = snapshot.coverLetterMarkdown;
     if (typeof snapshot.rules === 'string') validUpdates.rules = snapshot.rules;
-    if (typeof snapshot.companyName === 'string') validUpdates.companyName = snapshot.companyName;
-    if (typeof snapshot.targetRole === 'string') validUpdates.targetRole = snapshot.targetRole;
+    if (typeof snapshot.companyName === 'string') validUpdates.companyName = cleanHumanText(snapshot.companyName);
+    if (typeof snapshot.targetRole === 'string') validUpdates.targetRole = cleanHumanText(snapshot.targetRole);
     if (typeof snapshot.currentBaseLanguage === 'string') validUpdates.currentBaseLanguage = snapshot.currentBaseLanguage;
     if (typeof snapshot.activeLanguage === 'string') validUpdates.activeLanguage = snapshot.activeLanguage;
     if (snapshot.activeVersionId !== undefined) validUpdates.activeVersionId = snapshot.activeVersionId;
-    if (Array.isArray(snapshot.savedVersions)) validUpdates.savedVersions = snapshot.savedVersions;
-    if (Array.isArray(snapshot.applications)) validUpdates.applications = snapshot.applications;
+    if (Array.isArray(snapshot.savedVersions)) {
+      validUpdates.savedVersions = snapshot.savedVersions.map((v) => ({
+        ...v,
+        candidateName: v.candidateName ? cleanHumanText(v.candidateName) : v.candidateName,
+        companyName: v.companyName ? cleanHumanText(v.companyName) : v.companyName,
+      }));
+    }
+    if (Array.isArray(snapshot.applications)) {
+      validUpdates.applications = snapshot.applications.map((a) => ({
+        ...a,
+        companyName: a.companyName ? cleanHumanText(a.companyName) : a.companyName,
+        targetRole: a.targetRole ? cleanHumanText(a.targetRole) : a.targetRole,
+      }));
+    }
     if (Array.isArray(snapshot.kanbanColumns)) validUpdates.kanbanColumns = snapshot.kanbanColumns;
     if (snapshot.translations && typeof snapshot.translations === 'object') validUpdates.translations = snapshot.translations;
     if (snapshot.theme) validUpdates.theme = snapshot.theme;
@@ -85,7 +137,7 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
         snapshot.activeCvData.experience?.length ||
         snapshot.activeCvData.skillGroups?.length)
     ) {
-      validUpdates.activeCvData = snapshot.activeCvData;
+      validUpdates.activeCvData = cleanCvData(snapshot.activeCvData);
     } else if (snapshot.cvMarkdown && snapshot.cvMarkdown.trim().length > 30) {
       validUpdates.activeCvData = parseMarkdownToCvData(snapshot.cvMarkdown);
     } else if (snapshot.masterData && snapshot.masterData.trim().length > 30) {
@@ -315,7 +367,7 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     const isVariant = activeLanguage && currentBaseLanguage && activeLanguage !== currentBaseLanguage && translations[activeLanguage];
     const content = isVariant ? translations[activeLanguage].cvMarkdown : cvMarkdown;
     const langSuffix = isVariant ? `_${activeLanguage.toUpperCase()}` : '';
-    const baseName = `CV_${candidateName}_${targetComp}${langSuffix}`;
+    const baseName = `CV_${sanitizeFileName(candidateName)}_${sanitizeFileName(targetComp)}${langSuffix}`;
     const fileName = buildTimestampedFileName(baseName, 'md');
 
     downloadTextFile(content, fileName);

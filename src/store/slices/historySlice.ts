@@ -34,7 +34,7 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
       activeCvData,
     } = get();
 
-    const candName = extractCandidateName(masterData, 'Candidate').replace(/_/g, ' ');
+    const candName = (activeCvData?.name ? activeCvData.name.replace(/_/g, ' ') : extractCandidateName(masterData, 'Candidate')).trim();
     const comp = customTitle || companyName || extractTargetCompany(targetJob, 'Target Company');
     const role = targetRole || extractTargetRole(targetJob, masterData, '') || '';
     const baseLang = currentBaseLanguage || 'es';
