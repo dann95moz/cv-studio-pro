@@ -353,7 +353,7 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
       </Box>
 
       {/* Main Diff Content Container */}
-      <DialogContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <DialogContent sx={{ p: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {viewMode === 'visual' && (
           <VisualSplitView
             dataA={visualDiffResult.dataAWithDiff}

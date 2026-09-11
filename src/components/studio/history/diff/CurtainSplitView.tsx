@@ -37,6 +37,11 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
   const [sliderPosition, setSliderPosition] = useState<number>(50); // percentage 0 to 100
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const sheetRefA = useRef<HTMLDivElement>(null);
+  const sheetRefB = useRef<HTMLDivElement>(null);
+
+  const [sheetHeightA, setSheetHeightA] = useState<number>(1123);
+  const [sheetHeightB, setSheetHeightB] = useState<number>(1123);
 
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== 'undefined' ? window.innerWidth : 1200
@@ -49,6 +54,33 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
   }, []);
 
   const effectiveScale = Math.min(0.85, Math.max(0.42, (windowWidth - 48) / 794));
+
+  // Dynamic height measurement to avoid clipping and enable seamless vertical scrolling
+  useEffect(() => {
+    const measureHeights = () => {
+      if (sheetRefA.current) {
+        const hA = sheetRefA.current.scrollHeight || sheetRefA.current.offsetHeight;
+        if (hA > 0) setSheetHeightA(Math.max(1123, hA));
+      }
+      if (sheetRefB.current) {
+        const hB = sheetRefB.current.scrollHeight || sheetRefB.current.offsetHeight;
+        if (hB > 0) setSheetHeightB(Math.max(1123, hB));
+      }
+    };
+
+    measureHeights();
+
+    const observer = new ResizeObserver(() => {
+      measureHeights();
+    });
+
+    if (sheetRefA.current) observer.observe(sheetRefA.current);
+    if (sheetRefB.current) observer.observe(sheetRefB.current);
+
+    return () => observer.disconnect();
+  }, [dataA, dataB, themeA, themeB, paletteA, paletteB, fontFamily, spacingDensity]);
+
+  const maxCurtainHeight = Math.max(1123, sheetHeightA, sheetHeightB);
 
   const handlePointerMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
@@ -88,7 +120,7 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
   }, [isDragging, handlePointerMove]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, width: '100%', overflow: 'hidden' }}>
       {/* Top Banner Guide */}
       <Box
         sx={{
@@ -101,6 +133,7 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 1.5,
+          flexShrink: 0,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -125,11 +158,13 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
         />
       </Box>
 
-      {/* Main Curtain Stage */}
+      {/* Main Curtain Stage with full vertical scrolling */}
       <Box
         sx={{
           flex: 1,
+          minHeight: 0,
           overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
@@ -143,7 +178,9 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
           sx={{
             position: 'relative',
             width: `${794 * effectiveScale}px`,
+            height: `${maxCurtainHeight * effectiveScale}px`,
             minHeight: `${1123 * effectiveScale}px`,
+            flexShrink: 0,
             margin: '0 auto',
             boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.7)' : '0 16px 40px rgba(0,0,0,0.14)',
             borderRadius: 1,
@@ -161,18 +198,21 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
               top: 0,
               left: 0,
               width: '794px',
+              minHeight: '1123px',
               transform: `scale(${effectiveScale})`,
               transformOrigin: 'top left',
               pointerEvents: 'none',
             }}
           >
-            <CVRenderer
-              data={dataB}
-              theme={themeB as ThemeId}
-              palette={paletteB as PaletteId}
-              fontFamily={fontFamily}
-              spacingDensity={spacingDensity}
-            />
+            <div ref={sheetRefB} style={{ width: '794px', minHeight: '1123px' }}>
+              <CVRenderer
+                data={dataB}
+                theme={themeB as ThemeId}
+                palette={paletteB as PaletteId}
+                fontFamily={fontFamily}
+                spacingDensity={spacingDensity}
+              />
+            </div>
           </Box>
 
           {/* Layer A (Foreground / Left Side with dynamic clipping width) */}
@@ -196,17 +236,20 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
                 top: 0,
                 left: 0,
                 width: '794px',
+                minHeight: '1123px',
                 transform: `scale(${effectiveScale})`,
                 transformOrigin: 'top left',
               }}
             >
-              <CVRenderer
-                data={dataA}
-                theme={themeA as ThemeId}
-                palette={paletteA as PaletteId}
-                fontFamily={fontFamily}
-                spacingDensity={spacingDensity}
-              />
+              <div ref={sheetRefA} style={{ width: '794px', minHeight: '1123px' }}>
+                <CVRenderer
+                  data={dataA}
+                  theme={themeA as ThemeId}
+                  palette={paletteA as PaletteId}
+                  fontFamily={fontFamily}
+                  spacingDensity={spacingDensity}
+                />
+              </div>
             </Box>
           </Box>
 

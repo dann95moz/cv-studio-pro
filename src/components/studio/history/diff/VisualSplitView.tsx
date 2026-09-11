@@ -13,6 +13,8 @@ import {
 } from '@mui/material';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
 import LinkOffRoundedIcon from '@mui/icons-material/LinkOffRounded';
+import SyncRoundedIcon from '@mui/icons-material/SyncRounded';
+import SyncDisabledRoundedIcon from '@mui/icons-material/SyncDisabledRounded';
 import ZoomInRoundedIcon from '@mui/icons-material/ZoomInRounded';
 import ZoomOutRoundedIcon from '@mui/icons-material/ZoomOutRounded';
 import { useTranslation } from 'react-i18next';
@@ -68,7 +70,15 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
 
   const containerARef = useRef<HTMLDivElement>(null);
   const containerBRef = useRef<HTMLDivElement>(null);
-  const isSyncingRef = useRef<boolean>(false);
+  const sheetRefA = useRef<HTMLDivElement>(null);
+  const sheetRefB = useRef<HTMLDivElement>(null);
+
+  const [sheetHeightA, setSheetHeightA] = useState<number>(1123);
+  const [sheetHeightB, setSheetHeightB] = useState<number>(1123);
+  const [isScrollSynced, setIsScrollSynced] = useState<boolean>(true);
+
+  const activeScrollerRef = useRef<'A' | 'B' | null>(null);
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [activeMobileTab, setActiveMobileTab] = useState<'A' | 'B'>('B');
   const [zoomFactor, setZoomFactor] = useState<number>(0.72);
@@ -87,30 +97,68 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
     ? Math.min(0.85, Math.max(0.38, (windowWidth - 48) / 794))
     : zoomFactor;
 
-  // Synchronized scroll handler
-  const handleScroll = useCallback((source: 'A' | 'B') => {
-    if (isSyncingRef.current) return;
-    isSyncingRef.current = true;
+  // Track and measure document height dynamically to eliminate clipping
+  useEffect(() => {
+    const measureHeights = () => {
+      if (sheetRefA.current) {
+        const hA = sheetRefA.current.scrollHeight || sheetRefA.current.offsetHeight;
+        if (hA > 0) setSheetHeightA(Math.max(1123, hA));
+      }
+      if (sheetRefB.current) {
+        const hB = sheetRefB.current.scrollHeight || sheetRefB.current.offsetHeight;
+        if (hB > 0) setSheetHeightB(Math.max(1123, hB));
+      }
+    };
 
-    const srcEl = source === 'A' ? containerARef.current : containerBRef.current;
-    const targetEl = source === 'A' ? containerBRef.current : containerARef.current;
+    measureHeights();
 
-    if (srcEl && targetEl) {
-      const scrollRatio = srcEl.scrollTop / Math.max(1, srcEl.scrollHeight - srcEl.clientHeight);
-      targetEl.scrollTop = scrollRatio * (targetEl.scrollHeight - targetEl.clientHeight);
-    }
-
-    requestAnimationFrame(() => {
-      isSyncingRef.current = false;
+    const observer = new ResizeObserver(() => {
+      measureHeights();
     });
-  }, []);
+
+    if (sheetRefA.current) observer.observe(sheetRefA.current);
+    if (sheetRefB.current) observer.observe(sheetRefB.current);
+
+    return () => observer.disconnect();
+  }, [dataA, dataB, themeA, themeB, paletteA, paletteB, fontFamily, spacingDensity]);
+
+  // Clean, jitter-free scroll synchronization with feedback-loop guard
+  const handleScroll = useCallback(
+    (source: 'A' | 'B') => {
+      if (!isScrollSynced) return;
+
+      // Ignore programmatic echo scroll events from the other container
+      if (activeScrollerRef.current !== null && activeScrollerRef.current !== source) {
+        return;
+      }
+
+      activeScrollerRef.current = source;
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+      syncTimeoutRef.current = setTimeout(() => {
+        activeScrollerRef.current = null;
+      }, 120);
+
+      const srcEl = source === 'A' ? containerARef.current : containerBRef.current;
+      const targetEl = source === 'A' ? containerBRef.current : containerARef.current;
+
+      if (srcEl && targetEl) {
+        const maxSrc = srcEl.scrollHeight - srcEl.clientHeight;
+        const maxTarget = targetEl.scrollHeight - targetEl.clientHeight;
+        if (maxSrc > 0 && maxTarget > 0) {
+          const ratio = srcEl.scrollTop / maxSrc;
+          targetEl.scrollTop = Math.round(ratio * maxTarget);
+        }
+      }
+    },
+    [isScrollSynced]
+  );
 
   const templates = getAllTemplates();
   const palettes = Object.values(CURATED_PALETTES);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden' }}>
-      {/* Sub-toolbar: Template selectors, Linking toggle, and Zoom */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, width: '100%', overflow: 'hidden' }}>
+      {/* Sub-toolbar: Template selectors, Linking toggle, Scroll sync toggle, and Zoom */}
       <Box
         sx={{
           py: 1,
@@ -122,6 +170,7 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           gap: 1.5,
+          flexShrink: 0,
         }}
       >
         {/* Left Side: Template A Controls */}
@@ -174,7 +223,7 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
           </Select>
         </Box>
 
-        {/* Center: Style Linking Switch */}
+        {/* Center: Style Linking & Scroll Synchronization Toggles */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Tooltip
             title={
@@ -191,10 +240,35 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
                 border: `1px solid ${isLinkedStyles ? muiTheme.palette.primary.main : muiTheme.palette.divider}`,
                 bgcolor: isLinkedStyles ? alpha(muiTheme.palette.primary.main, 0.08) : 'transparent',
               }}
+              aria-label="Toggle linked styles"
             >
               {isLinkedStyles ? <LinkRoundedIcon fontSize="small" /> : <LinkOffRoundedIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
+
+          {!isMobile && (
+            <Tooltip
+              title={
+                isScrollSynced
+                  ? t('history:diff.syncScrollTip', 'Scrolls both CVs in unison (click to scroll independently)')
+                  : t('history:diff.unsyncScrollTip', 'Scrolls each CV independently (click to scroll in unison)')
+              }
+            >
+              <IconButton
+                size="small"
+                onClick={() => setIsScrollSynced((prev) => !prev)}
+                color={isScrollSynced ? 'primary' : 'default'}
+                sx={{
+                  border: `1px solid ${isScrollSynced ? muiTheme.palette.primary.main : muiTheme.palette.divider}`,
+                  bgcolor: isScrollSynced ? alpha(muiTheme.palette.primary.main, 0.08) : 'transparent',
+                }}
+                aria-label="Toggle scroll synchronization"
+              >
+                {isScrollSynced ? <SyncRoundedIcon fontSize="small" /> : <SyncDisabledRoundedIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          )}
+
           <Typography variant="caption" sx={{ fontWeight: 700, display: { xs: 'none', md: 'inline' } }}>
             {isLinkedStyles ? t('history:diff.linkStyles', 'Linked Styles') : t('history:diff.unlinkStyles', 'Custom Styles')}
           </Typography>
@@ -277,6 +351,7 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
             display: 'flex',
             borderBottom: `1px solid ${muiTheme.palette.divider}`,
             bgcolor: alpha(muiTheme.palette.background.paper, 0.95),
+            flexShrink: 0,
           }}
         >
           <Box
@@ -316,6 +391,7 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
       <Box
         sx={{
           flex: 1,
+          minHeight: 0,
           display: 'flex',
           overflow: 'hidden',
           bgcolor: isDark ? alpha('#000', 0.3) : alpha('#000', 0.03),
@@ -328,7 +404,9 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
             onScroll={() => handleScroll('A')}
             sx={{
               flex: 1,
+              minHeight: 0,
               overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
               p: { xs: 1.5, md: 3 },
               borderRight: !isMobile ? `1px solid ${muiTheme.palette.divider}` : 'none',
               display: 'flex',
@@ -336,30 +414,41 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
               alignItems: 'center',
             }}
           >
+            {/* Paper scale container with exact physical height */}
             <Box
               sx={{
                 width: `${794 * effectiveScale}px`,
-                overflow: 'hidden',
+                height: `${Math.max(1123, sheetHeightA) * effectiveScale}px`,
+                minHeight: `${1123 * effectiveScale}px`,
+                position: 'relative',
+                flexShrink: 0,
                 margin: '0 auto',
                 boxShadow: isDark ? '0 12px 36px rgba(0,0,0,0.6)' : '0 12px 36px rgba(0,0,0,0.12)',
                 borderRadius: 1,
                 bgcolor: '#ffffff',
+                overflow: 'hidden',
               }}
             >
               <Box
                 sx={{
                   width: '794px',
+                  minHeight: '1123px',
                   transform: `scale(${effectiveScale})`,
                   transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                 }}
               >
-                <CVRenderer
-                  data={dataA}
-                  theme={themeA as ThemeId}
-                  palette={paletteA as PaletteId}
-                  fontFamily={fontFamily}
-                  spacingDensity={spacingDensity}
-                />
+                <div ref={sheetRefA} style={{ width: '794px', minHeight: '1123px' }}>
+                  <CVRenderer
+                    data={dataA}
+                    theme={themeA as ThemeId}
+                    palette={paletteA as PaletteId}
+                    fontFamily={fontFamily}
+                    spacingDensity={spacingDensity}
+                  />
+                </div>
               </Box>
             </Box>
           </Box>
@@ -372,37 +461,50 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
             onScroll={() => handleScroll('B')}
             sx={{
               flex: 1,
+              minHeight: 0,
               overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
               p: { xs: 1.5, md: 3 },
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
             }}
           >
+            {/* Paper scale container with exact physical height */}
             <Box
               sx={{
                 width: `${794 * effectiveScale}px`,
-                overflow: 'hidden',
+                height: `${Math.max(1123, sheetHeightB) * effectiveScale}px`,
+                minHeight: `${1123 * effectiveScale}px`,
+                position: 'relative',
+                flexShrink: 0,
                 margin: '0 auto',
                 boxShadow: isDark ? '0 12px 36px rgba(0,0,0,0.6)' : '0 12px 36px rgba(0,0,0,0.12)',
                 borderRadius: 1,
                 bgcolor: '#ffffff',
+                overflow: 'hidden',
               }}
             >
               <Box
                 sx={{
                   width: '794px',
+                  minHeight: '1123px',
                   transform: `scale(${effectiveScale})`,
                   transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                 }}
               >
-                <CVRenderer
-                  data={dataB}
-                  theme={themeB as ThemeId}
-                  palette={paletteB as PaletteId}
-                  fontFamily={fontFamily}
-                  spacingDensity={spacingDensity}
-                />
+                <div ref={sheetRefB} style={{ width: '794px', minHeight: '1123px' }}>
+                  <CVRenderer
+                    data={dataB}
+                    theme={themeB as ThemeId}
+                    palette={paletteB as PaletteId}
+                    fontFamily={fontFamily}
+                    spacingDensity={spacingDensity}
+                  />
+                </div>
               </Box>
             </Box>
           </Box>
