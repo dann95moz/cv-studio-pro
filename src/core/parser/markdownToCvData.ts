@@ -16,15 +16,16 @@ export function inferDocumentLanguage(text: string): SupportedLanguage {
   // Domain-specific keyword indicators
   if (/(\bexperiencia\b|\bhabilidades\b|\beducaci[oó]n\b|\bidiomas\b|\bresumen\b|\bdesarrollador\b|\bproyectos\b|\bcertificaciones\b|\blaboral\b)/i.test(lower)) esScore += 4;
   if (/(\bberufserfahrung\b|\bausbildung\b|\bsprachen\b|\bkenntnisse\b|\bkurzprofil\b|\bprojekte\b)/i.test(lower)) deScore += 4;
-  if (/(\bexp[eé]rience\b|\bformation\b|\blangues\b|\bcomp[eé]tences\b|\bprofil professionnel\b|\bprojets\b)/i.test(lower)) frScore += 4;
+  if (/(\bexp[ée]rience\b|\bformation\b|\blangues\b|\bcomp[ée]tences\b|\bprofil professionnel\b|\bprojets\b)/i.test(lower)) frScore += 4;
   if (/(\besperienza\b|\bistruzione\b|\blingue\b|\bcompetenze\b|\bprogetti\b)/i.test(lower)) itScore += 4;
-  if (/(\bexperience\b|\bskills\b|\beducation\b|\blanguages\b|\bsummary\b|\bprojects\b)/i.test(lower)) enScore += 2;
+  if (/(\bexperience\b|\bskills\b|\beducation\b|\blanguages\b|\bsummary\b|\bprojects\b)/i.test(lower)) enScore += 4;
 
   // Common syntax and grammatical markers
   if (/\b(de|en|con|para|por|los|las|del|una|un|años|trayectoria)\b/i.test(lower)) esScore += 2;
   if (/\b(und|der|die|das|mit|für|von|im|jahre)\b/i.test(lower)) deScore += 2;
   if (/\b(et|dans|pour|avec|des|les|une|ans)\b/i.test(lower)) frScore += 2;
   if (/\b(e|in|per|con|dei|le|un|anni)\b/i.test(lower)) itScore += 2;
+  if (/\b(the|and|with|for|from|years|track\s*record)\b/i.test(lower)) enScore += 2;
 
   if (esScore > deScore && esScore > frScore && esScore > itScore && esScore >= enScore) return 'es';
   if (deScore > esScore && deScore > frScore && deScore > itScore && deScore >= enScore) return 'de';
@@ -147,6 +148,87 @@ function parseContactsLine(line: string): ContactItem[] {
 }
 
 /**
+ * Strips raw markdown headers (e.g. "## Professional Summary"), label prefixes ("**Summary:**"),
+ * dividers, and outer bold wrappers from summary text.
+ */
+export function cleanSummary(summary: string): string {
+  if (!summary) return '';
+  let clean = summary.trim();
+
+  // Strip markdown headers like "## Summary", "### Resumen Profesional"
+  clean = clean.replace(/^#{1,6}\s+[^\n]*\n+/gm, '').trim();
+
+  // Strip label prefixes like "**Summary:**", "**Summary**:", "**Resumen:**", "Summary:"
+  clean = clean.replace(/^\*{0,2}(?:Resumen(?:\s+Profesional|\s+Ejecutivo)?|Professional\s+Summary|Executive\s+Summary|Perfil(?:\s+Profesional)?|Summary|Profil|Zusammenfassung|Sommario)(?::\*{0,2}|\*{0,2}:)\s*(\r?\n)?/i, '').trim();
+
+  // Strip divider lines "---" or "==="
+  clean = clean.replace(/^[-=_]{3,}\s*$/gm, '').trim();
+
+  // If the whole summary is enclosed in **bold** or *italic*, strip outer wrappers
+  if (/^\*\*[^*]+\*\*$/.test(clean)) {
+    clean = clean.replace(/^\*\*([\s\S]+)\*\*$/, '$1').trim();
+  }
+
+  // Strip any leftover leading asterisks, bullets, or headers
+  clean = clean.replace(/^[*_`#\s]+/, '').replace(/[*_`\s]+$/, '').trim();
+
+  return clean;
+}
+
+/**
+ * Strips leading bullet characters (- , * , • , · , + , or 1. ) from bullet text.
+ */
+export function cleanBulletText(bullet: string): string {
+  if (!bullet) return '';
+  return bullet.replace(/^(?:[-*•·+]|\d+\.)\s+/, '').trim();
+}
+
+/**
+ * Cleans individual skill tag (stripping *, _, `, brackets, leading bullet dashes).
+ */
+export function cleanSkillItem(skill: string): string {
+  if (!skill) return '';
+  return skill
+    .replace(/^[-*•·+]\s*/, '')
+    .replace(/[*_`]/g, '')
+    .replace(/[\[\]]/g, '')
+    .trim();
+}
+
+/**
+ * Cleans skill category title (stripping *, _, `, #, brackets, leading bullet dashes, trailing colons).
+ */
+export function cleanSkillCategory(category: string): string {
+  if (!category) return '';
+  return category
+    .replace(/^[-*•·+]\s*/, '')
+    .replace(/[*_`#]/g, '')
+    .replace(/[\[\]]/g, '')
+    .replace(/[:\s]+$/, '')
+    .trim();
+}
+
+/**
+ * Cleans education / certification item string.
+ */
+export function cleanEducationItem(item: string): string {
+  if (!item) return '';
+  let clean = item.replace(/^(?:[-–—•·+]|\*(?!\*))\s*/, '').trim();
+  clean = clean.replace(/\[([^\]]+)\](?!\()/g, '$1');
+  return clean;
+}
+
+/**
+ * Cleans language item string.
+ */
+export function cleanLanguageItem(item: string): string {
+  if (!item) return '';
+  let clean = item.replace(/^(?:[-–—•·+]|\*(?!\*))\s*/, '').trim();
+  clean = clean.replace(/\[([^\]]+)\](?!\()/g, '$1');
+  return clean;
+}
+
+/**
  * Parses experience or project blocks under ###
  */
 function parseExperienceBlocks(content: string): ExperienceItem[] {
@@ -163,48 +245,70 @@ function parseExperienceBlocks(content: string): ExperienceItem[] {
     let date = '';
     const bullets: string[] = [];
 
-    // Line 1: Header line (e.g. "### **Company** | Location" or "### Role | Company")
+    // Line 1: Header line (e.g. "### **Company** | Location" or "### Role | Company" or "### Company | Oct 2024 – Present")
     const headerLine = lines[0].replace(/^###\s+/, '').trim();
-    const headerParts = headerLine.split('|').map((p) => p.trim());
-    const part0 = headerParts[0].replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/, '$1').trim();
-    const part1 = headerParts.length > 1 ? headerParts.slice(1).join(' | ').trim() : '';
+    const headerParts = headerLine.split('|').map((p) => cleanHumanText(p).replace(/\[([^\]]+)\]/g, '$1').trim());
+    const part0 = headerParts[0] || '';
+    const part1 = headerParts.length > 1 ? headerParts[1] : '';
+    const part2 = headerParts.length > 2 ? headerParts.slice(2).join(' | ') : '';
 
     const roleKeywords = /\b(developer|engineer|architect|consultant|specialist|designer|manager|lead|director|analyst|programmer|intern|assistant|desarrollador|ingeniero|l[ií]der|gerente|arquitecto|analista|consultor|especialista)\b/i;
+    const isDatePattern = (str: string) => /\b(19\d\d|20\d\d|presente|present|actualidad|current)\b/i.test(str);
 
     if (part1 && roleKeywords.test(part0) && !roleKeywords.test(part1)) {
       role = part0;
-      company = part1;
+      if (isDatePattern(part1)) {
+        date = part1;
+        company = part2;
+      } else {
+        company = part1;
+        if (part2) {
+          if (isDatePattern(part2)) date = part2;
+          else location = part2;
+        }
+      }
     } else {
       company = part0;
-      location = part1;
+      if (isDatePattern(part1)) {
+        date = part1;
+        location = part2;
+      } else {
+        location = part1;
+        if (part2 && isDatePattern(part2)) {
+          date = part2;
+        }
+      }
     }
 
     // Line 2: Subheader line (e.g. "*Role* | **Date**" or "Role | Date" or "Date")
     let lineIdx = 1;
-    if (lineIdx < lines.length && !lines[lineIdx].startsWith('-') && !lines[lineIdx].startsWith('* ')) {
+    if (lineIdx < lines.length && !lines[lineIdx].startsWith('-') && !lines[lineIdx].startsWith('* ') && !lines[lineIdx].startsWith('• ')) {
       const subLine = lines[lineIdx];
-      const subParts = subLine.split('|').map((p) => p.trim());
-      const sub0 = subParts[0].replace(/[*_]/g, '').trim();
-      const sub1 = subParts.length > 1 ? subParts.slice(1).join(' | ').replace(/[*_]/g, '').trim() : '';
+      const isParagraph = subLine.length > 100 && !subLine.includes('|');
+      if (!isParagraph) {
+        const subParts = subLine.split('|').map((p) => cleanHumanText(p).replace(/\[([^\]]+)\]/g, '$1').trim());
+        const sub0 = subParts[0] || '';
+        const sub1 = subParts.length > 1 ? subParts.slice(1).join(' | ') : '';
 
-      const isDateOnly = /\b(19\d\d|20\d\d|presente|present|actualidad|current)\b/i.test(sub0) && !roleKeywords.test(sub0);
+        const isDateOnly = isDatePattern(sub0) && !roleKeywords.test(sub0);
 
-      if (role && !date && isDateOnly) {
-        date = sub0;
-      } else {
-        if (!role) role = sub0;
-        if (sub1) date = sub1;
+        if (role && !date && isDateOnly) {
+          date = sub0;
+        } else {
+          if (!role) role = sub0;
+          if (sub1) date = sub1;
+        }
+        lineIdx++;
       }
-      lineIdx++;
     }
 
     // Remaining lines: Bullets
     for (; lineIdx < lines.length; lineIdx++) {
       const line = lines[lineIdx];
-      if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ')) {
-        const bulletText = line.replace(/^[-*•]\s+/, '').trim();
+      if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ') || line.startsWith('+ ')) {
+        const bulletText = line.replace(/^[-*•·+]\s+/, '').trim();
         if (bulletText) bullets.push(bulletText);
-      } else if (line.startsWith('---')) {
+      } else if (line.startsWith('---') || line.startsWith('===')) {
         continue;
       } else {
         if (bullets.length > 0) {
@@ -217,11 +321,11 @@ function parseExperienceBlocks(content: string): ExperienceItem[] {
 
     if (company || role || bullets.length > 0) {
       items.push({
-        company: company || 'Organization',
-        role: role || 'Specialist',
-        date,
-        location,
-        bullets,
+        company: cleanHumanText(company) || 'Organization',
+        role: cleanHumanText(role) || 'Specialist',
+        date: cleanHumanText(date),
+        location: cleanHumanText(location),
+        bullets: bullets.map(cleanBulletText).filter(Boolean),
       });
     }
   }
@@ -238,8 +342,8 @@ function parseSkillGroups(content: string, lang: SupportedLanguage): SkillCatego
   const langDef = LANGUAGE_DEFINITIONS[lang] || LANGUAGE_DEFINITIONS.es;
 
   for (const line of lines) {
-    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ')) {
-      const clean = line.replace(/^[-*•]\s+/, '').trim();
+    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ') || line.startsWith('+ ')) {
+      const clean = line.replace(/^[-*•·+]\s+/, '').trim();
 
       // Robust category match:
       // "**Languages & Core Fundamentals:** TypeScript, ..."
@@ -249,15 +353,15 @@ function parseSkillGroups(content: string, lang: SupportedLanguage): SkillCatego
 
       if (catMatch) {
         const rawCategory = catMatch[1].trim();
-        const category = normalizeSkillCategory(rawCategory, lang);
+        const category = cleanSkillCategory(normalizeSkillCategory(rawCategory, lang));
         const skills = catMatch[2]
           .split(/[,|•·;]/)
-          .map((s) => s.replace(/[*_`]/g, '').trim())
+          .map((s) => cleanSkillItem(s))
           .filter(Boolean);
         groups.push({ category, skills });
       } else {
         // Plain skills bullet: if a group already exists, append to the last group!
-        const skill = clean.replace(/[*_`]/g, '').trim();
+        const skill = cleanSkillItem(clean);
         if (skill) {
           if (groups.length > 0) {
             groups[groups.length - 1].skills.push(skill);
@@ -275,14 +379,31 @@ function parseSkillGroups(content: string, lang: SupportedLanguage): SkillCatego
 
 /**
  * Parses bullet list items (education, certifications, languages)
+ * Supports non-bullet entries and indented sub-bullets (descriptions).
  */
 function parseBulletList(content: string): string[] {
-  return content
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l.startsWith('- ') || l.startsWith('* ') || l.startsWith('• '))
-    .map((l) => l.replace(/^[-*•]\s+/, '').trim())
-    .filter(Boolean);
+  const lines = content.split('\n').map((l) => l.trimEnd());
+  const items: string[] = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('---') || line.startsWith('===')) continue;
+
+    const isBullet = /^[-*•·+]\s+/.test(line);
+    const isIndented = /^(\s{2,}|\t)[-*•·+]?\s*/.test(rawLine);
+
+    if (isBullet) {
+      items.push(line.replace(/^[-*•·+]\s+/, '').trim());
+    } else if (isIndented && items.length > 0) {
+      // Sub-bullet attached to previous item (e.g. description under degree)
+      items[items.length - 1] += `\n  - ${line.replace(/^[-*•·+]\s+/, '').trim()}`;
+    } else if (/^\*\*[^*]+\*\*/.test(line) || /^[A-Za-z0-9]/.test(line)) {
+      // Direct entry without bullet (e.g. "**The art of API Documentation**, Udemy, 2024.")
+      items.push(line);
+    }
+  }
+
+  return items.filter(Boolean);
 }
 
 /**
@@ -382,8 +503,13 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     const headerLine = secLines[0].replace(/^##\s+/, '').trim();
     const content = secLines.slice(1).join('\n').replace(/^---\s*$/gm, '').trim();
 
-    // Clean emojis and decorative prefixes from section title
-    const cleanHeaderUpper = headerLine.replace(/^[^\w\s]+/, '').trim().toUpperCase();
+    // Clean emojis, decorative prefixes, and strip accents from section title
+    const cleanHeaderUpper = headerLine
+      .replace(/^[^\w\s]+/, '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
 
     if (/SUMMARY|RESUMEN|PROFILE|PERFIL|PITCH|PROFIL|ZUSAMMENFASSUNG|SOMMARIO/.test(cleanHeaderUpper)) {
       summary = content;
@@ -443,6 +569,7 @@ export function cleanCvData(data: CVData): CVData {
     ...data,
     name: cleanHumanText(data.name || ''),
     title: cleanHumanText(data.title || ''),
+    summary: cleanSummary(data.summary || ''),
     contacts: data.contacts?.map((c) => ({
       ...c,
       label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
@@ -450,17 +577,34 @@ export function cleanCvData(data: CVData): CVData {
         : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
       url: c.url?.trim(),
     })),
+    skillGroups: data.skillGroups?.map((group) => ({
+      ...group,
+      category: cleanSkillCategory(group.category),
+      skills: (group.skills || []).map(cleanSkillItem).filter(Boolean),
+    })),
     experience: data.experience?.map((exp) => ({
       ...exp,
       company: cleanHumanText(exp.company || ''),
       role: cleanHumanText(exp.role || ''),
       location: exp.location ? cleanHumanText(exp.location) : exp.location,
+      date: exp.date ? cleanHumanText(exp.date) : exp.date,
+      bullets: (exp.bullets || []).map(cleanBulletText).filter(Boolean),
     })),
     projects: data.projects?.map((proj) => ({
       ...proj,
       company: cleanHumanText(proj.company || ''),
       role: cleanHumanText(proj.role || ''),
       location: proj.location ? cleanHumanText(proj.location) : proj.location,
+      date: proj.date ? cleanHumanText(proj.date) : proj.date,
+      bullets: (proj.bullets || []).map(cleanBulletText).filter(Boolean),
+    })),
+    education: (data.education || []).map(cleanEducationItem).filter(Boolean),
+    certifications: (data.certifications || []).map(cleanEducationItem).filter(Boolean),
+    languages: (data.languages || []).map(cleanLanguageItem).filter(Boolean),
+    customSections: data.customSections?.map((sec) => ({
+      ...sec,
+      title: cleanHumanText(sec.title),
+      items: (sec.items || []).map(cleanBulletText).filter(Boolean),
     })),
   };
 }

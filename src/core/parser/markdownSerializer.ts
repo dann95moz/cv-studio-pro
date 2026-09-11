@@ -84,9 +84,9 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push('\n---\n');
     parts.push(`## ${getSectionTitle('skills')}`);
     for (const group of data.skillGroups) {
-      const cat = group.category ? group.category.replace(/[:*_\s]+$/, '').replace(/^[*_\s]+/, '').trim() : '';
+      const cat = group.category ? group.category.replace(/[:*_\s]+$/, '').replace(/^[*_\s]+/, '').replace(/\*\*/g, '').trim() : '';
       const skl = group.skills && group.skills.length > 0
-        ? group.skills.map((s) => s.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '').trim()).filter(Boolean).join(', ')
+        ? group.skills.map((s) => s.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '').replace(/\*\*/g, '').trim()).filter(Boolean).join(', ')
         : '';
       parts.push(`- **${cat}**: ${skl}`);
     }
@@ -97,10 +97,12 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push('\n---\n');
     parts.push(`## ${getSectionTitle('experience')}\n`);
     const expItemsFormatted = data.experience.map(exp => {
-      const company = exp.company || '';
-      const role = exp.role || '';
-      const headerLine = `### **${company}**${exp.location ? ` | ${exp.location}` : ''}`;
-      const subHeaderLine = `*${role}*${exp.date ? ` | **${exp.date}**` : ''}`;
+      const company = (exp.company || '').replace(/\*\*/g, '').trim();
+      const role = (exp.role || '').replace(/[*_]/g, '').trim();
+      const date = (exp.date || '').replace(/\*\*/g, '').trim();
+      const location = (exp.location || '').replace(/\*\*/g, '').trim();
+      const headerLine = `### **${company}**${location ? ` | ${location}` : ''}`;
+      const subHeaderLine = `*${role}*${date ? ` | **${date}**` : ''}`;
       const bullets = (exp.bullets || []).map(b => (b.startsWith('- ') ? b : `- ${b}`)).join('\n');
       return `${headerLine}\n${subHeaderLine}\n${bullets}`;
     });
@@ -112,8 +114,9 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push('\n---\n');
     parts.push(`## ${getSectionTitle('projects')}\n`);
     const projItemsFormatted = data.projects.map(proj => {
-      const company = proj.company || '';
-      const role = proj.role || '';
+      const company = (proj.company || '').replace(/\*\*/g, '').trim();
+      const role = (proj.role || '').replace(/[*_]/g, '').trim();
+      const date = (proj.date || '').replace(/\*\*/g, '').trim();
       const links: string[] = [];
       if (proj.demoUrl) {
         links.push(`[Live Demo](${proj.demoUrl})`);
@@ -121,9 +124,9 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
       if (proj.repoUrl) {
         links.push(`[GitHub Repository](${proj.repoUrl})`);
       }
-      const linkText = links.length > 0 ? links.join(' • ') : (proj.location || '');
+      const linkText = links.length > 0 ? links.join(' • ') : ((proj.location || '').replace(/\*\*/g, '').trim());
       const headerLine = `### **${company}**${linkText ? ` | ${linkText}` : ''}`;
-      const subHeaderLine = `*${role}*${proj.date ? ` | **${proj.date}**` : ''}`;
+      const subHeaderLine = `*${role}*${date ? ` | **${date}**` : ''}`;
       const bullets = (proj.bullets || [])
         .filter(b => Boolean(b && b.trim()))
         .map(b => (b.startsWith('- ') ? b : `- ${b}`))
