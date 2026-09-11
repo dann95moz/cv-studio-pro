@@ -117,7 +117,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
         <TextField
           label={t('profile:sections.projects.repoUrl', 'Repositorio URL')}
           size="small"
-          value={proj.repoUrl || (proj.location && !proj.demoUrl ? proj.location : '')}
+          value={proj.repoUrl || (proj.location && (proj.location.includes('github') || proj.location.startsWith('http')) ? proj.location : '')}
           onChange={(e) => onFieldChange(projIdx, 'repoUrl', e.target.value)}
           placeholder="e.g. https://github.com/user/project"
           fullWidth

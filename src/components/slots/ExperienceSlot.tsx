@@ -3,6 +3,7 @@ import { ExperienceSlotProps } from '../../templates/types';
 import { marked } from 'marked';
 import { EditableText } from '../studio/preview/EditableText';
 import { useCvLiveEdit } from '../studio/preview/CvLiveEditContext';
+import { APP_LINKS } from '../../constants/links';
 
 export type { ExperienceSlotProps };
 
@@ -18,19 +19,18 @@ export const ExperienceSlot: React.FC<ExperienceSlotProps> = ({
 
   return (
     <section className={`cv-section section-${data.type} section-block ${className}`}>
-      <EditableText
-        tagName="h2"
-        className="cv-section-title"
-        value={data.title}
-        onSave={(newTitle) => liveEdit?.updateSectionTitle(sectionType, newTitle)}
-        placeholder={isProjects ? 'Personal & Open Source Projects' : 'Work Experience'}
-      />
-      <div className="experience-list">
+      <h2 className="section-title">
+        <EditableText
+          value={data.title}
+          onSave={(newVal) => liveEdit?.updateSectionTitle(sectionType, newVal)}
+          placeholder={isProjects ? 'Personal & Open Source Projects' : 'Work Experience'}
+        />
+      </h2>
+      <div className="section-content">
         {displayItems.map((item, idx) => (
-          <div key={idx} className="experience-item section-block">
+          <div key={idx} className="experience-item">
             <div className="item-header">
               <EditableText
-                tagName="span"
                 className="item-company"
                 value={item.company}
                 htmlContent={item.company ? (marked.parseInline(item.company) as string) : ''}
@@ -38,18 +38,55 @@ export const ExperienceSlot: React.FC<ExperienceSlotProps> = ({
                 placeholder={isProjects ? 'Project Title' : 'Company / Organization'}
               />
               {isProjects ? (
-                (item.demoUrl || item.repoUrl || item.location) && (
+                (item.demoUrl || item.repoUrl || item.location || (item.company && (item.company.toLowerCase().includes('cv studio') || item.company.toLowerCase().includes('tailor engine')))) && (
                   <span
                     className="item-location"
                     dangerouslySetInnerHTML={{
-                      __html: (item.demoUrl || item.repoUrl)
-                        ? (marked.parseInline(
-                            [
-                              item.demoUrl ? `[Live Demo](${item.demoUrl})` : '',
-                              item.repoUrl ? `[GitHub Repository](${item.repoUrl})` : ''
-                            ].filter(Boolean).join(' • ')
-                          ) as string)
-                        : (item.location ? (marked.parseInline(item.location) as string) : '')
+                      __html: (() => {
+                        let demoUrl = item.demoUrl;
+                        let repoUrl = item.repoUrl;
+
+                        if (!demoUrl && item.location) {
+                          const dm = item.location.match(/\[([^\]]*(?:demo|sitio|website|app|live)[^\]]*)\]\((https?:\/\/[^)]+)\)/i) ||
+                                     item.location.match(/https?:\/\/(?!github\.com)[^\s)\]•|]+/i);
+                          if (dm) demoUrl = dm[2] || dm[1] || dm[0];
+                        }
+                        if (!repoUrl && item.location) {
+                          const rm = item.location.match(/\[([^\]]*(?:github|repo|código|code|source)[^\]]*)\]\((https?:\/\/[^)]+)\)/i) ||
+                                     item.location.match(/https?:\/\/github\.com\/[^\s)\]•|]+/i);
+                          if (rm) repoUrl = rm[2] || rm[1] || rm[0];
+                        }
+
+                        const compLower = (item.company || '').toLowerCase();
+                        if (compLower.includes('cv studio') || compLower.includes('tailor engine')) {
+                          if (!demoUrl) demoUrl = APP_LINKS.DEMO_URL;
+                          if (!repoUrl) repoUrl = APP_LINKS.GITHUB_REPO;
+                        }
+
+                        const links: string[] = [];
+                        if (demoUrl) {
+                          const d = demoUrl.startsWith('http') ? demoUrl : `https://${demoUrl}`;
+                          links.push(`<a href="${d}" target="_blank" rel="noopener noreferrer">Live Demo</a>`);
+                        }
+                        if (repoUrl) {
+                          const r = repoUrl.startsWith('http') ? repoUrl : `https://${repoUrl}`;
+                          links.push(`<a href="${r}" target="_blank" rel="noopener noreferrer">GitHub Repository</a>`);
+                        }
+                        const locClean = item.location
+                          ? item.location
+                              .replace(/\[([^\]]+)\]\([^)]+\)/g, '')
+                              .replace(/Live\s*Demo/gi, '')
+                              .replace(/GitHub(?:\s*Repository)?/gi, '')
+                              .replace(/https?:\/\/[^\s]+/g, '')
+                              .replace(/[•|·+–—/]/g, '')
+                              .trim()
+                          : '';
+                        const locText = locClean ? (marked.parseInline(locClean) as string) : '';
+                        if (links.length > 0) {
+                          return [locText, ...links].filter(Boolean).join(' • ');
+                        }
+                        return item.location ? (marked.parseInline(item.location) as string) : '';
+                      })()
                     }}
                   />
                 )

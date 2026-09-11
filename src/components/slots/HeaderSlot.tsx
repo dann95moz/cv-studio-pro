@@ -37,11 +37,27 @@ export const HeaderSlot: React.FC<HeaderSlotProps> = ({
         <div className="cv-contact-list">
           {data.contacts.map((c, i) => {
             const displayLabel = getCleanContactLabel(c);
+            let resolvedUrl = c.url?.trim();
+            if (!resolvedUrl) {
+              const raw = (c.label || '').trim();
+              if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
+                if (raw.includes('.') || raw.startsWith('http')) {
+                  resolvedUrl = raw.startsWith('http') ? raw : `https://${raw.replace(/^https?:\/\//, '')}`;
+                }
+              } else if (c.type === 'email' && raw.includes('@')) {
+                resolvedUrl = raw.startsWith('mailto:') ? raw : `mailto:${raw.replace(/^mailto:/i, '')}`;
+              } else if (c.type === 'phone' && /[\d+]/.test(raw)) {
+                resolvedUrl = `tel:${raw.replace(/[^\d+]/g, '')}`;
+              }
+            } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !resolvedUrl.startsWith('http')) {
+              resolvedUrl = `https://${resolvedUrl}`;
+            }
+
             return (
               <span key={i} className="cv-contact-item">
                 <Icon type={c.type} />
-                {c.url && !liveEdit?.isLiveEditing ? (
-                  <a href={c.url} target="_blank" rel="noopener noreferrer">
+                {resolvedUrl && !liveEdit?.isLiveEditing ? (
+                  <a href={resolvedUrl} target="_blank" rel="noopener noreferrer">
                     {displayLabel}
                   </a>
                 ) : (
