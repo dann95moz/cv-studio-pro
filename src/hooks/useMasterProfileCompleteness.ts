@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { extractCandidateName } from '../core/parser';
+import { extractCandidateName, parseMarkdownToCvData } from '../core/parser';
 
 export interface MissingSectionItem {
   id: string;
@@ -34,70 +34,81 @@ export const useMasterProfileCompleteness = (masterData: string): ProfileComplet
       };
     }
 
+    const parsed = parseMarkdownToCvData(masterData);
     const lower = masterData.toLowerCase();
     const candidateName = extractCandidateName(masterData, '');
 
     // 1. Personal & Contact (20 pts)
-    const hasName = Boolean(candidateName && candidateName.length >= 3);
-    const hasEmailOrContact =
-      /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(masterData) ||
-      lower.includes('email') ||
-      lower.includes('correo') ||
-      lower.includes('linkedin');
+    const hasName = Boolean(
+      (parsed.name && parsed.name.trim().length >= 2) ||
+      (candidateName && candidateName.length >= 3)
+    );
+    const hasEmailOrContact = Boolean(
+      (parsed.contacts && parsed.contacts.length > 0 && parsed.contacts.some(c => c.type === 'email' || c.type === 'linkedin' || c.type === 'phone' || (c.label && c.label.includes('@')))) ||
+      /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(masterData)
+    );
     const personalPassed = hasName && hasEmailOrContact;
 
     // 2. Summary (15 pts)
-    const hasSummary =
-      (lower.includes('summary') ||
+    const hasSummary = Boolean(
+      (parsed.summary && parsed.summary.trim().length >= 25) ||
+      ((lower.includes('summary') ||
         lower.includes('resumen') ||
         lower.includes('extracto') ||
         lower.includes('perfil profesional') ||
         lower.includes('about me')) &&
-      masterData.length > 80;
+        masterData.length > 120)
+    );
 
     // 3. Work Experience (30 pts)
-    const hasExperience =
-      (lower.includes('experience') ||
+    const hasExperience = Boolean(
+      (parsed.experience && parsed.experience.length > 0 && parsed.experience.some(e => (e.company || e.role) && (e.bullets?.length || 0) > 0)) ||
+      ((lower.includes('experience') ||
         lower.includes('experiencia') ||
         lower.includes('work history') ||
         lower.includes('trayectoria') ||
         lower.includes('empleo') ||
         lower.includes('puesto')) &&
-      ((/•|-|\*/.test(masterData) || /\b(19\d\d|20\d\d)\b/.test(masterData)) && masterData.length > 100);
+        ((/•|-|\*/.test(masterData) || /\b(19\d\d|20\d\d)\b/.test(masterData)) && masterData.length > 150))
+    );
 
     // 4. Skills (15 pts)
-    const hasSkills =
-      (lower.includes('skills') ||
+    const hasSkills = Boolean(
+      (parsed.skillGroups && parsed.skillGroups.some(g => g.skills && g.skills.length > 0)) ||
+      ((lower.includes('skills') ||
         lower.includes('habilidades') ||
         lower.includes('competencias') ||
         lower.includes('tech stack') ||
         lower.includes('kenntnisse') ||
         lower.includes('compétences')) &&
-      masterData.length > 80;
+        masterData.length > 100)
+    );
 
     // 5. Education (10 pts)
-    const hasEducation =
-      lower.includes('education') ||
-      lower.includes('educación') ||
-      lower.includes('educacion') ||
-      lower.includes('formación') ||
-      lower.includes('universidad') ||
-      lower.includes('university') ||
-      lower.includes('degree') ||
-      lower.includes('ausbildung');
+    const hasEducation = Boolean(
+      (parsed.education && parsed.education.length > 0 && parsed.education.some(e => e.trim().length > 3)) ||
+      ((lower.includes('education') ||
+        lower.includes('educación') ||
+        lower.includes('educacion') ||
+        lower.includes('formación') ||
+        lower.includes('universidad') ||
+        lower.includes('university') ||
+        lower.includes('degree') ||
+        lower.includes('ausbildung')) &&
+        (/\b(19\d\d|20\d\d)\b/.test(masterData) || /•|-|\*/.test(masterData)) &&
+        masterData.length > 100)
+    );
 
     // 6. Languages / Certifications (10 pts)
-    const hasLanguages =
-      lower.includes('languages') ||
-      lower.includes('idiomas') ||
-      lower.includes('sprachen') ||
-      lower.includes('langues') ||
-      lower.includes('lingue') ||
-      lower.includes('english') ||
-      lower.includes('inglés') ||
-      lower.includes('ingles') ||
-      lower.includes('certificat') ||
-      lower.includes('certificaciones');
+    const hasLanguages = Boolean(
+      (parsed.languages && parsed.languages.length > 0 && parsed.languages.some(l => l.trim().length > 2)) ||
+      ((lower.includes('languages') ||
+        lower.includes('idiomas') ||
+        lower.includes('sprachen') ||
+        lower.includes('langues') ||
+        lower.includes('lingue')) &&
+        (/native|nativo|bilingual|bilingüe|c1|c2|b1|b2|a1|a2|fluido|fluent|intermedio|avanzado|profesional|professional/i.test(masterData)))
+    );
 
     const checks: Array<{ passed: boolean; item: MissingSectionItem; weight: number }> = [
       {
