@@ -246,5 +246,22 @@
     "translateFullBtn": "Traducir CV Completo",
     "translateNewAction": "+ Traducir a otro idioma...",
     "syncing": "Sincronizando..."
+  },
+  "versionSelector": {
+    "title": "Versiones de CV Creadas",
+    "tooltip": "Alternar entre CVs guardados o gestionar CV Genérico",
+    "genericTitle": "📌 CV Genérico",
+    "defaultActive": "CV en Vivo",
+    "pinnedGenericHeader": "CV Genérico (Baseline)",
+    "genericBadge": "Genérico",
+    "currentActive": "Activo",
+    "loadGenericAction": "Cargar Genérico",
+    "compareAgainstGeneric": "Comparar versión actual contra CV Genérico",
+    "compareVsGenericBtn": "Comparar vs Genérico",
+    "emptyNotice": "No hay versiones guardadas todavía.",
+    "pinAsGeneric": "Pinear como CV Genérico",
+    "unpinGeneric": "Desanclar como genérico",
+    "saveAsGenericAction": "+ Guardar actual como CV Genérico",
+    "compareCurrentVsGeneric": "⇄ Comparar versión actual vs Genérico"
   }
 }

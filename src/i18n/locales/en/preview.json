@@ -245,5 +245,22 @@
     "translateFullBtn": "Translate Full CV",
     "translateNewAction": "+ Translate to another language...",
     "syncing": "Syncing..."
+  },
+  "versionSelector": {
+    "title": "Created CV Versions",
+    "tooltip": "Switch saved CVs or manage Generic CV baseline",
+    "genericTitle": "📌 Generic CV",
+    "defaultActive": "Live CV",
+    "pinnedGenericHeader": "Generic CV (Baseline)",
+    "genericBadge": "Generic",
+    "currentActive": "Active",
+    "loadGenericAction": "Load Generic",
+    "compareAgainstGeneric": "Compare current version against Generic CV",
+    "compareVsGenericBtn": "Compare vs Generic",
+    "emptyNotice": "No saved versions yet.",
+    "pinAsGeneric": "Pin as Generic CV",
+    "unpinGeneric": "Unpin as Generic",
+    "saveAsGenericAction": "+ Save current as Generic CV",
+    "compareCurrentVsGeneric": "⇄ Compare current version vs Generic"
   }
 }

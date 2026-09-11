@@ -245,5 +245,22 @@
     "translateFullBtn": "Vollständigen Lebenslauf übersetzen",
     "translateNewAction": "+ In eine andere Sprache übersetzen...",
     "syncing": "Synchronisieren..."
+  },
+  "versionSelector": {
+    "title": "Erstellte Lebenslauf-Versionen",
+    "tooltip": "Zwischen gespeicherten CVs wechseln oder generischen CV verwalten",
+    "genericTitle": "📌 Generischer CV",
+    "defaultActive": "Aktueller Lebenslauf",
+    "pinnedGenericHeader": "Generischer CV (Baseline)",
+    "genericBadge": "Generisch",
+    "currentActive": "Aktiv",
+    "loadGenericAction": "Generisch laden",
+    "compareAgainstGeneric": "Aktuelle Version mit generischem CV vergleichen",
+    "compareVsGenericBtn": "Vergleichen vs Generisch",
+    "emptyNotice": "Noch keine gespeicherten Versionen.",
+    "pinAsGeneric": "Als generischen CV anheften",
+    "unpinGeneric": "Als generisch lösen",
+    "saveAsGenericAction": "+ Aktuelle Version als generischen CV speichern",
+    "compareCurrentVsGeneric": "⇄ Aktuelle Version vs Generisch vergleichen"
   }
 }
