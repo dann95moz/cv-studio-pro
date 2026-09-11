@@ -36,6 +36,7 @@ export const useStepPreviewWorkflow = () => {
   const [diffInitialVersionBId, setDiffInitialVersionBId] = useState<string | undefined>(undefined);
   const [isTranslateModalOpen, setIsTranslateModalOpen] = useState<boolean>(false);
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [isAdaptModalOpen, setIsAdaptModalOpen] = useState<boolean>(false);
 
   // Zustand Store selectors
   const activeVersionId = useResumeStore((s) => s.activeVersionId);
@@ -72,8 +73,11 @@ export const useStepPreviewWorkflow = () => {
   const setWizardStep = useResumeStore((s) => s.setWizardStep);
 
   const companyName = useResumeStore((s) => s.companyName);
+  const setCompanyName = useResumeStore((s) => s.setCompanyName);
   const targetRole = useResumeStore((s) => s.targetRole);
+  const setTargetRole = useResumeStore((s) => s.setTargetRole);
   const targetJob = useResumeStore((s) => s.targetJob);
+  const setTargetJob = useResumeStore((s) => s.setTargetJob);
   const providerSettings = useResumeStore((s) => s.providerSettings);
   const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
   const masterData = useResumeStore((s) => s.masterData);
@@ -456,6 +460,62 @@ export const useStepPreviewWorkflow = () => {
     setDiffInitialVersionBId(undefined);
   }, []);
 
+  const handleOpenAdaptModal = useCallback(() => {
+    setIsAdaptModalOpen(true);
+  }, []);
+
+  const handleCloseAdaptModal = useCallback(() => {
+    setIsAdaptModalOpen(false);
+  }, []);
+
+  const handleUseCurrentCvForNewOffer = useCallback((data: { companyName: string; targetRole: string; jobText: string }) => {
+    let versionId = activeVersionId;
+    if (!versionId || !savedVersions.some((v) => v.id === versionId)) {
+      versionId = handleSaveCurrentVersion();
+    }
+
+    setCompanyName(data.companyName);
+    if (data.targetRole) {
+      setTargetRole(data.targetRole);
+    }
+    if (data.jobText) {
+      setTargetJob(data.jobText);
+    }
+
+    handleAddApplication({
+      companyName: data.companyName,
+      targetRole: data.targetRole,
+      appliedVersionId: versionId,
+    });
+
+    setTrackSuccess(true);
+    setTimeout(() => setTrackSuccess(false), 3000);
+  }, [activeVersionId, savedVersions, handleSaveCurrentVersion, setCompanyName, setTargetRole, setTargetJob, handleAddApplication]);
+
+  const handleAdaptNewOfferWithAi = useCallback(async (data: { companyName: string; targetRole: string; jobText: string }) => {
+    setCompanyName(data.companyName);
+    if (data.targetRole) {
+      setTargetRole(data.targetRole);
+    }
+    if (data.jobText) {
+      setTargetJob(data.jobText);
+    }
+
+    await handleGenerate();
+
+    const newlyCreatedVersionId = useResumeStore.getState().activeVersionId;
+    if (newlyCreatedVersionId) {
+      handleAddApplication({
+        companyName: data.companyName,
+        targetRole: data.targetRole,
+        appliedVersionId: newlyCreatedVersionId,
+      });
+    }
+
+    setTrackSuccess(true);
+    setTimeout(() => setTrackSuccess(false), 3000);
+  }, [setCompanyName, setTargetRole, setTargetJob, handleGenerate, handleAddApplication]);
+
   const handleToggleSidePanel = (panel: PreviewSidePanelType) => {
     if (panel === 'compare') {
       handleCompareAgainstGeneric();
@@ -543,6 +603,7 @@ export const useStepPreviewWorkflow = () => {
     companyName,
     targetRole,
     targetJob,
+    cvMarkdown,
     providerSettings,
     applications,
     kanbanColumns,
@@ -588,5 +649,12 @@ export const useStepPreviewWorkflow = () => {
     handleTranslateFull,
     handleTranslateIncremental,
     handleQuickSyncOutdated,
+    // Adapt to New Offer Workflow
+    isAdaptModalOpen,
+    setIsAdaptModalOpen,
+    handleOpenAdaptModal,
+    handleCloseAdaptModal,
+    handleUseCurrentCvForNewOffer,
+    handleAdaptNewOfferWithAi,
   };
 };
