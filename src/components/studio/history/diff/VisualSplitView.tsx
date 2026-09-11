@@ -165,7 +165,7 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
           px: 2.5,
           bgcolor: alpha(muiTheme.palette.background.paper, 0.9),
           borderBottom: `1px solid ${muiTheme.palette.divider}`,
-          display: 'flex',
+          display: { xs: 'none', md: 'flex' },
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
@@ -352,37 +352,66 @@ export const VisualSplitView: React.FC<VisualSplitViewProps> = ({
             borderBottom: `1px solid ${muiTheme.palette.divider}`,
             bgcolor: alpha(muiTheme.palette.background.paper, 0.95),
             flexShrink: 0,
+            px: 1,
           }}
         >
           <Box
             onClick={() => setActiveMobileTab('A')}
             sx={{
               flex: 1,
-              py: 1,
+              py: 0.8,
               textAlign: 'center',
               cursor: 'pointer',
               fontWeight: 700,
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               borderBottom: activeMobileTab === 'A' ? `2px solid ${muiTheme.palette.primary.main}` : 'none',
               color: activeMobileTab === 'A' ? 'primary.main' : 'text.secondary',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+              minWidth: 0,
+              px: 0.5,
             }}
           >
-            A: {labelA}
+            <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: { xs: 120, sm: 200 } }}>
+              A: {labelA}
+            </Box>
+            <Chip
+              size="small"
+              label={`${scoreA}%`}
+              color={scoreA >= 80 ? 'success' : 'default'}
+              sx={{ height: 18, fontSize: '0.62rem', fontWeight: 800, flexShrink: 0 }}
+            />
           </Box>
           <Box
             onClick={() => setActiveMobileTab('B')}
             sx={{
               flex: 1,
-              py: 1,
+              py: 0.8,
               textAlign: 'center',
               cursor: 'pointer',
               fontWeight: 700,
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               borderBottom: activeMobileTab === 'B' ? `2px solid ${muiTheme.palette.primary.main}` : 'none',
               color: activeMobileTab === 'B' ? 'primary.main' : 'text.secondary',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+              minWidth: 0,
+              px: 0.5,
             }}
           >
-            B: {labelB}
+            <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: { xs: 120, sm: 200 } }}>
+              B: {labelB}
+            </Box>
+            <Chip
+              size="small"
+              label={`${scoreB}%`}
+              color="success"
+              sx={{ height: 18, fontSize: '0.62rem', fontWeight: 800, flexShrink: 0 }}
+            />
           </Box>
         </Box>
       )}

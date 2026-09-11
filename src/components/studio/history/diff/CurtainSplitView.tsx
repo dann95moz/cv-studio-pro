@@ -124,27 +124,26 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
       {/* Top Banner Guide */}
       <Box
         sx={{
-          py: 1,
-          px: 3,
+          py: { xs: 0.6, sm: 1 },
+          px: { xs: 1.5, sm: 3 },
           bgcolor: alpha(muiTheme.palette.background.paper, 0.9),
           borderBottom: `1px solid ${muiTheme.palette.divider}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 1.5,
+          gap: 1,
           flexShrink: 0,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
           <Chip
             size="small"
             label={`← A: ${labelA}`}
             color="default"
             variant="outlined"
-            sx={{ fontWeight: 700, fontSize: '0.74rem' }}
+            sx={{ fontWeight: 700, fontSize: '0.72rem', maxWidth: { xs: 150, sm: 260 }, height: 24 }}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: { xs: 'none', md: 'block' } }}>
             {t('history:diff.dragCurtain', 'Drag vertical curtain to compare layout shifts & density')}
           </Typography>
         </Box>
@@ -154,7 +153,7 @@ export const CurtainSplitView: React.FC<CurtainSplitViewProps> = ({
           label={`B: ${labelB} →`}
           color="primary"
           variant="filled"
-          sx={{ fontWeight: 700, fontSize: '0.74rem' }}
+          sx={{ fontWeight: 700, fontSize: '0.72rem', maxWidth: { xs: 150, sm: 260 }, height: 24 }}
         />
       </Box>
 

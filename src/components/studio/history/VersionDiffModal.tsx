@@ -15,7 +15,9 @@ import {
   Snackbar,
   FormControl,
   InputLabel,
+  Tooltip,
   useTheme,
+  useMediaQuery,
   alpha,
 } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -51,6 +53,7 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation(['history', 'preview', 'common']);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isDark = theme.palette.mode === 'dark';
 
   const {
@@ -149,12 +152,13 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
+      fullScreen={isMobile}
       maxWidth="xl"
       fullWidth
       slotProps={{
         paper: {
           sx: {
-            height: '92vh',
+            height: isMobile ? '100%' : '92vh',
             display: 'flex',
             flexDirection: 'column',
           },
@@ -164,41 +168,43 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
       {/* Header */}
       <DialogTitle
         sx={{
-          py: 1.5,
-          px: 3,
+          py: { xs: 1, sm: 1.5 },
+          px: { xs: 2, sm: 3 },
           borderBottom: `1px solid ${theme.palette.divider}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           bgcolor: 'background.default',
+          flexShrink: 0,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0 }}>
           <Box
             sx={{
-              width: 36,
-              height: 36,
+              width: { xs: 32, sm: 36 },
+              height: { xs: 32, sm: 36 },
               borderRadius: 1,
               bgcolor: alpha(theme.palette.primary.main, 0.15),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'primary.main',
+              flexShrink: 0,
             }}
           >
-            <DifferenceRoundedIcon />
+            <DifferenceRoundedIcon sx={{ fontSize: { xs: 18, sm: 22 } }} />
           </Box>
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle1" noWrap sx={{ fontWeight: 800, fontSize: { xs: '0.88rem', sm: '1rem' }, lineHeight: 1.2 }}>
               {t('history:diff.title', 'Visual Version Diff & Template Comparator')}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
               {t('history:diff.subtitle', 'Compare tailored variants and templates side-by-side with WYSIWYG fidelity')}
             </Typography>
           </Box>
         </Box>
 
-        <IconButton size="small" onClick={onClose} aria-label="Close diff modal">
+        <IconButton size="small" onClick={onClose} aria-label="Close diff modal" sx={{ ml: 1, flexShrink: 0 }}>
           <CloseRoundedIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -206,49 +212,98 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
       {/* Primary Controls Toolbar */}
       <Box
         sx={{
-          py: 1.25,
-          px: 3,
+          py: { xs: 0.75, sm: 1.25 },
+          px: { xs: 1.5, sm: 3 },
           bgcolor: alpha(theme.palette.text.primary, 0.02),
           borderBottom: `1px solid ${theme.palette.divider}`,
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           alignItems: { xs: 'stretch', md: 'center' },
           justifyContent: 'space-between',
-          gap: 2,
+          gap: { xs: 1, sm: 2 },
+          flexShrink: 0,
         }}
       >
+        {/* Mode Toggles: Visual vs Curtain vs Text */}
+        <ButtonGroup
+          size="small"
+          variant="outlined"
+          sx={{
+            width: { xs: '100%', md: 'auto' },
+            order: { xs: 1, md: 2 },
+            height: { xs: 32, sm: 36 },
+          }}
+        >
+          <Button
+            fullWidth={isMobile}
+            variant={viewMode === 'visual' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('visual')}
+            startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: { xs: 14, sm: 15 } }} />}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 } }}
+          >
+            {isMobile ? t('history:diff.modeVisualShort', 'Visual') : t('history:diff.modeVisual', 'Visual Side-by-Side')}
+          </Button>
+          <Button
+            fullWidth={isMobile}
+            variant={viewMode === 'curtain' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('curtain')}
+            startIcon={<ViewColumnRoundedIcon sx={{ fontSize: { xs: 14, sm: 15 } }} />}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 } }}
+          >
+            {isMobile ? t('history:diff.modeCurtainShort', 'Cortina') : t('history:diff.modeCurtain', 'Cortina Antes/Después')}
+          </Button>
+          <Button
+            fullWidth={isMobile}
+            variant={viewMode === 'text' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('text')}
+            startIcon={<CodeRoundedIcon sx={{ fontSize: { xs: 14, sm: 15 } }} />}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 } }}
+          >
+            {isMobile ? t('history:diff.modeTextShort', 'Texto') : t('history:diff.modeText', 'Diff de Texto')}
+          </Button>
+        </ButtonGroup>
+
         {/* Version Selectors */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-          <FormControl size="small" sx={{ minWidth: 210 }}>
-            <InputLabel id="diff-base-label">{t('history:diff.baseVersion', 'Base (Old)')}</InputLabel>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            order: { xs: 2, md: 1 },
+            width: { xs: '100%', md: 'auto' },
+            flexWrap: { xs: 'nowrap', sm: 'wrap' },
+          }}
+        >
+          <FormControl size="small" sx={{ flex: { xs: 1, sm: 'initial' }, minWidth: { xs: 0, sm: 200 } }}>
+            {!isMobile && <InputLabel id="diff-base-label">{t('history:diff.baseVersion', 'Base (Old)')}</InputLabel>}
             <Select
-              labelId="diff-base-label"
+              labelId={!isMobile ? "diff-base-label" : undefined}
               value={versionAId}
-              label={t('history:diff.baseVersion', 'Base (Old)')}
+              label={!isMobile ? t('history:diff.baseVersion', 'Base (Old)') : undefined}
               onChange={(e) => setVersionAId(e.target.value)}
-              sx={{ fontSize: '0.82rem', fontWeight: 600 }}
+              sx={{ height: { xs: 32, sm: 38 }, fontSize: { xs: '0.72rem', sm: '0.82rem' }, fontWeight: 600 }}
             >
               {allVersionOptions.map((opt) => (
-                <MenuItem key={opt.id} value={opt.id} sx={{ fontSize: '0.82rem' }}>
+                <MenuItem key={opt.id} value={opt.id} sx={{ fontSize: '0.78rem' }}>
                   {opt.label}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <CompareArrowsRoundedIcon sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' } }} />
+          <CompareArrowsRoundedIcon sx={{ color: 'text.secondary', fontSize: { xs: 16, sm: 20 }, flexShrink: 0 }} />
 
-          <FormControl size="small" sx={{ minWidth: 210 }}>
-            <InputLabel id="diff-target-label">{t('history:diff.targetVersion', 'Target (New)')}</InputLabel>
+          <FormControl size="small" sx={{ flex: { xs: 1, sm: 'initial' }, minWidth: { xs: 0, sm: 200 } }}>
+            {!isMobile && <InputLabel id="diff-target-label">{t('history:diff.targetVersion', 'Target (New)')}</InputLabel>}
             <Select
-              labelId="diff-target-label"
+              labelId={!isMobile ? "diff-target-label" : undefined}
               value={versionBId}
-              label={t('history:diff.targetVersion', 'Target (New)')}
+              label={!isMobile ? t('history:diff.targetVersion', 'Target (New)') : undefined}
               onChange={(e) => setVersionBId(e.target.value)}
-              sx={{ fontSize: '0.82rem', fontWeight: 600 }}
+              sx={{ height: { xs: 32, sm: 38 }, fontSize: { xs: '0.72rem', sm: '0.82rem' }, fontWeight: 600 }}
             >
               {allVersionOptions.map((opt) => (
-                <MenuItem key={opt.id} value={opt.id} sx={{ fontSize: '0.82rem' }}>
+                <MenuItem key={opt.id} value={opt.id} sx={{ fontSize: '0.78rem' }}>
                   {opt.label}
                 </MenuItem>
               ))}
@@ -256,98 +311,96 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
           </FormControl>
 
           {genericVersion && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="primary"
-              onClick={() => {
-                setVersionAId(genericVersion.id);
-                setVersionBId('current');
-              }}
-              startIcon={<CompareArrowsRoundedIcon sx={{ fontSize: 15 }} />}
-              sx={{
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                textTransform: 'none',
-                height: 38,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {t('preview:versionSelector.compareAgainstGeneric', 'Comparar vs Genérico')}
-            </Button>
+            isMobile ? (
+              <Tooltip title={t('preview:versionSelector.compareAgainstGeneric', 'Comparar vs Genérico')}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    setVersionAId(genericVersion.id);
+                    setVersionBId('current');
+                  }}
+                  sx={{
+                    height: 32,
+                    width: 32,
+                    border: `1px solid ${theme.palette.primary.main}`,
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    flexShrink: 0,
+                  }}
+                  aria-label="Compare vs Generic"
+                >
+                  <CompareArrowsRoundedIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                onClick={() => {
+                  setVersionAId(genericVersion.id);
+                  setVersionBId('current');
+                }}
+                startIcon={<CompareArrowsRoundedIcon sx={{ fontSize: 15 }} />}
+                sx={{
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  height: 38,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {t('preview:versionSelector.compareAgainstGeneric', 'Comparar vs Genérico')}
+              </Button>
+            )
           )}
         </Box>
-
-        {/* View Mode Mode Toggles: Visual Side-by-Side vs Curtain vs Text */}
-        <ButtonGroup size="small" variant="outlined" sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}>
-          <Button
-            variant={viewMode === 'visual' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('visual')}
-            startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: 15 }} />}
-            sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
-          >
-            {t('history:diff.modeVisual', 'Visual Side-by-Side')}
-          </Button>
-          <Button
-            variant={viewMode === 'curtain' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('curtain')}
-            startIcon={<ViewColumnRoundedIcon sx={{ fontSize: 15 }} />}
-            sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
-          >
-            {t('history:diff.modeCurtain', 'Cortina Antes/Después')}
-          </Button>
-          <Button
-            variant={viewMode === 'text' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('text')}
-            startIcon={<CodeRoundedIcon sx={{ fontSize: 15 }} />}
-            sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
-          >
-            {t('history:diff.modeText', 'Diff de Texto')}
-          </Button>
-        </ButtonGroup>
       </Box>
 
       {/* Stats Summary Bar */}
       <Box
         sx={{
-          py: 0.75,
-          px: 3,
+          py: { xs: 0.5, sm: 0.75 },
+          px: { xs: 1.5, sm: 3 },
           bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
           borderBottom: `1px solid ${theme.palette.divider}`,
           display: 'flex',
           alignItems: 'center',
-          gap: 1.5,
-          flexWrap: 'wrap',
+          gap: 1,
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+          '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
         <Chip
           size="small"
-          label={`+${visualDiffResult.stats.additions} ${t('history:diff.additions', 'Additions')}`}
+          label={`+${visualDiffResult.stats.additions}${isMobile ? '' : ` ${t('history:diff.additions', 'Additions')}`}`}
           color="success"
           variant="filled"
-          sx={{ fontWeight: 800, fontSize: '0.72rem' }}
+          sx={{ fontWeight: 800, fontSize: '0.68rem', height: 22 }}
         />
         <Chip
           size="small"
-          label={`-${visualDiffResult.stats.deletions} ${t('history:diff.deletions', 'Deletions')}`}
+          label={`-${visualDiffResult.stats.deletions}${isMobile ? '' : ` ${t('history:diff.deletions', 'Deletions')}`}`}
           color="error"
           variant="filled"
-          sx={{ fontWeight: 800, fontSize: '0.72rem' }}
+          sx={{ fontWeight: 800, fontSize: '0.68rem', height: 22 }}
         />
         <Chip
           size="small"
-          label={`${visualDiffResult.stats.similarity}% ${t('history:diff.similarity', 'Match Similarity')}`}
+          label={`${visualDiffResult.stats.similarity}%${isMobile ? '' : ` ${t('history:diff.similarity', 'Match Similarity')}`}`}
           color="primary"
           variant="outlined"
-          sx={{ fontWeight: 800, fontSize: '0.72rem' }}
+          sx={{ fontWeight: 800, fontSize: '0.68rem', height: 22 }}
         />
         {visualDiffResult.stats.metricsCount > 0 && (
           <Chip
             size="small"
-            label={`${visualDiffResult.stats.metricsCount} ${t('history:diff.metricsEnhanced', 'Metrics Enhanced')}`}
+            label={`${visualDiffResult.stats.metricsCount}${isMobile ? ' métricas' : ` ${t('history:diff.metricsEnhanced', 'Metrics Enhanced')}`}`}
             color="secondary"
             variant="outlined"
-            sx={{ fontWeight: 800, fontSize: '0.72rem' }}
+            sx={{ fontWeight: 800, fontSize: '0.68rem', height: 22 }}
           />
         )}
       </Box>
@@ -406,19 +459,45 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
       </DialogContent>
 
       {/* Footer Actions */}
-      <DialogActions sx={{ p: 2, px: 3, justifyContent: 'space-between', borderTop: `1px solid ${theme.palette.divider}` }}>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<ContentCopyRoundedIcon />}
-          onClick={handleCopyDiff}
-          sx={{ fontWeight: 600, textTransform: 'none' }}
-        >
-          {t('history:diff.copyDiff', 'Copy Raw Diff')}
-        </Button>
+      <DialogActions
+        sx={{
+          py: 1,
+          px: { xs: 1.5, sm: 3 },
+          justifyContent: 'space-between',
+          borderTop: `1px solid ${theme.palette.divider}`,
+          flexShrink: 0,
+          bgcolor: 'background.default',
+        }}
+      >
+        {isMobile ? (
+          <Tooltip title={t('history:diff.copyDiff', 'Copy Raw Diff')}>
+            <IconButton
+              size="small"
+              onClick={handleCopyDiff}
+              sx={{
+                border: `1px solid ${theme.palette.divider}`,
+                height: 36,
+                width: 36,
+              }}
+              aria-label="Copy Raw Diff"
+            >
+              <ContentCopyRoundedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<ContentCopyRoundedIcon />}
+            onClick={handleCopyDiff}
+            sx={{ fontWeight: 600, textTransform: 'none' }}
+          >
+            {t('history:diff.copyDiff', 'Copy Raw Diff')}
+          </Button>
+        )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Button size="small" variant="text" onClick={onClose}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button size="small" variant="text" onClick={onClose} sx={{ textTransform: 'none', fontWeight: 600 }}>
             {t('common:actions.close', 'Close')}
           </Button>
 
@@ -426,9 +505,16 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
             size="small"
             variant="contained"
             color="primary"
-            endIcon={<ArrowForwardRoundedIcon />}
+            endIcon={<ArrowForwardRoundedIcon sx={{ fontSize: 16 }} />}
             onClick={handleLoadVersionB}
-            sx={{ fontWeight: 700, textTransform: 'none', px: 2 }}
+            sx={{
+              fontWeight: 700,
+              textTransform: 'none',
+              px: { xs: 1.5, sm: 2 },
+              fontSize: { xs: '0.76rem', sm: '0.82rem' },
+              whiteSpace: 'nowrap',
+              height: 36,
+            }}
           >
             {t('history:diff.openInEditor', 'Load Version into Editor')}
           </Button>
