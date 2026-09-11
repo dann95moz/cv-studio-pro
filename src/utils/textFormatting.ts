@@ -27,6 +27,13 @@ export const markdownToHtml = (markdown: string): string => {
 
   let html = escapeHtml(markdown);
 
+  // Restore safe studio diff tags (<mark class="cv-diff-(add|del)"> and <span class="cv-diff-(added|removed)-bullet">)
+  html = html
+    .replace(/&lt;mark class=&quot;(cv-diff-(?:add|del))&quot;&gt;/g, '<mark class="$1">')
+    .replace(/&lt;\/mark&gt;/g, '</mark>')
+    .replace(/&lt;span class=&quot;(cv-diff-(?:added|removed)-bullet)&quot;&gt;/g, '<span class="$1">')
+    .replace(/&lt;\/span&gt;/g, '</span>');
+
   // 1. Keyword highlights: ++text++ -> <strong class="cv-highlight-keyword">$1</strong>
   html = html.replace(/\+\+([^\+\r\n]+?)\+\+/g, '<strong class="cv-highlight-keyword">$1</strong>');
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { marked } from 'marked';
 import { HeaderSlotProps } from '../../templates/types';
 import { Icon } from '../Icons';
 import { EditableText } from '../studio/preview/EditableText';
@@ -20,6 +21,7 @@ export const HeaderSlot: React.FC<HeaderSlotProps> = ({
         tagName="h1"
         className="cv-name"
         value={data.name}
+        htmlContent={data.name ? (marked.parseInline(data.name) as string) : ''}
         onSave={(newName) => liveEdit?.updateName(newName)}
         placeholder="Full Name"
       />
@@ -28,6 +30,7 @@ export const HeaderSlot: React.FC<HeaderSlotProps> = ({
           tagName="div"
           className="cv-title"
           value={data.title || ''}
+          htmlContent={data.title ? (marked.parseInline(data.title) as string) : ''}
           onSave={(newTitle) => liveEdit?.updateTitle(newTitle)}
           placeholder="Professional Title"
         />
@@ -64,6 +67,7 @@ export const HeaderSlot: React.FC<HeaderSlotProps> = ({
                   <EditableText
                     tagName="span"
                     value={c.label}
+                    htmlContent={c.label ? (marked.parseInline(c.label) as string) : ''}
                     onSave={(newLabel) => liveEdit?.updateContact(i, newLabel)}
                     placeholder="Contact Info"
                   />
