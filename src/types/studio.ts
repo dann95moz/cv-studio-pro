@@ -67,6 +67,8 @@ export interface GeneratedCvVersion {
   baseLanguage?: string;
   translations?: Record<string, CvTranslationVariant>;
   activeLanguage?: string;
+  isGeneric?: boolean;
+  isPinned?: boolean;
 }
 
 export interface KanbanColumn {

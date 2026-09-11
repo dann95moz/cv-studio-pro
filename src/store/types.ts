@@ -134,6 +134,9 @@ export interface HistorySlice {
   applications: ApplicationItem[];
   kanbanColumns: KanbanColumn[];
   handleSaveCurrentVersion: (customTitle?: string) => string;
+  handleSaveAsGeneric: (customTitle?: string) => string;
+  handlePinAsGeneric: (versionId: string) => void;
+  handleUnpinGeneric: (versionId: string) => void;
   handleLoadVersion: (id: string) => void;
   handleDeleteVersion: (id: string) => void;
   handleDeleteMultipleVersions: (ids: string[]) => void;

@@ -65,9 +65,10 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
     const audit = auditCvContent(activeCvData || cvMarkdown, targetJob, masterData);
     const versionId = existingIndex !== -1 && activeVersionId ? activeVersionId : `cv_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
+    const isExisting = existingIndex !== -1;
     const newVersion: GeneratedCvVersion = {
       id: versionId,
-      createdAt: existingIndex !== -1 ? savedVersions[existingIndex].createdAt : new Date().toISOString(),
+      createdAt: isExisting ? savedVersions[existingIndex].createdAt : new Date().toISOString(),
       candidateName: candName,
       companyName: comp,
       targetRole: role,
@@ -84,6 +85,8 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
       baseLanguage: baseLang,
       translations: translations || {},
       activeLanguage: activeLanguage || baseLang,
+      isGeneric: isExisting ? savedVersions[existingIndex].isGeneric : false,
+      isPinned: isExisting ? savedVersions[existingIndex].isPinned : false,
     };
 
     if (existingIndex !== -1) {
@@ -98,6 +101,84 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
     }
 
     return versionId;
+  },
+
+  handleSaveAsGeneric: (customTitle?: string) => {
+    const {
+      masterData,
+      targetJob,
+      targetRole,
+      gapMarkdown,
+      cvMarkdown,
+      theme,
+      palette,
+      pageBudget,
+      photo,
+      savedVersions,
+      currentBaseLanguage,
+      activeLanguage,
+      translations,
+      activeCvData,
+    } = get();
+
+    const candName = (activeCvData?.name ? activeCvData.name.replace(/_/g, ' ') : extractCandidateName(masterData, 'Candidate')).trim();
+    const comp = customTitle || 'CV Genérico';
+    const role = targetRole || activeCvData?.title || 'Perfil Base';
+    const baseLang = currentBaseLanguage || 'es';
+
+    const { matchScore } = extractGapInfo(gapMarkdown, targetJob);
+    const audit = auditCvContent(activeCvData || cvMarkdown, targetJob, masterData);
+    const versionId = `cv_generic_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
+    const newGenericVersion: GeneratedCvVersion = {
+      id: versionId,
+      createdAt: new Date().toISOString(),
+      candidateName: candName,
+      companyName: comp,
+      targetRole: role,
+      matchScore: matchScore > 0 ? matchScore : (audit.overallScore ? Math.round(audit.overallScore * 10) : 0),
+      qualityScore: audit.overallScore || 0,
+      theme,
+      palette,
+      pageBudget,
+      cvMarkdown,
+      cvData: activeCvData || undefined,
+      gapMarkdown,
+      targetJobSnippet: targetJob.slice(0, 280),
+      photo: photo || undefined,
+      baseLanguage: baseLang,
+      translations: translations || {},
+      activeLanguage: activeLanguage || baseLang,
+      isGeneric: true,
+      isPinned: true,
+    };
+
+    // Unpin other versions and place this pinned version at the front
+    const otherVersions = savedVersions.map((v) => ({ ...v, isPinned: false }));
+    set({
+      savedVersions: [newGenericVersion, ...otherVersions],
+      activeVersionId: versionId,
+    });
+
+    return versionId;
+  },
+
+  handlePinAsGeneric: (versionId: string) => {
+    set({
+      savedVersions: get().savedVersions.map((v) => ({
+        ...v,
+        isPinned: v.id === versionId,
+        isGeneric: v.id === versionId ? true : v.isGeneric,
+      })),
+    });
+  },
+
+  handleUnpinGeneric: (versionId: string) => {
+    set({
+      savedVersions: get().savedVersions.map((v) =>
+        v.id === versionId ? { ...v, isPinned: false } : v
+      ),
+    });
   },
 
   handleLoadVersion: (id: string) => {
