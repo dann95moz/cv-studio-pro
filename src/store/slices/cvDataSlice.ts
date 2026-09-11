@@ -153,7 +153,26 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   },
 
   setMasterData: (val) => {
-    const nextVal = typeof val === 'function' ? val(get().masterData) : val;
+    const rawVal = typeof val === 'function' ? val(get().masterData) : val;
+    let nextVal = rawVal;
+    if (typeof nextVal === 'string') {
+      const trimmed = nextVal.trim();
+      if (
+        trimmed.startsWith('{') ||
+        trimmed.includes('"cvData"') ||
+        /```(?:json)?\s*\{/i.test(trimmed) ||
+        (trimmed.includes('"name"') && (trimmed.includes('"experience"') || trimmed.includes('"skills"')))
+      ) {
+        try {
+          const parsed = parseMarkdownToCvData(trimmed);
+          if (parsed && (parsed.name || parsed.experience?.length || parsed.skillGroups?.length || parsed.summary)) {
+            nextVal = serializeCvDataToMarkdown(parsed);
+          }
+        } catch {
+          // Fall back to original raw string if parse fails
+        }
+      }
+    }
     const extractedRole = extractTargetRole(get().targetJob, nextVal);
     const hasChanged = nextVal !== get().masterData;
     set({

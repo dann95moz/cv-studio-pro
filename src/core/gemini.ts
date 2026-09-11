@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
-import { generatePdfFromMarkdown } from './pdf-generator';
+import { generatePdfFromMarkdown } from './cli-pdf-generator';
 import {
   sanitizeFileName,
   extractCandidateName,

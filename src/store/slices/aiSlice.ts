@@ -1,13 +1,15 @@
 import { StateCreator } from 'zustand';
 import { ResumeStore, AiSlice } from '../types';
-import { AIProviderSettings, GeneratedCvVersion } from '../../types/cv';
+import { AIProviderSettings, GeneratedCvVersion, CVData } from '../../types/cv';
 import { tailorResume, buildPrompts, extractCvAndGap } from '../../core/ai-service';
 import {
   extractCandidateName,
   extractTargetCompany,
   extractTargetRole,
   serializeCvDataToMarkdown,
+  parseMarkdownToCvData,
 } from '../../core/parser';
+
 
 export const DEFAULT_AI_SETTINGS: AIProviderSettings = {
   provider: 'gemini',
@@ -128,19 +130,25 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
     nextSavedVersions = [autoSavedVersion, ...savedVersions.filter((v) => v.id !== autoSavedVersion.id)];
 
     let nextMasterData = masterData;
-    if (extracted.cvData) {
-      const structured = serializeCvDataToMarkdown(extracted.cvData);
-      if (structured && structured.trim()) {
+    let activeCv: CVData | null = extracted.cvData || null;
+
+    if (!activeCv && tailoredCv) {
+      activeCv = parseMarkdownToCvData(tailoredCv, detectedLang);
+    }
+
+    if (activeCv && (activeCv.name || activeCv.experience?.length || activeCv.skillGroups?.length || activeCv.summary)) {
+      const structured = serializeCvDataToMarkdown(activeCv, detectedLang);
+      if (structured && structured.trim().length > 20) {
         nextMasterData = structured;
       }
-    } else if (tailoredCv && tailoredCv.trim()) {
+    } else if (tailoredCv && tailoredCv.trim().length > 20) {
       nextMasterData = tailoredCv;
     }
 
     set({
       masterData: nextMasterData,
       cvMarkdown: tailoredCv,
-      activeCvData: extracted.cvData || null,
+      activeCvData: activeCv,
       gapMarkdown: gapReport,
       currentBaseLanguage: detectedLang,
       activeLanguage: detectedLang,
@@ -152,6 +160,7 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
       activeTab: 'wizard',
       wizardStep: 'preview',
     });
+
   },
 
   cancelGeneration: () => {
