@@ -110,6 +110,7 @@ export function extractTargetCompany(targetJobText: string, fallback: string = '
     return cleanHumanText(fallback);
   }
 
+  // 1. Explicit Key-Value Header
   const match = targetJobText.match(/(?:Empresa|Company|Empresa Objetivo|Target Company)(?:\s*\/[^*:]*)?:\*{0,2}\s*\[?(?:Ej:\s*|e\.g\.\s*)?([^\]\r\n*]+)\]?/i);
   if (match) {
     let raw = match[1].trim();
@@ -125,6 +126,29 @@ export function extractTargetCompany(targetJobText: string, fallback: string = '
       return clean;
     }
   }
+
+  // 2. Natural language opening: e.g. "Acme Corp está buscando...", "Google is hiring..."
+  const naturalMatch = targetJobText.match(
+    /(?:^|\n)\s*([A-Z][a-zA-Z0-9\s.,&-]{1,35}?)\s+(?:está buscando|busca|is looking for|is hiring|se encuentra en búsqueda de)\b/i
+  );
+  if (naturalMatch && naturalMatch[1]) {
+    const clean = cleanHumanText(naturalMatch[1].trim());
+    if (clean && clean.length > 2 && clean.length < 40 && !clean.toLowerCase().includes('empresa')) {
+      return clean;
+    }
+  }
+
+  // 3. Contextual "en/at/para [Company]"
+  const prepMatch = targetJobText.match(
+    /(?:en|at|para|join)\s+([A-Z][a-zA-Z0-9.,&-]{2,25}(?:\s+[A-Z][a-zA-Z0-9.,&-]{2,20})?)(?:\s+(?:buscamos|we are|estamos|[.,\n]))/i
+  );
+  if (prepMatch && prepMatch[1]) {
+    const clean = cleanHumanText(prepMatch[1].trim());
+    if (clean && clean.length > 2 && clean.length < 40) {
+      return clean;
+    }
+  }
+
   return cleanHumanText(fallback);
 }
 
@@ -149,9 +173,11 @@ export function extractTargetRole(targetJobText: string, masterDataText: string 
       }
     }
 
-    // 2. Check natural vacancy opening sentences (e.g. "seeking an experienced Senior Angular/Front-End Developer...")
+    // 2. Check natural vacancy opening sentences in English and Spanish
     if (!detectedRole) {
-      const seekingMatch = targetJobText.match(/(?:seeking|looking for|hiring|need)\s+(?:an?\s+)?(?:experienced(?:\s+and\s+highly\s+skilled)?|highly skilled|skilled|talented|passionate|senior|lead|staff|principal)?\s*([A-Za-z0-9/ -]+(?:Developer|Engineer|Architect|Lead|Manager|Specialist|Consultant|Designer|Analyst|Scientist))/i);
+      const seekingMatch = targetJobText.match(
+        /(?:seeking|looking for|hiring|need|está buscando|busca|en búsqueda de|buscamos)\s+(?:an?\s+|un\s+|una\s+)?(?:experienced(?:\s+and\s+highly\s+skilled)?|highly skilled|skilled|talented|passionate|senior|lead|staff|principal)?\s*([A-Za-z0-9/ -]+(?:Developer|Engineer|Architect|Lead|Manager|Specialist|Consultant|Designer|Analyst|Scientist|Ingeniero|Desarrollador|Líder|Especialista|Consultor|Diseñador|Analista))/i
+      );
       if (seekingMatch && seekingMatch[1]) {
         const clean = seekingMatch[1].replace(/^[–\-•|:\s]+/, '').replace(/[–\-•|:\s]+$/, '').trim();
         if (clean.length > 5 && clean.length < 70) {
