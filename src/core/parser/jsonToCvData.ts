@@ -699,6 +699,24 @@ export function parseJsonToCvData(
     }
   }
 
+  // Enrich missing education, certifications and languages from fallbackMasterData if omitted by AI
+  if (fallbackMasterData && fallbackMasterData.trim()) {
+    try {
+      const fallbackCv = parseMarkdownToCvData(fallbackMasterData);
+      if (education.length === 0 && fallbackCv.education && fallbackCv.education.length > 0) {
+        education.push(...fallbackCv.education);
+      }
+      if (certifications.length === 0 && fallbackCv.certifications && fallbackCv.certifications.length > 0) {
+        certifications.push(...fallbackCv.certifications);
+      }
+      if (languages.length === 0 && fallbackCv.languages && fallbackCv.languages.length > 0) {
+        languages.push(...fallbackCv.languages);
+      }
+    } catch {
+      // Non-critical fallback
+    }
+  }
+
   // 11. Assemble sections
   const sections: CVSection[] = [];
   if (summary) sections.push({ id: 'summary', type: 'summary', title: langDef.sections.summary });

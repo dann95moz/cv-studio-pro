@@ -80,9 +80,10 @@ export function auditCvContent(
   const headerActions: string[] = [];
   let headerComment = 'Clean, professional header with verified communication channels and zero sensitive personal data.';
 
-  const hasEmail = cvData.contacts.some(c => c.type === 'email');
-  const hasLinkedIn = cvData.contacts.some(c => c.type === 'linkedin');
-  const hasPortfolioOrProfile = cvData.contacts.some(c => c.type === 'globe' || c.type === 'github');
+  const contactsList = cvData.contacts || [];
+  const hasEmail = contactsList.some(c => c.type === 'email');
+  const hasLinkedIn = contactsList.some(c => c.type === 'linkedin');
+  const hasPortfolioOrProfile = contactsList.some(c => c.type === 'globe' || c.type === 'github');
 
   if (!hasEmail || !cvData.name || !cvData.title) {
     headerScore = 7.5;

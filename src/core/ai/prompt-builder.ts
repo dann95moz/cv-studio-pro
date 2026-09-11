@@ -162,6 +162,16 @@ ${rules}
 - Identify names, companies, roles, dates, skills, and accomplishments authentically from the text without requiring markdown syntax.
 - Obey ZERO HALLUCINATION: Never invent companies or qualifications not explicitly supported by the candidate's text.
 
+=== ⚡ MODULAR SECTION ISOLATION & TOKEN EFFICIENCY ===
+- Static candidate credentials (email, phone, location, LinkedIn, GitHub, formal Education, and Languages) are deterministically preserved client-side from the candidate's verified baseline.
+- Prioritize your synthesis and token budget on:
+  1. Strategic role title alignment ("title")
+  2. Targeted, metric-rich Professional Summary ("summary")
+  3. Categorized Technical Skills mapped to vacancy requirements ("skills")
+  4. High-impact Google XYZ Experience bullets with bolded metrics and keywords ("experience")
+  5. Relevant Featured Projects ("projects")
+  6. Comprehensive Gap Analysis ("gapReport")
+
 === STRICT OUTPUT FORMAT (JSON SCHEMA) ===
 Deliver your entire response as a single, valid JSON object (optionally inside a \`\`\`json ... \`\`\` fence) adhering strictly to this schema:
 

@@ -629,6 +629,7 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   let experience: ExperienceItem[] = [];
   let projects: ExperienceItem[] = [];
   let education: string[] = [];
+  let certifications: string[] = [];
   let languages: string[] = [];
   const sections: CVSection[] = [];
 
@@ -657,7 +658,10 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     } else if (/PROJECT|PROYECTO|PROJEKT|PROGETT/.test(cleanHeaderUpper)) {
       projects = parseExperienceBlocks(content, contacts);
       sections.push({ id: 'projects', type: 'projects', title: langDef.sections.projects, rawContent: content });
-    } else if (/EDUCATION|EDUCACI|CERTIFIC|FORMATION|AUSBILDUNG|STUDIUM|ISTRUZIONE/.test(cleanHeaderUpper)) {
+    } else if (/(?:CERTIFIC|LICEN[CS])/.test(cleanHeaderUpper) && !/(?:EDUCATION|EDUCACI|FORMATION|AUSBILDUNG|STUDIUM|ISTRUZIONE)/.test(cleanHeaderUpper)) {
+      certifications = parseBulletList(content);
+      sections.push({ id: 'certifications', type: 'education', title: headerLine, rawContent: content });
+    } else if (/EDUCATION|EDUCACI|FORMATION|AUSBILDUNG|STUDIUM|ISTRUZIONE/.test(cleanHeaderUpper)) {
       education = parseBulletList(content);
       sections.push({ id: 'education', type: 'education', title: langDef.sections.education, rawContent: content });
     } else if (/LANGUAGE|IDIOMA|SPRACH|LANGUE|LINGU/.test(cleanHeaderUpper)) {
@@ -702,6 +706,7 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     experience: experience.length > 0 ? experience : undefined,
     projects: projects.length > 0 ? projects : undefined,
     education: education.length > 0 ? education : undefined,
+    certifications: certifications.length > 0 ? certifications : undefined,
     languages: languages.length > 0 ? languages : undefined,
   });
 }
@@ -805,9 +810,9 @@ export function cleanCvData(data: CVData): CVData {
         bullets: (proj.bullets || []).map(cleanBulletText).filter(Boolean),
       };
     }),
-    education: (data.education || []).map(cleanEducationItem).filter(Boolean),
-    certifications: (data.certifications || []).map(cleanEducationItem).filter(Boolean),
-    languages: (data.languages || []).map(cleanLanguageItem).filter(Boolean),
+    education: data.education?.map(cleanEducationItem).filter(Boolean),
+    certifications: data.certifications?.map(cleanEducationItem).filter(Boolean),
+    languages: data.languages?.map(cleanLanguageItem).filter(Boolean),
     customSections: data.customSections?.map((sec) => ({
       ...sec,
       title: cleanHumanText(sec.title),
