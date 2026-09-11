@@ -105,6 +105,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
   });
 
   const [showSampleConfirmDialog, setShowSampleConfirmDialog] = React.useState(false);
+  const [activeGuidedSection, setActiveGuidedSection] = React.useState<string>('personal');
 
   const handleTriggerLoadSample = () => {
     if (hasData) {
@@ -320,7 +321,10 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
           {/* VIEW 2: Pure Guided Form (When in guided mode) */}
           {editMode === 'guided' && (
             <>
-              <ProfileCompletenessBar completeness={completeness} />
+              <ProfileCompletenessBar
+                completeness={completeness}
+                onSelectMissingSection={(secId) => setActiveGuidedSection(secId)}
+              />
               <Paper
                 sx={{
                   flex: 1,
@@ -334,7 +338,13 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                 }}
               >
                 <React.Suspense fallback={<StudioSkeleton variant="guidedForm" />}>
-                  <GuidedProfileForm markdownContent={content} onChange={onChange} onFlushRef={flushGuidedRef} />
+                  <GuidedProfileForm
+                    markdownContent={content}
+                    onChange={onChange}
+                    onFlushRef={flushGuidedRef}
+                    activeSection={activeGuidedSection}
+                    onSectionChange={setActiveGuidedSection}
+                  />
                 </React.Suspense>
               </Paper>
             </>

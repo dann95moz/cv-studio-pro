@@ -170,6 +170,8 @@ export interface GuidedProfileFormProps {
   onChange: (newMarkdown: string) => void;
   data?: CVData;
   onFlushRef?: React.MutableRefObject<(() => void) | null>;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
 

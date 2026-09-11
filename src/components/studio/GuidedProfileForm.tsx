@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import { serializeCvDataToMarkdown, parseMarkdownToCvData, cleanCvData } from '../../core/parser';
 import { CVData, ContactItem, ContactType, ExperienceItem, SkillCategory } from '../../types/cv';
 import { BLANK_CV_DATA } from '../../constants/templates';
-import { useResumeStore } from '../../store/useResumeStore';
 import { ProfileNavRail, ProfileSectionKey } from './profile/ProfileNavRail';
 import { PersonalInfoSection } from './profile/PersonalInfoSection';
 import { SummarySection } from './profile/SummarySection';
@@ -36,11 +35,29 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   onChange,
   onFlushRef,
   data,
+  activeSection: controlledActiveSection,
+  onSectionChange: setControlledActiveSection,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
-  const activeCvData = useResumeStore((s) => s.activeCvData);
-  const [formData, setFormData] = useState<CVData>(() => cleanCvData(data || activeCvData || BLANK_CV_DATA));
-  const [activeSection, setActiveSection] = useState<ProfileSectionKey>('personal');
+  const [formData, setFormData] = useState<CVData>(() => {
+    if (data) return cleanCvData(data);
+    if (markdownContent && markdownContent.trim().length > 0) {
+      return cleanCvData(parseMarkdownToCvData(markdownContent));
+    }
+    return cleanCvData(BLANK_CV_DATA);
+  });
+  const [internalSection, setInternalSection] = useState<ProfileSectionKey>('personal');
+  const activeSection = (controlledActiveSection as ProfileSectionKey) || internalSection;
+  const handleSectionChange = useCallback(
+    (sec: ProfileSectionKey) => {
+      if (setControlledActiveSection) {
+        setControlledActiveSection(sec);
+      } else {
+        setInternalSection(sec);
+      }
+    },
+    [setControlledActiveSection]
+  );
   
   const lastEmittedMarkdownRef = useRef<string>(markdownContent);
   const formDataRef = useRef<CVData>(formData);
@@ -64,7 +81,6 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
       lastEmittedMarkdownRef.current = newMarkdown;
       onChange(newMarkdown);
     }
-    useResumeStore.getState().setActiveCvData(formDataRef.current);
   }, [onChange]);
 
   // Hook up onFlushRef for parent components
@@ -93,29 +109,27 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           lastEmittedMarkdownRef.current = newMarkdown;
           onChange(newMarkdown);
         }
-        useResumeStore.getState().setActiveCvData(formDataRef.current);
       }
     };
   }, [onChange]);
 
-  // Synchronize when external data, activeCvData, or markdownContent changes (from import, QR sync, sample load, etc.)
+  // Synchronize when external data or markdownContent changes (from import, QR sync, sample load, free text edit, etc.)
   useEffect(() => {
     if (data) {
       const cleaned = cleanCvData(data);
       setFormData(cleaned);
       formDataRef.current = cleaned;
-    } else if (activeCvData && !isDirtyRef.current) {
-      const cleaned = cleanCvData(activeCvData);
-      setFormData(cleaned);
-      formDataRef.current = cleaned;
+    } else if (markdownContent !== lastEmittedMarkdownRef.current) {
       lastEmittedMarkdownRef.current = markdownContent;
-    } else if (markdownContent && markdownContent !== lastEmittedMarkdownRef.current) {
-      lastEmittedMarkdownRef.current = markdownContent;
-      const parsed = cleanCvData(parseMarkdownToCvData(markdownContent));
+      const parsed = cleanCvData(
+        markdownContent && markdownContent.trim().length > 0
+          ? parseMarkdownToCvData(markdownContent)
+          : BLANK_CV_DATA
+      );
       setFormData(parsed);
       formDataRef.current = parsed;
     }
-  }, [data, activeCvData, markdownContent]);
+  }, [data, markdownContent]);
 
   const scheduleEmit = useCallback(() => {
     if (debounceTimerRef.current) {
@@ -130,7 +144,6 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           lastEmittedMarkdownRef.current = newMarkdown;
           onChange(newMarkdown);
         }
-        useResumeStore.getState().setActiveCvData(formDataRef.current);
       }
     }, 250);
   }, [onChange]);
@@ -408,8 +421,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
         ]
       };
     });
-    setActiveSection(`custom_${newId}`);
-  }, [updateData]);
+    handleSectionChange(`custom_${newId}`);
+  }, [updateData, handleSectionChange]);
 
   const handleUpdateCustomSectionTitle = useCallback((sectionId: string, newTitle: string) => {
     updateData(prev => ({
@@ -456,8 +469,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
       ...prev,
       customSections: (prev.customSections || []).filter(sec => sec.id !== sectionId)
     }));
-    setActiveSection('personal');
-  }, [updateData]);
+    handleSectionChange('personal');
+  }, [updateData, handleSectionChange]);
 
   // Active custom section resolver
   const activeCustomSection = useMemo(() => {
@@ -522,7 +535,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
       {/* 1. Left Navigation Rail (Desktop) / Top Tabs (Mobile) */}
       <ProfileNavRail
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={handleSectionChange}
         sectionCounts={sectionCounts}
         customSections={formData.customSections || []}
         onAddSectionClick={() => setIsAddSectionModalOpen(true)}
