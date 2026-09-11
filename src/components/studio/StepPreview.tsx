@@ -122,12 +122,21 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     applications,
     kanbanColumns,
     savedVersions,
+    activeVersionId,
     gapMarkdown,
     parsedCv,
     auditReport,
     gapInfo,
     isTracked,
     handleSaveToHistory,
+    handleSaveAsGeneric,
+    handleLoadVersion,
+    handlePinAsGeneric,
+    handleUnpinGeneric,
+    diffInitialVersionAId,
+    diffInitialVersionBId,
+    handleCompareAgainstGeneric,
+    handleCloseDiffModal,
     handleTrackApplication,
     handleConfirmTrackApplication,
     handleMagicAutoFit,
@@ -239,6 +248,16 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           outdatedSectionsCount={outdatedSectionsCount}
           onQuickSyncOutdated={handleQuickSyncOutdated}
           isTranslating={isTranslating}
+          savedVersions={savedVersions}
+          activeVersionId={activeVersionId}
+          companyName={companyName}
+          targetRole={targetRole}
+          matchScore={gapInfo.matchScore || (auditReport.overallScore ? Math.round(auditReport.overallScore * 10) : 0)}
+          onSelectVersion={handleLoadVersion}
+          onPinAsGeneric={handlePinAsGeneric}
+          onUnpinGeneric={handleUnpinGeneric}
+          onSaveAsGeneric={handleSaveAsGeneric}
+          onCompareAgainstGeneric={handleCompareAgainstGeneric}
         />
       </Box>
 
@@ -495,7 +514,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           }}
           onOpenDiff={() => {
             setIsMobileToolsOpen(false);
-            setIsDiffModalOpen(true);
+            handleCompareAgainstGeneric();
           }}
           onOpenAuditGap={(tab = 'gap') => {
             setIsMobileToolsOpen(false);
@@ -540,7 +559,9 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
       <React.Suspense fallback={null}>
         <VersionDiffModal
           open={isDiffModalOpen}
-          onClose={() => setIsDiffModalOpen(false)}
+          onClose={handleCloseDiffModal}
+          initialVersionAId={diffInitialVersionAId}
+          initialVersionBId={diffInitialVersionBId}
         />
       </React.Suspense>
 

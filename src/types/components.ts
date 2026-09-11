@@ -276,6 +276,16 @@ export interface StepPreviewToolbarProps {
   outdatedSectionsCount?: number;
   onQuickSyncOutdated?: () => void;
   isTranslating?: boolean;
+  savedVersions?: GeneratedCvVersion[];
+  activeVersionId?: string | null;
+  companyName?: string;
+  targetRole?: string;
+  matchScore?: number;
+  onSelectVersion?: (versionId: string) => void;
+  onPinAsGeneric?: (versionId: string) => void;
+  onUnpinGeneric?: (versionId: string) => void;
+  onSaveAsGeneric?: () => void;
+  onCompareAgainstGeneric?: (versionId?: string) => void;
 }
 
 export interface StepPreviewNavRailProps {

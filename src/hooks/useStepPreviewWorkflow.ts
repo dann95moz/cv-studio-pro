@@ -32,10 +32,17 @@ export const useStepPreviewWorkflow = () => {
 
   const [previewDocType, setPreviewDocType] = useState<'cv' | 'cover-letter'>('cv');
   const [isDiffModalOpen, setIsDiffModalOpen] = useState<boolean>(false);
+  const [diffInitialVersionAId, setDiffInitialVersionAId] = useState<string | undefined>(undefined);
+  const [diffInitialVersionBId, setDiffInitialVersionBId] = useState<string | undefined>(undefined);
   const [isTranslateModalOpen, setIsTranslateModalOpen] = useState<boolean>(false);
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
 
   // Zustand Store selectors
+  const activeVersionId = useResumeStore((s) => s.activeVersionId);
+  const handleLoadVersion = useResumeStore((s) => s.handleLoadVersion);
+  const handlePinAsGeneric = useResumeStore((s) => s.handlePinAsGeneric);
+  const handleUnpinGeneric = useResumeStore((s) => s.handleUnpinGeneric);
+  const handleSaveAsGeneric = useResumeStore((s) => s.handleSaveAsGeneric);
   const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
   const activeLanguage = useResumeStore((s) => s.activeLanguage);
   const setActiveLanguage = useResumeStore((s) => s.setActiveLanguage);
@@ -434,9 +441,24 @@ export const useStepPreviewWorkflow = () => {
     return false;
   }, [parsedCv]);
 
+  const handleCompareAgainstGeneric = useCallback((targetVersionId?: string) => {
+    const genericVersion = savedVersions.find((v) => v.isPinned || v.isGeneric);
+    const versionA = genericVersion ? genericVersion.id : 'master';
+    const versionB = targetVersionId || activeVersionId || 'current';
+    setDiffInitialVersionAId(versionA);
+    setDiffInitialVersionBId(versionB);
+    setIsDiffModalOpen(true);
+  }, [savedVersions, activeVersionId]);
+
+  const handleCloseDiffModal = useCallback(() => {
+    setIsDiffModalOpen(false);
+    setDiffInitialVersionAId(undefined);
+    setDiffInitialVersionBId(undefined);
+  }, []);
+
   const handleToggleSidePanel = (panel: PreviewSidePanelType) => {
     if (panel === 'compare') {
-      setIsDiffModalOpen(true);
+      handleCompareAgainstGeneric();
       return;
     }
     if (panel === 'audit') {
@@ -464,6 +486,10 @@ export const useStepPreviewWorkflow = () => {
     setPreviewDocType,
     isDiffModalOpen,
     setIsDiffModalOpen,
+    diffInitialVersionAId,
+    diffInitialVersionBId,
+    handleCompareAgainstGeneric,
+    handleCloseDiffModal,
     isTrackModalOpen,
     setIsTrackModalOpen,
     savedSuccess,
@@ -521,6 +547,7 @@ export const useStepPreviewWorkflow = () => {
     applications,
     kanbanColumns,
     savedVersions,
+    activeVersionId,
     gapMarkdown,
     parsedCv,
     auditReport,
@@ -530,6 +557,10 @@ export const useStepPreviewWorkflow = () => {
     setIsHudMinimized,
     // Actions
     handleSaveToHistory,
+    handleSaveAsGeneric,
+    handleLoadVersion,
+    handlePinAsGeneric,
+    handleUnpinGeneric,
     handleTrackApplication,
     handleConfirmTrackApplication,
     handleMagicAutoFit,

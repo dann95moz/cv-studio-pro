@@ -57,18 +57,32 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
     return 'current';
   });
 
+  React.useEffect(() => {
+    if (open) {
+      if (initialVersionAId) setVersionAId(initialVersionAId);
+      if (initialVersionBId) setVersionBId(initialVersionBId);
+    }
+  }, [open, initialVersionAId, initialVersionBId]);
+
   const [viewMode, setViewMode] = useState<'unified' | 'split'>('unified');
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const { copy } = useCopyToClipboard();
+
+  const genericVersion = useMemo(
+    () => savedVersions.find((v) => v.isPinned || v.isGeneric),
+    [savedVersions]
+  );
 
   const allVersionOptions = useMemo(() => [
     { id: 'master', label: t('history:diff.masterCv', 'Original Career Profile') },
     { id: 'current', label: t('history:diff.currentTailored', 'Current Tailored CV (Editor)') },
     ...savedVersions.map((v) => {
+      const pinPrefix = v.isPinned ? '📌 ' : v.isGeneric ? '⭐ ' : '';
+      const genericSuffix = v.isGeneric ? ` [${t('preview:versionSelector.genericBadge', 'Genérico')}]` : '';
       const company = v.companyName || 'General';
       const role = v.targetRole ? ` • ${v.targetRole}` : '';
       const date = formatLocalizedDate(v.createdAt, i18n.language || 'en');
-      return { id: v.id, label: `${company}${role} (${date})` };
+      return { id: v.id, label: `${pinPrefix}${company}${role}${genericSuffix} (${date})` };
     }),
   ], [savedVersions, i18n.language, t]);
 
@@ -219,6 +233,28 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
               ))}
             </Select>
           </FormControl>
+
+          {genericVersion && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setVersionAId(genericVersion.id);
+                setVersionBId('current');
+              }}
+              startIcon={<CompareArrowsRoundedIcon sx={{ fontSize: 15 }} />}
+              sx={{
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                textTransform: 'none',
+                height: 38,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {t('preview:versionSelector.compareAgainstGeneric', 'Comparar vs Genérico')}
+            </Button>
+          )}
         </Box>
 
 

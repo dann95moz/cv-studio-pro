@@ -33,6 +33,8 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
+import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
+import { VersionSelectorDropdown } from './VersionSelectorDropdown';
 import { useTranslation } from 'react-i18next';
 import { StepPreviewToolbarProps, PageFormat } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
@@ -71,6 +73,16 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
   outdatedSectionsCount = 0,
   onQuickSyncOutdated,
   isTranslating = false,
+  savedVersions = [],
+  activeVersionId = null,
+  companyName,
+  targetRole,
+  matchScore = 0,
+  onSelectVersion,
+  onPinAsGeneric,
+  onUnpinGeneric,
+  onSaveAsGeneric,
+  onCompareAgainstGeneric,
 }) => {
   const { t } = useTranslation(['preview', 'target', 'common']);
   const theme = useTheme();
@@ -404,6 +416,26 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
           </>
         )}
 
+        {/* CV Saved Versions & Generic Selector Dropdown */}
+        {onSelectVersion && onPinAsGeneric && onSaveAsGeneric && onCompareAgainstGeneric && (
+          <>
+            <VersionSelectorDropdown
+              savedVersions={savedVersions}
+              activeVersionId={activeVersionId}
+              currentCompanyName={companyName}
+              currentTargetRole={targetRole}
+              currentMatchScore={matchScore}
+              onSelectVersion={onSelectVersion}
+              onPinAsGeneric={onPinAsGeneric}
+              onUnpinGeneric={onUnpinGeneric}
+              onSaveAsGeneric={onSaveAsGeneric}
+              onCompareAgainstGeneric={onCompareAgainstGeneric}
+            />
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 0.5 }} />
+          </>
+        )}
+
         {/* Document Type Switcher Dropdown */}
         {onPreviewDocTypeChange && (
           <>
@@ -633,6 +665,28 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
           </>
         )}
 
+        {/* Quick Compare vs Generic Action */}
+        {onCompareAgainstGeneric && (
+          <Tooltip title={t('preview:versionSelector.compareAgainstGeneric', 'Comparar versión actual contra CV Genérico')}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="inherit"
+              startIcon={<CompareArrowsRoundedIcon sx={{ fontSize: '15px !important' }} />}
+              onClick={() => onCompareAgainstGeneric()}
+              sx={{
+                height: 28,
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textTransform: 'none',
+                px: 1.2,
+                display: { xs: 'none', lg: 'inline-flex' },
+              }}
+            >
+              {t('preview:versionSelector.compareVsGenericBtn', 'Comparar vs Genérico')}
+            </Button>
+          </Tooltip>
+        )}
 
         {/* Magic 1-Page Auto-Fit Button */}
         {onAutoFit && (
