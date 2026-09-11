@@ -82,7 +82,7 @@ export function computeLineDiff(textA: string, textB: string): DiffResult {
   let metricsCount = 0;
 
   // Regex to detect numbers/metrics like $1.2M, 40%, 10k, 250ms, 99.99%
-  const metricRegex = /\b(\d+(\.\d+)?%|\$\d+(\.\d+)?[kKmMbB]?|\d+[kKmMbB]|\d+\+?(\s*(ms|sec|min|users|requests|req\/s|tps)))\b/g;
+  const metricRegex = /(?:\b\$\d+(?:\.\d+)?[kKmMbB]?|\b\d+(?:\.\d+)?%|\b\d+[kKmMbB]\b|\b\d+\+?(?:\s*(?:ms|sec|min|users|requests|req\/s|tps))\b)/g;
 
   resultLines.forEach((line) => {
     if (line.type === 'added') {

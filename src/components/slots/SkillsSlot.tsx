@@ -49,10 +49,14 @@ export const SkillsSlot: React.FC<SkillsSlotProps> = ({
             ) : (
               <span className="skills-items">
                 {group.skills.map((skill, sIdx) => {
-                  const cleanSkill = skill.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '');
+                  const isDiffAdded = skill.startsWith('cv-diff-added-skill:');
+                  const isDiffRemoved = skill.startsWith('cv-diff-removed-skill:');
+                  const rawSkill = isDiffAdded ? skill.replace('cv-diff-added-skill:', '') : isDiffRemoved ? skill.replace('cv-diff-removed-skill:', '') : skill;
+                  const cleanSkill = rawSkill.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '');
+                  const diffClass = isDiffAdded ? 'cv-diff-added-skill' : isDiffRemoved ? 'cv-diff-removed-skill' : '';
                   return (
                     <React.Fragment key={sIdx}>
-                      <span className="skill-pill">
+                      <span className={`skill-pill ${diffClass}`.trim()}>
                         {cleanSkill}
                       </span>
                       {variant === 'inline' && sIdx < group.skills.length - 1 && (

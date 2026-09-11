@@ -160,3 +160,63 @@ html, body {
   background-color: var(--bg-dark);
   color: var(--text-main);
 }
+
+/* ==========================================================================
+   VISUAL CV DIFF & HIGHLIGHTING STYLES
+   ========================================================================== */
+.cv-diff-add {
+  background-color: rgba(16, 185, 129, 0.18);
+  color: inherit;
+  border-bottom: 2px solid #10b981;
+  border-radius: 2px;
+  padding: 1px 3px;
+  font-weight: 600;
+}
+
+.cv-diff-del {
+  background-color: rgba(239, 68, 68, 0.14);
+  color: inherit;
+  text-decoration: line-through;
+  opacity: 0.75;
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+
+.cv-diff-added-bullet {
+  position: relative;
+  background-color: rgba(16, 185, 129, 0.08);
+  border-left: 3px solid #10b981;
+  padding-left: 6px;
+  margin-left: -9px;
+  border-radius: 0 4px 4px 0;
+  display: list-item;
+}
+
+.cv-diff-removed-bullet {
+  position: relative;
+  background-color: rgba(239, 68, 68, 0.08);
+  border-left: 3px solid #ef4444;
+  padding-left: 6px;
+  margin-left: -9px;
+  border-radius: 0 4px 4px 0;
+  opacity: 0.8;
+  display: list-item;
+}
+
+.skill-pill.cv-diff-added-skill {
+  border: 1.5px solid #10b981 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35) !important;
+  color: #059669 !important;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .skill-pill.cv-diff-added-skill {
+  color: #34d399 !important;
+}
+
+.skill-pill.cv-diff-removed-skill {
+  border: 1.5px dashed #ef4444 !important;
+  opacity: 0.65;
+  text-decoration: line-through;
+}
+
