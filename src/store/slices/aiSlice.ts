@@ -128,11 +128,13 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
     nextSavedVersions = [autoSavedVersion, ...savedVersions.filter((v) => v.id !== autoSavedVersion.id)];
 
     let nextMasterData = masterData;
-    if (extracted.cvData && (!masterData || !/^##\s+/m.test(masterData))) {
+    if (extracted.cvData) {
       const structured = serializeCvDataToMarkdown(extracted.cvData);
       if (structured && structured.trim()) {
         nextMasterData = structured;
       }
+    } else if (tailoredCv && tailoredCv.trim()) {
+      nextMasterData = tailoredCv;
     }
 
     set({

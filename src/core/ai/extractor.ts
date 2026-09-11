@@ -6,7 +6,17 @@ import { extractJobKeywords } from '../matching/quickMatcher';
 import { CVData, CVSection } from '../../types/cv';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 import { serializeCvDataToMarkdown, parseMarkdownToCvData, extractCandidateName } from '../parser';
-import { inferDocumentLanguage, normalizeSkillCategory } from '../parser/markdownToCvData';
+import {
+  inferDocumentLanguage,
+  normalizeSkillCategory,
+  cleanCvData,
+  cleanSummary,
+  cleanBulletText,
+  cleanSkillItem,
+  cleanSkillCategory,
+  cleanEducationItem,
+  cleanLanguageItem
+} from '../parser/markdownToCvData';
 
 export interface ExtractedCvAndGap {
   cvMarkdown: string;
@@ -107,7 +117,7 @@ function tryParseJsonCv(
       sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages });
     }
 
-    const cvData: CVData = {
+    const rawCvData: CVData = {
       name: candidateName,
       title: role,
       contacts,
@@ -122,11 +132,11 @@ function tryParseJsonCv(
         websites: langDef.sections.websites,
       },
       language: detectedLang,
-      summary: parsed.cvData.summary || '',
+      summary: cleanSummary(parsed.cvData.summary || ''),
       skillGroups: (parsed.cvData.skills || []).map((sg) => ({
-        category: normalizeSkillCategory((sg.category || '').replace(/[:*_\s]+$/, '').replace(/^[:*_\s]+/, '').trim(), detectedLang),
+        category: cleanSkillCategory(normalizeSkillCategory((sg.category || '').trim(), detectedLang)),
         skills: (sg.skills || [])
-          .map((sk) => sk.replace(/^[:*_\s]+/, '').replace(/[:*_\s]+$/, '').trim())
+          .map((sk) => cleanSkillItem(sk))
           .filter(Boolean),
       })),
       experience: (parsed.cvData.experience || []).map((exp) => ({
@@ -134,20 +144,21 @@ function tryParseJsonCv(
         role: exp.role || 'Specialist',
         date: exp.date || '',
         location: exp.location || '',
-        bullets: exp.bullets || [],
+        bullets: (exp.bullets || []).map(cleanBulletText).filter(Boolean),
       })),
       projects: (parsed.cvData.projects || []).map((proj) => ({
         company: proj.company || proj.name || 'Project',
         role: proj.role || '',
         demoUrl: proj.demoUrl,
         repoUrl: proj.repoUrl,
-        bullets: proj.bullets || [],
+        bullets: (proj.bullets || []).map(cleanBulletText).filter(Boolean),
       })),
-      education: parsed.cvData.education || [],
-      certifications: parsed.cvData.certifications || [],
-      languages: parsed.cvData.languages || [],
+      education: (parsed.cvData.education || []).map(cleanEducationItem).filter(Boolean),
+      certifications: (parsed.cvData.certifications || []).map(cleanEducationItem).filter(Boolean),
+      languages: (parsed.cvData.languages || []).map(cleanLanguageItem).filter(Boolean),
     };
 
+    const cvData = cleanCvData(rawCvData);
     const cvMarkdown = serializeCvDataToMarkdown(cvData, detectedLang);
     const score = parsed.gapReport?.estimatedScore ?? parsed.gapReport?.estimatedMatchScore ?? 0;
     const keywords = parsed.gapReport?.criticalKeywords ?? parsed.gapReport?.criticalIntegratedKeywords ?? [];
