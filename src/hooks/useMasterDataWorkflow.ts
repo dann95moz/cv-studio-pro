@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { extractCandidateName } from '../core/parser';
+import { extractCandidateName, parseMarkdownToCvData, serializeCvDataToMarkdown } from '../core/parser';
+
 import { useFileUploader } from './useFileUploader';
 import { useTranslation } from 'react-i18next';
 import { downloadTextFile, buildTimestampedFileName } from '../utils/fileUtils';
@@ -21,9 +22,15 @@ export const useMasterDataWorkflow = ({
 }: UseMasterDataWorkflowProps) => {
   const { t } = useTranslation(['profile', 'common']);
 
+  const isStructuredOrJson = (text: string) => {
+    if (!text) return false;
+    const trimmed = text.trim();
+    return /^##\s+/m.test(trimmed) || trimmed.startsWith('{') || trimmed.includes('"cvData"') || /```(?:json)?\s*\{/i.test(trimmed);
+  };
+
   const [editMode, setEditMode] = useState<MasterDataMode>(() => {
     if (!content || !content.trim()) return 'choice';
-    if (/^##\s+/m.test(content)) return 'guided';
+    if (isStructuredOrJson(content)) return 'guided';
     return 'freeText';
   });
   const [manualText, setManualText] = useState(content);
@@ -34,7 +41,7 @@ export const useMasterDataWorkflow = ({
   useEffect(() => {
     setManualText(content);
     if (editMode === 'choice' && content && content.trim().length > 20) {
-      setEditMode(/^##\s+/m.test(content) ? 'guided' : 'freeText');
+      setEditMode(isStructuredOrJson(content) ? 'guided' : 'freeText');
     }
   }, [content, editMode]);
 
@@ -60,11 +67,24 @@ export const useMasterDataWorkflow = ({
     if (editMode === 'freeText') {
       flushManualRef.current?.();
       flushManual();
+      // If user pasted JSON in freeText, convert to structured markdown when switching to guided
+      const trimmed = manualText.trim();
+      if (trimmed.startsWith('{') || trimmed.includes('"cvData"') || /```(?:json)?\s*\{/i.test(trimmed)) {
+        const parsed = parseMarkdownToCvData(trimmed);
+        if (parsed && (parsed.name || parsed.experience?.length || parsed.skillGroups?.length || parsed.summary)) {
+          const serialized = serializeCvDataToMarkdown(parsed);
+          if (serialized && serialized.trim().length > 20) {
+            setManualText(serialized);
+            onChange(serialized);
+          }
+        }
+      }
     } else if (editMode === 'guided') {
       flushGuidedRef.current?.();
     }
     setEditMode(newMode);
-  }, [editMode, flushManual]);
+  }, [editMode, flushManual, manualText, onChange]);
+
 
   const handleSelectMode = useCallback((mode: 'freeText' | 'guided') => {
     setEditMode(mode);
@@ -154,7 +174,7 @@ export const useMasterDataWorkflow = ({
     details?: PdfImportResult
   ) => {
     const finalContent = loadedContent;
-    setEditMode('freeText');
+    setEditMode(isStructuredOrJson(finalContent) ? 'guided' : 'freeText');
 
     if (hasData) {
       setPendingFile({ content: finalContent, fileName, isPdf, details });
@@ -201,6 +221,7 @@ export const useMasterDataWorkflow = ({
   const {
     fileInputRef,
     isProcessing,
+    progressMessage,
     isDragging,
     handleFileUpload,
     handleDrop,
@@ -265,6 +286,7 @@ export const useMasterDataWorkflow = ({
     // File upload handlers & state
     fileInputRef,
     isProcessing,
+    progressMessage,
     isDragging,
     handleFileUpload,
     handleDrop,

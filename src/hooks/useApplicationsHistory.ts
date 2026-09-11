@@ -142,7 +142,7 @@ export function useApplicationsHistory() {
   const handleDownloadPdf = useCallback(async (v: GeneratedCvVersion, language?: string) => {
     setDownloadingPdfId(v.id);
     try {
-      const { generateVersionDirectPdf } = await import('../core/pdfGenerator');
+      const { generateVersionDirectPdf } = await import('../core/browser-pdf-generator');
       await generateVersionDirectPdf(v, { language });
     } catch (error) {
       console.error('Failed to generate version PDF:', error);

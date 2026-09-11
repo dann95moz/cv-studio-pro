@@ -176,16 +176,18 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           cleanText = cleanText.replace(/^mailto:/i, '');
         }
 
-        let finalUrl = url;
+        let finalUrl = url?.trim();
         if (type === 'email') {
           finalUrl = cleanText ? `mailto:${cleanText}` : undefined;
         } else if (!finalUrl && (type === 'linkedin' || type === 'github' || type === 'globe')) {
-          finalUrl = label;
+          finalUrl = label.startsWith('http') ? label : `https://${label.replace(/^https?:\/\//, '')}`;
+        } else if (finalUrl && (type === 'linkedin' || type === 'github' || type === 'globe') && !finalUrl.startsWith('http')) {
+          finalUrl = `https://${finalUrl}`;
         }
 
         const newContact: ContactItem = {
           type,
-          label,
+          label: label.trim(),
           url: finalUrl
         };
         return { ...prev, contacts: [...remaining, newContact] };
@@ -388,7 +390,16 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleProjectFieldChange = useCallback((index: number, field: keyof ExperienceItem, value: string | string[]) => {
     updateData(prev => {
       const list = [...(prev.projects || [])];
-      list[index] = { ...list[index], [field]: value };
+      let val = value;
+      if (typeof val === 'string' && (field === 'demoUrl' || field === 'repoUrl')) {
+        const trimmed = val.trim();
+        if (trimmed && !trimmed.startsWith('http') && (trimmed.includes('.') || trimmed.includes('/'))) {
+          val = `https://${trimmed.replace(/^https?:\/\//, '')}`;
+        } else {
+          val = trimmed;
+        }
+      }
+      list[index] = { ...list[index], [field]: val };
       return { ...prev, projects: list };
     });
   }, [updateData]);

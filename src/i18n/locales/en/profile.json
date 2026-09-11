@@ -80,6 +80,11 @@
 
     "tipLoadSample": "Tip: Click 'Load Sample Profile' to test right away",
     "importingPdf": "Reading and structuring your PDF resume...",
+    "ocrReading": "Reading PDF document structure...",
+    "ocrScanning": "Scanned PDF detected. Initializing OCR engine...",
+    "ocrProgress": "Running OCR on page {{current}} of {{total}}...",
+    "ocrFormatting": "Structuring career profile...",
+    "ocrEmptyError": "No readable text found in PDF. The document appears to be empty or an unreadable scanned image.",
     "pdfSuccess": "Successfully imported career profile from {{fileName}}",
     "fileImportedSuccess": "Resume \"{{fileName}}\" imported successfully!",
     "importedAi": "Structured via AI Engine",

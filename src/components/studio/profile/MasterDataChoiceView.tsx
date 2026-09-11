@@ -5,6 +5,7 @@ import {
   Typography,
   Button,
   Chip,
+  CircularProgress,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -23,6 +24,7 @@ export interface MasterDataChoiceViewProps {
   openFileDialog: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   isProcessing?: boolean;
+  progressMessage?: string;
   hasData?: boolean;
 }
 
@@ -41,6 +43,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
   openFileDialog,
   fileInputRef,
   isProcessing = false,
+  progressMessage,
   hasData = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
@@ -180,11 +183,19 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
             size="medium"
             onClick={openFileDialog}
             disabled={isProcessing}
-            startIcon={<CloudUploadRoundedIcon />}
+            startIcon={
+              isProcessing ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <CloudUploadRoundedIcon />
+              )
+            }
             fullWidth
             sx={{ fontWeight: 700 }}
           >
-            {t('profile:actions.importResume', 'Upload Resume')}
+            {isProcessing
+              ? (progressMessage || t('profile:actions.importing', 'Extracting PDF...'))
+              : t('profile:actions.importResume', 'Upload Resume')}
           </Button>
         </Paper>
 

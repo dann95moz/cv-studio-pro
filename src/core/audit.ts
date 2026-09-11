@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { sanitizeFileName } from './parser';
-import { generatePdfFromMarkdown } from './pdf-generator';
+import { generatePdfFromMarkdown } from './cli-pdf-generator';
 import { ThemeId, AuditSectionResult, StrategicGrowthPillar, QualityAuditReport } from '../types/cv';
 import { auditCvContent } from './audit-engine';
 import { getWorkspaceRoot, getOutputsDir } from './workspace';

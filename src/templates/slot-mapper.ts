@@ -16,6 +16,20 @@ import { normalizeSkillCategory } from '../core/parser/markdownToCvData';
  */
 function cleanContactDisplayLabel(c: ContactItem): ContactItem {
   let label = c.label;
+  let url = c.url?.trim();
+
+  if (!url) {
+    if (c.type === 'email' && label.includes('@')) {
+      url = `mailto:${label.replace(/^mailto:/i, '')}`;
+    } else if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
+      if (label.includes('.') || label.startsWith('http')) {
+        url = label.startsWith('http') ? label : `https://${label.replace(/^https?:\/\//, '')}`;
+      }
+    }
+  } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !url.startsWith('http')) {
+    url = `https://${url}`;
+  }
+
   if (c.type === 'linkedin') {
     if (label.startsWith('http') || label.includes('linkedin.com') || label.includes('/in/')) {
       label = 'LinkedIn';
@@ -31,7 +45,8 @@ function cleanContactDisplayLabel(c: ContactItem): ContactItem {
   }
   return {
     ...c,
-    label
+    label,
+    url
   };
 }
 

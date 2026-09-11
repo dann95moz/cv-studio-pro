@@ -80,6 +80,11 @@
 
     "tipLoadSample": "Tipp: Klicken Sie auf 'Beispielprofil laden', um direkt zu testen",
     "importingPdf": "PDF-Lebenslauf wird gelesen und strukturiert...",
+    "ocrReading": "PDF-Dokumentstruktur wird analysiert...",
+    "ocrScanning": "Gescannter PDF-Lebenslauf erkannt. Lokale OCR-Engine wird gestartet...",
+    "ocrProgress": "OCR wird auf Seite {{current}} von {{total}} ausgeführt...",
+    "ocrFormatting": "Karriereprofil wird strukturiert...",
+    "ocrEmptyError": "Im PDF wurde kein lesbarer Text gefunden. Das Dokument scheint leer oder ein unleserlicher Scan zu sein.",
     "pdfSuccess": "Karriereprofil erfolgreich aus {{fileName}} importiert",
     "fileImportedSuccess": "Lebenslauf „{{fileName}}“ erfolgreich importiert!",
     "importedAi": "Strukturiert durch KI-Engine",

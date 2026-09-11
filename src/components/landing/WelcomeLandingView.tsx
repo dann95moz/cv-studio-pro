@@ -38,7 +38,7 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
   const workflow = useWelcomeLandingWorkflow();
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
 
-  const { fileInputRef, isProcessing, handleFileUpload, openFileDialog } = useFileUploader({
+  const { fileInputRef, isProcessing, progressMessage, handleFileUpload, openFileDialog } = useFileUploader({
     onFileLoaded: (content) => {
       if (onFileLoaded) {
         onFileLoaded(content);
@@ -252,7 +252,7 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
                   fontWeight: 700,
                 }}
               >
-                {isProcessing ? t('profile:actions.importing', 'Extracting PDF...') : t('landing:actions.importPdfHero', 'Import Existing PDF')}
+                {isProcessing ? (progressMessage || t('profile:actions.importing', 'Extracting PDF...')) : t('landing:actions.importPdfHero', 'Import Existing PDF')}
               </Button>
 
               <Button

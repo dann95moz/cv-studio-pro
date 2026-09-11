@@ -29,7 +29,9 @@ export function useFileUploader({ onFileLoaded, onError }: UseFileUploaderOption
         }, 200);
 
         try {
-          const result = await importResumePdf(file);
+          const result = await importResumePdf(file, (msg) => {
+            setProgressMessage(msg);
+          });
           onFileLoaded(result.markdown, file.name, true, result);
         } catch (err: unknown) {
           const errorObj = err instanceof Error ? err : new Error(String(err));

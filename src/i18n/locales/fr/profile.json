@@ -80,6 +80,11 @@
 
     "tipLoadSample": "Astuce : Cliquez sur 'Charger un Profil Exemple' pour tester immédiatement",
     "importingPdf": "Lecture et structuration de votre CV PDF...",
+    "ocrReading": "Lecture de la structure du document PDF...",
+    "ocrScanning": "PDF numérisé détecté. Initialisation du moteur OCR local...",
+    "ocrProgress": "Exécution de l'OCR sur la page {{current}} sur {{total}}...",
+    "ocrFormatting": "Structuration du profil professionnel...",
+    "ocrEmptyError": "Aucun texte lisible trouvé dans le PDF. Le document semble vide ou est une image numérisée illisible.",
     "pdfSuccess": "Profil de carrière importé avec succès depuis {{fileName}}",
     "fileImportedSuccess": "CV « {{fileName}} » importé avec succès !",
     "importedAi": "Structuré via le moteur d'IA",

@@ -6,6 +6,7 @@ import {
   Button,
   IconButton,
   Chip,
+  CircularProgress,
   Stack,
   Tooltip,
   ButtonGroup,
@@ -92,6 +93,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
     handleContinue,
     fileInputRef,
     isProcessing,
+    progressMessage,
     isDragging,
     handleFileUpload,
     handleDrop,
@@ -172,6 +174,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
           openFileDialog={openFileDialog}
           fileInputRef={fileInputRef}
           isProcessing={isProcessing}
+          progressMessage={progressMessage}
           hasData={hasData}
         />
       ) : (
@@ -284,12 +287,20 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<CloudUploadRoundedIcon />}
+                startIcon={
+                  isProcessing ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <CloudUploadRoundedIcon />
+                  )
+                }
                 onClick={openFileDialog}
                 disabled={isProcessing}
                 sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
               >
-                {t('profile:actions.importResume', 'Import File')}
+                {isProcessing
+                  ? (progressMessage || t('profile:actions.importing', 'Extracting PDF...'))
+                  : t('profile:actions.importResume', 'Import File')}
               </Button>
 
               {hasData && (
