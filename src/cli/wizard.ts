@@ -2,7 +2,7 @@ import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import path from 'node:path';
 import fs from 'node:fs';
-import { generatePdfFromMarkdown } from '../core/pdf-generator';
+import { generatePdfFromMarkdown } from '../core/cli-pdf-generator';
 import { tailorCvWithGemini } from '../core/gemini';
 import { generateQualityAuditReport } from '../core/audit';
 import { getAllTemplates } from '../templates/registry';

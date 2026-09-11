@@ -147,8 +147,8 @@ customs-CVs/
 │   │   ├── parser/              # Markdown AST parser, serializer & slot mapper
 │   │   ├── audit-engine.ts      # 6-dimension quality & ATS audit evaluator
 │   │   ├── pdf-extractor.ts     # 100% Client-side local PDF parser (pdfjs)
-│   │   ├── pdfGenerator.ts      # In-browser direct vector PDF generator
-│   │   └── pdf-generator.ts     # React SSR -> Headless Puppeteer PDF compiler
+│   │   ├── browser-pdf-generator.ts # In-browser direct vector PDF generator (html2canvas/jsPDF)
+│   │   └── cli-pdf-generator.ts     # CLI & Node.js Puppeteer PDF compiler
 │   ├── hooks/                   # Custom stateful hooks (useFileUploader, usePrintPdf, etc.)
 │   ├── i18n/                    # i18next configuration & 5 JSON locale directories
 │   ├── store/                   # Sliced Zustand store (cvData, design, ai, ui, history)

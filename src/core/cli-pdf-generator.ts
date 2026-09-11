@@ -5,7 +5,7 @@
  * ENGINE: Puppeteer / Headless Chrome.
  * PURPOSE: Renders CV and Quality Audit markdown to pixel-perfect A4 PDFs on the local filesystem.
  * 
- * NOTE: For client-side / browser PDF export, see `src/core/pdfGenerator.ts`.
+ * NOTE: For client-side / browser PDF export, see `src/core/browser-pdf-generator.ts`.
  */
 
 import puppeteer, { Browser } from 'puppeteer';

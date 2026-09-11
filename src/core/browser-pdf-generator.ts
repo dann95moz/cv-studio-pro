@@ -5,7 +5,7 @@
  * ENGINE: html2canvas + jsPDF.
  * PURPOSE: Captures the rendered DOM resume element and downloads high-DPI PDFs directly in browser without print dialogs.
  * 
- * NOTE: For server/CLI Puppeteer PDF generation, see `src/core/pdf-generator.ts`.
+ * NOTE: For server/CLI Puppeteer PDF generation, see `src/core/cli-pdf-generator.ts`.
  */
 
 import React from 'react';
@@ -18,11 +18,13 @@ import { getPageFormatConfig } from '../theme/dimensions';
 import { sanitizeFileName } from './parser';
 import { DEMO_CV_DATA } from '../constants/templates';
 import { CVRenderer } from '../components/CVRenderer';
+import { useResumeStore } from '../store';
 
 export interface DirectPdfOptions {
   fileName?: string;
   pageFormat?: PageFormat;
   qualityScale?: number;
+  markdownPayload?: string;
   onProgress?: (step: 'capturing' | 'rendering' | 'saving' | 'done') => void;
 }
 
@@ -144,6 +146,26 @@ export async function generateDirectPdf(
       compress: true
     });
 
+    // Embed Master Profile metadata payload for instant 100% fidelity re-import
+    const payloadMd =
+      options.markdownPayload ||
+      useResumeStore.getState().cvMarkdown ||
+      useResumeStore.getState().masterData;
+    if (payloadMd && typeof payloadMd === 'string') {
+      try {
+        const encoded = btoa(unescape(encodeURIComponent(payloadMd)));
+        pdf.setProperties({
+          title: targetFileName,
+          subject: `CV_STUDIO_MD:${encoded}`,
+          author: 'CV Studio Pro',
+          keywords: `cv-studio-pro;cv-studio-data:${encoded}`,
+          creator: 'CV Studio Pro',
+        });
+      } catch {
+        // Non-critical metadata encoding error
+      }
+    }
+
     const pdfPageWidth = mmDimensions.width;
     const pdfPageHeight = mmDimensions.height;
 
@@ -156,6 +178,25 @@ export async function generateDirectPdf(
 
     // First page
     pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+
+    // Add invisible selectable text layer for ATS compatibility
+    const rawDomText = element.innerText || '';
+    if (rawDomText) {
+      const textLines = rawDomText.split('\n').map((l) => l.trim()).filter(Boolean);
+      let textY = 15;
+      const step = 6;
+      for (const line of textLines) {
+        if (textY < pdfPageHeight - 15) {
+          try {
+            pdf.text(line.slice(0, 120), 10, textY, { renderingMode: 'invisible' });
+            textY += step;
+          } catch {
+            // Ignore individual line rendering issues
+          }
+        }
+      }
+    }
+
     heightLeft -= pdfPageHeight;
 
     // Add subsequent pages if document exceeds 1 page
@@ -164,6 +205,30 @@ export async function generateDirectPdf(
       pdf.addPage([pdfPageWidth, pdfPageHeight], 'portrait');
       pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pdfPageHeight;
+    }
+
+    // Add clickable PDF link annotations for all <a> tags in the DOM
+    try {
+      const mmPerPx = pdfPageWidth / formatConfig.widthPx;
+      const parentRect = element.getBoundingClientRect();
+      const anchors = element.querySelectorAll('a[href]');
+      anchors.forEach((anchor) => {
+        const href = anchor.getAttribute('href');
+        if (!href || href.startsWith('#')) return;
+        const rect = anchor.getBoundingClientRect();
+        const xMm = (rect.left - parentRect.left) * mmPerPx;
+        const totalYMm = (rect.top - parentRect.top) * mmPerPx;
+        const wMm = rect.width * mmPerPx;
+        const hMm = rect.height * mmPerPx;
+        const pageIndex = Math.floor(totalYMm / pdfPageHeight);
+        const yOnPageMm = totalYMm - (pageIndex * pdfPageHeight);
+        if (pageIndex < pdf.getNumberOfPages()) {
+          pdf.setPage(pageIndex + 1);
+          pdf.link(xMm, yOnPageMm, Math.max(wMm, 4), Math.max(hMm, 3), { url: href });
+        }
+      });
+    } catch {
+      // Non-critical link mapping error
     }
 
     if (onProgress) onProgress('saving');
@@ -236,6 +301,7 @@ export async function generateVersionDirectPdf(
       fileName,
       pageFormat,
       qualityScale: options.qualityScale || 2,
+      markdownPayload: version.cvMarkdown,
     });
   } finally {
     // Clean up off-screen DOM tree

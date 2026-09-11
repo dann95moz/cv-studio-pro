@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { generatePdfFromMarkdown, generateAllPdfs } from '../core/pdf-generator';
+import { generatePdfFromMarkdown, generateAllPdfs } from '../core/cli-pdf-generator';
 import { tailorCvWithGemini } from '../core/gemini';
 import { generateQualityAuditReport } from '../core/audit';
 import { ThemeId, PaletteId, FontFamilyId, SpacingDensity } from '../types/cv';

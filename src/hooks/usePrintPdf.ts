@@ -72,7 +72,7 @@ export const usePrintPdf = () => {
     setExportStatus('rendering');
 
     try {
-      const { generateDirectPdf } = await import('../core/pdfGenerator');
+      const { generateDirectPdf } = await import('../core/browser-pdf-generator');
       await generateDirectPdf(element, {
         fileName,
         pageFormat,
