@@ -239,27 +239,27 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
             variant={viewMode === 'visual' ? 'contained' : 'outlined'}
             onClick={() => setViewMode('visual')}
             startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: { xs: 14, sm: 15 } }} />}
-            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 } }}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 }, whiteSpace: 'nowrap' }}
           >
-            {isMobile ? t('history:diff.modeVisualShort', 'Visual') : t('history:diff.modeVisual', 'Visual Side-by-Side')}
+            {isMobile ? t('history:diff.modeVisualShort', 'Side-by-Side') : t('history:diff.modeVisual', 'Side-by-Side')}
           </Button>
           <Button
             fullWidth={isMobile}
             variant={viewMode === 'curtain' ? 'contained' : 'outlined'}
             onClick={() => setViewMode('curtain')}
             startIcon={<ViewColumnRoundedIcon sx={{ fontSize: { xs: 14, sm: 15 } }} />}
-            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 } }}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 }, whiteSpace: 'nowrap' }}
           >
-            {isMobile ? t('history:diff.modeCurtainShort', 'Cortina') : t('history:diff.modeCurtain', 'Cortina Antes/Después')}
+            {isMobile ? t('history:diff.modeCurtainShort', 'Cortina') : t('history:diff.modeCurtain', 'Cortina')}
           </Button>
           <Button
             fullWidth={isMobile}
             variant={viewMode === 'text' ? 'contained' : 'outlined'}
             onClick={() => setViewMode('text')}
             startIcon={<CodeRoundedIcon sx={{ fontSize: { xs: 14, sm: 15 } }} />}
-            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 } }}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: { xs: '0.72rem', sm: '0.75rem' }, px: { xs: 1, sm: 1.5 }, whiteSpace: 'nowrap' }}
           >
-            {isMobile ? t('history:diff.modeTextShort', 'Texto') : t('history:diff.modeText', 'Diff de Texto')}
+            {isMobile ? t('history:diff.modeTextShort', 'Diff') : t('history:diff.modeText', 'Diff')}
           </Button>
         </ButtonGroup>
 
