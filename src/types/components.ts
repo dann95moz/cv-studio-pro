@@ -286,6 +286,7 @@ export interface StepPreviewToolbarProps {
   onUnpinGeneric?: (versionId: string) => void;
   onSaveAsGeneric?: () => void;
   onCompareAgainstGeneric?: (versionId?: string) => void;
+  onOpenAdaptModal?: () => void;
 }
 
 export interface StepPreviewNavRailProps {
