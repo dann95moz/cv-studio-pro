@@ -1,6 +1,8 @@
 import { CVData, CVSection, ContactItem, SkillCategory, ExperienceItem, ContactType } from '../../types/cv';
 import { extractCandidateName, cleanHumanText, extractTargetRole } from './metadataExtractor';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
+import { parseJsonToCvData } from './jsonToCvData';
+import { APP_LINKS } from '../../constants/links';
 
 /**
  * Autonomously infers the primary natural language of the document.
@@ -111,12 +113,18 @@ function parseContactsLine(line: string): ContactItem[] {
   for (const item of items) {
     const linkMatch = item.match(/\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
-      const label = cleanHumanText(linkMatch[1]);
-      const url = linkMatch[2].trim();
+      const rawLabel = cleanHumanText(linkMatch[1]);
+      let rawUrl = linkMatch[2].trim();
+      const type = inferContactType(rawLabel, rawUrl);
+      if (type === 'email' && !rawUrl.startsWith('mailto:')) {
+        rawUrl = `mailto:${rawUrl}`;
+      } else if ((type === 'linkedin' || type === 'github' || type === 'globe') && !rawUrl.startsWith('http')) {
+        rawUrl = `https://${rawUrl}`;
+      }
       contacts.push({
-        type: inferContactType(label, url),
-        label,
-        url,
+        type,
+        label: rawLabel,
+        url: rawUrl,
       });
     } else {
       let clean = item.replace(/^[–\-*]\s*/, '').trim();
@@ -135,10 +143,22 @@ function parseContactsLine(line: string): ContactItem[] {
       }
       if (clean) {
         const type = detectedType || inferContactType(clean);
+        let url: string | undefined = undefined;
+        if (type === 'email') {
+          url = clean.startsWith('mailto:') ? clean : `mailto:${clean}`;
+        } else if (clean.startsWith('http')) {
+          url = clean;
+        } else if (type === 'linkedin' || type === 'github' || type === 'globe') {
+          if (clean.includes('linkedin.com') || clean.includes('github.com') || clean.includes('.') || clean.startsWith('http')) {
+            url = clean.startsWith('http') ? clean : `https://${clean}`;
+          }
+        } else if (type === 'phone') {
+          url = `tel:${clean.replace(/[^\d+]/g, '')}`;
+        }
         contacts.push({
           type,
           label: clean,
-          url: type === 'email' && !clean.startsWith('mailto:') ? `mailto:${clean}` : (clean.startsWith('http') ? clean : undefined),
+          url,
         });
       }
     }
@@ -147,9 +167,10 @@ function parseContactsLine(line: string): ContactItem[] {
   return contacts;
 }
 
+
 /**
  * Strips raw markdown headers (e.g. "## Professional Summary"), label prefixes ("**Summary:**"),
- * dividers, and outer bold wrappers from summary text.
+ * dividers, and markdown formatting wrappers from summary text.
  */
 export function cleanSummary(summary: string): string {
   if (!summary) return '';
@@ -164,10 +185,16 @@ export function cleanSummary(summary: string): string {
   // Strip divider lines "---" or "==="
   clean = clean.replace(/^[-=_]{3,}\s*$/gm, '').trim();
 
-  // If the whole summary is enclosed in **bold** or *italic*, strip outer wrappers
-  if (/^\*\*[^*]+\*\*$/.test(clean)) {
-    clean = clean.replace(/^\*\*([\s\S]+)\*\*$/, '$1').trim();
-  }
+  // Strip outer and inline markdown bolding, italics, and code markers
+  clean = clean
+    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[\[\]]/g, '');
 
   // Strip any leftover leading asterisks, bullets, or headers
   clean = clean.replace(/^[*_`#\s]+/, '').replace(/[*_`\s]+$/, '').trim();
@@ -176,11 +203,21 @@ export function cleanSummary(summary: string): string {
 }
 
 /**
- * Strips leading bullet characters (- , * , • , · , + , or 1. ) from bullet text.
+ * Strips leading bullet characters (- , * , • , · , + , or 1. ) and markdown bolding from bullet text.
  */
 export function cleanBulletText(bullet: string): string {
   if (!bullet) return '';
-  return bullet.replace(/^(?:[-*•·+]|\d+\.)\s+/, '').trim();
+  return bullet
+    .replace(/^(?:[-*•·+]|\d+\.)\s+/, '')
+    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[\[\]]/g, '')
+    .trim();
 }
 
 /**
@@ -209,30 +246,50 @@ export function cleanSkillCategory(category: string): string {
 }
 
 /**
- * Cleans education / certification item string.
+ * Cleans education / certification item string into pure human-readable text.
  */
 export function cleanEducationItem(item: string): string {
   if (!item) return '';
   let clean = item.replace(/^(?:[-–—•·+]|\*(?!\*))\s*/, '').trim();
   clean = clean.replace(/\[([^\]]+)\](?!\()/g, '$1');
+  clean = clean
+    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[\[\]]/g, '')
+    .trim();
   return clean;
 }
 
 /**
- * Cleans language item string.
+ * Cleans language item string into pure human-readable text (Language: Level).
  */
 export function cleanLanguageItem(item: string): string {
   if (!item) return '';
   let clean = item.replace(/^(?:[-–—•·+]|\*(?!\*))\s*/, '').trim();
   clean = clean.replace(/\[([^\]]+)\](?!\()/g, '$1');
+  clean = clean
+    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[\[\]]/g, '')
+    .trim();
   return clean;
 }
 
 /**
  * Parses experience or project blocks under ###
  */
-function parseExperienceBlocks(content: string): ExperienceItem[] {
-  const blocks = content.split(/(?=^###\s+)/m).filter((b) => b.trim());
+function parseExperienceBlocks(content: string, contacts: ContactItem[] = []): ExperienceItem[] {
+  const blocks = content.split(/(?=^###\s+)/m).filter((b) => b.trim().length > 0);
   const items: ExperienceItem[] = [];
 
   for (const block of blocks) {
@@ -244,6 +301,45 @@ function parseExperienceBlocks(content: string): ExperienceItem[] {
     let role = '';
     let date = '';
     const bullets: string[] = [];
+
+    // Extract demoUrl and repoUrl BEFORE stripping markdown links from header
+    const fullHeaderRaw = lines[0] + (lines.length > 1 && !lines[1].startsWith('-') && !lines[1].startsWith('*') && !lines[1].startsWith('•') ? ` ${lines[1]}` : '');
+    let demoUrl: string | undefined = undefined;
+    let repoUrl: string | undefined = undefined;
+
+    const demoMatch = fullHeaderRaw.match(/\[([^\]]*(?:demo|sitio|website|app|live|ver\s*demo)[^\]]*)\]\((https?:\/\/[^)]+)\)/i) ||
+                      fullHeaderRaw.match(/\[(?:Live\s*Demo|Demo)\]\(([^)]+)\)/i);
+    if (demoMatch) {
+      demoUrl = (demoMatch[2] || demoMatch[1]).trim();
+    }
+
+    const repoMatch = fullHeaderRaw.match(/\[([^\]]*(?:github|repo|código|code|source)[^\]]*)\]\((https?:\/\/[^)]+)\)/i) ||
+                      fullHeaderRaw.match(/\[(?:GitHub(?:\s*Repository)?|Repo)\]\(([^)]+)\)/i);
+    if (repoMatch) {
+      repoUrl = (repoMatch[2] || repoMatch[1]).trim();
+    }
+
+    if (!repoUrl) {
+      const ghMatch = fullHeaderRaw.match(/https?:\/\/github\.com\/[^\s)\]|•]+/i);
+      if (ghMatch) repoUrl = ghMatch[0];
+    }
+    if (!demoUrl) {
+      const liveMatch = fullHeaderRaw.match(/https?:\/\/(?!github\.com)[^\s)\]|•]+/i);
+      if (liveMatch) demoUrl = liveMatch[0];
+    }
+
+    const compOrHeaderLower = fullHeaderRaw.toLowerCase();
+    if (compOrHeaderLower.includes('cv studio') || compOrHeaderLower.includes('tailor engine')) {
+      if (!demoUrl) demoUrl = APP_LINKS.DEMO_URL;
+      if (!repoUrl) repoUrl = APP_LINKS.GITHUB_REPO;
+    } else if (!repoUrl && /\b(github|repo|repository)\b/i.test(compOrHeaderLower)) {
+      const ghContact = contacts.find((c) => c.type === 'github');
+      if (ghContact?.url) {
+        const firstLineCompany = lines[0].replace(/^###\s+/, '').split('|')[0].replace(/[*_]/g, '').trim();
+        const slug = firstLineCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (slug) repoUrl = `${ghContact.url.replace(/\/+$/, '')}/${slug}`;
+      }
+    }
 
     // Line 1: Header line (e.g. "### **Company** | Location" or "### Role | Company" or "### Company | Oct 2024 – Present")
     const headerLine = lines[0].replace(/^###\s+/, '').trim();
@@ -319,12 +415,34 @@ function parseExperienceBlocks(content: string): ExperienceItem[] {
       }
     }
 
+    let cleanLoc = cleanHumanText(location);
+    if (
+      cleanLoc.includes('Live Demo') ||
+      cleanLoc.includes('GitHub Repository') ||
+      cleanLoc.startsWith('http') ||
+      cleanLoc.includes('github.com') ||
+      cleanLoc === 'Demo' ||
+      cleanLoc === 'Repo'
+    ) {
+      cleanLoc = cleanLoc
+        .replace(/Live\s*Demo/gi, '')
+        .replace(/GitHub(?:\s*Repository)?/gi, '')
+        .replace(/https?:\/\/[^\s]+/g, '')
+        .replace(/[•|·+–—/]/g, '')
+        .trim();
+    }
+    if (/^[•|·+–—/\s]+$/.test(cleanLoc) || cleanLoc === '+' || cleanLoc === '-') {
+      cleanLoc = '';
+    }
+
     if (company || role || bullets.length > 0) {
       items.push({
         company: cleanHumanText(company) || 'Organization',
         role: cleanHumanText(role) || 'Specialist',
         date: cleanHumanText(date),
-        location: cleanHumanText(location),
+        location: cleanLoc,
+        demoUrl,
+        repoUrl,
         bullets: bullets.map(cleanBulletText).filter(Boolean),
       });
     }
@@ -434,7 +552,23 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     };
   }
 
+  // If input is JSON (from external AI or direct JSON paste), parse via parseJsonToCvData
+  const trimmed = markdown.trim();
+  if (
+    trimmed.startsWith('{') ||
+    trimmed.includes('"cvData"') ||
+    trimmed.includes('"experience"') ||
+    trimmed.includes('"skills"') ||
+    /```(?:json)?\s*\{/i.test(trimmed)
+  ) {
+    const jsonCv = parseJsonToCvData(trimmed);
+    if (jsonCv && (jsonCv.name || jsonCv.experience?.length || jsonCv.skillGroups?.length || jsonCv.summary)) {
+      return jsonCv;
+    }
+  }
+
   const normalized = markdown.replace(/\r\n/g, '\n');
+
   const lines = normalized.split('\n');
   const lang: SupportedLanguage = language || inferDocumentLanguage(markdown);
   const langDef = LANGUAGE_DEFINITIONS[lang] || LANGUAGE_DEFINITIONS.es;
@@ -518,10 +652,10 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
       skillGroups = parseSkillGroups(content, lang);
       sections.push({ id: 'skills', type: 'skills', title: langDef.sections.skills, rawContent: content });
     } else if (/EXPERIENCE|EXPERIENCIA|CAREER|HISTORIAL|LABORAL|WERDEGANG|BERUFSERFAHRUNG|PARCOURS|ESPERIENZA/.test(cleanHeaderUpper)) {
-      experience = parseExperienceBlocks(content);
+      experience = parseExperienceBlocks(content, contacts);
       sections.push({ id: 'experience', type: 'experience', title: langDef.sections.experience, rawContent: content });
     } else if (/PROJECT|PROYECTO|PROJEKT|PROGETT/.test(cleanHeaderUpper)) {
-      projects = parseExperienceBlocks(content);
+      projects = parseExperienceBlocks(content, contacts);
       sections.push({ id: 'projects', type: 'projects', title: langDef.sections.projects, rawContent: content });
     } else if (/EDUCATION|EDUCACI|CERTIFIC|FORMATION|AUSBILDUNG|STUDIUM|ISTRUZIONE/.test(cleanHeaderUpper)) {
       education = parseBulletList(content);
@@ -529,6 +663,19 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     } else if (/LANGUAGE|IDIOMA|SPRACH|LANGUE|LINGU/.test(cleanHeaderUpper)) {
       languages = parseBulletList(content);
       sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages, rawContent: content });
+    } else if (/CONTACT|PERSONAL/.test(cleanHeaderUpper)) {
+      // Parse any contact lines found in this section without creating a rogue custom section
+      const contactLines = content.split('\n').map((l) => l.trim()).filter(Boolean);
+      for (const cLine of contactLines) {
+        if (isLikelyContactLine(cLine)) {
+          const parsed = parseContactsLine(cLine);
+          for (const item of parsed) {
+            if (!contacts.some((c) => c.type === item.type && c.label === item.label)) {
+              contacts.push(item);
+            }
+          }
+        }
+      }
     } else {
       const secId = `custom_${Math.random().toString(36).substring(2, 7)}`;
       sections.push({ id: secId, type: 'custom', title: headerLine, rawContent: content });
@@ -570,13 +717,28 @@ export function cleanCvData(data: CVData): CVData {
     name: cleanHumanText(data.name || ''),
     title: cleanHumanText(data.title || ''),
     summary: cleanSummary(data.summary || ''),
-    contacts: data.contacts?.map((c) => ({
-      ...c,
-      label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
-        ? cleanHumanText(c.label || '')
-        : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
-      url: c.url?.trim(),
-    })),
+    contacts: data.contacts?.map((c) => {
+      let resolvedUrl = c.url?.trim();
+      const rawLbl = (c.label || '').trim();
+      if (!resolvedUrl) {
+        if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
+          if (rawLbl.includes('.') || rawLbl.startsWith('http')) {
+            resolvedUrl = rawLbl.startsWith('http') ? rawLbl : `https://${rawLbl.replace(/^https?:\/\//, '')}`;
+          }
+        } else if (c.type === 'email' && rawLbl.includes('@')) {
+          resolvedUrl = rawLbl.startsWith('mailto:') ? rawLbl : `mailto:${rawLbl.replace(/^mailto:/i, '')}`;
+        }
+      } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !resolvedUrl.startsWith('http')) {
+        resolvedUrl = `https://${resolvedUrl}`;
+      }
+      return {
+        ...c,
+        label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
+          ? cleanHumanText(c.label || '')
+          : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
+        url: resolvedUrl,
+      };
+    }),
     skillGroups: data.skillGroups?.map((group) => ({
       ...group,
       category: cleanSkillCategory(group.category),
@@ -590,14 +752,59 @@ export function cleanCvData(data: CVData): CVData {
       date: exp.date ? cleanHumanText(exp.date) : exp.date,
       bullets: (exp.bullets || []).map(cleanBulletText).filter(Boolean),
     })),
-    projects: data.projects?.map((proj) => ({
-      ...proj,
-      company: cleanHumanText(proj.company || ''),
-      role: cleanHumanText(proj.role || ''),
-      location: proj.location ? cleanHumanText(proj.location) : proj.location,
-      date: proj.date ? cleanHumanText(proj.date) : proj.date,
-      bullets: (proj.bullets || []).map(cleanBulletText).filter(Boolean),
-    })),
+    projects: data.projects?.map((proj) => {
+      let demoUrl = proj.demoUrl?.trim();
+      let repoUrl = proj.repoUrl?.trim();
+
+      if (!demoUrl && proj.location) {
+        const demoM = proj.location.match(/\[(?:Live\s*Demo|Demo|Sitio|Web)[^\]]*\]\(([^)]+)\)/i) ||
+                      proj.location.match(/https?:\/\/(?!github\.com)[^\s)\]•|]+/i);
+        if (demoM) demoUrl = (demoM[1] || demoM[0]).trim();
+      }
+      if (!repoUrl && proj.location) {
+        const repoM = proj.location.match(/\[(?:GitHub(?:\s*Repository)?|Repo|Source)[^\]]*\]\(([^)]+)\)/i) ||
+                      proj.location.match(/https?:\/\/github\.com\/[^\s)\]•|]+/i);
+        if (repoM) repoUrl = (repoM[1] || repoM[0]).trim();
+      }
+
+      const compLower = (proj.company || '').toLowerCase();
+      if (compLower.includes('cv studio') || compLower.includes('tailor engine')) {
+        if (!demoUrl) demoUrl = APP_LINKS.DEMO_URL;
+        if (!repoUrl) repoUrl = APP_LINKS.GITHUB_REPO;
+      }
+
+      let cleanLoc = proj.location ? cleanHumanText(proj.location) : '';
+      if (
+        cleanLoc.includes('Live Demo') ||
+        cleanLoc.includes('GitHub Repository') ||
+        cleanLoc.startsWith('http') ||
+        cleanLoc.includes('github.com') ||
+        cleanLoc === 'Demo' ||
+        cleanLoc === 'Repo'
+      ) {
+        cleanLoc = cleanLoc
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '')
+          .replace(/Live\s*Demo/gi, '')
+          .replace(/GitHub(?:\s*Repository)?/gi, '')
+          .replace(/https?:\/\/[^\s]+/g, '')
+          .replace(/[•|·+–—/]/g, '')
+          .trim();
+      }
+      if (/^[•|·+–—/\s]+$/.test(cleanLoc) || cleanLoc === '+' || cleanLoc === '-') {
+        cleanLoc = '';
+      }
+
+      return {
+        ...proj,
+        company: cleanHumanText(proj.company || ''),
+        role: cleanHumanText(proj.role || ''),
+        location: cleanLoc || undefined,
+        date: proj.date ? cleanHumanText(proj.date) : proj.date,
+        demoUrl: demoUrl || undefined,
+        repoUrl: repoUrl || undefined,
+        bullets: (proj.bullets || []).map(cleanBulletText).filter(Boolean),
+      };
+    }),
     education: (data.education || []).map(cleanEducationItem).filter(Boolean),
     certifications: (data.certifications || []).map(cleanEducationItem).filter(Boolean),
     languages: (data.languages || []).map(cleanLanguageItem).filter(Boolean),

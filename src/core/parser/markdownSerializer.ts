@@ -39,18 +39,36 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   // Contacts
   if (data.contacts && data.contacts.length > 0) {
     const contactStrings = data.contacts.map(c => {
-      if (c.url) {
-        const cleanLabel = (c.label || '').replace(/[\[\]]/g, '').trim();
-        const cleanUrl = c.url.replace(/[\[\]\(\)]/g, '').trim();
-        if (cleanLabel === cleanUrl || cleanLabel.startsWith('http') || cleanLabel.includes('linkedin.com') || cleanLabel.includes('github.com')) {
-          return cleanUrl;
+      let url = c.url?.trim();
+      let label = (c.label || '').replace(/[\[\]]/g, '').trim();
+
+      // Auto-derive url if missing for link types
+      if (!url) {
+        if (c.type === 'email' && label.includes('@')) {
+          url = `mailto:${label.replace(/^mailto:/i, '')}`;
+        } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && (label.includes('.') || label.startsWith('http'))) {
+          url = label.startsWith('http') ? label : `https://${label}`;
         }
-        return `[${cleanLabel || cleanUrl}](${cleanUrl})`;
       }
-      return (c.label || '').replace(/[\[\]]/g, '').trim();
+
+      if (url) {
+        let display = label;
+        if (c.type === 'linkedin') {
+          display = (!display || display.includes('linkedin.com') || display.startsWith('http')) ? 'LinkedIn' : display;
+        } else if (c.type === 'github') {
+          display = (!display || display.includes('github.com') || display.startsWith('http')) ? 'GitHub' : display;
+        } else if (c.type === 'globe') {
+          display = (!display || display.startsWith('http')) ? 'Portfolio' : display;
+        } else if (c.type === 'email') {
+          display = display.replace(/^mailto:/i, '');
+        }
+        return `[${display}](${url})`;
+      }
+      return label;
     });
     parts.push(contactStrings.filter(Boolean).join(' • '));
   }
+
 
   // Helper to get formatted section title preserving user's edit without emojis
   const getSectionTitle = (type: string) => {
@@ -119,13 +137,22 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
       const date = (proj.date || '').replace(/\*\*/g, '').trim();
       const links: string[] = [];
       if (proj.demoUrl) {
-        links.push(`[Live Demo](${proj.demoUrl})`);
+        const dUrl = proj.demoUrl.trim();
+        links.push(`[Live Demo](${dUrl.startsWith('http') ? dUrl : `https://${dUrl}`})`);
       }
       if (proj.repoUrl) {
-        links.push(`[GitHub Repository](${proj.repoUrl})`);
+        const rUrl = proj.repoUrl.trim();
+        links.push(`[GitHub Repository](${rUrl.startsWith('http') ? rUrl : `https://${rUrl}`})`);
       }
-      const linkText = links.length > 0 ? links.join(' • ') : ((proj.location || '').replace(/\*\*/g, '').trim());
-      const headerLine = `### **${company}**${linkText ? ` | ${linkText}` : ''}`;
+      const linkText = links.length > 0 ? links.join(' • ') : '';
+      const cleanLoc = (proj.location || '')
+        .replace(/\*\*/g, '')
+        .replace(/^[•|·+–—/\s]+|[•|·+–—/\s]+$/g, '')
+        .trim();
+      const locDisplay = cleanLoc && !cleanLoc.includes('http') && !cleanLoc.includes('Live Demo') && !cleanLoc.includes('GitHub') && cleanLoc !== '+' && cleanLoc !== '-' ? cleanLoc : '';
+      const meta = [locDisplay, linkText].filter(Boolean).join(' • ');
+      const headerLine = `### **${company}**${meta ? ` | ${meta}` : ''}`;
+
       const subHeaderLine = `*${role}*${date ? ` | **${date}**` : ''}`;
       const bullets = (proj.bullets || [])
         .filter(b => Boolean(b && b.trim()))
@@ -144,19 +171,13 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push(`## ${getSectionTitle('education')}`);
     if (data.education) {
       for (const edu of data.education) {
-        let cleanEdu = edu.replace(/^(?:[-•]\s*|\*\s+)/, '');
-        if (/^\*?[^*]+\*\*/.test(cleanEdu)) {
-          cleanEdu = cleanEdu.replace(/^\*?([^*]+)\*\*/, '**$1**');
-        }
+        let cleanEdu = edu.replace(/^(?:[-•]\s*|\*\s+)/, '').trim();
         parts.push(`- ${cleanEdu}`);
       }
     }
     if (data.certifications) {
       for (const cert of data.certifications) {
-        let cleanCert = cert.replace(/^(?:[-•]\s*|\*\s+)/, '');
-        if (/^\*?[^*]+\*\*/.test(cleanCert)) {
-          cleanCert = cleanCert.replace(/^\*?([^*]+)\*\*/, '**$1**');
-        }
+        let cleanCert = cert.replace(/^(?:[-•]\s*|\*\s+)/, '').trim();
         parts.push(`- ${cleanCert}`);
       }
     }
@@ -167,10 +188,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push('\n---\n');
     parts.push(`## ${getSectionTitle('languages')}`);
     for (const lang of data.languages) {
-      let cleanLang = lang.replace(/^(?:[-•]\s*|\*\s+)/, '');
-      if (/^\*?[^*]+\*\*/.test(cleanLang)) {
-        cleanLang = cleanLang.replace(/^\*?([^*]+)\*\*/, '**$1**');
-      }
+      let cleanLang = lang.replace(/^(?:[-•]\s*|\*\s+)/, '').trim();
       parts.push(`- ${cleanLang}`);
     }
   }

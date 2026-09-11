@@ -30,8 +30,8 @@ export const EducationSlot: React.FC<EducationSlotProps> = ({
           // Auto-repair missing leading bold like "Degree** – Institution" or "*Degree** – Institution"
           if (/^\*?[^*]+\*\*/.test(item)) {
             item = item.replace(/^\*?([^*]+)\*\*/, '**$1**');
-          } else if (!item.includes('**') && /^[A-Za-z0-9\s.,/&()-]+?\s+[–—\-]\s+/.test(item)) {
-            item = item.replace(/^([A-Za-z0-9\s.,/&()-]+?)\s+([–—\-])\s+/, '**$1** $2 ');
+          } else if (!item.includes('**') && /^[\p{L}0-9\s.,/&()-]+?\s+[–—\-]\s+/u.test(item)) {
+            item = item.replace(/^([\p{L}0-9\s.,/&()-]+?)\s+([–—\-])\s+/u, '**$1** $2 ');
           }
 
           const htmlContent = item.includes('\n')

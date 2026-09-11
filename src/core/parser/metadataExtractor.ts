@@ -31,7 +31,6 @@ export function cleanHumanText(text: string): string {
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/^[-*•#|:\s]+/, '')
     .replace(/[–\-•|:\s]+$/, '')
-    .replace(/^(?:CV|Resume|Curriculum)[_-\s]+/i, '')
     .replace(/[*`#]/g, '')
     .replace(/[\[\]]/g, '')
     .replace(/_/g, ' ')

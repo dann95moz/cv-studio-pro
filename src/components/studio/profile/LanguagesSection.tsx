@@ -88,7 +88,7 @@ export function formatLanguageEntry(name: string, level: string): string {
   const cleanLevel = (level || '').trim().replace(/\*\*/g, '');
   if (!cleanName && !cleanLevel) return '';
   if (!cleanLevel) return cleanName;
-  return `**${cleanName}:** ${cleanLevel}`;
+  return `${cleanName}: ${cleanLevel}`;
 }
 
 export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({

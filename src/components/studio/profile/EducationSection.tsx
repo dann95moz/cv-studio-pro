@@ -118,7 +118,7 @@ export function formatEducationString(item: StructuredEducationItem): string {
   const institutionClean = item.institution.trim().replace(/\*\*/g, '');
   const yearClean = item.year.trim().replace(/[()]/g, '');
 
-  let formatted = `**${degreeClean}**`;
+  let formatted = degreeClean;
   if (institutionClean) {
     formatted += ` — ${institutionClean}`;
   }
@@ -128,7 +128,7 @@ export function formatEducationString(item: StructuredEducationItem): string {
   if (item.description && item.description.trim()) {
     const descLines = item.description
       .split(/\r?\n/)
-      .map((l) => l.replace(/^\s*[-*•·]\s*/, '').trim())
+      .map((l) => l.replace(/^\s*[-*•·]\s*/, '').replace(/\*\*/g, '').trim())
       .filter(Boolean);
     for (const descLine of descLines) {
       formatted += `\n  - ${descLine}`;

@@ -25,8 +25,8 @@ export const LanguagesSlot: React.FC<LanguagesSlotProps> = ({ data, className = 
           // Auto-repair "Spanish:** Level" or "*Spanish:** Level"
           if (/^\*?[^*]+:\*\*/.test(item)) {
             item = item.replace(/^\*?([^*]+):\*\*/, '**$1:**');
-          } else if (!item.includes('**') && /^[A-Za-z\s]+:/.test(item)) {
-            item = item.replace(/^([A-Za-z\s]+):/, '**$1:**');
+          } else if (!item.includes('**') && /^[\p{L}\s]+:/u.test(item)) {
+            item = item.replace(/^([\p{L}\s]+):/u, '**$1:**');
           }
 
           return (
