@@ -22,6 +22,7 @@ import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import { useTranslation } from 'react-i18next';
 import { GeneratedCvVersion } from '../../../types/studio';
 import { formatLocalizedDate } from '../../../utils/dateUtils';
@@ -38,6 +39,7 @@ export interface VersionSelectorDropdownProps {
   onUnpinGeneric?: (versionId: string) => void;
   onSaveAsGeneric: () => void;
   onCompareAgainstGeneric: (versionId?: string) => void;
+  onOpenAdaptModal?: () => void;
 }
 
 /**
@@ -56,6 +58,7 @@ export const VersionSelectorDropdown: React.FC<VersionSelectorDropdownProps> = R
   onUnpinGeneric,
   onSaveAsGeneric,
   onCompareAgainstGeneric,
+  onOpenAdaptModal,
 }) => {
   const { t, i18n } = useTranslation(['preview', 'common']);
   const theme = useTheme();
@@ -426,6 +429,29 @@ export const VersionSelectorDropdown: React.FC<VersionSelectorDropdownProps> = R
           >
             {t('preview:versionSelector.compareCurrentVsGeneric', '⇄ Comparar versión actual vs Genérico')}
           </Button>
+
+          {onOpenAdaptModal && (
+            <Button
+              size="small"
+              variant="text"
+              color="primary"
+              startIcon={<PostAddRoundedIcon fontSize="small" />}
+              onClick={() => {
+                onOpenAdaptModal();
+                handleClose();
+              }}
+              sx={{
+                justifyContent: 'flex-start',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                textTransform: 'none',
+                px: 1.5,
+                py: 0.5,
+              }}
+            >
+              {t('preview:toolbar.adaptToNewOffer', 'Adaptar a otra oferta')}
+            </Button>
+          )}
         </Box>
       </Menu>
     </>

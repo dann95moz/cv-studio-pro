@@ -27,6 +27,7 @@ import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import { useTranslation } from 'react-i18next';
 import { PreviewSidePanelType } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
@@ -44,6 +45,7 @@ export interface MobileToolsBottomSheetProps {
   onDownloadMarkdown?: () => void;
   onSaveVersion?: () => void;
   onReTailor?: () => void;
+  onOpenAdaptModal?: () => void;
   isExportingPdf?: boolean;
   isSavingVersion?: boolean;
 }
@@ -65,6 +67,7 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
   onDownloadMarkdown,
   onSaveVersion,
   onReTailor,
+  onOpenAdaptModal,
   isExportingPdf = false,
   isSavingVersion = false,
 }) => {
@@ -120,6 +123,15 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
         onOpenDiff?.();
       },
     },
+    ...(onOpenAdaptModal ? [{
+      id: 'adapt' as PreviewSidePanelType,
+      label: t('preview:toolbar.adaptToNewOffer', 'Adaptar a otra oferta'),
+      icon: <PostAddRoundedIcon sx={{ fontSize: 22, color: 'primary.main' }} />,
+      action: () => {
+        onClose();
+        onOpenAdaptModal();
+      },
+    }] : []),
   ];
 
   return (

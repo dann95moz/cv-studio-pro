@@ -34,6 +34,7 @@ import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
+import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import { VersionSelectorDropdown } from './VersionSelectorDropdown';
 import { useTranslation } from 'react-i18next';
 import { StepPreviewToolbarProps, PageFormat } from '../../../types';
@@ -83,6 +84,7 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
   onUnpinGeneric,
   onSaveAsGeneric,
   onCompareAgainstGeneric,
+  onOpenAdaptModal,
 }) => {
   const { t } = useTranslation(['preview', 'target', 'common']);
   const theme = useTheme();
@@ -430,6 +432,7 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
               onUnpinGeneric={onUnpinGeneric}
               onSaveAsGeneric={onSaveAsGeneric}
               onCompareAgainstGeneric={onCompareAgainstGeneric}
+              onOpenAdaptModal={onOpenAdaptModal}
             />
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5, my: 0.5 }} />
@@ -818,6 +821,42 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
             ? t('preview:toolbar.regeneratingCv', 'Regenerando...')
             : t('preview:toolbar.regenerateCv', 'Regenerar CV')}
         </Button>
+
+        {/* 4. Adapt to Another Job Offer Action (Primary tinted pill button) */}
+        {onOpenAdaptModal && (
+          <Tooltip title={t('preview:toolbar.adaptToNewOfferTooltip', 'Adaptar este CV a una nueva oferta laboral sin perder la actual')}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              startIcon={<PostAddRoundedIcon sx={{ fontSize: 15 }} />}
+              onClick={onOpenAdaptModal}
+              disabled={isGenerating}
+              sx={{
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 1.6,
+                py: 0.5,
+                minHeight: 34,
+                display: { xs: 'none', md: 'inline-flex' },
+                bgcolor: alpha(theme.palette.primary.main, 0.05),
+                borderColor: alpha(theme.palette.primary.main, 0.3),
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.12),
+                  borderColor: 'primary.main',
+                },
+              }}
+            >
+              <Box component="span" sx={{ display: { xs: 'none', lg: 'inline' } }}>
+                {t('preview:toolbar.adaptToNewOffer', 'Adaptar a otra oferta')}
+              </Box>
+              <Box component="span" sx={{ display: { xs: 'inline', lg: 'none' } }}>
+                {t('preview:toolbar.adaptToNewOfferShort', 'Nueva Oferta')}
+              </Box>
+            </Button>
+          </Tooltip>
+        )}
 
         {/* Visual separation before Primary CTA */}
         <Divider orientation="vertical" flexItem sx={{ mx: { xs: 0.25, sm: 0.5 }, my: 0.5, display: { xs: 'none', md: 'block' } }} />

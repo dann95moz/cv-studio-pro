@@ -53,6 +53,9 @@ const GitHubStarToast = React.lazy(() =>
 const CvTranslateModal = React.lazy(() =>
   import('./preview/CvTranslateModal').then((m) => ({ default: m.CvTranslateModal }))
 );
+const AdaptToNewOfferModal = React.lazy(() =>
+  import('./preview/AdaptToNewOfferModal').then((m) => ({ default: m.AdaptToNewOfferModal }))
+);
 
 export type { StepPreviewProps };
 
@@ -163,6 +166,13 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     handleTranslateFull,
     handleTranslateIncremental,
     handleQuickSyncOutdated,
+    // Adapt to New Offer Workflow
+    cvMarkdown,
+    isAdaptModalOpen,
+    handleOpenAdaptModal,
+    handleCloseAdaptModal,
+    handleUseCurrentCvForNewOffer,
+    handleAdaptNewOfferWithAi,
   } = useStepPreviewWorkflow();
 
   const [isMobileToolsOpen, setIsMobileToolsOpen] = React.useState(false);
@@ -258,6 +268,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           onUnpinGeneric={handleUnpinGeneric}
           onSaveAsGeneric={handleSaveAsGeneric}
           onCompareAgainstGeneric={handleCompareAgainstGeneric}
+          onOpenAdaptModal={handleOpenAdaptModal}
         />
       </Box>
 
@@ -529,6 +540,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           onDownloadMarkdown={handleDownloadCvMarkdown}
           onSaveVersion={handleSaveToHistory}
           onReTailor={handleGenerate}
+          onOpenAdaptModal={handleOpenAdaptModal}
           isExportingPdf={isExportingPdf}
           isSavingVersion={isSavingVersion}
         />
@@ -578,6 +590,22 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             isTranslating={isTranslating}
             onTranslateFull={handleTranslateFull}
             onTranslateIncremental={handleTranslateIncremental}
+          />
+        )}
+      </React.Suspense>
+
+      {/* Adapt CV to Another Job Offer Modal */}
+      <React.Suspense fallback={null}>
+        {isAdaptModalOpen && (
+          <AdaptToNewOfferModal
+            open={isAdaptModalOpen}
+            onClose={handleCloseAdaptModal}
+            currentCompanyName={companyName}
+            currentTargetRole={targetRole}
+            currentCvMarkdown={cvMarkdown}
+            onUseCurrent={handleUseCurrentCvForNewOffer}
+            onGenerateNew={handleAdaptNewOfferWithAi}
+            isGenerating={isGenerating}
           />
         )}
       </React.Suspense>
