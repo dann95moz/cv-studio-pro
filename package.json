@@ -1,6 +1,6 @@
 {
   "name": "mi-cv-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Privacy-first ATS resume tailoring and PDF studio with Google XYZ bullet synthesis and real-time quality audit",
   "type": "module",
   "scripts": {
