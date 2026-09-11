@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -23,13 +23,16 @@ import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import DifferenceRoundedIcon from '@mui/icons-material/DifferenceRounded';
 import ViewColumnRoundedIcon from '@mui/icons-material/ViewColumnRounded';
-import ViewAgendaRoundedIcon from '@mui/icons-material/ViewAgendaRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useTranslation } from 'react-i18next';
 import { computeLineDiff } from '../../../utils/diffUtils';
+import { computeVisualCvDiff } from '../../../utils/cvVisualDiff';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import { useVersionDiffWorkflow } from '../../../hooks/useVersionDiffWorkflow';
 import { formatLocalizedDate } from '../../../utils/dateUtils';
+import { VisualSplitView, CurtainSplitView, TextDiffView } from './diff';
 
 export interface VersionDiffModalProps {
   open: boolean;
@@ -38,17 +41,27 @@ export interface VersionDiffModalProps {
   initialVersionBId?: string;
 }
 
+export type DiffViewMode = 'visual' | 'curtain' | 'text';
+
 export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
   open,
   onClose,
   initialVersionAId,
   initialVersionBId,
 }) => {
-  const { t, i18n } = useTranslation(['history', 'common']);
+  const { t, i18n } = useTranslation(['history', 'preview', 'common']);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  const { masterData, cvMarkdown, savedVersions, applyVersion } = useVersionDiffWorkflow();
+  const {
+    savedVersions,
+    resolveVersion,
+    applyVersion,
+    currentTheme,
+    currentPalette,
+    currentFontFamily,
+    currentSpacingDensity,
+  } = useVersionDiffWorkflow();
 
   const [versionAId, setVersionAId] = useState<string>(() => initialVersionAId || 'master');
   const [versionBId, setVersionBId] = useState<string>(() => {
@@ -57,14 +70,23 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
     return 'current';
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       if (initialVersionAId) setVersionAId(initialVersionAId);
       if (initialVersionBId) setVersionBId(initialVersionBId);
     }
   }, [open, initialVersionAId, initialVersionBId]);
 
-  const [viewMode, setViewMode] = useState<'unified' | 'split'>('unified');
+  const [viewMode, setViewMode] = useState<DiffViewMode>('visual');
+  const [textSubMode, setTextSubMode] = useState<'unified' | 'split'>('unified');
+  const [isLinkedStyles, setIsLinkedStyles] = useState<boolean>(true);
+
+  // Template and palette local state for independent or linked comparison
+  const [themeA, setThemeA] = useState<string>(currentTheme);
+  const [themeB, setThemeB] = useState<string>(currentTheme);
+  const [paletteA, setPaletteA] = useState<string>(currentPalette);
+  const [paletteB, setPaletteB] = useState<string>(currentPalette);
+
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const { copy } = useCopyToClipboard();
 
@@ -86,36 +108,32 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
     }),
   ], [savedVersions, i18n.language, t]);
 
+  const verA = useMemo(() => resolveVersion(versionAId), [versionAId, resolveVersion]);
+  const verB = useMemo(() => resolveVersion(versionBId), [versionBId, resolveVersion]);
 
-  // Helper to resolve markdown content by ID
-  const getVersionText = (id: string): { label: string; text: string } => {
-    if (id === 'master') {
-      return { label: t('history:diff.masterCv', 'Original Career Profile'), text: masterData };
-    }
+  // Synchronize themes when versions change
+  useEffect(() => {
+    if (verA.theme) setThemeA(verA.theme);
+    if (verA.palette) setPaletteA(verA.palette);
+  }, [verA.id, verA.theme, verA.palette]);
 
-    if (id === 'current') {
-      return { label: t('history:diff.currentTailored', 'Current Tailored CV (Editor)'), text: cvMarkdown };
-    }
-    const found = savedVersions.find((v) => v.id === id);
-    if (found) {
-      const company = found.companyName || 'General';
-      const role = found.targetRole ? ` • ${found.targetRole}` : '';
-      const date = formatLocalizedDate(found.createdAt, i18n.language || 'en');
-      return { label: `${company}${role} (${date})`, text: found.cvMarkdown };
-    }
-    return { label: 'Unknown Version', text: '' };
-  };
+  useEffect(() => {
+    if (verB.theme) setThemeB(verB.theme);
+    if (verB.palette) setPaletteB(verB.palette);
+  }, [verB.id, verB.theme, verB.palette]);
 
-  const verA = useMemo(() => getVersionText(versionAId), [versionAId, masterData, savedVersions, i18n.language]);
-  const verB = useMemo(() => getVersionText(versionBId), [versionBId, cvMarkdown, savedVersions, i18n.language]);
+  // Deep visual semantic diff
+  const visualDiffResult = useMemo(() => {
+    return computeVisualCvDiff(verA.cvData, verB.cvData);
+  }, [verA.cvData, verB.cvData]);
 
-  // Compute diff
-  const diffResult = useMemo(() => {
-    return computeLineDiff(verA.text, verB.text);
-  }, [verA.text, verB.text]);
+  // Text code diff
+  const textDiffResult = useMemo(() => {
+    return computeLineDiff(verA.cvMarkdown, verB.cvMarkdown);
+  }, [verA.cvMarkdown, verB.cvMarkdown]);
 
   const handleCopyDiff = async () => {
-    const rawDiff = diffResult.lines
+    const rawDiff = textDiffResult.lines
       .map((l) => `${l.type === 'added' ? '+ ' : l.type === 'removed' ? '- ' : '  '}${l.content}`)
       .join('\n');
     await copy(rawDiff);
@@ -131,21 +149,22 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="lg"
+      maxWidth="xl"
       fullWidth
       slotProps={{
         paper: {
           sx: {
-            height: '88vh',
+            height: '92vh',
             display: 'flex',
             flexDirection: 'column',
           },
         },
       }}
     >
+      {/* Header */}
       <DialogTitle
         sx={{
-          p: 2,
+          py: 1.5,
           px: 3,
           borderBottom: `1px solid ${theme.palette.divider}`,
           display: 'flex',
@@ -171,10 +190,10 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
           </Box>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-              {t('history:diff.title', 'Visual Version Diff Comparator')}
+              {t('history:diff.title', 'Visual Version Diff & Template Comparator')}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {t('history:diff.subtitle', 'Compare tailored variants side-by-side or unified')}
+              {t('history:diff.subtitle', 'Compare tailored variants and templates side-by-side with WYSIWYG fidelity')}
             </Typography>
           </Box>
         </Box>
@@ -184,9 +203,10 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
         </IconButton>
       </DialogTitle>
 
+      {/* Primary Controls Toolbar */}
       <Box
         sx={{
-          p: 2,
+          py: 1.25,
           px: 3,
           bgcolor: alpha(theme.palette.text.primary, 0.02),
           borderBottom: `1px solid ${theme.palette.divider}`,
@@ -197,8 +217,9 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
           gap: 2,
         }}
       >
+        {/* Version Selectors */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-          <FormControl size="small" sx={{ minWidth: 200 }}>
+          <FormControl size="small" sx={{ minWidth: 210 }}>
             <InputLabel id="diff-base-label">{t('history:diff.baseVersion', 'Base (Old)')}</InputLabel>
             <Select
               labelId="diff-base-label"
@@ -217,7 +238,7 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
 
           <CompareArrowsRoundedIcon sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' } }} />
 
-          <FormControl size="small" sx={{ minWidth: 200 }}>
+          <FormControl size="small" sx={{ minWidth: 210 }}>
             <InputLabel id="diff-target-label">{t('history:diff.targetVersion', 'Target (New)')}</InputLabel>
             <Select
               labelId="diff-target-label"
@@ -257,24 +278,31 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
           )}
         </Box>
 
-
-        {/* View Mode Toggle: Unified vs Split */}
-        <ButtonGroup size="small" variant="outlined" sx={{ alignSelf: { xs: 'flex-start', md: 'center' }, mt: { xs: 1, md: 2 } }}>
+        {/* View Mode Mode Toggles: Visual Side-by-Side vs Curtain vs Text */}
+        <ButtonGroup size="small" variant="outlined" sx={{ alignSelf: { xs: 'flex-start', md: 'center' } }}>
           <Button
-            variant={viewMode === 'unified' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('unified')}
-            startIcon={<ViewAgendaRoundedIcon sx={{ fontSize: 15 }} />}
+            variant={viewMode === 'visual' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('visual')}
+            startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: 15 }} />}
             sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
           >
-            {t('history:diff.unified', 'Unified Diff')}
+            {t('history:diff.modeVisual', 'Visual Side-by-Side')}
           </Button>
           <Button
-            variant={viewMode === 'split' ? 'contained' : 'outlined'}
-            onClick={() => setViewMode('split')}
+            variant={viewMode === 'curtain' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('curtain')}
             startIcon={<ViewColumnRoundedIcon sx={{ fontSize: 15 }} />}
             sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
           >
-            {t('history:diff.split', 'Side-by-Side')}
+            {t('history:diff.modeCurtain', 'Cortina Antes/Después')}
+          </Button>
+          <Button
+            variant={viewMode === 'text' ? 'contained' : 'outlined'}
+            onClick={() => setViewMode('text')}
+            startIcon={<CodeRoundedIcon sx={{ fontSize: 15 }} />}
+            sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
+          >
+            {t('history:diff.modeText', 'Diff de Texto')}
           </Button>
         </ButtonGroup>
       </Box>
@@ -282,7 +310,7 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
       {/* Stats Summary Bar */}
       <Box
         sx={{
-          py: 1,
+          py: 0.75,
           px: 3,
           bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
           borderBottom: `1px solid ${theme.palette.divider}`,
@@ -294,29 +322,29 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
       >
         <Chip
           size="small"
-          label={`+${diffResult.stats.additions} ${t('history:diff.additions', 'Additions')}`}
+          label={`+${visualDiffResult.stats.additions} ${t('history:diff.additions', 'Additions')}`}
           color="success"
           variant="filled"
           sx={{ fontWeight: 800, fontSize: '0.72rem' }}
         />
         <Chip
           size="small"
-          label={`-${diffResult.stats.deletions} ${t('history:diff.deletions', 'Deletions')}`}
+          label={`-${visualDiffResult.stats.deletions} ${t('history:diff.deletions', 'Deletions')}`}
           color="error"
           variant="filled"
           sx={{ fontWeight: 800, fontSize: '0.72rem' }}
         />
         <Chip
           size="small"
-          label={`${diffResult.stats.similarity}% ${t('history:diff.similarity', 'Match Similarity')}`}
+          label={`${visualDiffResult.stats.similarity}% ${t('history:diff.similarity', 'Match Similarity')}`}
           color="primary"
           variant="outlined"
           sx={{ fontWeight: 800, fontSize: '0.72rem' }}
         />
-        {diffResult.stats.metricsCount > 0 && (
+        {visualDiffResult.stats.metricsCount > 0 && (
           <Chip
             size="small"
-            label={`${diffResult.stats.metricsCount} ${t('history:diff.metricsEnhanced', 'Metrics Enhanced')}`}
+            label={`${visualDiffResult.stats.metricsCount} ${t('history:diff.metricsEnhanced', 'Metrics Enhanced')}`}
             color="secondary"
             variant="outlined"
             sx={{ fontWeight: 800, fontSize: '0.72rem' }}
@@ -324,104 +352,56 @@ export const VersionDiffModal: React.FC<VersionDiffModalProps> = ({
         )}
       </Box>
 
-      {/* Main Diff Code Display */}
-      <DialogContent sx={{ p: 0, flex: 1, overflowY: 'auto', bgcolor: 'background.paper' }}>
-        {viewMode === 'unified' ? (
-          /* UNIFIED DIFF VIEW */
-          <Box sx={{ fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace", fontSize: '0.82rem', lineHeight: 1.6 }}>
-            {diffResult.lines.map((line, idx) => {
-              const isAdded = line.type === 'added';
-              const isRemoved = line.type === 'removed';
+      {/* Main Diff Content Container */}
+      <DialogContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {viewMode === 'visual' && (
+          <VisualSplitView
+            dataA={visualDiffResult.dataAWithDiff}
+            dataB={visualDiffResult.dataBWithDiff}
+            labelA={verA.label}
+            labelB={verB.label}
+            scoreA={verA.matchScore}
+            scoreB={verB.matchScore}
+            themeA={themeA}
+            themeB={themeB}
+            onThemeAChange={setThemeA}
+            onThemeBChange={setThemeB}
+            paletteA={paletteA}
+            paletteB={paletteB}
+            onPaletteAChange={setPaletteA}
+            onPaletteBChange={setPaletteB}
+            isLinkedStyles={isLinkedStyles}
+            onToggleLinkedStyles={() => setIsLinkedStyles((prev) => !prev)}
+            fontFamily={currentFontFamily}
+            spacingDensity={currentSpacingDensity}
+          />
+        )}
 
-              let bg = 'transparent';
-              let color = 'text.primary';
-              let prefix = '  ';
+        {viewMode === 'curtain' && (
+          <CurtainSplitView
+            dataA={visualDiffResult.dataAWithDiff}
+            dataB={visualDiffResult.dataBWithDiff}
+            labelA={verA.label}
+            labelB={verB.label}
+            themeA={themeA}
+            themeB={themeB}
+            paletteA={paletteA}
+            paletteB={paletteB}
+            fontFamily={currentFontFamily}
+            spacingDensity={currentSpacingDensity}
+          />
+        )}
 
-              if (isAdded) {
-                bg = alpha(theme.palette.success.main, isDark ? 0.18 : 0.12);
-                color = 'success.main';
-                prefix = '+ ';
-              } else if (isRemoved) {
-                bg = alpha(theme.palette.error.main, isDark ? 0.18 : 0.1);
-                color = 'error.main';
-                prefix = '- ';
-              }
-
-              return (
-                <Box
-                  key={idx}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    bgcolor: bg,
-                    color: color,
-                    px: 2,
-                    py: 0.25,
-                    borderLeft: isAdded
-                      ? `3px solid ${theme.palette.success.main}`
-                      : isRemoved
-                      ? `3px solid ${theme.palette.error.main}`
-                      : '3px solid transparent',
-                    '&:hover': { bgcolor: alpha(theme.palette.text.primary, 0.04) },
-                  }}
-                >
-                  <Typography
-                    component="span"
-                    sx={{
-                      width: 44,
-                      userSelect: 'none',
-                      color: 'text.secondary',
-                      fontSize: '0.72rem',
-                      textAlign: 'right',
-                      pr: 2,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {line.newLineNumber || line.oldLineNumber || ''}
-                  </Typography>
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontWeight: 700,
-                      width: 20,
-                      userSelect: 'none',
-                      color: isAdded ? 'success.main' : isRemoved ? 'error.main' : 'text.disabled',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {prefix}
-                  </Typography>
-                  <Typography component="span" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', flex: 1, fontFamily: 'inherit' }}>
-                    {line.content || ' '}
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
-
-        ) : (
-          /* SIDE-BY-SIDE SPLIT VIEW */
-          <Box sx={{ display: 'flex', height: '100%', minHeight: 400 }}>
-            {/* Left Column: Version A */}
-            <Box sx={{ flex: 1, borderRight: `1px solid ${theme.palette.divider}`, p: 2, overflowY: 'auto' }}>
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', mb: 1, display: 'block' }}>
-                {verA.label}
-              </Typography>
-              <Box sx={{ fontFamily: "'JetBrains Mono', Consolas, monospace", fontSize: '0.8rem', whiteSpace: 'pre-wrap' }}>
-                {verA.text}
-              </Box>
-            </Box>
-
-            {/* Right Column: Version B */}
-            <Box sx={{ flex: 1, p: 2, overflowY: 'auto' }}>
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', textTransform: 'uppercase', mb: 1, display: 'block' }}>
-                {verB.label}
-              </Typography>
-              <Box sx={{ fontFamily: "'JetBrains Mono', Consolas, monospace", fontSize: '0.8rem', whiteSpace: 'pre-wrap' }}>
-                {verB.text}
-              </Box>
-            </Box>
-          </Box>
+        {viewMode === 'text' && (
+          <TextDiffView
+            diffResult={textDiffResult}
+            verALabel={verA.label}
+            verAText={verA.cvMarkdown}
+            verBLabel={verB.label}
+            verBText={verB.cvMarkdown}
+            subMode={textSubMode}
+            onSubModeChange={setTextSubMode}
+          />
         )}
       </DialogContent>
 
