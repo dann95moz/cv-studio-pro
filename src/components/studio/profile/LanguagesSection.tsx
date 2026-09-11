@@ -51,8 +51,8 @@ export function parseLanguageEntry(raw: string): StructuredLanguageEntry {
   const colonMatch = clean.match(/^\*{0,2}([^:*–—(]+)\*{0,2}\s*[:*–—]\s*(.+)$/);
   if (colonMatch) {
     return {
-      name: colonMatch[1].replace(/\*\*/g, '').trim(),
-      level: colonMatch[2].replace(/\*\*/g, '').trim()
+      name: colonMatch[1].replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim(),
+      level: colonMatch[2].replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim()
     };
   }
 
@@ -60,8 +60,8 @@ export function parseLanguageEntry(raw: string): StructuredLanguageEntry {
   const parenMatch = clean.match(/^\*{0,2}([^:(]+)\*{0,2}\s*\(([^)]+)\)$/);
   if (parenMatch) {
     return {
-      name: parenMatch[1].replace(/\*\*/g, '').trim(),
-      level: parenMatch[2].replace(/\*\*/g, '').trim()
+      name: parenMatch[1].replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim(),
+      level: parenMatch[2].replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim()
     };
   }
 
@@ -69,13 +69,13 @@ export function parseLanguageEntry(raw: string): StructuredLanguageEntry {
   const parts = clean.split(/\s*[-–—|]\s*/);
   if (parts.length >= 2) {
     return {
-      name: parts[0].replace(/\*\*/g, '').trim(),
-      level: parts.slice(1).join(' ').replace(/\*\*/g, '').trim()
+      name: parts[0].replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim(),
+      level: parts.slice(1).join(' ').replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim()
     };
   }
 
   return {
-    name: clean.replace(/\*\*/g, '').trim(),
+    name: clean.replace(/[*_`]/g, '').replace(/\[([^\]]+)\]/g, '$1').replace(/[\[\]]/g, '').trim(),
     level: 'Professional Working Proficiency'
   };
 }

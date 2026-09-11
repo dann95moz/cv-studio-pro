@@ -50,12 +50,12 @@ export function parseEducationString(raw: string): StructuredEducationItem {
 
   let clean = mainLine.trim().replace(/^(?:[-•·]|\*(?!\*))\s*/, '').trim();
 
-  // 1. Extract year / date range at the end: (2014 – 2020), 2024, 2018 - 2022, etc.
+  // 1. Extract year / date range at the end: (2014 – 2020), 2024, 2018 - 2022, etc. (with optional trailing period)
   let year = '';
-  const yearMatch = clean.match(/(?:[,\s(–—\-|]+)\s*(\(?\d{4}(?:\s*[\-–—]\s*(?:\d{4}|[A-Za-z]+))?\)?)\s*$/);
+  const yearMatch = clean.match(/(?:[,\s(–—\-|]+)\s*(\(?\d{4}(?:\s*[\-–—]\s*(?:\d{4}|[A-Za-z]+))?\)?)\.?\s*$/);
   if (yearMatch) {
     year = yearMatch[1].replace(/[()]/g, '').trim();
-    clean = clean.slice(0, yearMatch.index).trim();
+    clean = clean.slice(0, yearMatch.index).replace(/[,–—\-|.\s]+$/, '').trim();
   }
 
   // 2. Extract degree vs institution separated by –, —, -, or |
@@ -72,24 +72,40 @@ export function parseEducationString(raw: string): StructuredEducationItem {
     if (boldMatch) {
       degree = boldMatch[1];
       institution = boldMatch[2];
+    } else {
+      // Fallback: split by comma if available
+      const commaIdx = clean.indexOf(',');
+      if (commaIdx !== -1) {
+        degree = clean.slice(0, commaIdx);
+        institution = clean.slice(commaIdx + 1);
+      }
     }
   }
 
-  // Clean all markdown markers and stray asterisks
+  // Clean all markdown markers, brackets, and stray asterisks
   const cleanDegree = (degree || clean)
-    .replace(/\*\*/g, '')
-    .replace(/^[*_`\s]+|[*_`\s]+$/g, '')
+    .replace(/[*_`]/g, '')
+    .replace(/\[([^\]]+)\]/g, '$1')
+    .replace(/[\[\]]/g, '')
+    .replace(/^[:,\s–—|-]+|[:,\s–—|-]+$/g, '')
     .trim();
 
   const cleanInstitution = institution
-    .replace(/\*\*/g, '')
-    .replace(/^[*_`\s]+|[*_`\s]+$/g, '')
+    .replace(/[*_`]/g, '')
+    .replace(/\[([^\]]+)\]/g, '$1')
+    .replace(/[\[\]]/g, '')
+    .replace(/^[:,\s–—|-]+|[:,\s–—|-]+$/g, '')
+    .trim();
+
+  const cleanYear = year
+    .replace(/[*_`]/g, '')
+    .replace(/[()\[\]]/g, '')
     .trim();
 
   return {
     degree: cleanDegree,
     institution: cleanInstitution,
-    year: year.trim(),
+    year: cleanYear,
     description: description || undefined
   };
 }

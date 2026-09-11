@@ -63,7 +63,10 @@ export const SkillsCategorizedPanel: React.FC<SkillsCategorizedPanelProps> = ({
     if (!raw || !currentGroup) return;
 
     // Handle comma-separated skills if pasted
-    const incomingSkills = raw.split(/[,|•]/).map(s => s.trim()).filter(Boolean);
+    const incomingSkills = raw
+      .split(/[,|•·;]/)
+      .map(s => s.replace(/^[-*•·+]\s*/, '').replace(/[*_`]/g, '').replace(/[\[\]]/g, '').trim())
+      .filter(Boolean);
     const existing = new Set(currentGroup.skills.map(s => s.toLowerCase()));
     
     const nextSkills = [...currentGroup.skills];
@@ -229,7 +232,7 @@ export const SkillsCategorizedPanel: React.FC<SkillsCategorizedPanelProps> = ({
             currentGroup.skills.map((skill, sIdx) => (
               <Chip
                 key={sIdx}
-                label={skill}
+                label={skill.replace(/[*_`]/g, '').trim()}
                 onDelete={() => handleDeleteSkill(sIdx)}
                 variant="filled"
               />
