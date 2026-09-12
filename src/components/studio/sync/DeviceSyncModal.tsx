@@ -14,6 +14,7 @@ import {
   Checkbox,
   Alert,
   CircularProgress,
+  InputAdornment,
   IconButton,
   Tooltip,
   useTheme,
@@ -21,8 +22,10 @@ import {
 } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
+import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
+import ContentPasteRoundedIcon from '@mui/icons-material/ContentPasteRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
 import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
@@ -32,6 +35,8 @@ import { QrCodeCard } from './QrCodeCard';
 export interface DeviceSyncModalProps {
   open: boolean;
   onClose: () => void;
+  initialTab?: 'export' | 'import';
+  onScanCamera?: () => void;
   isExporting: boolean;
   exportUrl: string | null;
   exportId: string | null;
@@ -47,6 +52,8 @@ export interface DeviceSyncModalProps {
 export const DeviceSyncModal: React.FC<DeviceSyncModalProps> = ({
   open,
   onClose,
+  initialTab = 'export',
+  onScanCamera,
   isExporting,
   exportUrl,
   exportId,
@@ -60,15 +67,34 @@ export const DeviceSyncModal: React.FC<DeviceSyncModalProps> = ({
 }) => {
   const { t } = useTranslation(['common']);
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<number>(initialTab === 'import' ? 1 : 0);
   const [importInput, setImportInput] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (open) {
+      setActiveTab(initialTab === 'import' ? 1 : 0);
+    }
+  }, [open, initialTab]);
 
   const handleCopyLink = () => {
     if (!exportUrl) return;
     navigator.clipboard.writeText(exportUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handlePasteClipboard = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && text.trim()) {
+          setImportInput(text.trim());
+        }
+      }
+    } catch (err) {
+      console.debug('[DeviceSyncModal] Clipboard read error:', err);
+    }
   };
 
   const handleStartImport = () => {
@@ -249,6 +275,24 @@ export const DeviceSyncModal: React.FC<DeviceSyncModalProps> = ({
               )}
             </Typography>
 
+            {onScanCamera && (
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="large"
+                startIcon={<QrCodeScannerRoundedIcon />}
+                onClick={onScanCamera}
+                sx={{
+                  py: 1.25,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  borderRadius: 2,
+                }}
+              >
+                {t('common:sync.scanWithCamera', 'Escanear con Cámara')}
+              </Button>
+            )}
+
             <TextField
               fullWidth
               label={t('common:sync.inputLabel', 'Enlace de sincronización o Código (ej. CV-78K2)')}
@@ -257,6 +301,24 @@ export const DeviceSyncModal: React.FC<DeviceSyncModalProps> = ({
               onChange={(e) => setImportInput(e.target.value)}
               size="small"
               autoFocus
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        onClick={handlePasteClipboard}
+                        startIcon={<ContentPasteRoundedIcon fontSize="small" />}
+                        sx={{ minWidth: 'auto', textTransform: 'none', px: 1, py: 0.25, fontSize: '0.78rem', fontWeight: 600 }}
+                      >
+                        {t('common:actions.paste', 'Pegar')}
+                      </Button>
+                    </InputAdornment>
+                  ),
+                },
+              }}
             />
 
             {importError && (

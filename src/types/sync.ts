@@ -43,6 +43,7 @@ export interface RelayPushResponse {
   ok: boolean;
   id: string;
   ttl: number;
+  lanHost?: string;
 }
 
 export interface RelayPullResponse {

@@ -2,6 +2,23 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
+
+function getLocalLanIp(): string {
+  try {
+    const ifaces = os.networkInterfaces();
+    for (const name of Object.keys(ifaces)) {
+      for (const iface of ifaces[name] || []) {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          return iface.address;
+        }
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return 'localhost';
+}
 
 export default defineConfig({
   plugins: [
@@ -14,6 +31,19 @@ export default defineConfig({
         server.middlewares.use(async (req, res, next) => {
           const url = new URL(req.url || '', `http://${req.headers.host}`);
           const pathname = url.pathname;
+
+          // CORS and Preflight handling for Relay endpoints (needed for mobile native fetch)
+          if (pathname.startsWith('/api/relay/')) {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+
+            if (req.method === 'OPTIONS') {
+              res.statusCode = 204;
+              res.end();
+              return;
+            }
+          }
 
           // Local Relay Push Mock: POST /api/relay/push
           if (pathname === '/api/relay/push' && req.method === 'POST') {
@@ -35,9 +65,14 @@ export default defineConfig({
                   ciphertext: String(ciphertext),
                   expiresAt: Date.now() + 300 * 1000,
                 });
+
+                const lanIp = getLocalLanIp();
+                const port = (server.config.server.port as number) || 5173;
+                const lanHost = `http://${lanIp}:${port}`;
+
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ ok: true, id: sanitizedId, ttl: 300 }));
+                res.end(JSON.stringify({ ok: true, id: sanitizedId, ttl: 300, lanHost }));
               } catch {
                 res.statusCode = 400;
                 res.setHeader('Content-Type', 'application/json');
@@ -101,6 +136,7 @@ export default defineConfig({
     }
   ],
   server: {
+    host: true,
     port: 5173,
     open: true
   },

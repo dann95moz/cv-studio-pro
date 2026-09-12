@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   backgroundColor: '#080b12',
   server: {
     androidScheme: 'https',
+    cleartext: true,
   },
   plugins: {
     Keyboard: {

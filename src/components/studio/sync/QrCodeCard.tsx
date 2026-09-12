@@ -32,13 +32,13 @@ export const QrCodeCard: React.FC<QrCodeCardProps> = ({
   useEffect(() => {
     if (canvasRef.current && url) {
       QRCode.toCanvas(canvasRef.current, url, {
-        width: 220,
+        width: 230,
         margin: 2,
         color: {
           dark: '#0f172a',
           light: '#ffffff',
         },
-        errorCorrectionLevel: 'M',
+        errorCorrectionLevel: url.length > 250 ? 'L' : 'M',
       }).catch((err) => {
         console.error('Error drawing QR code:', err);
       });

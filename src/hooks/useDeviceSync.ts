@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useResumeStore } from '../store/useResumeStore';
 import { extractCandidateName } from '../core/parser';
+import { DEFAULT_RULES } from '../core/ai-service';
 import {
   WorkspaceSnapshotPayload,
   WorkspaceSnapshotMetadata,
@@ -103,10 +104,9 @@ export const useDeviceSync = () => {
           masterData: state.masterData,
           targetJob: state.targetJob,
           cvMarkdown: state.cvMarkdown,
-          activeCvData: state.activeCvData,
           gapMarkdown: state.gapMarkdown,
           coverLetterMarkdown: state.coverLetterMarkdown,
-          rules: state.rules,
+          rules: state.rules && state.rules !== DEFAULT_RULES ? state.rules : undefined,
           companyName: state.companyName,
           targetRole: state.targetRole,
           currentBaseLanguage: state.currentBaseLanguage,
@@ -137,11 +137,26 @@ export const useDeviceSync = () => {
         const ciphertext = await encryptPayload(serialized, aesKey);
 
         // Upload to serverless relay
-        await pushSnapshotToRelay(syncId, ciphertext);
+        const relayRes = await pushSnapshotToRelay(syncId, ciphertext);
 
-        // Build URL: base URL + #sync?id=...#key=...
-        const baseUrl = window.location.origin + window.location.pathname;
-        const magicUrl = `${baseUrl}#sync?id=${encodeURIComponent(syncId)}#key=${keyBase64Url}`;
+        // Build URL: if relay returned lanHost and we are on localhost, use lanHost so mobile on LAN can connect!
+        let baseOrigin = window.location.origin;
+        if (
+          relayRes.lanHost &&
+          (window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname === '')
+        ) {
+          baseOrigin = relayRes.lanHost;
+        }
+        const baseUrl = baseOrigin + window.location.pathname;
+
+        // If ciphertext is compact (<= 1800 chars), we ALSO include direct payload 'd='
+        // allowing 0-network instantaneous decryption right from the QR code!
+        let magicUrl = `${baseUrl}#sync?id=${encodeURIComponent(syncId)}&key=${keyBase64Url}`;
+        if (ciphertext.length <= 1800) {
+          magicUrl += `&d=${encodeURIComponent(ciphertext)}`;
+        }
 
         setExportId(syncId);
         setExportKey(keyBase64Url);
@@ -170,38 +185,94 @@ export const useDeviceSync = () => {
   );
 
   /**
-   * Pulls an encrypted snapshot from relay, decrypts it, and prepares the conflict comparison
+   * Pulls an encrypted snapshot from direct payload or relay, decrypts it,
+   * and either auto-applies (if local is clean) or prepares the conflict comparison.
    */
   const handlePullSnapshot = useCallback(
-    async (idOrUrl: string, explicitKey?: string) => {
+    async (
+      idOrUrl: string,
+      explicitKey?: string
+    ): Promise<{ success: boolean; autoApplied?: boolean; error?: string }> => {
       setIsImporting(true);
       setImportError(null);
 
       try {
-        let syncId = idOrUrl.trim();
-        let keyBase64Url = explicitKey?.trim();
+        let syncId = '';
+        let keyBase64Url = explicitKey?.trim() || '';
+        let serverOrigin: string | undefined = undefined;
+        let directCiphertext: string | undefined = undefined;
 
-        // If user passed full URL e.g. https://domain/#sync?id=CV-78K2#key=abc
-        if (idOrUrl.includes('#sync') || idOrUrl.includes('?id=')) {
-          const urlObj = new URL(idOrUrl.startsWith('http') ? idOrUrl : `https://dummy.com/${idOrUrl}`);
-          const hash = urlObj.hash;
-          // Hash contains sync?id=...#key=...
-          const idMatch = hash.match(/id=([A-Za-z0-9_-]+)/);
-          const keyMatch = hash.match(/key=([A-Za-z0-9_-]+)/);
+        const trimmed = idOrUrl.trim();
 
-          if (idMatch && idMatch[1]) syncId = idMatch[1];
-          if (keyMatch && keyMatch[1]) keyBase64Url = keyMatch[1];
+        // 1. Extract parameters from URL, hash, or plain code
+        if (
+          trimmed.includes('#sync') ||
+          trimmed.includes('sync?') ||
+          trimmed.includes('?id=') ||
+          trimmed.includes('&id=') ||
+          trimmed.startsWith('http')
+        ) {
+          try {
+            const urlObj = new URL(trimmed.startsWith('http') ? trimmed : `https://dummy.com/${trimmed}`);
+            if (trimmed.startsWith('http') && !trimmed.includes('dummy.com')) {
+              serverOrigin = urlObj.origin;
+            }
+
+            const hash = urlObj.hash || '';
+            const queryInHash = hash.includes('?')
+              ? hash.slice(hash.indexOf('?') + 1)
+              : hash.replace(/^#sync\??/, '').replace(/^#/, '');
+            const hashParams = new URLSearchParams(queryInHash);
+            const searchParams = urlObj.searchParams;
+
+            syncId = hashParams.get('id') || searchParams.get('id') || '';
+            keyBase64Url = keyBase64Url || hashParams.get('key') || searchParams.get('key') || '';
+            directCiphertext = hashParams.get('d') || searchParams.get('d') || undefined;
+
+            // Fallback regex if URLSearchParams missed delimiters (e.g. multiple #)
+            if (!syncId) {
+              const idMatch = (hash + urlObj.search).match(/[?&#]id=([A-Za-z0-9_-]+)/);
+              if (idMatch) syncId = idMatch[1];
+            }
+            if (!keyBase64Url) {
+              const keyMatch = (hash + urlObj.search).match(/[?&#]key=([A-Za-z0-9_-]+)/);
+              if (keyMatch) keyBase64Url = keyMatch[1];
+            }
+            if (!directCiphertext) {
+              const dMatch = (hash + urlObj.search).match(/[?&#]d=([A-Za-z0-9_-]+)/);
+              if (dMatch) directCiphertext = dMatch[1];
+            }
+          } catch (urlErr) {
+            console.warn('[useDeviceSync] Failed URL parsing, fallback to regex:', urlErr);
+            const idMatch = trimmed.match(/[?&#]id=([A-Za-z0-9_-]+)/);
+            const keyMatch = trimmed.match(/[?&#]key=([A-Za-z0-9_-]+)/);
+            const dMatch = trimmed.match(/[?&#]d=([A-Za-z0-9_-]+)/);
+            if (idMatch) syncId = idMatch[1];
+            if (keyMatch) keyBase64Url = keyMatch[1];
+            if (dMatch) directCiphertext = dMatch[1];
+          }
+        } else {
+          syncId = trimmed;
         }
 
-        if (!syncId) {
-          throw new Error('Código de sincronización no válido');
+        if (!syncId && !directCiphertext) {
+          throw new Error('Código de sincronización o URL no válido');
         }
 
         if (!keyBase64Url) {
           throw new Error('Falta la clave de descifrado E2EE');
         }
 
-        const ciphertext = await pullSnapshotFromRelay(syncId);
+        // 2. Obtain ciphertext: either from direct payload in QR (0-network) or from relay
+        let ciphertext = directCiphertext;
+        if (!ciphertext) {
+          if (!syncId) {
+            throw new Error('Código de sincronización no encontrado');
+          }
+          ciphertext = await pullSnapshotFromRelay(syncId, serverOrigin);
+        }
+
+        // 3. Decrypt and decompress
         const aesKey = await importKeyFromBase64Url(keyBase64Url);
         const decryptedJson = await decryptPayload(ciphertext, aesKey);
         const snapshot: WorkspaceSnapshotPayload = JSON.parse(decryptedJson);
@@ -210,7 +281,7 @@ export const useDeviceSync = () => {
           throw new Error('El formato del snapshot recibido no es válido');
         }
 
-        // Compare timestamps and calculate conflict
+        // 4. Compare timestamps and calculate conflict
         const local = useResumeStore.getState();
         const localModified =
           local.lastModifiedTimestamp ||
@@ -253,20 +324,73 @@ export const useDeviceSync = () => {
           },
         };
 
+        // 5. If local workspace is clean, auto-apply immediately!
+        if (severity === 'clean') {
+          const safetyBackup = JSON.stringify({
+            masterData: local.masterData,
+            targetJob: local.targetJob,
+            cvMarkdown: local.cvMarkdown,
+            activeCvData: local.activeCvData,
+            savedVersions: local.savedVersions,
+            applications: local.applications,
+            kanbanColumns: local.kanbanColumns,
+            theme: local.theme,
+            lastBackupTimestamp: local.lastBackupTimestamp,
+          });
+          try {
+            localStorage.setItem('cv_pre_sync_safety_backup', safetyBackup);
+          } catch (e) {
+            console.warn('[useDeviceSync] Failed to store local safety backup:', e);
+          }
+
+          restoreFullSnapshot(snapshot.data);
+
+          showNotification({
+            message: '¡Espacio de trabajo importado con éxito desde tu PC!',
+            severity: 'success',
+            actionLabel: 'Deshacer',
+            onAction: () => {
+              try {
+                const rawBackup = localStorage.getItem('cv_pre_sync_safety_backup');
+                if (rawBackup) {
+                  const parsed = JSON.parse(rawBackup);
+                  restoreFullSnapshot(parsed);
+                  showNotification({
+                    message: 'Se ha restaurado tu espacio de trabajo previo.',
+                    severity: 'info',
+                  });
+                }
+              } catch (e) {
+                console.error('Failed to undo sync:', e);
+              }
+            },
+          });
+
+          setPendingSnapshot(null);
+          setConflictComparison(null);
+          return { success: true, autoApplied: true };
+        }
+
+        // Local workspace has data -> show conflict resolution modal
         setPendingSnapshot(snapshot);
         setConflictComparison(comparison);
+        return { success: true, autoApplied: false };
       } catch (err: unknown) {
         console.error('Failed to pull or decrypt snapshot:', err);
-        if (err instanceof Error && err.message === 'NOT_FOUND_OR_EXPIRED') {
-          setImportError('El código ha expirado o ya fue consumido por otro dispositivo.');
-        } else {
-          setImportError(err instanceof Error ? err.message : 'Error al descargar o descifrar snapshot');
-        }
+        const errMsg =
+          err instanceof Error && err.message === 'NOT_FOUND_OR_EXPIRED'
+            ? 'El código ha expirado o ya fue consumido por otro dispositivo.'
+            : err instanceof Error
+              ? err.message
+              : 'Error al descargar o descifrar snapshot';
+
+        setImportError(errMsg);
+        return { success: false, error: errMsg };
       } finally {
         setIsImporting(false);
       }
     },
-    []
+    [restoreFullSnapshot, showNotification]
   );
 
   /**
