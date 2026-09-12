@@ -25,6 +25,9 @@ import { MobileTopHeader, MobileBottomNav } from '../components/studio/mobile';
 import { useAndroidBackHandler } from '../hooks/useAndroidBackHandler';
 import { useForegroundResume } from '../hooks/useForegroundResume';
 import { backButtonRegistry } from '../core/backButtonRegistry';
+import { Capacitor } from '@capacitor/core';
+import { qrScannerService } from '../core/qrScannerService';
+import { hapticsService } from '../core/haptics';
 import './App.css';
 
 // Dynamically loaded tab views and wizard steps
@@ -81,6 +84,7 @@ export const App: React.FC = () => {
   const handleGenerate = useResumeStore((s) => s.handleGenerate);
   const handleResetWorkspace = useResumeStore((s) => s.handleResetWorkspace);
   const globalNotification = useResumeStore((s) => s.globalNotification);
+  const showNotification = useResumeStore((s) => s.showNotification);
   const hideNotification = useResumeStore((s) => s.hideNotification);
   const isManualPromptModalOpen = useResumeStore((s) => s.isManualPromptModalOpen);
   const manualPromptBundle = useResumeStore((s) => s.manualPromptBundle);
@@ -91,17 +95,84 @@ export const App: React.FC = () => {
 
   // Derived state via optimized memoized hooks
   const { hasTargetJob, hasGeneratedCv, hasGapReport } = useDerivedFlags();
+  const hasApplications = useResumeStore((s) => s.applications.length > 0);
+  const savedVersionsCount = useResumeStore((s) => s.savedVersions.length);
+  const hasStarted = hasMasterData || hasApplications || savedVersionsCount > 0 || hasTargetJob || hasGeneratedCv;
+
+  // Show bottom navigation on mobile ONLY when user is past landing AND has active workspace / applications
+  const showMobileBottomNav = activeTab !== 'landing' && (hasStarted || activeTab === 'history');
 
   // Multidevice Sync State & Hook
   const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
+  const [syncModalInitialTab, setSyncModalInitialTab] = useState<'export' | 'import'>('export');
   const sync = useDeviceSync();
+
+  const handleOpenSync = (tab: 'export' | 'import' = 'export') => {
+    setSyncModalInitialTab(tab);
+    setIsSyncModalOpen(true);
+  };
+
+  const handleScanOrSync = async () => {
+    // 1. Mobile-First: Directly invoke native camera QR scanner
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const scanRes = await qrScannerService.scan();
+        if (scanRes.success && scanRes.content) {
+          hapticsService.notificationSuccess();
+          showNotification({
+            message: t('common:sync.qrDetected', 'QR detectado. Conectando y descargando datos...'),
+            severity: 'info',
+          });
+
+          const result = await sync.handlePullSnapshot(scanRes.content);
+          if (!result.success) {
+            hapticsService.notificationWarning();
+            showNotification({
+              message: result.error || t('common:sync.downloadError', 'No se pudo descargar el espacio de trabajo.'),
+              severity: 'error',
+            });
+            handleOpenSync('import');
+          } else {
+            hapticsService.notificationSuccess();
+          }
+          return;
+        }
+
+        // If user cancelled, do not force modal open
+        if (scanRes.cancelled) {
+          return;
+        }
+
+        // If permission was denied or scanner error, fallback to manual code modal
+        if (scanRes.deniedPermission || scanRes.errorMessage) {
+          hapticsService.notificationWarning();
+          handleOpenSync('import');
+          return;
+        }
+      } catch (err) {
+        console.debug('[App] Native scan exception, falling back to manual code:', err);
+        handleOpenSync('import');
+        return;
+      }
+    }
+
+    // 2. On Web or desktop: open sync modal in import tab
+    handleOpenSync('import');
+  };
+
+  const handleModalScanCamera = async () => {
+    setIsSyncModalOpen(false);
+    setTimeout(async () => {
+      await handleScanOrSync();
+    }, 150);
+  };
 
   // Listen for hash-based sync parameters on mount & hashchange (e.g. #sync?id=...#key=...)
   useEffect(() => {
-    const handleCheckSync = () => {
+    const handleCheckSync = async () => {
       const hash = window.location.hash;
       if (hash.startsWith('#sync')) {
-        sync.handlePullSnapshot(hash);
+        await sync.handlePullSnapshot(hash);
         // Clear hash so it doesn't re-trigger on subsequent refreshes
         window.history.replaceState(null, '', window.location.pathname);
       }
@@ -162,7 +233,7 @@ export const App: React.FC = () => {
     <div className="studio-app">
       {/* Top Navbar: Visible on Desktop */}
       <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
-        <StudioNavbar onOpenSync={() => setIsSyncModalOpen(true)} />
+        <StudioNavbar onOpenSync={() => handleOpenSync('export')} />
       </Box>
 
       {/* Stepper Bar for Guided Wizard: Visible on Desktop for Steps 1 & 2 (Step 3 uses compact breadcrumb dropdown) */}
@@ -179,7 +250,16 @@ export const App: React.FC = () => {
       )}
 
       {/* Mobile Top Header: Visible on Mobile (xs to sm) */}
-      <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
+      <Box
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          flexShrink: 0,
+          position: 'relative',
+          zIndex: (theme) => theme.zIndex.appBar,
+          width: '100%',
+          bgcolor: 'background.paper',
+        }}
+      >
         <MobileTopHeader
           currentStepNumber={
             wizardStep === 'profile' ? 1 : wizardStep === 'target' ? 2 : 3
@@ -204,7 +284,7 @@ export const App: React.FC = () => {
             setWizardStep(step);
           }}
           activeWizardStep={wizardStep}
-          onOpenSync={() => setIsSyncModalOpen(true)}
+          onOpenSync={() => handleOpenSync('export')}
         />
       </Box>
 
@@ -216,10 +296,15 @@ export const App: React.FC = () => {
           flex: 1,
           minHeight: 0,
           height: {
-            xs: 'calc(100dvh - 52px)',
+            xs: 'auto',
             md: 'calc(100dvh - var(--navbar-height))',
           },
-          pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 56px)', md: 0 },
+          pb: {
+            xs: showMobileBottomNav
+              ? 'calc(env(safe-area-inset-bottom, 0px) + 56px)'
+              : 'env(safe-area-inset-bottom, 0px)',
+            md: 0,
+          },
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -229,7 +314,7 @@ export const App: React.FC = () => {
         {/* VIEW: WELCOME & ONBOARDING LANDING */}
         {activeTab === 'landing' && (
           <Suspense fallback={<StudioSkeleton variant="landing" />}>
-            <WelcomeLandingView />
+            <WelcomeLandingView onOpenSync={handleScanOrSync} />
           </Suspense>
         )}
 
@@ -244,6 +329,7 @@ export const App: React.FC = () => {
                   onLoadSample={() => setMasterData(DEMO_MASTER_DATA)}
                   onResetTemplate={() => setMasterData(BLANK_MASTER_DATA)}
                   onNextStep={() => setWizardStep('target')}
+                  onOpenSync={handleScanOrSync}
                 />
               </Suspense>
             )}
@@ -374,7 +460,7 @@ export const App: React.FC = () => {
                 rules={rules}
                 onRulesChange={setRules}
                 onResetDefaults={handleResetWorkspace}
-                onOpenSync={() => setIsSyncModalOpen(true)}
+                onOpenSync={() => handleOpenSync('export')}
               />
             </div>
           </Suspense>
@@ -382,14 +468,16 @@ export const App: React.FC = () => {
       </Box>
 
       {/* Mobile-First Bottom Navigation (Estudio & Postulaciones) */}
-      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-        <MobileBottomNav
-          activeTab={activeTab}
-          onSelectTab={(tab) => {
-            setActiveTab(tab);
-          }}
-        />
-      </Box>
+      {showMobileBottomNav && (
+        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          <MobileBottomNav
+            activeTab={activeTab}
+            onSelectTab={(tab) => {
+              setActiveTab(tab);
+            }}
+          />
+        </Box>
+      )}
 
       {/* Synthesis Error Floating Banner */}
       <SynthesisErrorBanner
@@ -418,6 +506,8 @@ export const App: React.FC = () => {
       <DeviceSyncModal
         open={isSyncModalOpen}
         onClose={() => setIsSyncModalOpen(false)}
+        initialTab={syncModalInitialTab}
+        onScanCamera={Capacitor.isNativePlatform() ? handleModalScanCamera : undefined}
         isExporting={sync.isExporting}
         exportUrl={sync.exportUrl}
         exportId={sync.exportId}

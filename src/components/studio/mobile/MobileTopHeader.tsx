@@ -98,8 +98,8 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
         width: '100%',
         bgcolor: 'background.paper',
         borderBottom: `1px solid ${theme.palette.divider}`,
-        position: 'sticky',
-        top: 0,
+        pt: 'max(env(safe-area-inset-top), 0px)',
+        position: 'relative',
         zIndex: theme.zIndex.appBar,
       }}
     >
