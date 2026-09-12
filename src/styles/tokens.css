@@ -220,3 +220,22 @@ html, body {
   text-decoration: line-through;
 }
 
+/* ==========================================================================
+   Mobile-First App Touch Hygiene & Inertial Scrolling
+   ========================================================================== */
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+

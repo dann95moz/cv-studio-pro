@@ -27,6 +27,9 @@ import {
   MobileStudioFab,
   MobileToolsBottomSheet,
 } from './mobile';
+import { backButtonRegistry } from '../../core/backButtonRegistry';
+import { useCanvasTouchGestures } from '../../hooks/useCanvasTouchGestures';
+import { CanvasZoomFloatingCapsule } from './preview/CanvasZoomFloatingCapsule';
 
 // Dynamically loaded preview sidebars
 const TemplatesPanel = React.lazy(() =>
@@ -144,6 +147,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     handleConfirmTrackApplication,
     handleMagicAutoFit,
     onTriggerDirectDownloadPdf,
+    onTriggerSharePdf,
     onTriggerDownloadPlainText,
     onTriggerDownloadDocx,
     onTriggerCopyPlainText,
@@ -176,6 +180,111 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
   } = useStepPreviewWorkflow();
 
   const [isMobileToolsOpen, setIsMobileToolsOpen] = React.useState(false);
+
+  // 0ms Touch Gestures for mobile A4 canvas (Pinch-to-zoom & 2-finger pan)
+  const {
+    currentScale: dynamicCanvasScale,
+    isZoomed: isCanvasZoomed,
+    resetToFit: handleResetFitZoom,
+  } = useCanvasTouchGestures({
+    containerRef: canvasContainerRef,
+    baseScale: canvasScale,
+    onResetFit: () => setMobileZoomMode('fit'),
+  });
+
+  const effectiveCanvasScale = isMobile ? dynamicCanvasScale : canvasScale;
+
+  // Register mobile tools bottom sheet and active modals in the back button stack
+  React.useEffect(() => {
+    if (isMobileToolsOpen) {
+      return backButtonRegistry.register({
+        id: 'preview-mobile-tools',
+        priority: 50,
+        handler: () => {
+          setIsMobileToolsOpen(false);
+          return true;
+        },
+      });
+    }
+  }, [isMobileToolsOpen]);
+
+  React.useEffect(() => {
+    if (activeSidePanel) {
+      return backButtonRegistry.register({
+        id: 'preview-side-panel',
+        priority: 60,
+        handler: () => {
+          handleToggleSidePanel(activeSidePanel);
+          return true;
+        },
+      });
+    }
+  }, [activeSidePanel, handleToggleSidePanel]);
+
+  React.useEffect(() => {
+    if (isAuditGapOpen) {
+      return backButtonRegistry.register({
+        id: 'preview-audit-drawer',
+        priority: 60,
+        handler: () => {
+          setIsAuditGapOpen(false);
+          return true;
+        },
+      });
+    }
+  }, [isAuditGapOpen, setIsAuditGapOpen]);
+
+  React.useEffect(() => {
+    if (isDiffModalOpen) {
+      return backButtonRegistry.register({
+        id: 'preview-diff-modal',
+        priority: 100,
+        handler: () => {
+          handleCloseDiffModal();
+          return true;
+        },
+      });
+    }
+  }, [isDiffModalOpen, handleCloseDiffModal]);
+
+  React.useEffect(() => {
+    if (isTrackModalOpen) {
+      return backButtonRegistry.register({
+        id: 'preview-track-modal',
+        priority: 100,
+        handler: () => {
+          setIsTrackModalOpen(false);
+          return true;
+        },
+      });
+    }
+  }, [isTrackModalOpen, setIsTrackModalOpen]);
+
+  React.useEffect(() => {
+    if (isTranslateModalOpen) {
+      return backButtonRegistry.register({
+        id: 'preview-translate-modal',
+        priority: 100,
+        handler: () => {
+          handleCloseTranslateModal();
+          return true;
+        },
+      });
+    }
+  }, [isTranslateModalOpen, handleCloseTranslateModal]);
+
+  React.useEffect(() => {
+    if (isAdaptModalOpen) {
+      return backButtonRegistry.register({
+        id: 'preview-adapt-modal',
+        priority: 100,
+        handler: () => {
+          handleCloseAdaptModal();
+          return true;
+        },
+      });
+    }
+  }, [isAdaptModalOpen, handleCloseAdaptModal]);
 
   const panelContent = activeSidePanel && (
     <React.Suspense fallback={<StudioSkeleton variant="drawer" />}>
@@ -416,9 +525,9 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                 <div
                   className="paper-scale-container"
                   style={{
-                    width: canvasScale < 1 ? `${targetPageWidthPx * canvasScale}px` : `${targetPageWidthPx}px`,
-                    height: canvasScale < 1 ? `${(sheetHeight || targetPagePx) * canvasScale}px` : (sheetHeight > 0 ? `${sheetHeight}px` : 'auto'),
-                    minHeight: canvasScale < 1 ? `${targetPagePx * canvasScale}px` : `${targetPagePx}px`,
+                    width: effectiveCanvasScale < 1 ? `${targetPageWidthPx * effectiveCanvasScale}px` : `${targetPageWidthPx}px`,
+                    height: effectiveCanvasScale < 1 ? `${(sheetHeight || targetPagePx) * effectiveCanvasScale}px` : (sheetHeight > 0 ? `${sheetHeight}px` : 'auto'),
+                    minHeight: effectiveCanvasScale < 1 ? `${targetPagePx * effectiveCanvasScale}px` : `${targetPagePx}px`,
                     position: 'relative',
                     margin: '0 auto',
                     flexShrink: 0,
@@ -430,9 +539,9 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
                     style={{
                       width: `${targetPageWidthPx}px`,
                       minHeight: `${targetPagePx}px`,
-                      transform: canvasScale < 1 ? `scale(${canvasScale})` : undefined,
+                      transform: effectiveCanvasScale < 1 ? `scale(${effectiveCanvasScale})` : undefined,
                       transformOrigin: 'top left',
-                      position: canvasScale < 1 ? 'absolute' : 'relative',
+                      position: effectiveCanvasScale < 1 ? 'absolute' : 'relative',
                       top: 0,
                       left: 0,
                       transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -513,8 +622,13 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
         </Box>
       </Box>
 
-      {/* Mobile-First FAB and Tools Bottom Sheet */}
+      {/* Mobile-First FAB, Zoom Indicator, and Tools Bottom Sheet */}
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+        <CanvasZoomFloatingCapsule
+          scale={effectiveCanvasScale}
+          isZoomed={isCanvasZoomed}
+          onResetFit={handleResetFitZoom}
+        />
         <MobileStudioFab onClick={() => setIsMobileToolsOpen(true)} />
         <MobileToolsBottomSheet
           open={isMobileToolsOpen}
@@ -534,6 +648,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
             setActiveSidePanel(null);
           }}
           onDownloadPdf={onTriggerDirectDownloadPdf}
+          onSharePdf={onTriggerSharePdf}
           onDownloadDocx={onTriggerDownloadDocx}
           onDownloadPlainText={onTriggerDownloadPlainText}
           onCopyPlainText={onTriggerCopyPlainText}
