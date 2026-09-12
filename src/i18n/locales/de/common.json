@@ -18,7 +18,8 @@
     "theme": "Design",
     "syncQr": "Synchronisieren (QR)",
     "viewGithub": "Auf GitHub ansehen",
-    "stepCounter": "Schritt {{current}} von {{total}} · {{title}}"
+    "stepCounter": "Schritt {{current}} von {{total}} · {{title}}",
+    "pressBackAgainToExit": "Drücken Sie erneut Zurück, um zu beenden"
   },
   "badge": {
     "optional": "Optional",
@@ -60,6 +61,7 @@
     "completed": "Abgeschlossen",
     "locked": "Gesperrt",
     "error": "KI-Generierungshinweis",
+    "resumingSynthesis": "CV-Synthese wird fortgesetzt...",
     "step": "Schritt {{number}}"
   },
   "loading": {

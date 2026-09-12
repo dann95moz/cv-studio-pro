@@ -22,6 +22,9 @@ import { downloadTextFile, buildTimestampedFileName } from '../utils/fileUtils';
 import { useTranslation } from 'react-i18next';
 import { Box, Snackbar, Alert, Button } from '@mui/material';
 import { MobileTopHeader, MobileBottomNav } from '../components/studio/mobile';
+import { useAndroidBackHandler } from '../hooks/useAndroidBackHandler';
+import { useForegroundResume } from '../hooks/useForegroundResume';
+import { backButtonRegistry } from '../core/backButtonRegistry';
 import './App.css';
 
 // Dynamically loaded tab views and wizard steps
@@ -108,6 +111,52 @@ export const App: React.FC = () => {
     window.addEventListener('hashchange', handleCheckSync);
     return () => window.removeEventListener('hashchange', handleCheckSync);
   }, [sync.handlePullSnapshot]);
+
+  // Unified Android Back Button Navigation Stack
+  useAndroidBackHandler();
+
+  // Background / Foreground synthesis recovery
+  useForegroundResume();
+
+  // Register open modals in the Back Button Stack
+  useEffect(() => {
+    if (isManualPromptModalOpen) {
+      return backButtonRegistry.register({
+        id: 'manual-prompt-modal',
+        priority: 100,
+        handler: () => {
+          closeManualPromptModal();
+          return true;
+        },
+      });
+    }
+  }, [isManualPromptModalOpen, closeManualPromptModal]);
+
+  useEffect(() => {
+    if (isSyncModalOpen) {
+      return backButtonRegistry.register({
+        id: 'sync-modal',
+        priority: 100,
+        handler: () => {
+          setIsSyncModalOpen(false);
+          return true;
+        },
+      });
+    }
+  }, [isSyncModalOpen]);
+
+  useEffect(() => {
+    if (sync.pendingSnapshot && sync.conflictComparison) {
+      return backButtonRegistry.register({
+        id: 'snapshot-conflict-modal',
+        priority: 110,
+        handler: () => {
+          sync.handleCancelConflict();
+          return true;
+        },
+      });
+    }
+  }, [sync.pendingSnapshot, sync.conflictComparison, sync.handleCancelConflict]);
 
   return (
     <div className="studio-app">

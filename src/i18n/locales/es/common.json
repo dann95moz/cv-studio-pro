@@ -18,7 +18,8 @@
     "theme": "Tema",
     "syncQr": "Sincronizar (QR)",
     "viewGithub": "Ver en GitHub",
-    "stepCounter": "Paso {{current}} de {{total}} · {{title}}"
+    "stepCounter": "Paso {{current}} de {{total}} · {{title}}",
+    "pressBackAgainToExit": "Presiona atrás de nuevo para salir"
   },
   "badge": {
     "optional": "Opcional",
@@ -60,6 +61,7 @@
     "completed": "Completado",
     "locked": "Bloqueado",
     "error": "Aviso de Generación de IA",
+    "resumingSynthesis": "Reanudando síntesis de CV...",
     "step": "Paso {{number}}"
   },
   "loading": {
