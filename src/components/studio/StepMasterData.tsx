@@ -60,6 +60,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
   onChange,
   onLoadSample,
   onNextStep,
+  onOpenSync,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -178,6 +179,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
           isProcessing={isProcessing}
           progressMessage={progressMessage}
           hasData={hasData}
+          onOpenSync={onOpenSync}
         />
       ) : (
         <Box

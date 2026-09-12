@@ -14,7 +14,9 @@ import FormatListBulletedRoundedIcon from '@mui/icons-material/FormatListBullete
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import { useTranslation } from 'react-i18next';
+import { RADIUS_TOKENS } from '../../../theme/dimensions';
 
 export interface MasterDataChoiceViewProps {
   onSelectFreeText: () => void;
@@ -26,6 +28,7 @@ export interface MasterDataChoiceViewProps {
   isProcessing?: boolean;
   progressMessage?: string;
   hasData?: boolean;
+  onOpenSync?: () => void;
 }
 
 /**
@@ -34,6 +37,7 @@ export interface MasterDataChoiceViewProps {
  * 1) Import an existing resume (PDF, TXT, MD)
  * 2) Start from scratch or continue via Guided Step-by-Step Form
  * 3) Paste or view unformatted notes / free text
+ * 4) Sync from PC via QR code or pairing code
  */
 export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.memo(({
   onSelectFreeText,
@@ -45,6 +49,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
   isProcessing = false,
   progressMessage,
   hasData = false,
+  onOpenSync,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -84,6 +89,64 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           )}
         </Typography>
       </Box>
+
+      {/* Optional: Fast Sync from PC / Another Device Banner */}
+      {onOpenSync && (
+        <Paper
+          elevation={0}
+          sx={{
+            width: '100%',
+            mb: 3.5,
+            p: { xs: 2, sm: 2.5 },
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            justifyContent: 'space-between',
+            gap: 2,
+            borderRadius: RADIUS_TOKENS.lg,
+            border: `1px solid ${alpha(theme.palette.secondary.main, 0.35)}`,
+            bgcolor: alpha(theme.palette.secondary.main, 0.04),
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: RADIUS_TOKENS.md,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: alpha(theme.palette.secondary.main, 0.12),
+                color: 'secondary.main',
+                flexShrink: 0,
+              }}
+            >
+              <QrCodeScannerRoundedIcon fontSize="medium" />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                {t('profile:choice.syncCardTitle', 'Escanear QR de PC')}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.5 }}>
+                {t(
+                  'profile:choice.syncCardDesc',
+                  'Apunta la cámara de tu teléfono al código QR de tu computadora para importar tu Master CV y versiones al instante.'
+                )}
+              </Typography>
+            </Box>
+          </Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={onOpenSync}
+            startIcon={<QrCodeScannerRoundedIcon />}
+            sx={{ flexShrink: 0, fontWeight: 700 }}
+          >
+            {t('profile:choice.syncCardAction', 'Escanear QR')}
+          </Button>
+        </Paper>
+      )}
 
       {/* 3 Decision Cards Grid */}
       <Box

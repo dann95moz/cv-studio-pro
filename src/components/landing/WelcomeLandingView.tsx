@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Box,
   Typography,
   Button,
   CircularProgress,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -17,24 +20,29 @@ import StyleRoundedIcon from '@mui/icons-material/StyleRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import { useTranslation } from 'react-i18next';
 import { useFileUploader } from '../../hooks/useFileUploader';
 import { useWelcomeLandingWorkflow } from '../../hooks/useWelcomeLandingWorkflow';
 import { ConfirmDeleteDialog } from '../studio/common/ConfirmDeleteDialog';
 import { APP_LINKS } from '../../constants/links';
+import { RADIUS_TOKENS } from '../../theme/dimensions';
 
 export interface WelcomeLandingViewProps {
   onStart?: () => void;
   onExploreDemo?: () => void;
   onFileLoaded?: (content: string) => void;
+  onOpenSync?: () => void;
 }
 
 export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
   onStart,
   onExploreDemo,
   onFileLoaded,
+  onOpenSync,
 }) => {
   const { t } = useTranslation(['landing', 'common', 'profile']);
+  const theme = useTheme();
   const workflow = useWelcomeLandingWorkflow();
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
 
@@ -177,9 +185,9 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
               >
                 {workflow.candidateFirstName
                   ? t('landing:actions.continueWithName', {
-                      name: workflow.candidateFirstName,
-                      defaultValue: `Continuar, ${workflow.candidateFirstName}`,
-                    })
+                    name: workflow.candidateFirstName,
+                    defaultValue: `Continuar, ${workflow.candidateFirstName}`,
+                  })
                   : t('landing:actions.continueWhereLeft', 'Continuar donde lo dejaste')}
               </Button>
 
@@ -255,9 +263,27 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
                 {isProcessing ? (progressMessage || t('profile:actions.importing', 'Extracting PDF...')) : t('landing:actions.importPdfHero', 'Import Existing PDF')}
               </Button>
 
+              {onOpenSync && (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="large"
+                  onClick={onOpenSync}
+                  startIcon={<QrCodeScannerRoundedIcon />}
+                  sx={{
+                    px: 3,
+                    py: 1.5,
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  {t('landing:actions.syncFromPc', 'Escanear QR de PC')}
+                </Button>
+              )}
+
               <Button
                 variant="outlined"
-                color="secondary"
+                color="inherit"
                 size="large"
                 onClick={handleDemo}
                 startIcon={<AutoAwesomeRoundedIcon />}
@@ -273,6 +299,51 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
             </>
           )}
         </div>
+
+        {/* Mobile-First Fast Sync from PC Card */}
+        {onOpenSync && (
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              flexDirection: 'column',
+              alignItems: 'center',
+              p: 2.25,
+              mt: 2.5,
+              mb: 1,
+              borderRadius: RADIUS_TOKENS.lg,
+              border: `1px solid ${alpha(theme.palette.secondary.main, 0.35)}`,
+              bgcolor: alpha(theme.palette.secondary.main, 0.05),
+              textAlign: 'center',
+              gap: 1,
+              width: '100%',
+              maxWidth: 480,
+              mx: 'auto',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <QrCodeScannerRoundedIcon color="secondary" fontSize="small" />
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                {t('landing:actions.syncFromPcTitle', '¿Ya creaste tu CV en PC?')}
+              </Typography>
+            </Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1.4 }}>
+              {t(
+                'landing:actions.syncFromPcDesc',
+                'Apunta la cámara al código QR de tu PC para importar todo tu espacio de trabajo en segundos.'
+              )}
+            </Typography>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              onClick={onOpenSync}
+              startIcon={<QrCodeScannerRoundedIcon />}
+              sx={{ fontWeight: 700, mt: 0.75, width: '100%' }}
+            >
+              {t('landing:actions.syncFromPc', 'Escanear QR de PC')}
+            </Button>
+          </Box>
+        )}
 
         {/* Capabilities Pill Ribbon */}
         <div className="welcome-capabilities-ribbon">
