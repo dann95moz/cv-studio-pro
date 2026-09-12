@@ -6,6 +6,7 @@ import { createCvDataSlice } from './slices/cvDataSlice';
 import { createDesignSlice } from './slices/designSlice';
 import { createAiSlice } from './slices/aiSlice';
 import { createHistorySlice } from './slices/historySlice';
+import { secureStorage } from '../core/secureStorage';
 import {
   StudioTab,
   ThemeId,
@@ -133,7 +134,11 @@ export const useResumeStore = create<ResumeStore>()(
         customColor: state.customColor,
         fontFamily: state.fontFamily,
         spacingDensity: state.spacingDensity,
-        providerSettings: state.providerSettings,
+        // Exclude plain text apiKey from unencrypted localStorage/Preferences
+        providerSettings: {
+          ...state.providerSettings,
+          apiKey: '',
+        },
         savedVersions: state.savedVersions,
         applications: state.applications,
         kanbanColumns: state.kanbanColumns,
@@ -141,6 +146,22 @@ export const useResumeStore = create<ResumeStore>()(
     }
   )
 );
+
+// Hydrate encrypted API key from secureStorage (EncryptedSharedPreferences / Keystore)
+if (typeof window !== 'undefined') {
+  secureStorage.getItem('cv_studio_secure_api_key').then((secureKey) => {
+    if (secureKey) {
+      useResumeStore.setState((state) => ({
+        providerSettings: {
+          ...state.providerSettings,
+          apiKey: secureKey,
+        },
+      }));
+    }
+  }).catch((err) => {
+    console.debug('[useResumeStore] Secure storage key hydration notice:', err);
+  });
+}
 
 // Synchronize window.location.hash with activeTab on back/forward browser navigation
 if (typeof window !== 'undefined') {
@@ -155,3 +176,4 @@ if (typeof window !== 'undefined') {
     }
   });
 }
+

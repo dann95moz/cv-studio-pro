@@ -11,6 +11,9 @@ import {
 } from '../../core/parser';
 
 
+import { secureStorage } from '../../core/secureStorage';
+import { hapticsService } from '../../core/haptics';
+
 export const DEFAULT_AI_SETTINGS: AIProviderSettings = {
   provider: 'gemini',
   model: 'gemini-2.5-flash',
@@ -38,6 +41,9 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
 
   setProviderSettings: (val) => {
     const nextVal = typeof val === 'function' ? val(get().providerSettings) : val;
+    if (nextVal.apiKey !== undefined) {
+      secureStorage.setItem('cv_studio_secure_api_key', nextVal.apiKey);
+    }
     set({ providerSettings: nextVal });
   },
 
@@ -207,6 +213,31 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
       activeModelName: currentModel,
     });
 
+    // 1. Snapshot pending synthesis state for background / foreground crash resilience
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.setItem('cv_studio_pending_synthesis', JSON.stringify({
+          timestamp: Date.now(),
+          companyName: get().companyName,
+          targetRole: get().targetRole,
+        }));
+      }
+    } catch {
+      // Non-critical session snapshot error
+    }
+
+    // 2. Request OS background execution window via Capacitor BackgroundTask
+    let bgTaskId: string | null = null;
+    if (typeof window !== 'undefined') {
+      import('@capawesome/capacitor-background-task').then(({ BackgroundTask }) => {
+        BackgroundTask.beforeExit(async () => {
+          // Keep thread execution window open during external app switching
+        }).then((id) => {
+          bgTaskId = id;
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+
     try {
       const {
         masterData,
@@ -315,6 +346,25 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
         generationStep: 'Done! Resume tailored successfully.',
       });
 
+      // Clear pending resilience marker upon successful completion
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          window.sessionStorage.removeItem('cv_studio_pending_synthesis');
+        }
+      } catch {
+        // Ignore
+      }
+
+      // Finish OS BackgroundTask
+      if (bgTaskId) {
+        import('@capawesome/capacitor-background-task').then(({ BackgroundTask }) => {
+          BackgroundTask.finish({ taskId: bgTaskId! });
+        }).catch(() => {});
+      }
+
+      // Tactile success feedback
+      hapticsService.notificationSuccess();
+
       setTimeout(() => {
         set({
           isGenerating: false,
@@ -323,6 +373,25 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
         });
       }, 400);
     } catch (err: unknown) {
+      // Clear pending resilience marker on error
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          window.sessionStorage.removeItem('cv_studio_pending_synthesis');
+        }
+      } catch {
+        // Ignore
+      }
+
+      // Finish OS BackgroundTask
+      if (bgTaskId) {
+        import('@capawesome/capacitor-background-task').then(({ BackgroundTask }) => {
+          BackgroundTask.finish({ taskId: bgTaskId! });
+        }).catch(() => {});
+      }
+
+      // Tactile warning feedback
+      hapticsService.notificationWarning();
+
       if (err instanceof Error && err.message.includes('cancelled')) {
         set({
           isGenerating: false,
