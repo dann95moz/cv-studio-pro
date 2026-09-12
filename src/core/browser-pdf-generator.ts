@@ -25,6 +25,7 @@ export interface DirectPdfOptions {
   pageFormat?: PageFormat;
   qualityScale?: number;
   markdownPayload?: string;
+  mode?: 'save' | 'share';
   onProgress?: (step: 'capturing' | 'rendering' | 'saving' | 'done') => void;
 }
 
@@ -233,8 +234,20 @@ export async function generateDirectPdf(
 
     if (onProgress) onProgress('saving');
 
-    // Trigger direct browser download
-    pdf.save(targetFileName);
+    const pdfBlob = pdf.output('blob');
+    if (options.mode === 'share') {
+      const { sharePdfTransitory } = await import('./nativePdfService');
+      await sharePdfTransitory(pdfBlob, targetFileName);
+    } else {
+      const { savePdfPermanently } = await import('./nativePdfService');
+      const saveResult = await savePdfPermanently(pdfBlob, targetFileName);
+      if (saveResult.isNative) {
+        useResumeStore.getState().showNotification({
+          message: `PDF guardado en Documentos: ${saveResult.fileName}`,
+          severity: 'success',
+        });
+      }
+    }
 
     if (onProgress) onProgress('done');
   } finally {

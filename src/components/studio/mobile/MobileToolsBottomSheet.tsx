@@ -32,6 +32,8 @@ import { useTranslation } from 'react-i18next';
 import { PreviewSidePanelType } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
 
+import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
+
 export interface MobileToolsBottomSheetProps {
   open: boolean;
   onClose: () => void;
@@ -39,6 +41,7 @@ export interface MobileToolsBottomSheetProps {
   onOpenDiff?: () => void;
   onOpenAuditGap?: (tab?: 'audit' | 'gap' | 'interview') => void;
   onDownloadPdf?: () => void;
+  onSharePdf?: () => void;
   onDownloadDocx?: () => void;
   onDownloadPlainText?: () => void;
   onCopyPlainText?: () => void;
@@ -61,6 +64,7 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
   onOpenDiff,
   onOpenAuditGap,
   onDownloadPdf,
+  onSharePdf,
   onDownloadDocx,
   onDownloadPlainText,
   onCopyPlainText,
@@ -265,6 +269,28 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
             },
           }}
         >
+          {onSharePdf && (
+            <MenuItem
+              onClick={() => {
+                setExportMenuAnchor(null);
+                onClose();
+                onSharePdf();
+              }}
+            >
+              <ListItemIcon>
+                <ShareRoundedIcon fontSize="small" color="primary" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('preview:toolbar.sharePdfItem', 'Compartir PDF')}
+                secondary={t('preview:toolbar.sharePdfDesc', 'Enviar por WhatsApp, Gmail, Drive...')}
+                slotProps={{
+                  primary: { sx: { fontSize: '0.86rem', fontWeight: 700 } },
+                  secondary: { sx: { fontSize: '0.72rem' } },
+                }}
+              />
+            </MenuItem>
+          )}
+
           {onDownloadPdf && (
             <MenuItem
               onClick={() => {
@@ -274,11 +300,11 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
               }}
             >
               <ListItemIcon>
-                <PictureAsPdfRoundedIcon fontSize="small" color="primary" />
+                <PictureAsPdfRoundedIcon fontSize="small" sx={{ color: 'text.secondary' }} />
               </ListItemIcon>
               <ListItemText
-                primary={t('preview:toolbar.directPdfItem', 'Descarga Directa (PDF)')}
-                secondary={t('preview:toolbar.directPdfDesc', 'Documento PDF de alta fidelidad')}
+                primary={t('preview:toolbar.savePdfItem', 'Guardar en Dispositivo (PDF)')}
+                secondary={t('preview:toolbar.savePdfDesc', 'Guardar permanentemente en Documentos')}
                 slotProps={{
                   primary: { sx: { fontSize: '0.86rem', fontWeight: 700 } },
                   secondary: { sx: { fontSize: '0.72rem' } },

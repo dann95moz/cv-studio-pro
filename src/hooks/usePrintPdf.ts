@@ -65,7 +65,8 @@ export const usePrintPdf = () => {
   const handleDirectDownload = useCallback(async (
     element: HTMLElement | null,
     fileName?: string,
-    pageFormat: PageFormat = 'a4'
+    pageFormat: PageFormat = 'a4',
+    mode: 'save' | 'share' = 'save'
   ) => {
     if (!element) return;
     setIsExportingPdf(true);
@@ -77,6 +78,7 @@ export const usePrintPdf = () => {
         fileName,
         pageFormat,
         qualityScale: 2,
+        mode,
         onProgress: (step) => {
           if (step === 'saving') setExportStatus('saving');
           else if (step === 'done') setExportStatus('done');

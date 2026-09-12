@@ -417,12 +417,16 @@ export const useStepPreviewWorkflow = () => {
   const cleanCompany = sanitizeFileName(companyName || 'Target');
   const targetPdfName = `CV_${candidateName}_${cleanCompany}.pdf`;
 
-  const onTriggerDirectDownloadPdf = () => {
+  const onTriggerDirectDownloadPdf = useCallback((mode: 'save' | 'share' = 'save') => {
     if (paperRef.current) {
-      handleDirectDownload(paperRef.current, targetPdfName, pageFormat);
+      handleDirectDownload(paperRef.current, targetPdfName, pageFormat, mode);
       triggerPrompt(2000);
     }
-  };
+  }, [handleDirectDownload, targetPdfName, pageFormat, triggerPrompt]);
+
+  const onTriggerSharePdf = useCallback(() => {
+    onTriggerDirectDownloadPdf('share');
+  }, [onTriggerDirectDownloadPdf]);
 
   const onTriggerDownloadPlainText = useCallback(() => {
     const plainText = generatePlainTextCv(parsedCv);
@@ -626,6 +630,7 @@ export const useStepPreviewWorkflow = () => {
     handleConfirmTrackApplication,
     handleMagicAutoFit,
     onTriggerDirectDownloadPdf,
+    onTriggerSharePdf,
     onTriggerDownloadPlainText,
     onTriggerDownloadDocx,
     onTriggerCopyPlainText,
