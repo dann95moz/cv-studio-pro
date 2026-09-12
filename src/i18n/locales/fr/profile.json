@@ -50,7 +50,10 @@
     "loadSampleAction": "Charger un Profil d'Exemple",
     "switchMethod": "Changer de méthode",
     "switchToGuided": "Passer au Formulaire Guidé",
-    "switchToFreeText": "Passer au Texte Libre / Notes"
+    "switchToFreeText": "Passer au Texte Libre / Notes",
+    "syncCardTitle": "Synchroniser depuis le PC (Code QR)",
+    "syncCardDesc": "Vous avez déjà créé votre CV sur votre ordinateur ? Transférez instantanément votre Master CV, versions et candidatures via QR chiffré ou code.",
+    "syncCardAction": "Synchroniser avec QR"
   },
   "modes": {
     "guidedAssistant": "Formulaire Guidé",

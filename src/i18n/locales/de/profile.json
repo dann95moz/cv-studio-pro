@@ -50,7 +50,10 @@
     "loadSampleAction": "Beispielprofil laden",
     "switchMethod": "Methode wechseln",
     "switchToGuided": "Zu geführtem Formular wechseln",
-    "switchToFreeText": "Zu Freitext / Notizen wechseln"
+    "switchToFreeText": "Zu Freitext / Notizen wechseln",
+    "syncCardTitle": "Von PC synchronisieren (QR-Code)",
+    "syncCardDesc": "Haben Sie Ihren Lebenslauf bereits am Computer erstellt? Übertragen Sie Master-CV, Versionen und Bewerbungen sofort per verschlüsseltem QR oder Code.",
+    "syncCardAction": "Mit QR synchronisieren"
   },
   "modes": {
     "guidedAssistant": "Geführtes Formular",

@@ -49,7 +49,8 @@
     "search": "Cerca",
     "filter": "Filtra",
     "apply": "Applica",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "paste": "Incolla"
   },
   "language": {
     "selectLanguage": "Lingua",
@@ -107,6 +108,7 @@
     "modalSubtitle": "Trasferisci il tuo spazio di lavoro tra PC e smartphone con crittografia E2EE",
     "exportTab": "Invia (Genera QR)",
     "importTab": "Ricevi (Importa)",
+    "scanWithCamera": "Scansiona con la fotocamera",
     "exportDescription": "Genera uno snapshot crittografato temporaneo del tuo intero spazio di lavoro (CV master, versioni, posizioni e candidature Kanban).",
     "includeApiKeys": "Includi credenziali IA (crittografate)",
     "generating": "Generazione snapshot...",
@@ -141,6 +143,11 @@
     "confirmOverwriteAction": "Sovrascrivi spazio di lavoro",
     "settingsCardTitle": "Sincronizzazione multidispositivo (Snapshot Pull & Push)",
     "settingsCardSubtitle": "Trasferisci il tuo intero spazio di lavoro tra PC e smartphone tramite codice QR o link effimero crittografato E2EE.",
-    "openSyncAction": "Sincronizza Dispositivi"
+    "openSyncAction": "Sincronizza Dispositivi",
+    "qrDetected": "Codice QR rilevato. Connessione e download dei dati in corso...",
+    "importedSuccess": "Area di lavoro importata con successo dal tuo PC!",
+    "restoredPrevious": "L'area di lavoro precedente è stata ripristinata.",
+    "downloadError": "Impossibile scaricare l'area di lavoro dal dispositivo.",
+    "undo": "Annulla"
   }
 }

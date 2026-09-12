@@ -29,7 +29,10 @@
     "viewProfile": "Vedi il mio Profilo",
     "startNewResume": "Inizia un nuovo CV",
     "trySample": "Prova con Dati di Esempio",
-    "importPdfHero": "Importa CV in PDF"
+    "importPdfHero": "Importa CV in PDF",
+    "syncFromPc": "Sincronizza da PC (QR)",
+    "syncFromPcTitle": "Hai già creato il tuo CV su PC?",
+    "syncFromPcDesc": "Trasferisci istantaneamente il tuo Master CV, versioni e candidature scansionando il QR o con il tuo codice."
   },
   "dialog": {
     "confirmNewCvTitle": "Iniziare un nuovo CV?",

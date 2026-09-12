@@ -49,7 +49,8 @@
     "search": "Suchen",
     "filter": "Filtern",
     "apply": "Anwenden",
-    "retry": "Wiederholen"
+    "retry": "Wiederholen",
+    "paste": "Einfügen"
   },
   "language": {
     "selectLanguage": "Sprache",
@@ -107,6 +108,7 @@
     "modalSubtitle": "Übertragen Sie Ihren Arbeitsbereich zwischen PC und Mobilgerät mit E2EE-Verschlüsselung",
     "exportTab": "Senden (QR generieren)",
     "importTab": "Empfangen (Importieren)",
+    "scanWithCamera": "Mit Kamera scannen",
     "exportDescription": "Erstellt einen temporären, verschlüsselten Snapshot Ihres gesamten Arbeitsbereichs (Master-CV, Versionen, Stellenangebote und Kanban-Bewerbungen).",
     "includeApiKeys": "KI-Anmeldeinformationen einbinden (verschlüsselt)",
     "generating": "Snapshot wird generiert...",
@@ -141,6 +143,11 @@
     "confirmOverwriteAction": "Arbeitsbereich überschreiben",
     "settingsCardTitle": "Geräteübergreifende Synchronisierung (Snapshot Pull & Push)",
     "settingsCardSubtitle": "Übertragen Sie Ihren gesamten Arbeitsbereich zwischen PC und Smartphone via QR-Code oder ephemerem Link mit E2EE.",
-    "openSyncAction": "Geräte synchronisieren"
+    "openSyncAction": "Geräte synchronisieren",
+    "qrDetected": "QR-Code erkannt. Verbindung wird hergestellt und Daten werden heruntergeladen...",
+    "importedSuccess": "Arbeitsbereich erfolgreich von Ihrem PC importiert!",
+    "restoredPrevious": "Vorheriger Arbeitsbereich wurde wiederhergestellt.",
+    "downloadError": "Arbeitsbereich konnte nicht vom Gerät heruntergeladen werden.",
+    "undo": "Rückgängig"
   }
 }

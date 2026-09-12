@@ -30,7 +30,10 @@
     "viewProfile": "Mein Profil ansehen",
     "startNewResume": "Neuen Lebenslauf beginnen",
     "trySample": "Mit Beispieldaten testen",
-    "importPdfHero": "PDF-Lebenslauf importieren"
+    "importPdfHero": "PDF-Lebenslauf importieren",
+    "syncFromPc": "Von PC synchronisieren (QR)",
+    "syncFromPcTitle": "Lebenslauf bereits am PC erstellt?",
+    "syncFromPcDesc": "Übertragen Sie Master-Lebenslauf, Versionen und Bewerbungen sofort per QR-Scan oder Code."
   },
   "dialog": {
     "confirmNewCvTitle": "Neuen Lebenslauf beginnen?",

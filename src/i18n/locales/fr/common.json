@@ -49,7 +49,8 @@
     "search": "Rechercher",
     "filter": "Filtrer",
     "apply": "Appliquer",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "paste": "Coller"
   },
   "language": {
     "selectLanguage": "Langue",
@@ -107,6 +108,7 @@
     "modalSubtitle": "Transférez votre espace de travail entre PC et mobile avec chiffrement E2EE",
     "exportTab": "Envoyer (Générer QR)",
     "importTab": "Recevoir (Importer)",
+    "scanWithCamera": "Scanner avec la caméra",
     "exportDescription": "Génère un instantané chiffré temporaire de tout votre espace de travail (CV maître, versions, offres et candidatures Kanban).",
     "includeApiKeys": "Inclure les identifiants IA (chiffrés)",
     "generating": "Génération de l'instantané...",
@@ -141,6 +143,11 @@
     "confirmOverwriteAction": "Écraser l'espace de travail",
     "settingsCardTitle": "Synchronisation multi-appareils (Snapshot Pull & Push)",
     "settingsCardSubtitle": "Transférez tout votre espace de travail entre PC et smartphone via code QR ou lien éphémère chiffré E2EE.",
-    "openSyncAction": "Synchroniser les appareils"
+    "openSyncAction": "Synchroniser les appareils",
+    "qrDetected": "Code QR détecté. Connexion et téléchargement des données...",
+    "importedSuccess": "Espace de travail importé avec succès depuis votre PC !",
+    "restoredPrevious": "L'espace de travail précédent a été restauré.",
+    "downloadError": "Impossible de télécharger l'espace de travail depuis l'appareil.",
+    "undo": "Annuler"
   }
 }

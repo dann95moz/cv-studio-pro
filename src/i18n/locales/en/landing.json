@@ -29,7 +29,10 @@
     "viewProfile": "View My Profile",
     "startNewResume": "Start New Resume",
     "trySample": "Try with Sample Data",
-    "importPdfHero": "Import Existing PDF"
+    "importPdfHero": "Import Existing PDF",
+    "syncFromPc": "Sync from PC (QR)",
+    "syncFromPcTitle": "Already built your CV on PC?",
+    "syncFromPcDesc": "Transfer your Master CV, versions, and applications instantly by scanning QR or entering code."
   },
   "dialog": {
     "confirmNewCvTitle": "Start a new resume?",

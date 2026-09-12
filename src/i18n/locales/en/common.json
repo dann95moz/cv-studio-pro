@@ -49,7 +49,8 @@
     "search": "Search",
     "filter": "Filter",
     "apply": "Apply",
-    "retry": "Retry"
+    "retry": "Retry",
+    "paste": "Paste"
   },
   "language": {
     "selectLanguage": "Language",
@@ -107,6 +108,7 @@
     "modalSubtitle": "Transfer your workspace between PC and mobile with E2EE encryption",
     "exportTab": "Send (Generate QR)",
     "importTab": "Receive (Import)",
+    "scanWithCamera": "Scan with Camera",
     "exportDescription": "Generates a temporary encrypted snapshot of your entire workspace (Master CV, versions, vacancies, and Kanban applications) to scan or open on another device.",
     "includeApiKeys": "Include AI credentials (encrypted)",
     "generating": "Generating snapshot...",
@@ -141,6 +143,11 @@
     "confirmOverwriteAction": "Overwrite Workspace",
     "settingsCardTitle": "Multidevice Sync (Snapshot Pull & Push)",
     "settingsCardSubtitle": "Transfer your entire workspace (Master CV, versions, vacancies, and Kanban) between PC and smartphone via QR code or ephemeral link with E2EE encryption.",
-    "openSyncAction": "Sync Devices"
+    "openSyncAction": "Sync Devices",
+    "qrDetected": "QR code detected. Connecting and downloading data...",
+    "importedSuccess": "Workspace successfully imported from your PC!",
+    "restoredPrevious": "Previous workspace has been restored.",
+    "downloadError": "Could not download workspace from device.",
+    "undo": "Undo"
   }
 }

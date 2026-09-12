@@ -49,7 +49,8 @@
     "search": "Buscar",
     "filter": "Filtrar",
     "apply": "Aplicar",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "paste": "Pegar"
   },
   "language": {
     "selectLanguage": "Idioma",
@@ -107,7 +108,8 @@
     "modalSubtitle": "Transfiere tu espacio de trabajo entre PC y móvil con cifrado E2EE",
     "exportTab": "Enviar (Generar QR)",
     "importTab": "Recibir (Importar)",
-    "exportDescription": "Genera un snapshot cifrado temporal de todo tu espacio de trabajo (Master CV, versiones, vacantes y postulaciones Kanban) para escanearlo o abrirlo en otro dispositivo.",
+    "scanWithCamera": "Escanear con Cámara",
+    "exportDescription": "Genera una instantánea cifrada temporal de todo tu espacio de trabajo (Master CV, versiones, vacantes y postulaciones en Kanban) para escanear o abrir en otro dispositivo.",
     "includeApiKeys": "Incluir credenciales de IA (cifradas)",
     "generating": "Generando snapshot...",
     "generateAction": "Generar Código QR",
@@ -141,6 +143,11 @@
     "confirmOverwriteAction": "Sobrescribir Workspace",
     "settingsCardTitle": "Sincronización Multidispositivo (Snapshot Pull & Push)",
     "settingsCardSubtitle": "Transfiere todo tu espacio de trabajo (Master CV, versiones, vacantes y Kanban) entre PC y smartphone mediante código QR o enlace efímero con cifrado E2EE.",
-    "openSyncAction": "Sincronizar Dispositivos"
+    "openSyncAction": "Sincronizar Dispositivos",
+    "qrDetected": "QR detectado. Conectando y descargando datos...",
+    "importedSuccess": "¡Espacio de trabajo importado con éxito desde tu PC!",
+    "restoredPrevious": "Se ha restaurado tu espacio de trabajo previo.",
+    "downloadError": "No se pudo descargar el espacio de trabajo del dispositivo.",
+    "undo": "Deshacer"
   }
 }

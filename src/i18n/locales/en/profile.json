@@ -50,7 +50,10 @@
     "loadSampleAction": "Load Sample Profile",
     "switchMethod": "Change Method",
     "switchToGuided": "Switch to Guided Form",
-    "switchToFreeText": "Switch to Free Text / Notes"
+    "switchToFreeText": "Switch to Free Text / Notes",
+    "syncCardTitle": "Sync from PC (QR Code)",
+    "syncCardDesc": "Already have your CV on your computer? Transfer your Master CV, versions, and vacancies instantly via encrypted QR or pairing code.",
+    "syncCardAction": "Sync with QR"
   },
   "modes": {
     "guidedAssistant": "Guided Form",
