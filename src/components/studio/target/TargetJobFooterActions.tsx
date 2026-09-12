@@ -13,6 +13,7 @@ import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { useTranslation } from 'react-i18next';
 import { StepFooterStatus } from '../../atoms/StepFooterStatus';
+import { useKeyboardStatus } from '../../../hooks/useKeyboardStatus';
 
 export interface TargetJobFooterActionsProps {
   onBack: () => void;
@@ -37,9 +38,11 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
 }) => {
   const { t } = useTranslation(['target', 'common']);
   const theme = useTheme();
+  const { isKeyboardVisible } = useKeyboardStatus();
 
   return (
     <Paper
+      elevation={isKeyboardVisible ? 12 : 2}
       sx={{
         p: { xs: 2, sm: 2 },
         px: { xs: 2, sm: 2.5 },
@@ -53,6 +56,21 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
         borderRadius: 2,
         gap: { xs: 1.5, sm: 2 },
         boxShadow: 2,
+        // Keyboard anchoring: When virtual keyboard is up on mobile, dock cleanly at bottom of viewport
+        ...(isKeyboardVisible && {
+          position: { xs: 'fixed', sm: 'static' },
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: theme.zIndex.appBar,
+          borderRadius: { xs: 0, sm: 2 },
+          borderBottom: { xs: 'none', sm: `1px solid ${theme.palette.divider}` },
+          p: { xs: 1.25, sm: 2 },
+          px: { xs: 2, sm: 2.5 },
+          flexDirection: { xs: 'row', sm: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }),
       }}
     >
       <Button

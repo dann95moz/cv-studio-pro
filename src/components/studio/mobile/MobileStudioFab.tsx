@@ -2,6 +2,7 @@ import React from 'react';
 import { Fab, useTheme, alpha } from '@mui/material';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import { useTranslation } from 'react-i18next';
+import { useKeyboardStatus } from '../../../hooks/useKeyboardStatus';
 
 export interface MobileStudioFabProps {
   onClick: () => void;
@@ -14,6 +15,7 @@ export interface MobileStudioFabProps {
 export const MobileStudioFab: React.FC<MobileStudioFabProps> = ({ onClick }) => {
   const { t } = useTranslation('preview');
   const theme = useTheme();
+  const { isKeyboardVisible } = useKeyboardStatus();
   const isDark = theme.palette.mode === 'dark';
 
   return (
@@ -27,6 +29,9 @@ export const MobileStudioFab: React.FC<MobileStudioFabProps> = ({ onClick }) => 
         zIndex: theme.zIndex.speedDial || 1050,
         width: 54,
         height: 54,
+        transform: isKeyboardVisible ? 'scale(0)' : 'scale(1)',
+        opacity: isKeyboardVisible ? 0 : 1,
+        pointerEvents: isKeyboardVisible ? 'none' : 'auto',
         bgcolor: isDark ? alpha(theme.palette.background.paper, 0.9) : 'background.paper',
         backdropFilter: 'blur(12px)',
         border: `1.5px solid ${isDark ? alpha(theme.palette.divider, 0.8) : alpha(theme.palette.primary.main, 0.28)}`,

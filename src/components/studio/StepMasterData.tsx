@@ -45,6 +45,7 @@ import { StudioSkeleton } from './StudioSkeleton';
 import { ConfirmDeleteDialog } from './common/ConfirmDeleteDialog';
 import { useMasterDataWorkflow } from '../../hooks/useMasterDataWorkflow';
 import { useMasterProfileCompleteness } from '../../hooks/useMasterProfileCompleteness';
+import { useKeyboardStatus } from '../../hooks/useKeyboardStatus';
 import { ProfileCompletenessBar } from './profile/ProfileCompletenessBar';
 import { MasterDataChoiceView } from './profile/MasterDataChoiceView';
 
@@ -63,6 +64,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
   const completeness = useMasterProfileCompleteness(content);
+  const { isKeyboardVisible } = useKeyboardStatus();
 
   const wordCount = React.useMemo(() => {
     if (!content || !content.trim()) return 0;
@@ -446,6 +448,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
 
         {/* Navigation Footer */}
         <Paper
+          elevation={isKeyboardVisible ? 12 : 2}
           sx={{
             p: { xs: 2, sm: 2 },
             px: { xs: 2, sm: 2.5 },
@@ -459,6 +462,21 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             borderRadius: 2,
             gap: { xs: 1.5, sm: 2 },
             boxShadow: 2,
+            // Keyboard anchoring: Dock cleanly at bottom of viewport when virtual keyboard is active on mobile
+            ...(isKeyboardVisible && {
+              position: { xs: 'fixed', sm: 'static' },
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: theme.zIndex.appBar,
+              borderRadius: { xs: 0, sm: 2 },
+              borderBottom: { xs: 'none', sm: `1px solid ${theme.palette.divider}` },
+              p: { xs: 1.25, sm: 2 },
+              px: { xs: 2, sm: 2.5 },
+              flexDirection: { xs: 'row', sm: 'row' },
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }),
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>

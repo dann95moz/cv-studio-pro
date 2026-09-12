@@ -10,6 +10,8 @@ import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 import { useTranslation } from 'react-i18next';
 import { StudioTab } from '../../../types/cv';
 
+import { useKeyboardStatus } from '../../../hooks/useKeyboardStatus';
+
 export interface MobileBottomNavProps {
   activeTab: StudioTab;
   onSelectTab: (tab: StudioTab) => void;
@@ -25,6 +27,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 }) => {
   const { t } = useTranslation('common');
   const theme = useTheme();
+  const { isKeyboardVisible } = useKeyboardStatus();
 
   // Normalize active value for the two primary mobile tabs
   const navValue = activeTab === 'history' ? 'history' : 'wizard';
@@ -42,6 +45,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         bgcolor: 'background.paper',
         borderTop: `1px solid ${theme.palette.divider}`,
         pb: 'max(env(safe-area-inset-bottom), 4px)',
+        transform: isKeyboardVisible ? 'translateY(100%)' : 'translateY(0)',
+        opacity: isKeyboardVisible ? 0 : 1,
+        pointerEvents: isKeyboardVisible ? 'none' : 'auto',
+        transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease',
       }}
     >
       <BottomNavigation
