@@ -60,6 +60,18 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
+  // Ephemeral selection feedback for active touch / loading transitions
+  const [selectedOption, setSelectedOption] = React.useState<'sync' | 'import' | 'form' | null>(null);
+
+  React.useEffect(() => {
+    if (selectedOption && !isProcessing) {
+      const timer = setTimeout(() => {
+        setSelectedOption(null);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedOption, isProcessing]);
+
   // NATIVE APP EXPERIENCE: Content lives directly on screen background (zero-card container, zero-scroll)
   if (platformService.isNative()) {
     return (
@@ -117,6 +129,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           <ButtonBase
             onClick={() => {
               hapticsService.impactLight();
+              setSelectedOption('sync');
               onOpenSync?.('import');
             }}
             sx={{
@@ -128,10 +141,17 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
               justifyContent: 'space-between',
               textAlign: 'left',
               borderRadius: RADIUS_TOKENS.lg,
+              borderLeft: selectedOption === 'sync'
+                ? `4px solid ${theme.palette.primary.main}`
+                : '4px solid transparent',
+              bgcolor: selectedOption === 'sync'
+                ? (isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff')
+                : 'transparent',
               transition: 'all 0.15s ease',
               '&:active': {
                 transform: 'scale(0.985)',
-                bgcolor: alpha(theme.palette.action.hover, 0.08),
+                borderLeft: `4px solid ${theme.palette.primary.main}`,
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff',
               },
             }}
           >
@@ -144,9 +164,12 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
-                  color: 'text.primary',
+                  bgcolor: selectedOption === 'sync'
+                    ? (isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe')
+                    : (isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9'),
+                  color: selectedOption === 'sync' ? 'primary.main' : 'text.primary',
                   flexShrink: 0,
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <QrCodeScannerRoundedIcon sx={{ fontSize: 22 }} />
@@ -170,6 +193,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           <ButtonBase
             onClick={() => {
               hapticsService.impactLight();
+              setSelectedOption('import');
               openFileDialog();
             }}
             sx={{
@@ -181,10 +205,17 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
               justifyContent: 'space-between',
               textAlign: 'left',
               borderRadius: RADIUS_TOKENS.lg,
+              borderLeft: selectedOption === 'import'
+                ? `4px solid ${theme.palette.primary.main}`
+                : '4px solid transparent',
+              bgcolor: selectedOption === 'import'
+                ? (isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff')
+                : 'transparent',
               transition: 'all 0.15s ease',
               '&:active': {
                 transform: 'scale(0.985)',
-                bgcolor: alpha(theme.palette.action.hover, 0.08),
+                borderLeft: `4px solid ${theme.palette.primary.main}`,
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff',
               },
             }}
           >
@@ -197,9 +228,12 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
-                  color: 'text.primary',
+                  bgcolor: selectedOption === 'import'
+                    ? (isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe')
+                    : (isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9'),
+                  color: selectedOption === 'import' ? 'primary.main' : 'text.primary',
                   flexShrink: 0,
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <CloudUploadRoundedIcon sx={{ fontSize: 22 }} />
@@ -239,6 +273,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           <ButtonBase
             onClick={() => {
               hapticsService.impactLight();
+              setSelectedOption('form');
               onSelectGuided();
             }}
             sx={{
@@ -250,10 +285,17 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
               justifyContent: 'space-between',
               textAlign: 'left',
               borderRadius: RADIUS_TOKENS.lg,
+              borderLeft: selectedOption === 'form'
+                ? `4px solid ${theme.palette.primary.main}`
+                : '4px solid transparent',
+              bgcolor: selectedOption === 'form'
+                ? (isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff')
+                : 'transparent',
               transition: 'all 0.15s ease',
               '&:active': {
                 transform: 'scale(0.985)',
-                bgcolor: alpha(theme.palette.action.hover, 0.08),
+                borderLeft: `4px solid ${theme.palette.primary.main}`,
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff',
               },
             }}
           >
@@ -266,9 +308,12 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
-                  color: 'text.primary',
+                  bgcolor: selectedOption === 'form'
+                    ? (isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe')
+                    : (isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9'),
+                  color: selectedOption === 'form' ? 'primary.main' : 'text.primary',
                   flexShrink: 0,
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <FormatListBulletedRoundedIcon sx={{ fontSize: 22 }} />
@@ -500,9 +545,9 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            border: `1.5px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+            border: `1.5px solid ${theme.palette.divider}`,
             borderRadius: 2,
-            bgcolor: alpha(theme.palette.primary.main, 0.02),
+            bgcolor: 'background.paper',
             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             '&:hover': {
               borderColor: theme.palette.primary.main,
