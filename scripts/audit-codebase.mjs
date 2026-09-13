@@ -103,6 +103,19 @@ walkDir(srcDir, (filePath) => {
     if (insideButton && />/.test(lineText)) {
       insideButton = false;
     }
+
+    // I. History Hijacking & Popstate Trapping on Web
+    if (!isComment && /window\.history\.pushState\s*\(/.test(lineText) && !filePath.includes('App.tsx')) {
+      reportError(filePath, lineNum, 'History hijacking via pushState forbidden. Web browser back navigation must remain natural.');
+    }
+
+    // J. Native Exit Guard leakage
+    if (!isComment && /pressBackAgainToExit/.test(lineText)) {
+      const fileText = fs.readFileSync(filePath, 'utf-8');
+      if (!fileText.includes('isNativePlatform()') && !fileText.includes('platformService.isNative()')) {
+        reportError(filePath, lineNum, 'pressBackAgainToExit detected without strict isNative check. Mobile exit toast must never trigger on web.');
+      }
+    }
   });
 });
 

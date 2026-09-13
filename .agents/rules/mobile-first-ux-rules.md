@@ -103,17 +103,94 @@ At the very bottom of the screen (docked and elevated), render a native `BottomN
 
 ---
 
-## 3. Strict Prohibitions & Anti-Patterns for Mobile (`xs`)
+## 3. Touch Ergonomics & Interaction Physics: Fitts's Law + Steven Hoober Thumb Zone
+
+Mobile devices (particularly modern tall aspect ratios like 19.5:9, 20:9, and 21:9) demand strict adherence to human hand biomechanics. Interfaces must never place primary actions at physical reach extremes.
+
+### 3.1. Steven Hoober's Thumb Zone Architecture
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│ [Clock / Battery] ◄── Status Bar (OS reserved)          │
+├─────────────────────────────────────────────────────────┤
+│                     OFF-LIMITS / STRETCH ZONE           │
+│  [Back / Close]                              [Skip]     │ ◄── Safe Top Offset: ≥ 24px–28px + safe-area
+│                                                         │     (Never collide with camera notch or clock)
+│                                                         │
+│               PASSIVE CONTENT / HERO AREA               │
+│               - 3D Illustrations                        │
+│               - Headings & Descriptions                 │
+│               - Preview Canvas / Cards                  │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│               NATURAL REACH (THE SWEET SPOT)            │
+│               - Primary CTAs (Next, Save, Apply)        │
+│               - Floating Action Buttons (FAB)           │ ◄── Highest ergonomic comfort
+│               - Stepper Dots & Paginators               │     (Zero palm strain, fast acquisition)
+│               - Bottom Navigation Tabs                  │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│ ⚠️ THE "CRAMP ZONE" (DO NOT PIN BUTTONS HERE!)          │
+│ ─────────────────────────────────────────────────────── │ ◄── Minimum Bottom Clearance: ≥ 40px–48px
+│ ══════════════════ [Gesture Bar] ══════════════════════ │     (Prevents accidental OS Home navigation)
+└─────────────────────────────────────────────────────────┘
+```
+
+1. **Zone 1: Natural Reach (The Sweet Spot — Bottom 25% to 65% of screen)**:
+   - Primary forward actions (`Next`, `Get Started`, `Save`, `Continue`, `Generate`) MUST sit in this zone.
+   - Secondary paginators (e.g. Stepper Dots) must be clustered **16px–24px directly above** the primary button, forming a cohesive interactive unit.
+
+2. **Zone 2: The "Cramp Zone" Prohibition (Bottom 0px–36px)**:
+   - ❌ **Forbidden**: Sticking primary action buttons right against the bottom edge of the viewport (`pb: 0`, `pb: 8px`, `pb: 16px`).
+   - ⚠️ **The Problem**: Tapping at the extreme bottom edge forces the thumb to fold sharply against the palm (thumb flexor strain) and frequently triggers the OS gesture bar (accidental minimize/home navigation).
+   - ✅ **Mandatory Clearance**: All floating or bottom-docked action containers must enforce:
+     ```tsx
+     pb: 'max(calc(env(safe-area-inset-bottom) + 16px), 42px)'
+     ```
+
+3. **Zone 3: Top Clearance & Notch Immunity (Top 0px–44px)**:
+   - ❌ **Forbidden**: Placing `Skip`, `Back`, or `Close [X]` flush against the top edge or with meager padding (`pt: 8px` / `pt: 16px`).
+   - ⚠️ **The Problem**: Collides with Android status bar icons (battery, clock, wifi) and front camera punch-holes/island cutouts.
+   - ✅ **Mandatory Clearance**: Top headers and dismiss triggers must enforce:
+     ```tsx
+     pt: 'max(calc(env(safe-area-inset-top) + 8px), 26px)'
+     ```
+
+---
+
+### 3.2. Fitts's Law for Mobile Touch Targets
+
+Fitts's Law states that the time $T$ required to rapidly move to a target area is a function of the ratio between the distance to the target ($D$) and the width of the target ($W$):
+$$T = a + b \log_2\left(1 + \frac{D}{W}\right)$$
+
+In CV Studio mobile interfaces, Fitts's Law dictates 3 strict rules:
+
+1. **Maximize Target Width ($W$) for Primary Actions**:
+   - Primary mobile buttons (`Next`, `Comenzar`, `Guardar`) must be **full-width** (`fullWidth`, max-width bounded to 390px–420px) with minimum height **$48\text{px}$–$52\text{px}$**.
+   - Full-width pill buttons reduce acquisition time to near zero because horizontal aiming is eliminated.
+2. **Minimize Inter-Action Distance ($D$) & Kill "Dead Voids"**:
+   - ❌ **Forbidden**: Scattering related controls across screen extremes (e.g. Stepper Dots in the upper half and CTA button 160px below in the abyss via unconstrained `mt: 'auto'`).
+   - ✅ **Mandatory**: Cluster related interactive elements together. Stepper indicators, helper tips, and secondary actions must reside within $16\text{px}$–$24\text{px}$ of the primary CTA.
+3. **Optical Center Balance on Tall Displays**:
+   - On 20:9 mobile displays, content must not be split into disconnected top/bottom islands with a massive empty cavern in between.
+   - The presentation must feel unified: Hero message centered in the upper/mid canvas, and the Action Cluster elevated in the Natural Thumb Zone.
+
+---
+
+## 4. Strict Prohibitions & Anti-Patterns for Mobile (`xs`)
 
 1. ❌ **The "Desktop Toolbar Squeeze"**: Squeezing 5+ buttons onto a mobile header row or allowing toolbars to wrap into multiple lines.
 2. ❌ **Viewport Theft (>20% rule)**: Top headers + toolbars must never consume more than **15–20%** of the mobile screen height. The remaining 80%+ belongs to the candidate's CV.
 3. ❌ **Desktop Side-Rails on Mobile**: Never render a left or right vertical bar that shifts or pushes the mobile preview off-center.
-4. ❌ **Rogue Tiny-Icon Rows**: Never render a row of 5+ micro-icons with 9px labels crammed underneath the canvas.
-5. ❌ **Scattered Global Settings**: Theme and language toggles must not appear in 3 different toolbars. On mobile, they belong exclusively in the `•••` overflow menu.
+4. ❌ **The "Cramp Zone" Anchor**: Pinning primary CTA buttons directly to the bottom bezel without $\ge 40\text{px}$–$48\text{px}$ safe elevation.
+5. ❌ **Notch / Status Bar Collision**: Placing `Skip` or close buttons with `< 24px` top clearance.
+6. ❌ **The 100px+ Empty Void**: Leaving massive dead space between paginators and primary action buttons.
+7. ❌ **Scattered Global Settings**: Theme and language toggles must not appear in 3 different toolbars. On mobile, they belong exclusively in the `•••` overflow menu.
 
 ---
 
-## 4. Responsive Verification Checklist for Agents
+## 5. Responsive Verification Checklist for Agents
 
 Before completing any task affecting UI or layout:
 1. [ ] Is the top header on `xs` clean and single-row with `•••` overflow menu?
@@ -121,3 +198,7 @@ Before completing any task affecting UI or layout:
 3. [ ] Does the document canvas occupy the maximum viewport height without being crowded by stacked bars?
 4. [ ] Are tool panels (Templates, Design, LinkedIn, Diff) accessible via a bottom sheet or FAB?
 5. [ ] Is the bottom navigation (`Estudio`, `Postulaciones`) anchored at the bottom with proper safe-area padding?
+6. [ ] **Fitts's Law Check**: Are primary CTAs full-width with height $\ge 48\text{px}$–$52\text{px}$?
+7. [ ] **Hoober Thumb Zone Check**: Is the bottom CTA elevated out of the "Cramp Zone" ($\ge 42\text{px}$ clearance above gesture bar)?
+8. [ ] **Notch Clearance Check**: Are top actions (`Skip`, `Back`) cleared by $\ge 26\text{px}$ from the top edge?
+9. [ ] **Void Check**: Are paginator dots and CTAs clustered without an artificial 100px+ empty void?
