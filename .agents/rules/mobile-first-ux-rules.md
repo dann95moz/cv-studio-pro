@@ -64,13 +64,12 @@ On mobile viewports (`xs`: 0px–599px), the interface must **not** be a scaled-
 ### Pillar 2: Global `•••` Overflow Bottom Sheet (Zero Floating Menus)
 - ❌ **STRICTLY FORBIDDEN ON APP & MOBILE WEB**: Anchored floating dropdown menus (`<Menu>`, `<Popover>`) floating near the top or middle of the screen.
 - ✅ **MANDATORY**: Tapping `•••` MUST open a native **Slide-Up Bottom Sheet** (`Drawer anchor="bottom"` with top drag handle `—`, `borderTopLeftRadius: 16px`, `borderTopRightRadius: 16px`, and safe-area padding).
-- Encapsulate all meta-actions and secondary tools inside this thumb-zone bottom sheet:
+- Encapsulate meta-actions and system preferences inside this thumb-zone bottom sheet without duplicating primary navigation:
   - `🌐 Idioma app` (Navigates to an in-sheet language selection sub-view with Back button).
   - `☼ Tema` (Theme switcher: Claro / Oscuro).
-  - `▦ Sincronizar (QR)` (Multidevice sync modal trigger).
-  - `📁 Mis Postulaciones` (Job tracker navigation).
   - `📖 Ver Tour / Intro` (Onboarding tour replay).
   - `⌥ Ver en GitHub` (Repository link).
+  *(Note: Primary domain navigation like 'Mis Postulaciones' lives permanently in `MobileBottomNav`, and 'Sincronizar QR' lives in the Step 1 Profile view to prevent redundant action clutter).*
 
 ---
 

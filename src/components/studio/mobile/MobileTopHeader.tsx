@@ -18,10 +18,8 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
-import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
-import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
@@ -39,7 +37,7 @@ export interface MobileTopHeaderProps {
   currentStepNumber?: number;
   totalSteps?: number;
   stepTitle: string;
-  onOpenSync: () => void;
+  onOpenSync?: () => void;
   onOpenWalkthrough?: () => void;
   onOpenApplications?: () => void;
   isWizard?: boolean;
@@ -89,11 +87,6 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
   const handleToggleTheme = () => {
     hapticsService.impactLight();
     toggleThemeMode();
-  };
-
-  const handleSyncClick = () => {
-    handleCloseOptions();
-    onOpenSync();
   };
 
   const handleSelectLanguage = (langCode: SupportedLanguage) => {
@@ -448,55 +441,6 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
                   slotProps={{ input: { 'aria-label': 'theme switcher' } }}
                 />
               </ListItemButton>
-
-              {/* Multidevice Sync (QR) */}
-              <ListItemButton
-                onClick={() => {
-                  hapticsService.impactLight();
-                  handleSyncClick();
-                }}
-                sx={{
-                  py: 1.5,
-                  px: 1.75,
-                  borderRadius: RADIUS_TOKENS.lg,
-                  '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
-                  <QrCode2RoundedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={t('common:nav.syncQr', 'Sincronizar con QR')}
-                  slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
-                />
-                <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
-              </ListItemButton>
-
-              {/* My Applications (Navigates to Applications History) */}
-              {onOpenApplications && (
-                <ListItemButton
-                  onClick={() => {
-                    hapticsService.impactLight();
-                    handleCloseOptions();
-                    onOpenApplications();
-                  }}
-                  sx={{
-                    py: 1.5,
-                    px: 1.75,
-                    borderRadius: RADIUS_TOKENS.lg,
-                    '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
-                    <BusinessRoundedIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={t('common:nav.myApplications', 'Mis Postulaciones')}
-                    slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
-                  />
-                  <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
-                </ListItemButton>
-              )}
 
               {/* View Intro Walkthrough */}
               {onOpenWalkthrough && (
