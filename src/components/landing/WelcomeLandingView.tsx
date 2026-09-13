@@ -21,18 +21,20 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import { useTranslation } from 'react-i18next';
 import { useFileUploader } from '../../hooks/useFileUploader';
 import { useWelcomeLandingWorkflow } from '../../hooks/useWelcomeLandingWorkflow';
 import { ConfirmDeleteDialog } from '../studio/common/ConfirmDeleteDialog';
 import { APP_LINKS } from '../../constants/links';
 import { RADIUS_TOKENS } from '../../theme/dimensions';
+import { platformService } from '../../core/platform';
 
 export interface WelcomeLandingViewProps {
   onStart?: () => void;
   onExploreDemo?: () => void;
   onFileLoaded?: (content: string) => void;
-  onOpenSync?: () => void;
+  onOpenSync?: (tab?: 'export' | 'import') => void;
 }
 
 export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
@@ -46,7 +48,17 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
   const workflow = useWelcomeLandingWorkflow();
   const [showResetConfirm, setShowResetConfirm] = React.useState(false);
 
-  const { fileInputRef, isProcessing, progressMessage, handleFileUpload, openFileDialog } = useFileUploader({
+  const {
+    fileInputRef,
+    isProcessing,
+    progressMessage,
+    handleFileUpload,
+    openFileDialog,
+    isDragging,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useFileUploader({
     onFileLoaded: (content) => {
       if (onFileLoaded) {
         onFileLoaded(content);
@@ -73,7 +85,41 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
   };
 
   return (
-    <div className="welcome-landing-wrapper">
+    <div
+      className="welcome-landing-wrapper"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Full-View Drag Overlay for Desktop Web */}
+      {isDragging && platformService.isDesktopWeb() && (
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 16,
+            zIndex: 9999,
+            bgcolor: alpha(theme.palette.primary.main, 0.12),
+            backdropFilter: 'blur(12px)',
+            border: `2px dashed ${theme.palette.primary.main}`,
+            borderRadius: RADIUS_TOKENS.xl,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            pointerEvents: 'none',
+          }}
+        >
+          <PictureAsPdfRoundedIcon sx={{ fontSize: 64, color: 'primary.main', animation: 'pulse 1.5s infinite' }} />
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main' }}>
+            {t('landing:actions.dragDropBanner', 'Suelta tu archivo (PDF o Markdown) aquí para comenzar')}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {t('landing:capabilities.pdfImport', 'Importador PDF a 1-Clic')}
+          </Typography>
+        </Box>
+      )}
+
       {/* Hidden file input for Landing PDF/MD Import */}
       <input
         type="file"
@@ -268,8 +314,14 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
                   variant="outlined"
                   color="secondary"
                   size="large"
-                  onClick={onOpenSync}
-                  startIcon={<QrCodeScannerRoundedIcon />}
+                  onClick={() => onOpenSync(platformService.isDesktopWeb() ? 'export' : 'import')}
+                  startIcon={
+                    platformService.isDesktopWeb() ? (
+                      <QrCode2RoundedIcon />
+                    ) : (
+                      <QrCodeScannerRoundedIcon />
+                    )
+                  }
                   sx={{
                     px: 3,
                     py: 1.5,
@@ -277,7 +329,9 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
                     fontWeight: 700,
                   }}
                 >
-                  {t('landing:actions.syncFromPc', 'Escanear QR de PC')}
+                  {platformService.isDesktopWeb()
+                    ? t('landing:actions.syncToPhone', 'Sincronizar con Móvil (QR)')
+                    : t('landing:actions.syncFromPc', 'Escanear QR de PC')}
                 </Button>
               )}
 
@@ -336,7 +390,7 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
               variant="contained"
               color="secondary"
               size="small"
-              onClick={onOpenSync}
+              onClick={() => onOpenSync('import')}
               startIcon={<QrCodeScannerRoundedIcon />}
               sx={{ fontWeight: 700, mt: 0.75, width: '100%' }}
             >

@@ -19,7 +19,8 @@
     "syncQr": "Sincronizar (QR)",
     "viewGithub": "Ver en GitHub",
     "stepCounter": "Paso {{current}} de {{total}} · {{title}}",
-    "pressBackAgainToExit": "Presiona atrás de nuevo para salir"
+    "pressBackAgainToExit": "Presiona atrás de nuevo para salir",
+    "viewWalkthrough": "Ver introducción"
   },
   "badge": {
     "optional": "Opcional",
@@ -149,5 +150,30 @@
     "restoredPrevious": "Se ha restaurado tu espacio de trabajo previo.",
     "downloadError": "No se pudo descargar el espacio de trabajo del dispositivo.",
     "undo": "Deshacer"
+  },
+  "onboarding": {
+    "skip": "Omitir",
+    "previous": "Atrás",
+    "next": "Siguiente",
+    "getStarted": "Comenzar",
+    "haveAccountPrompt": "¿Ya tienes un CV previo?",
+    "step1": {
+      "title": "Tu Perfil Profesional",
+      "description": "Construye tu base de experiencia, habilidades y logros con un formato estructurado y optimizado."
+    },
+    "step2": {
+      "title": "Adaptación Inteligente",
+      "description": "Pega la oferta laboral deseada y adapta tus puntos fuertes para superar los filtros ATS con IA."
+    },
+    "step3": {
+      "title": "Tu Estudio en Cualquier Lugar",
+      "description": "Genera PDFs profesionales de alta fidelidad y sincroniza al instante tu espacio de trabajo con tu ordenador vía QR."
+    },
+    "actions": {
+      "startBlank": "Empezar a crear CV",
+      "scanPc": "Escanear QR de PC",
+      "importPdf": "Importar PDF existente",
+      "loadSample": "Cargar Ejemplo"
+    }
   }
 }

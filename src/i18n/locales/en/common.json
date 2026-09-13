@@ -19,7 +19,8 @@
     "syncQr": "Sync (QR)",
     "viewGithub": "View on GitHub",
     "stepCounter": "Step {{current}} of {{total}} · {{title}}",
-    "pressBackAgainToExit": "Press back again to exit"
+    "pressBackAgainToExit": "Press back again to exit",
+    "viewWalkthrough": "View Tour / Intro"
   },
   "badge": {
     "optional": "Optional",
@@ -149,5 +150,30 @@
     "restoredPrevious": "Previous workspace has been restored.",
     "downloadError": "Could not download workspace from device.",
     "undo": "Undo"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "previous": "Previous",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "haveAccountPrompt": "Already have an existing CV?",
+    "step1": {
+      "title": "Track Your Profile",
+      "description": "Build your comprehensive career baseline, skills, and achievements in an intuitive structured format."
+    },
+    "step2": {
+      "title": "Smart Tailoring",
+      "description": "Paste any target job posting and align your key strengths to beat ATS filters with precision AI."
+    },
+    "step3": {
+      "title": "Your Studio Everywhere",
+      "description": "Generate print-perfect ATS PDFs and seamlessly sync your workspace with your computer via QR code."
+    },
+    "actions": {
+      "startBlank": "Start Building Resume",
+      "scanPc": "Scan PC QR Code",
+      "importPdf": "Import Existing PDF",
+      "loadSample": "Load Sample Demo"
+    }
   }
 }

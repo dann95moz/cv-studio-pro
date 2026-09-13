@@ -19,7 +19,8 @@
     "syncQr": "Synchronisieren (QR)",
     "viewGithub": "Auf GitHub ansehen",
     "stepCounter": "Schritt {{current}} von {{total}} · {{title}}",
-    "pressBackAgainToExit": "Drücken Sie erneut Zurück, um zu beenden"
+    "pressBackAgainToExit": "Drücken Sie erneut Zurück, um zu beenden",
+    "viewWalkthrough": "Einführung ansehen"
   },
   "badge": {
     "optional": "Optional",
@@ -149,5 +150,30 @@
     "restoredPrevious": "Vorheriger Arbeitsbereich wurde wiederhergestellt.",
     "downloadError": "Arbeitsbereich konnte nicht vom Gerät heruntergeladen werden.",
     "undo": "Rückgängig"
+  },
+  "onboarding": {
+    "skip": "Überspringen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "getStarted": "Loslegen",
+    "haveAccountPrompt": "Haben Sie bereits einen Lebenslauf?",
+    "step1": {
+      "title": "Dein Karriereprofil",
+      "description": "Erstelle deine berufliche Basis, Fähigkeiten und Erfolge in einem klar strukturierten Format."
+    },
+    "step2": {
+      "title": "Intelligente Anpassung",
+      "description": "Füge Stellenanzeigen ein und passe deine Stärken mit KI gezielt an, um ATS-Filter zu übertreffen."
+    },
+    "step3": {
+      "title": "Alles nahtlos synchronisiert",
+      "description": "Erstellen Sie erstklassige ATS-PDFs und synchronisieren Sie Ihren Arbeitsbereich nahtlos per QR-Code mit Ihrem PC."
+    },
+    "actions": {
+      "startBlank": "Lebenslauf erstellen",
+      "scanPc": "PC-QR-Code scannen",
+      "importPdf": "Bestehendes PDF importieren",
+      "loadSample": "Beispiel laden"
+    }
   }
 }

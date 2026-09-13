@@ -33,7 +33,9 @@
     "importPdfHero": "PDF-Lebenslauf importieren",
     "syncFromPc": "Von PC synchronisieren (QR)",
     "syncFromPcTitle": "Lebenslauf bereits am PC erstellt?",
-    "syncFromPcDesc": "Übertragen Sie Master-Lebenslauf, Versionen und Bewerbungen sofort per QR-Scan oder Code."
+    "syncFromPcDesc": "Übertragen Sie Master-Lebenslauf, Versionen und Bewerbungen sofort per QR-Scan oder Code.",
+    "syncToPhone": "Mit Smartphone synchronisieren (QR)",
+    "dragDropBanner": "Datei (PDF oder Markdown) hier ablegen, um zu starten"
   },
   "dialog": {
     "confirmNewCvTitle": "Neuen Lebenslauf beginnen?",

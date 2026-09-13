@@ -19,7 +19,8 @@
     "syncQr": "Sincronizza (QR)",
     "viewGithub": "Vedi su GitHub",
     "stepCounter": "Passo {{current}} di {{total}} · {{title}}",
-    "pressBackAgainToExit": "Premi di nuovo indietro per uscire"
+    "pressBackAgainToExit": "Premi di nuovo indietro per uscire",
+    "viewWalkthrough": "Guarda introduzione"
   },
   "badge": {
     "optional": "Opzionale",
@@ -149,5 +150,30 @@
     "restoredPrevious": "L'area di lavoro precedente è stata ripristinata.",
     "downloadError": "Impossibile scaricare l'area di lavoro dal dispositivo.",
     "undo": "Annulla"
+  },
+  "onboarding": {
+    "skip": "Salta",
+    "previous": "Indietro",
+    "next": "Avanti",
+    "getStarted": "Inizia",
+    "haveAccountPrompt": "Hai già un CV esistente?",
+    "step1": {
+      "title": "Il Tuo Profilo Pro",
+      "description": "Costruisci la tua base di esperienza, competenze e risultati in un formato strutturato e ottimizzato."
+    },
+    "step2": {
+      "title": "Adattamento Intelligente",
+      "description": "Incolla l'annuncio di lavoro e allinea i tuoi punti di forza per superare i filtri ATS con l'IA."
+    },
+    "step3": {
+      "title": "Il Tuo Studio Ovunque",
+      "description": "Genera PDF ATS impeccabili e sincronizza istantaneamente il tuo spazio di lavoro con il computer tramite codice QR."
+    },
+    "actions": {
+      "startBlank": "Crea CV da zero",
+      "scanPc": "Scansiona QR da PC",
+      "importPdf": "Importa PDF esistente",
+      "loadSample": "Carica esempio"
+    }
   }
 }

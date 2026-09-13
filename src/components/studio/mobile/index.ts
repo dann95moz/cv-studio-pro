@@ -4,3 +4,4 @@ export * from './MobileDiagnosticBar';
 export * from './MobileBottomNav';
 export * from './MobileToolsBottomSheet';
 export * from './MobileStudioFab';
+export * from './MobileOnboardingWalkthrough';

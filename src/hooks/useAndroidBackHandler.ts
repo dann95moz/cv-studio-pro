@@ -22,6 +22,15 @@ export function useAndroidBackHandler(): void {
   const lastBackPressRef = useRef<number>(0);
 
   useEffect(() => {
+    // STRICT PLATFORM ISOLATION:
+    // This hook is exclusively for native Android/Capacitor containers with a physical
+    // or system gesture back button.
+    // On Desktop Web and Mobile Web, browser navigation history must NEVER be hijacked
+    // with dummy pushStates, popstate traps, or "Press back again to exit" mobile toasts.
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
     const handleSystemBack = () => {
       // 1. Check if any modal, drawer, or bottom sheet registered in the registry intercepts the back action
       const handled = backButtonRegistry.dispatch();
@@ -45,12 +54,10 @@ export function useAndroidBackHandler(): void {
         return;
       }
 
-      // 3. Root Level Exit Guard (Double tap to exit within 2000ms)
+      // 3. Root Level Exit Guard (Double tap to exit within 2000ms on native Android)
       const now = Date.now();
       if (now - lastBackPressRef.current < 2000) {
-        if (Capacitor.isNativePlatform()) {
-          App.exitApp();
-        }
+        App.exitApp();
       } else {
         lastBackPressRef.current = now;
         showNotification({
@@ -63,41 +70,27 @@ export function useAndroidBackHandler(): void {
     // Safely bind to Capacitor App backButton event
     let capacitorRemoveListener: (() => void) | undefined;
 
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const res = App.addListener('backButton', () => {
-          handleSystemBack();
-        }) as unknown;
+    try {
+      const res = App.addListener('backButton', () => {
+        handleSystemBack();
+      }) as unknown;
 
-        if (res && typeof (res as Promise<{ remove: () => void }>).then === 'function') {
-          (res as Promise<{ remove: () => void }>).then((handle) => {
-            if (handle && typeof handle.remove === 'function') {
-              capacitorRemoveListener = () => handle.remove();
-            }
-          }).catch((err) => {
-            console.debug('[useAndroidBackHandler] Capacitor App listener error:', err);
-          });
-        } else if (res && typeof (res as { remove: () => void }).remove === 'function') {
-          capacitorRemoveListener = () => (res as { remove: () => void }).remove();
-        }
-      } catch (err) {
-        console.debug('[useAndroidBackHandler] Capacitor App listener unavailable:', err);
+      if (res && typeof (res as Promise<{ remove: () => void }>).then === 'function') {
+        (res as Promise<{ remove: () => void }>).then((handle) => {
+          if (handle && typeof handle.remove === 'function') {
+            capacitorRemoveListener = () => handle.remove();
+          }
+        }).catch((err) => {
+          console.debug('[useAndroidBackHandler] Capacitor App listener error:', err);
+        });
+      } else if (res && typeof (res as { remove: () => void }).remove === 'function') {
+        capacitorRemoveListener = () => (res as { remove: () => void }).remove();
       }
+    } catch (err) {
+      console.debug('[useAndroidBackHandler] Capacitor App listener unavailable:', err);
     }
 
-    // Web popstate fallback: push a state so the browser back button triggers our handler
-    const handlePopState = (e: PopStateEvent) => {
-      e.preventDefault();
-      handleSystemBack();
-      // Keep state in history so back gestures continue to be intercepted
-      window.history.pushState({ cvStudioNavigation: true }, '', window.location.href);
-    };
-
-    window.history.pushState({ cvStudioNavigation: true }, '', window.location.href);
-    window.addEventListener('popstate', handlePopState);
-
     return () => {
-      window.removeEventListener('popstate', handlePopState);
       capacitorRemoveListener?.();
     };
   }, [activeTab, wizardStep, setActiveTab, setWizardStep, showNotification, t]);

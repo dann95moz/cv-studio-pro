@@ -32,7 +32,9 @@
     "importPdfHero": "Importa CV in PDF",
     "syncFromPc": "Sincronizza da PC (QR)",
     "syncFromPcTitle": "Hai già creato il tuo CV su PC?",
-    "syncFromPcDesc": "Trasferisci istantaneamente il tuo Master CV, versioni e candidature scansionando il QR o con il tuo codice."
+    "syncFromPcDesc": "Trasferisci istantaneamente il tuo Master CV, versioni e candidature scansionando il QR o con il tuo codice.",
+    "syncToPhone": "Sincronizza con Smartphone (QR)",
+    "dragDropBanner": "Trascina il file (PDF o Markdown) qui per iniziare"
   },
   "dialog": {
     "confirmNewCvTitle": "Iniziare un nuovo CV?",
