@@ -100,16 +100,16 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           onChange={onUploadFile}
         />
 
-        {/* Main Title directly on screen background (calm semibold typography) */}
+        {/* Main Title directly on screen background (calm medium typography for context) */}
         <Box sx={{ mb: 2.5, px: 0.5 }}>
           <Typography
             variant="h5"
             component="h1"
             sx={{
-              fontWeight: 600,
-              fontSize: { xs: '1.42rem', sm: '1.65rem' },
-              letterSpacing: '-0.02em',
-              lineHeight: 1.28,
+              fontWeight: 500,
+              fontSize: { xs: '1.35rem', sm: '1.5rem' },
+              letterSpacing: '-0.01em',
+              lineHeight: 1.3,
               color: 'text.primary',
             }}
           >
@@ -419,10 +419,10 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 800,
+            fontWeight: 500,
             mb: { xs: 0.5, sm: 1.2 },
-            letterSpacing: '-0.02em',
-            fontSize: { xs: '1.35rem', sm: '1.85rem', md: '2.1rem' },
+            letterSpacing: '-0.01em',
+            fontSize: { xs: '1.35rem', sm: '1.75rem', md: '1.95rem' },
           }}
         >
           {t('profile:choice.title', 'How would you like to start your profile?')}

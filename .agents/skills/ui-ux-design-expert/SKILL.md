@@ -87,6 +87,14 @@ All visual styles must derive from the centralized design system:
     2. **Explicit Recommendation Badge**: Express recommendation solely via an explicit textual badge (e.g. `<Chip label="Recommended" size="small" />`).
     3. **Selection Affordance**: Reserve the accent border and tinted surface exclusively for active touches (`:active`), loading transitions, or when an item has truly been selected.
 
+### 4.7. Typographic Weight Hierarchy in Choice & Decision Screens
+- **The Heavy Title Pitfall**:
+  - ❌ **Anti-Pattern**: Using ultra-heavy font weights (`fontWeight: 800` or aggressive black styles) on introductory questions or context headers (e.g. *"How would you like to start your profile?"*).
+  - **Why It Fails**: A dense, heavy black title monopolizes visual attention and exerts excessive visual gravity, competing directly with the interactive choices below it rather than gracefully introducing them.
+  - ✅ **Standard**:
+    - **Context vs. Action**: The headline sets the scene, but the interactive options are the true protagonists of the screen.
+    - **Medium Weight (`fontWeight: 500`)**: Give decision screen headers a calm, refined medium weight (`500`) and clean letter-spacing (`-0.01em`). This creates natural visual hierarchy: the title provides context without visual aggression, allowing the interactive options (`600` / `700`) to hold clear focal priority.
+
 ---
 
 ## 5. Accessibility (a11y) & Usability Checklist
@@ -109,6 +117,7 @@ When creating or modifying components:
 - [ ] **Semantic Icons**: Use Settings (⚙) for global app preferences, not `•••` or kebab.
 - [ ] **Inset Dividers**: Lists with leading icons must use inset dividers (`ml: '72px'`) aligned to text.
 - [ ] **Recommended vs Selected**: Do NOT pre-highlight "Recommended" items with active borders/backgrounds. Use only explicit badge chips.
+- [ ] **Calm Context Typography**: Choice screen titles must use medium weight (`fontWeight: 500`) to provide calm context without overpowering interactive options.
 
 
 
