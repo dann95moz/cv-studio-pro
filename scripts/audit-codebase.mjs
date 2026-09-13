@@ -116,6 +116,13 @@ walkDir(srcDir, (filePath) => {
         reportError(filePath, lineNum, 'pressBackAgainToExit detected without strict isNative check. Mobile exit toast must never trigger on web.');
       }
     }
+
+    // K. Zero Floating Menus (<Menu>, <Popover>) in Mobile Components
+    if (filePath.includes(path.join('src', 'components', 'studio', 'mobile')) && !isComment) {
+      if (/<Menu\b/.test(lineText) || /<Popover\b/.test(lineText)) {
+        reportError(filePath, lineNum, 'Floating <Menu> or <Popover> detected in mobile component. All secondary choices on Mobile/Native must use slide-up Bottom Sheets (<Drawer anchor="bottom">).');
+      }
+    }
   });
 });
 

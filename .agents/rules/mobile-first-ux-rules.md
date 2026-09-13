@@ -61,23 +61,25 @@ On mobile viewports (`xs`: 0px–599px), the interface must **not** be a scaled-
 
 ---
 
-### Pillar 2: Global `•••` Overflow Menu (Progressive Disclosure)
-All meta-actions and secondary tools must be encapsulated inside the top-right `•••` menu:
-- `🌐 Idioma app` (Language switcher with current code, e.g. `ES`).
-- `☼ Tema` (Theme switcher: Claro / Oscuro).
-- `▦ Sincronizar (QR)` (Multidevice sync modal trigger).
-- `⌥ Ver en GitHub` (Repository link).
-- Secondary export actions (Download Plain Text ATS, Download DOCX, Download Markdown).
+### Pillar 2: Global `•••` Overflow Bottom Sheet (Zero Floating Menus)
+- ❌ **STRICTLY FORBIDDEN ON APP & MOBILE WEB**: Anchored floating dropdown menus (`<Menu>`, `<Popover>`) floating near the top or middle of the screen.
+- ✅ **MANDATORY**: Tapping `•••` MUST open a native **Slide-Up Bottom Sheet** (`Drawer anchor="bottom"` with top drag handle `—`, `borderTopLeftRadius: 16px`, `borderTopRightRadius: 16px`, and safe-area padding).
+- Encapsulate all meta-actions and secondary tools inside this thumb-zone bottom sheet:
+  - `🌐 Idioma app` (Navigates to an in-sheet language selection sub-view with Back button).
+  - `☼ Tema` (Theme switcher: Claro / Oscuro).
+  - `▦ Sincronizar (QR)` (Multidevice sync modal trigger).
+  - `📁 Mis Postulaciones` (Job tracker navigation).
+  - `📖 Ver Tour / Intro` (Onboarding tour replay).
+  - `⌥ Ver en GitHub` (Repository link).
 
 ---
 
-### Pillar 3: Contextual Secondary Document Bar
+### Pillar 3: Contextual Secondary Document Bar (Bottom Sheet Pickers)
 Immediately beneath the top header, render a clean, horizontal secondary control bar:
-- **Document Selector**: A compact rounded dropdown button showing the active document:
-  - `📄 Currículum ⌄`
-  - `✉ Carta de presentación ⌄`
-- **Language Variant**: A compact chip/button showing the active document language:
-  - `EN ⌄` / `ES ⌄` (tapping opens the translation variant picker or modal).
+- **Document Selector**: A compact rounded button showing the active document (`📄 Currículum ⌄` / `✉ Carta de presentación ⌄`).
+  - Tapping MUST open a **Slide-Up Bottom Sheet** to switch document types. Floating `<Menu>` is strictly forbidden.
+- **Language Variant**: A compact chip showing the active document language (`EN ⌄` / `ES ⌄`).
+  - Tapping MUST open a **Slide-Up Bottom Sheet** listing available translation variants and the AI translation trigger. Floating `<Menu>` is strictly forbidden.
 - ❌ **Forbidden**: Adding more than these 2 controls in this row on mobile.
 
 ---
@@ -91,7 +93,8 @@ Instead of desktop side rails or horizontal icon bars eating screen space:
   2. `🎨 Diseño & Formato` (Theme, font, spacing, margins).
   3. `in LinkedIn` (LinkedIn profile generator).
   4. `⇄ Comparar` (Version diff & history).
-- Tapping any item closes the bottom sheet and opens the dedicated focused editor or modal.
+- **Secondary Actions & Export Formats**: Tapping "Descargar / Exportar" transitions seamlessly to an in-sheet sub-view (`activeView: 'export'`) with a Back arrow button (`<`), never opening a floating `<Menu>` or nested popup.
+- Tapping any tool item closes the bottom sheet and opens the dedicated focused editor or modal.
 
 ---
 
@@ -187,6 +190,7 @@ In CV Studio mobile interfaces, Fitts's Law dictates 3 strict rules:
 5. ❌ **Notch / Status Bar Collision**: Placing `Skip` or close buttons with `< 24px` top clearance.
 6. ❌ **The 100px+ Empty Void**: Leaving massive dead space between paginators and primary action buttons.
 7. ❌ **Scattered Global Settings**: Theme and language toggles must not appear in 3 different toolbars. On mobile, they belong exclusively in the `•••` overflow menu.
+8. ❌ **Floating / Anchored Menus (`<Menu>`, `<Popover>`)**: Floating popover menus anchored to header icons, dropdown triggers, or toolbar buttons are strictly forbidden on mobile. Every secondary choice, menu, or format picker MUST open as a slide-up Bottom Sheet (`Drawer anchor="bottom"`).
 
 ---
 
@@ -194,7 +198,7 @@ In CV Studio mobile interfaces, Fitts's Law dictates 3 strict rules:
 
 Before completing any task affecting UI or layout:
 1. [ ] Is the top header on `xs` clean and single-row with `•••` overflow menu?
-2. [ ] Are global settings (theme, app language, sync QR, GitHub) located in the `•••` menu on mobile?
+2. [ ] Are global settings (theme, app language, sync QR, GitHub) located in the `•••` bottom sheet on mobile?
 3. [ ] Does the document canvas occupy the maximum viewport height without being crowded by stacked bars?
 4. [ ] Are tool panels (Templates, Design, LinkedIn, Diff) accessible via a bottom sheet or FAB?
 5. [ ] Is the bottom navigation (`Estudio`, `Postulaciones`) anchored at the bottom with proper safe-area padding?
@@ -202,3 +206,4 @@ Before completing any task affecting UI or layout:
 7. [ ] **Hoober Thumb Zone Check**: Is the bottom CTA elevated out of the "Cramp Zone" ($\ge 42\text{px}$ clearance above gesture bar)?
 8. [ ] **Notch Clearance Check**: Are top actions (`Skip`, `Back`) cleared by $\ge 26\text{px}$ from the top edge?
 9. [ ] **Void Check**: Are paginator dots and CTAs clustered without an artificial 100px+ empty void?
+10. [ ] **Zero Floating Menus Check**: Are all dropdowns, submenus, overflow options, and format pickers implemented as slide-up Bottom Sheets (`Drawer anchor="bottom"`) with 0 `<Menu>` or `<Popover>` components?

@@ -61,6 +61,7 @@ Mobile Web users interact via touch screens within mobile browsers (Safari, Chro
   - **Single Column Layout**: Multi-column desktop grids must cleanly collapse to a single ergonomic column.
   - **Thumb-Zone Navigation**: Use `MobileBottomNav` for quick switching between *Estudio* and *Postulaciones*.
   - **Top Header Clearance**: Compact single row ($52\text{px}$–$56\text{px}$) with safe top offset ($\ge 26\text{px}$ + safe-area) to avoid notch and clock collisions. See [mobile-first-ux-rules.md](file:///.agents/rules/mobile-first-ux-rules.md).
+  - **Bottom Sheet Paradigm for All Secondary Choices**: Every secondary menu, overflow options (`•••`), format picker, language switcher, or document selector MUST open as a slide-up Bottom Sheet (`Drawer anchor="bottom"`). Floating dropdown menus (`<Menu>`, `<Popover>`) are strictly forbidden.
 
 ### 3.2. Graceful Hardware Fallbacks
 - ❌ **STRICTLY FORBIDDEN**: Calling native Capacitor plugins (camera, filesystem, background task) that reject or crash in mobile browsers.
@@ -86,6 +87,7 @@ The Android application runs inside Capacitor with direct access to device hardw
 
 ### 4.2. Native Hardware & OS Integrations
 - ✅ **MANDATORY**:
+  - **Bottom Sheet Paradigm for All Secondary Choices**: All secondary actions, settings, overflow choices, and export formats MUST open as slide-up Bottom Sheets (`Drawer anchor="bottom"` with top drag handle and rounded corners). Floating dropdown menus (`<Menu>`, `<Popover>`) are strictly forbidden across the native app.
   - **First-Run Onboarding**: The 3-screen Onboarding Walkthrough (`MobileOnboardingWalkthrough`) with interactive gestures and illustrations auto-opens exclusively on the first launch of the native app.
   - **Instant Camera QR Scanner**: Tapping *"Escanear QR de PC"* launches ML Kit Barcode Scanning directly via the physical camera.
   - **Safe-Area Insets**: All top headers and bottom navigation bars must apply `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)` to respect camera notches and system navigation bars.
@@ -111,4 +113,5 @@ Before completing any task affecting layout, navigation, or platform features:
 4. [ ] Does Desktop Web support full-screen Drag & Drop for resume files?
 5. [ ] Do native Capacitor calls safely guard against browser environments?
 6. [ ] **Native App Landing Immunity**: Does the native app bypass `WelcomeLandingView` and go directly to `wizard`?
-6. [ ] Does `npm run check:compliance` exit cleanly with 0 errors and 0 warnings?
+7. [ ] **Zero Floating Menus on Mobile/Native**: Are all secondary menus, pickers, and overflow options implemented as slide-up Bottom Sheets (`Drawer anchor="bottom"`) with zero `<Menu>` or `<Popover>` components in mobile views?
+8. [ ] Does `npm run check:compliance` exit cleanly with 0 errors and 0 warnings?
