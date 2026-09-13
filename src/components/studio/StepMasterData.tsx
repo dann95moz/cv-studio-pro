@@ -6,8 +6,6 @@ import {
   Button,
   IconButton,
   Chip,
-  CircularProgress,
-  Stack,
   Tooltip,
   ButtonGroup,
   Dialog,
@@ -27,7 +25,6 @@ import { StepFooterStatus } from '../atoms/StepFooterStatus';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
-import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import FileDownloadRoundedIcon from '@mui/icons-material/FileDownloadRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
@@ -39,7 +36,6 @@ import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { useTranslation } from 'react-i18next';
 import { StepMasterDataProps } from '../../types';
 import { StudioSkeleton } from './StudioSkeleton';
@@ -52,7 +48,6 @@ import { MasterDataChoiceView } from './profile/MasterDataChoiceView';
 import { platformService } from '../../core/platform';
 import { backButtonRegistry } from '../../core/backButtonRegistry';
 import { hapticsService } from '../../core/haptics';
-import { RADIUS_TOKENS } from '../../theme/dimensions';
 
 const GuidedProfileForm = React.lazy(() =>
   import('./GuidedProfileForm').then((m) => ({ default: m.GuidedProfileForm }))
@@ -246,33 +241,8 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
               borderRadius: 2,
             }}
           >
-            <Box sx={{ maxWidth: 720 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25, flexWrap: 'wrap' }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<ArrowBackRoundedIcon />}
-                  onClick={() => {
-                    hapticsService.impactLight();
-                    handleResetToChoice();
-                  }}
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.82rem',
-                    color: 'text.secondary',
-                    borderColor: 'divider',
-                    borderRadius: RADIUS_TOKENS.full,
-                    textTransform: 'none',
-                    '&:hover': {
-                      color: 'text.primary',
-                      borderColor: 'text.secondary',
-                      bgcolor: alpha(theme.palette.text.primary, 0.04),
-                    },
-                  }}
-                >
-                  {t('profile:actions.backToOptions', 'Volver a opciones')}
-                </Button>
-
+            <Box sx={{ width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, mb: 1.25, flexWrap: 'wrap' }}>
                 <ToggleButtonGroup
                   size="small"
                   value={editMode}
@@ -316,8 +286,33 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                     {t('profile:modes.freeTextShort', 'Career Notes')}
                   </ToggleButton>
                 </ToggleButtonGroup>
+
+                {hasData && (
+                  <Tooltip title={t('profile:actions.clearProfileTip', 'Clear all profile fields and start from a blank slate')}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowClearConfirmDialog(true)}
+                      disabled={isProcessing}
+                      aria-label={t('profile:actions.clearProfile', 'Start from Scratch')}
+                      sx={{
+                        color: 'text.secondary',
+                        border: `1px solid ${theme.palette.divider}`,
+                        p: 0.75,
+                        flexShrink: 0,
+                        '&:hover': {
+                          borderColor: theme.palette.error.main,
+                          color: theme.palette.error.main,
+                          bgcolor: alpha(theme.palette.error.main, 0.08),
+                        },
+                      }}
+                    >
+                      <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Box>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5 }}>
+
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5, fontSize: { xs: '1.25rem', sm: '1.45rem' } }}>
                 {editMode === 'guided'
                   ? t('profile:modes.guidedTitle', 'Guided Profile Form')
                   : t('profile:modes.freeTextTitle', 'Free Text & Career Notes')}
@@ -334,60 +329,6 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                     )}
               </Typography>
             </Box>
-
-            {/* Mode Actions */}
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={1}
-              sx={{
-                width: { xs: '100%', sm: 'auto' },
-                alignItems: { xs: 'stretch', sm: 'center' },
-                flexShrink: 0,
-              }}
-            >
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={
-                  isProcessing ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : (
-                    <CloudUploadRoundedIcon />
-                  )
-                }
-                onClick={openFileDialog}
-                disabled={isProcessing}
-                sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}
-              >
-                {isProcessing
-                  ? (progressMessage || t('profile:actions.importing', 'Extracting PDF...'))
-                  : t('profile:actions.importResume', 'Import File')}
-              </Button>
-
-              {hasData && (
-                <Tooltip title={t('profile:actions.clearProfileTip', 'Clear all profile fields and start from a blank slate')}>
-                  <IconButton
-                    size="small"
-                    onClick={() => setShowClearConfirmDialog(true)}
-                    disabled={isProcessing}
-                    aria-label={t('profile:actions.clearProfile', 'Start from Scratch')}
-                    sx={{
-                      color: 'text.secondary',
-                      border: `1px solid ${theme.palette.divider}`,
-                      p: 0.75,
-                      flexShrink: 0,
-                      '&:hover': {
-                        borderColor: theme.palette.error.main,
-                        color: theme.palette.error.main,
-                        bgcolor: alpha(theme.palette.error.main, 0.08),
-                      },
-                    }}
-                  >
-                    <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Stack>
           </Paper>
 
           {/* VIEW 2: Pure Guided Form (When in guided mode) */}

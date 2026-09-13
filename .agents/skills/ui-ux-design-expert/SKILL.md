@@ -99,11 +99,12 @@ All visual styles must derive from the centralized design system:
 - **The One-Way Gate Anti-Pattern**:
   - ❌ **Anti-Pattern**: Transitioning the candidate into a detail form or sub-flow without an explicit, visible, and system-level path back to the parent options screen.
   - **Why It Fails**: Exploration is natural. Candidates tap "Guided form" or "Notes" just to explore what it entails. If they can't go back, they feel trapped and anxious about losing context or being committed to the wrong path.
-  - ✅ **Standard (Triple-Tier Back Affordance)**:
-    1. **Top App Bar Navigation Icon**: The header bar displays a back arrow (`[←]`) whenever the user is in a sub-view or non-root step.
-    2. **In-View Context Button**: Provide an in-view control (`[← Back to options]` / `[← Volver a opciones]`) directly above the sub-form.
-    3. **Android Hardware & Gesture Back**: Register an interceptor with `backButtonRegistry` so system back gestures and hardware buttons return to the choice screen seamlessly without exiting the app.
-    4. **Preserve Ephemeral State**: Returning to the options screen must never discard already typed data; store state safely so re-entering resumes without data loss.
+  - ✅ **Standard (Clean Canonical Back Affordance)**:
+    1. **Top App Bar Navigation Icon**: The header bar displays a clean back arrow (`[←]`) whenever the user is in a sub-view or non-root step.
+    2. **Zero Redundant In-View Buttons**: Never duplicate the top back arrow with a redundant "Back to Options" button in the content card below. Having two back triggers stacked vertically creates cognitive noise and steals vertical space.
+    3. **Zero Redundant Alternative Actions**: Do not clutter the sub-form with actions already provided by the parent choice screen (e.g. "Import PDF" inside the Guided Form). Tapping `←` returns to the canonical home of those actions.
+    4. **Android Hardware & Gesture Back**: Register an interceptor with `backButtonRegistry` so system back gestures and hardware buttons return to the choice screen seamlessly without exiting the app.
+    5. **Preserve Ephemeral State**: Returning to the options screen must never discard already typed data; store state safely so re-entering resumes without data loss.
 
 ---
 
