@@ -60,19 +60,19 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  // NATIVE APP EXPERIENCE: Compact, single-screen, zero-scroll 3-row layout matching reference
+  // NATIVE APP EXPERIENCE: Content lives directly on screen background (zero-card container, zero-scroll)
   if (platformService.isNative()) {
     return (
       <Box
         sx={{
           width: '100%',
-          maxWidth: 440,
+          maxWidth: 460,
           mx: 'auto',
           display: 'flex',
           flexDirection: 'column',
           px: { xs: 2, sm: 2.5 },
-          pt: { xs: 1.5, sm: 2.5 },
-          pb: 3,
+          pt: { xs: 2, sm: 3 },
+          pb: 2,
           boxSizing: 'border-box',
           position: 'relative',
         }}
@@ -86,231 +86,220 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           onChange={onUploadFile}
         />
 
-        {/* Outer Card Container matching mockup */}
-        <Paper
-          elevation={0}
-          sx={{
-            width: '100%',
-            p: { xs: 2.5, sm: 3 },
-            borderRadius: RADIUS_TOKENS.xl,
-            border: `1px solid ${theme.palette.divider}`,
-            bgcolor: 'background.paper',
-            boxSizing: 'border-box',
-          }}
-        >
-          {/* Main Title & Subtitle */}
-          <Box sx={{ mb: 2 }}>
-            <Typography
-              variant="h5"
-              component="h1"
-              sx={{
-                fontWeight: 800,
-                fontSize: { xs: '1.45rem', sm: '1.65rem' },
-                letterSpacing: '-0.025em',
-                lineHeight: 1.25,
-                color: 'text.primary',
-                mb: 0.75,
-              }}
-            >
-              {t('profile:choice.title', '¿Cómo querés empezar tu perfil?')}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.secondary',
-                fontSize: '0.92rem',
-                fontWeight: 400,
-                lineHeight: 1.4,
-              }}
-            >
-              {t('profile:choice.nativeSubtitle', 'Elegí una opción para continuar.')}
-            </Typography>
-          </Box>
-
-          {/* Divider separating header from options */}
-          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, mb: 1.5 }} />
-
-          {/* 3 Native Interactive Option Rows */}
-          <Box
+        {/* Main Title & Subtitle directly on screen background */}
+        <Box sx={{ mb: 2.5 }}>
+          <Typography
+            variant="h5"
+            component="h1"
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1.25,
-              width: '100%',
+              fontWeight: 800,
+              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+              letterSpacing: '-0.025em',
+              lineHeight: 1.25,
+              color: 'text.primary',
+              mb: 0.75,
             }}
           >
-            {/* Row 1: Sincronizar desde PC */}
-            <ButtonBase
-              onClick={() => {
-                hapticsService.impactLight();
-                onOpenSync?.('import');
-              }}
-              sx={{
-                width: '100%',
-                py: 1.75,
-                px: 1.75,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                textAlign: 'left',
-                borderRadius: RADIUS_TOKENS.lg,
-                transition: 'all 0.15s ease',
-                '&:active': {
-                  transform: 'scale(0.985)',
-                  bgcolor: alpha(theme.palette.action.hover, 0.08),
-                },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
-                    color: 'text.primary',
-                    flexShrink: 0,
-                  }}
-                >
-                  <QrCodeScannerRoundedIcon sx={{ fontSize: 22 }} />
-                </Box>
-                <Box sx={{ minWidth: 0, flex: 1 }}>
+            {t('profile:choice.title', '¿Cómo querés empezar tu perfil?')}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.94rem',
+              fontWeight: 400,
+              lineHeight: 1.45,
+            }}
+          >
+            {t('profile:choice.nativeSubtitle', 'Elegí una opción para continuar.')}
+          </Typography>
+        </Box>
+
+        {/* 3 Native Interactive Option Rows living directly on screen background */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+          }}
+        >
+          {/* Row 1: Sincronizar desde PC */}
+          <ButtonBase
+            onClick={() => {
+              hapticsService.impactLight();
+              onOpenSync?.('import');
+            }}
+            sx={{
+              width: '100%',
+              py: 1.75,
+              px: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              textAlign: 'left',
+              borderRadius: RADIUS_TOKENS.lg,
+              transition: 'all 0.15s ease',
+              '&:active': {
+                transform: 'scale(0.985)',
+                bgcolor: alpha(theme.palette.action.hover, 0.08),
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
+                  color: 'text.primary',
+                  flexShrink: 0,
+                }}
+              >
+                <QrCodeScannerRoundedIcon sx={{ fontSize: 22 }} />
+              </Box>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
+                  {t('profile:choice.syncCardTitleShort', 'Sincronizar desde PC')}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
+                  {t('profile:choice.syncCardShortDesc', 'Transferí tu CV con un código QR')}
+                </Typography>
+              </Box>
+            </Box>
+            <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
+          </ButtonBase>
+
+          {/* Divider between Row 1 and Row 2 */}
+          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, mx: 1 }} />
+
+          {/* Row 2: Importar CV (Recomendado - Primary Accent & Left Indicator) */}
+          <ButtonBase
+            onClick={() => {
+              hapticsService.impactLight();
+              openFileDialog();
+            }}
+            sx={{
+              width: '100%',
+              py: 1.75,
+              px: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              textAlign: 'left',
+              borderRadius: RADIUS_TOKENS.lg,
+              borderLeft: `4px solid ${theme.palette.primary.main}`,
+              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.12) : '#eff6ff',
+              transition: 'all 0.15s ease',
+              '&:active': {
+                transform: 'scale(0.985)',
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.2) : '#e0f0fe',
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe',
+                  color: 'primary.main',
+                  flexShrink: 0,
+                }}
+              >
+                <CloudUploadRoundedIcon sx={{ fontSize: 22 }} />
+              </Box>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
-                    {t('profile:choice.syncCardTitleShort', 'Sincronizar desde PC')}
+                    {t('profile:choice.importCardTitleShort', 'Importar CV')}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
-                    {t('profile:choice.syncCardShortDesc', 'Transferí tu CV con un código QR')}
-                  </Typography>
+                  <Chip
+                    label={t('profile:choice.recommendedChipShort', 'Recomendado')}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      borderRadius: RADIUS_TOKENS.full,
+                      bgcolor: isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe',
+                      color: isDark ? '#93c5fd' : '#1d4ed8',
+                      border: 'none',
+                      '& .MuiChip-label': { px: 1 },
+                    }}
+                  />
                 </Box>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
+                  {t('profile:choice.importCardShortDesc', 'Subí tu PDF, TXT o Markdown')}
+                </Typography>
               </Box>
-              <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
-            </ButtonBase>
+            </Box>
+            <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
+          </ButtonBase>
 
-            {/* Row 2: Importar CV (Recomendado - Primary Accent & Left Indicator) */}
-            <ButtonBase
-              onClick={() => {
-                hapticsService.impactLight();
-                openFileDialog();
-              }}
-              sx={{
-                width: '100%',
-                py: 1.75,
-                px: 1.75,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                textAlign: 'left',
-                borderRadius: RADIUS_TOKENS.lg,
-                borderLeft: `4px solid ${theme.palette.primary.main}`,
-                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.1) : '#eff6ff',
-                transition: 'all 0.15s ease',
-                '&:active': {
-                  transform: 'scale(0.985)',
-                  bgcolor: isDark ? alpha(theme.palette.primary.main, 0.18) : '#e0f0fe',
-                },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe',
-                    color: 'primary.main',
-                    flexShrink: 0,
-                  }}
-                >
-                  <CloudUploadRoundedIcon sx={{ fontSize: 22 }} />
-                </Box>
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
-                      {t('profile:choice.importCardTitleShort', 'Importar CV')}
-                    </Typography>
-                    <Chip
-                      label={t('profile:choice.recommendedChipShort', 'Recomendado')}
-                      size="small"
-                      sx={{
-                        height: 20,
-                        fontSize: '0.72rem',
-                        fontWeight: 600,
-                        borderRadius: RADIUS_TOKENS.full,
-                        bgcolor: isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe',
-                        color: isDark ? '#93c5fd' : '#1d4ed8',
-                        border: 'none',
-                        '& .MuiChip-label': { px: 1 },
-                      }}
-                    />
-                  </Box>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
-                    {t('profile:choice.importCardShortDesc', 'Subí tu PDF, TXT o Markdown')}
-                  </Typography>
-                </Box>
+          {/* Divider between Row 2 and Row 3 */}
+          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, mx: 1 }} />
+
+          {/* Row 3: Formulario guiado */}
+          <ButtonBase
+            onClick={() => {
+              hapticsService.impactLight();
+              onSelectGuided();
+            }}
+            sx={{
+              width: '100%',
+              py: 1.75,
+              px: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              textAlign: 'left',
+              borderRadius: RADIUS_TOKENS.lg,
+              transition: 'all 0.15s ease',
+              '&:active': {
+                transform: 'scale(0.985)',
+                bgcolor: alpha(theme.palette.action.hover, 0.08),
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
+                  color: 'text.primary',
+                  flexShrink: 0,
+                }}
+              >
+                <FormatListBulletedRoundedIcon sx={{ fontSize: 22 }} />
               </Box>
-              <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
-            </ButtonBase>
-
-            {/* Row 3: Formulario guiado */}
-            <ButtonBase
-              onClick={() => {
-                hapticsService.impactLight();
-                onSelectGuided();
-              }}
-              sx={{
-                width: '100%',
-                py: 1.75,
-                px: 1.75,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                textAlign: 'left',
-                borderRadius: RADIUS_TOKENS.lg,
-                transition: 'all 0.15s ease',
-                '&:active': {
-                  transform: 'scale(0.985)',
-                  bgcolor: alpha(theme.palette.action.hover, 0.08),
-                },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, flex: 1 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
-                    color: 'text.primary',
-                    flexShrink: 0,
-                  }}
-                >
-                  <FormatListBulletedRoundedIcon sx={{ fontSize: 22 }} />
-                </Box>
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
-                    {t('profile:choice.guidedCardTitleShort', 'Formulario guiado')}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
-                    {t('profile:choice.guidedCardShortDesc', 'Empezar de cero, paso a paso')}
-                  </Typography>
-                </Box>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
+                  {t('profile:choice.guidedCardTitleShort', 'Formulario guiado')}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
+                  {t('profile:choice.guidedCardShortDesc', 'Empezar de cero, paso a paso')}
+                </Typography>
               </Box>
-              <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
-            </ButtonBase>
-          </Box>
-        </Paper>
+            </Box>
+            <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
+          </ButtonBase>
+        </Box>
 
-        {/* Subtle bottom action for demo sample */}
-        <Box sx={{ mt: 3.5, textAlign: 'center' }}>
+        {/* Subtle bottom action for demo sample (directly below options without void) */}
+        <Box sx={{ mt: 2.5, textAlign: 'center' }}>
           <Button
             variant="text"
             size="small"

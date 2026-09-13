@@ -128,7 +128,11 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
         height: '100%',
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
-        p: { xs: 1.5, sm: 2, md: 3 },
+        p: {
+          xs: platformService.isNative() && editMode === 'choice' ? 0 : 1.5,
+          sm: 2,
+          md: 3,
+        },
         pb: {
           xs: platformService.isNative()
             ? 'max(env(safe-area-inset-bottom, 0px), 24px)'
