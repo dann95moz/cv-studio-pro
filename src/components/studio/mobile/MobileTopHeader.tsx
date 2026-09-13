@@ -3,11 +3,14 @@ import {
   Box,
   Typography,
   IconButton,
-  Menu,
-  MenuItem,
+  Drawer,
+  List,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   LinearProgress,
+  Divider,
+  Switch,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -19,11 +22,18 @@ import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import { useTranslation } from 'react-i18next';
 import { useThemeMode } from '../../../theme/ThemeContext';
 import { APP_LINKS } from '../../../constants/links';
 import { LANGUAGE_DEFINITIONS, SupportedLanguage } from '../../../constants/languages';
 import { WizardStep } from '../../../types';
+import { RADIUS_TOKENS } from '../../../theme/dimensions';
+import { hapticsService } from '../../../core/haptics';
 
 export interface MobileTopHeaderProps {
   currentStepNumber?: number;
@@ -38,8 +48,10 @@ export interface MobileTopHeaderProps {
 }
 
 /**
- * Mobile-First Top Header (Step progress, step title & ••• overflow menu).
- * Adheres strictly to mobile-first-ux-rules.md (single row, 52-56px).
+ * Mobile-First Top Header (Step progress, step title & ••• overflow Bottom Sheet).
+ * Adheres strictly to mobile-first-ux-rules.md:
+ * - Single row (52px-56px).
+ * - ZERO floating popup menus: all secondary actions open as slide-up Bottom Sheets within the Thumb Zone.
  */
 export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
   currentStepNumber = 3,
@@ -56,39 +68,38 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
   const theme = useTheme();
   const { mode, toggleThemeMode } = useThemeMode();
 
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null);
-  const [stepMenuAnchor, setStepMenuAnchor] = useState<null | HTMLElement>(null);
+  const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState<boolean>(false);
+  const [activeSheetView, setActiveSheetView] = useState<'main' | 'language'>('main');
+  const [isStepSheetOpen, setIsStepSheetOpen] = useState<boolean>(false);
 
   const progressPercent = (currentStepNumber / totalSteps) * 100;
   const currentLang = (i18n.language || 'es').slice(0, 2).toUpperCase();
 
-  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchor(e.currentTarget);
+  const handleOpenOptions = () => {
+    hapticsService.impactLight();
+    setActiveSheetView('main');
+    setIsOptionsSheetOpen(true);
   };
 
-  const handleCloseMenu = () => {
-    setMenuAnchor(null);
+  const handleCloseOptions = () => {
+    setIsOptionsSheetOpen(false);
+    setActiveSheetView('main');
   };
 
   const handleToggleTheme = () => {
+    hapticsService.impactLight();
     toggleThemeMode();
-    handleCloseMenu();
   };
 
   const handleSyncClick = () => {
-    handleCloseMenu();
+    handleCloseOptions();
     onOpenSync();
   };
 
-  const handleOpenLangMenu = (e: React.MouseEvent<HTMLElement>) => {
-    setLangMenuAnchor(e.currentTarget);
-  };
-
   const handleSelectLanguage = (langCode: SupportedLanguage) => {
+    hapticsService.impactLight();
     i18n.changeLanguage(langCode);
-    setLangMenuAnchor(null);
-    handleCloseMenu();
+    handleCloseOptions();
   };
 
   const wizardStepOptions: Array<{ id: 'profile' | 'target' | 'preview'; stepNumber: number; title: string }> = [
@@ -151,7 +162,14 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
             </Typography>
             <Typography
               component="span"
-              onClick={onSelectStep ? (e) => setStepMenuAnchor(e.currentTarget) : undefined}
+              onClick={
+                onSelectStep
+                  ? () => {
+                      hapticsService.impactLight();
+                      setIsStepSheetOpen(true);
+                    }
+                  : undefined
+              }
               sx={{
                 fontWeight: 700,
                 fontSize: '0.92rem',
@@ -166,7 +184,14 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
           </Box>
         ) : (
           <Box
-            onClick={isWizard && onSelectStep ? (e) => setStepMenuAnchor(e.currentTarget) : undefined}
+            onClick={
+              isWizard && onSelectStep
+                ? () => {
+                    hapticsService.impactLight();
+                    setIsStepSheetOpen(true);
+                  }
+                : undefined
+            }
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -197,7 +222,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
 
         <IconButton
           size="small"
-          onClick={handleOpenMenu}
+          onClick={handleOpenOptions}
           aria-label="more options"
           sx={{
             color: 'text.secondary',
@@ -227,157 +252,364 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
         />
       )}
 
-      {/* Step Selector Menu (when clicking step title) */}
+      {/* Step Selector Bottom Sheet (when tapping step title) */}
       {isWizard && onSelectStep && (
-        <Menu
-          anchorEl={stepMenuAnchor}
-          open={Boolean(stepMenuAnchor)}
-          onClose={() => setStepMenuAnchor(null)}
+        <Drawer
+          anchor="bottom"
+          open={isStepSheetOpen}
+          onClose={() => setIsStepSheetOpen(false)}
           slotProps={{
             paper: {
               sx: {
-                mt: 0.5,
-                minWidth: 200,
+                borderTopLeftRadius: RADIUS_TOKENS.xl,
+                borderTopRightRadius: RADIUS_TOKENS.xl,
+                bgcolor: 'background.paper',
+                backgroundImage: 'none',
+                pt: 1,
+                pb: 'max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px)',
+                px: 2,
+                boxShadow: theme.shadows[16],
               },
             },
           }}
         >
-          {wizardStepOptions.map((opt) => (
-            <MenuItem
-              key={opt.id}
-              selected={activeWizardStep === opt.id}
-              onClick={() => {
-                onSelectStep(opt.id);
-                setStepMenuAnchor(null);
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: activeWizardStep === opt.id ? 700 : 500 }}>
-                {t('common:nav.stepCounter', 'Paso {{current}} de {{total}} · {{title}}', {
-                  current: opt.stepNumber,
-                  total: 3,
-                  title: opt.title,
-                })}
-              </Typography>
-            </MenuItem>
-          ))}
-        </Menu>
+          {/* Drag Handle */}
+          <Box
+            sx={{
+              width: 36,
+              height: 4,
+              borderRadius: RADIUS_TOKENS.full,
+              bgcolor: 'divider',
+              mx: 'auto',
+              mb: 1.5,
+              mt: 0.5,
+            }}
+          />
+
+          {/* Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
+              {t('common:nav.stepsTitle', 'Pasos del Estudio')}
+            </Typography>
+            <IconButton size="small" onClick={() => setIsStepSheetOpen(false)} sx={{ color: 'text.secondary' }}>
+              <CloseRoundedIcon fontSize="small" />
+            </IconButton>
+          </Box>
+
+          <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+            {wizardStepOptions.map((opt) => {
+              const isSelected = activeWizardStep === opt.id;
+              return (
+                <ListItemButton
+                  key={opt.id}
+                  selected={isSelected}
+                  onClick={() => {
+                    hapticsService.impactLight();
+                    onSelectStep(opt.id);
+                    setIsStepSheetOpen(false);
+                  }}
+                  sx={{
+                    py: 1.75,
+                    px: 2,
+                    borderRadius: RADIUS_TOKENS.lg,
+                    border: `1px solid ${isSelected ? theme.palette.primary.main : theme.palette.divider}`,
+                    bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75 }}>
+                    <Box
+                      sx={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: '50%',
+                        bgcolor: isSelected ? 'primary.main' : alpha(theme.palette.text.primary, 0.06),
+                        color: isSelected ? 'primary.contrastText' : 'text.primary',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {opt.stepNumber}
+                    </Box>
+                    <Typography variant="body1" sx={{ fontWeight: isSelected ? 700 : 500, color: 'text.primary' }}>
+                      {opt.title}
+                    </Typography>
+                  </Box>
+                  {isSelected && <CheckRoundedIcon color="primary" fontSize="small" />}
+                </ListItemButton>
+              );
+            })}
+          </List>
+        </Drawer>
       )}
 
-      {/* Primary ••• Overflow Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleCloseMenu}
+      {/* Global ••• Overflow Bottom Sheet (Thumb Zone Ergonomics) */}
+      <Drawer
+        anchor="bottom"
+        open={isOptionsSheetOpen}
+        onClose={handleCloseOptions}
         slotProps={{
           paper: {
             sx: {
-              mt: 0.5,
-              minWidth: 230,
+              borderTopLeftRadius: RADIUS_TOKENS.xl,
+              borderTopRightRadius: RADIUS_TOKENS.xl,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              pt: 1,
+              pb: 'max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px)',
+              px: 2,
+              boxShadow: theme.shadows[16],
             },
           },
         }}
       >
-        {/* App Language Selector */}
-        <MenuItem onClick={handleOpenLangMenu}>
-          <ListItemIcon>
-            <LanguageRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t('common:nav.appLanguage', 'Idioma app')} />
-          <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', ml: 1.5 }}>
-            {currentLang} ⌄
-          </Typography>
-        </MenuItem>
+        {/* Drag Handle */}
+        <Box
+          sx={{
+            width: 36,
+            height: 4,
+            borderRadius: RADIUS_TOKENS.full,
+            bgcolor: 'divider',
+            mx: 'auto',
+            mb: 1.5,
+            mt: 0.5,
+          }}
+        />
 
-        {/* Theme Mode Switcher */}
-        <MenuItem onClick={handleToggleTheme}>
-          <ListItemIcon>
-            {mode === 'dark' ? <DarkModeRoundedIcon fontSize="small" /> : <LightModeRoundedIcon fontSize="small" />}
-          </ListItemIcon>
-          <ListItemText primary={t('common:nav.theme', 'Tema')} />
-          <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', ml: 1.5 }}>
-            {mode === 'dark' ? t('common:nav.dark', 'Oscuro') : t('common:nav.light', 'Claro')}
-          </Typography>
-        </MenuItem>
+        {activeSheetView === 'main' ? (
+          <>
+            {/* Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
+                {t('common:nav.options', 'Opciones')}
+              </Typography>
+              <IconButton size="small" onClick={handleCloseOptions} sx={{ color: 'text.secondary' }}>
+                <CloseRoundedIcon fontSize="small" />
+              </IconButton>
+            </Box>
 
-        {/* Multidevice Sync (QR) */}
-        <MenuItem onClick={handleSyncClick}>
-          <ListItemIcon>
-            <QrCode2RoundedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t('common:nav.syncQr', 'Sincronizar (QR)')} />
-        </MenuItem>
+            <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {/* App Language Selector */}
+              <ListItemButton
+                onClick={() => {
+                  hapticsService.impactLight();
+                  setActiveSheetView('language');
+                }}
+                sx={{
+                  py: 1.5,
+                  px: 1.75,
+                  borderRadius: RADIUS_TOKENS.lg,
+                  '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
+                  <LanguageRoundedIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('common:nav.appLanguage', 'Idioma de la app')}
+                  slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                    {LANGUAGE_DEFINITIONS[i18n.language as SupportedLanguage]?.nativeName || currentLang}
+                  </Typography>
+                  <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
+                </Box>
+              </ListItemButton>
 
-        {/* My Applications */}
-        {onOpenApplications && (
-          <MenuItem
-            onClick={() => {
-              handleCloseMenu();
-              onOpenApplications();
-            }}
-          >
-            <ListItemIcon>
-              <BusinessRoundedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t('common:nav.myApplications', 'Postulaciones')} />
-          </MenuItem>
+              {/* Theme Switcher */}
+              <ListItemButton
+                onClick={handleToggleTheme}
+                sx={{
+                  py: 1.5,
+                  px: 1.75,
+                  borderRadius: RADIUS_TOKENS.lg,
+                  '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
+                  {mode === 'dark' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('common:nav.theme', 'Tema')}
+                  secondary={mode === 'dark' ? t('common:nav.dark', 'Oscuro') : t('common:nav.light', 'Claro')}
+                  slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
+                />
+                <Switch
+                  checked={mode === 'dark'}
+                  onChange={handleToggleTheme}
+                  edge="end"
+                  size="small"
+                  slotProps={{ input: { 'aria-label': 'theme switcher' } }}
+                />
+              </ListItemButton>
+
+              {/* Multidevice Sync (QR) */}
+              <ListItemButton
+                onClick={() => {
+                  hapticsService.impactLight();
+                  handleSyncClick();
+                }}
+                sx={{
+                  py: 1.5,
+                  px: 1.75,
+                  borderRadius: RADIUS_TOKENS.lg,
+                  '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
+                  <QrCode2RoundedIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('common:nav.syncQr', 'Sincronizar con QR')}
+                  slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
+                />
+                <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
+              </ListItemButton>
+
+              {/* My Applications (Navigates to Applications History) */}
+              {onOpenApplications && (
+                <ListItemButton
+                  onClick={() => {
+                    hapticsService.impactLight();
+                    handleCloseOptions();
+                    onOpenApplications();
+                  }}
+                  sx={{
+                    py: 1.5,
+                    px: 1.75,
+                    borderRadius: RADIUS_TOKENS.lg,
+                    '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
+                    <BusinessRoundedIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={t('common:nav.myApplications', 'Mis Postulaciones')}
+                    slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
+                  />
+                  <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
+                </ListItemButton>
+              )}
+
+              {/* View Intro Walkthrough */}
+              {onOpenWalkthrough && (
+                <ListItemButton
+                  onClick={() => {
+                    hapticsService.impactLight();
+                    handleCloseOptions();
+                    onOpenWalkthrough();
+                  }}
+                  sx={{
+                    py: 1.5,
+                    px: 1.75,
+                    borderRadius: RADIUS_TOKENS.lg,
+                    '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
+                    <AutoStoriesRoundedIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={t('common:nav.viewWalkthrough', 'Ver introducción')}
+                    slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
+                  />
+                  <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
+                </ListItemButton>
+              )}
+
+              <Divider sx={{ my: 0.75 }} />
+
+              {/* View on GitHub */}
+              <ListItemButton
+                component="a"
+                href={APP_LINKS.GITHUB_REPO}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleCloseOptions}
+                sx={{
+                  py: 1.5,
+                  px: 1.75,
+                  borderRadius: RADIUS_TOKENS.lg,
+                  '&:active': { bgcolor: alpha(theme.palette.action.hover, 0.08) },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: 'text.primary' }}>
+                  <GitHubIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('common:nav.viewGithub', 'Ver en GitHub')}
+                  slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.95rem' } } }}
+                />
+                <OpenInNewRoundedIcon sx={{ color: 'text.disabled', fontSize: 18 }} />
+              </ListItemButton>
+            </List>
+          </>
+        ) : (
+          <>
+            {/* Language Sub-View Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    hapticsService.impactLight();
+                    setActiveSheetView('main');
+                  }}
+                  sx={{ color: 'text.primary', ml: -0.75 }}
+                >
+                  <ArrowBackRoundedIcon fontSize="small" />
+                </IconButton>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
+                  {t('common:nav.appLanguage', 'Idioma de la app')}
+                </Typography>
+              </Box>
+              <IconButton size="small" onClick={handleCloseOptions} sx={{ color: 'text.secondary' }}>
+                <CloseRoundedIcon fontSize="small" />
+              </IconButton>
+            </Box>
+
+            <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+              {Object.values(LANGUAGE_DEFINITIONS).map((lang) => {
+                const isSelected = i18n.language?.startsWith(lang.code);
+                return (
+                  <ListItemButton
+                    key={lang.code}
+                    selected={isSelected}
+                    onClick={() => handleSelectLanguage(lang.code as SupportedLanguage)}
+                    sx={{
+                      py: 1.75,
+                      px: 2,
+                      borderRadius: RADIUS_TOKENS.lg,
+                      border: `1px solid ${isSelected ? theme.palette.primary.main : theme.palette.divider}`,
+                      bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Typography variant="body1" sx={{ fontWeight: isSelected ? 700 : 500, color: 'text.primary' }}>
+                        {lang.nativeName}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                        ({lang.code.toUpperCase()})
+                      </Typography>
+                    </Box>
+                    {isSelected && <CheckRoundedIcon color="primary" fontSize="small" />}
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          </>
         )}
-
-        {/* View Tour / Intro Walkthrough */}
-        {onOpenWalkthrough && (
-          <MenuItem
-            onClick={() => {
-              handleCloseMenu();
-              onOpenWalkthrough();
-            }}
-          >
-            <ListItemIcon>
-              <AutoStoriesRoundedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t('common:nav.viewWalkthrough', 'Ver introducción')} />
-          </MenuItem>
-        )}
-
-        {/* View on GitHub */}
-        <MenuItem
-          component="a"
-          href={APP_LINKS.GITHUB_REPO}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleCloseMenu}
-        >
-          <ListItemIcon>
-            <GitHubIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t('common:nav.viewGithub', 'Ver en GitHub')} />
-        </MenuItem>
-      </Menu>
-
-      {/* Language Picker Sub-Menu */}
-      <Menu
-        anchorEl={langMenuAnchor}
-        open={Boolean(langMenuAnchor)}
-        onClose={() => setLangMenuAnchor(null)}
-        slotProps={{
-          paper: {
-            sx: {
-              mt: 0.5,
-              minWidth: 180,
-            },
-          },
-        }}
-      >
-        {Object.values(LANGUAGE_DEFINITIONS).map((lang) => (
-          <MenuItem
-            key={lang.code}
-            selected={i18n.language?.startsWith(lang.code)}
-            onClick={() => handleSelectLanguage(lang.code as SupportedLanguage)}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {lang.nativeName} ({lang.code.toUpperCase()})
-            </Typography>
-          </MenuItem>
-        ))}
-      </Menu>
+      </Drawer>
     </Box>
   );
 };

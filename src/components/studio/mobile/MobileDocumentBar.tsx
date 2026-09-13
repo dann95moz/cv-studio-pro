@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import {
   Box,
   Button,
-  Menu,
-  MenuItem,
+  Drawer,
+  List,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
+  IconButton,
   Typography,
   Divider,
   Chip,
@@ -18,9 +20,11 @@ import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useTranslation } from 'react-i18next';
 import { CvTranslationVariant } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
+import { hapticsService } from '../../../core/haptics';
 
 export interface MobileDocumentBarProps {
   previewDocType: 'cv' | 'cover-letter';
@@ -35,7 +39,9 @@ export interface MobileDocumentBarProps {
 
 /**
  * Mobile-First Secondary Document Bar (Document Switcher + Language Variant Selector).
- * Adheres strictly to mobile-first-ux-rules.md (2 clean controls, maximum canvas clearance).
+ * Adheres strictly to mobile-first-ux-rules.md:
+ * - 2 clean controls, maximum canvas clearance.
+ * - ZERO floating menus: both pickers open as slide-up Bottom Sheets in the Thumb Zone.
  */
 export const MobileDocumentBar: React.FC<MobileDocumentBarProps> = ({
   previewDocType,
@@ -50,8 +56,8 @@ export const MobileDocumentBar: React.FC<MobileDocumentBarProps> = ({
   const { t } = useTranslation(['preview', 'common']);
   const theme = useTheme();
 
-  const [docMenuAnchor, setDocMenuAnchor] = useState<null | HTMLElement>(null);
-  const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null);
+  const [isDocSheetOpen, setIsDocSheetOpen] = useState<boolean>(false);
+  const [isLangSheetOpen, setIsLangSheetOpen] = useState<boolean>(false);
 
   const isCv = previewDocType === 'cv';
   const displayDocTitle = isCv
@@ -76,7 +82,10 @@ export const MobileDocumentBar: React.FC<MobileDocumentBarProps> = ({
       <Button
         size="medium"
         variant="outlined"
-        onClick={(e) => setDocMenuAnchor(e.currentTarget)}
+        onClick={() => {
+          hapticsService.impactLight();
+          setIsDocSheetOpen(true);
+        }}
         startIcon={
           isCv ? (
             <ArticleRoundedIcon sx={{ fontSize: '18px !important', color: 'primary.main' }} />
@@ -121,7 +130,10 @@ export const MobileDocumentBar: React.FC<MobileDocumentBarProps> = ({
       <Button
         size="medium"
         variant="outlined"
-        onClick={(e) => setLangMenuAnchor(e.currentTarget)}
+        onClick={() => {
+          hapticsService.impactLight();
+          setIsLangSheetOpen(true);
+        }}
         endIcon={<ArrowDropDownRoundedIcon sx={{ fontSize: 20, color: 'text.secondary', ml: -0.5 }} />}
         sx={{
           minWidth: 72,
@@ -147,159 +159,245 @@ export const MobileDocumentBar: React.FC<MobileDocumentBarProps> = ({
         )}
       </Button>
 
-      {/* Document Selector Menu */}
-      <Menu
-        anchorEl={docMenuAnchor}
-        open={Boolean(docMenuAnchor)}
-        onClose={() => setDocMenuAnchor(null)}
+      {/* Document Selector Bottom Sheet */}
+      <Drawer
+        anchor="bottom"
+        open={isDocSheetOpen}
+        onClose={() => setIsDocSheetOpen(false)}
         slotProps={{
           paper: {
             sx: {
-              mt: 0.5,
-              minWidth: 220,
-              borderRadius: RADIUS_TOKENS.md,
+              borderTopLeftRadius: RADIUS_TOKENS.xl,
+              borderTopRightRadius: RADIUS_TOKENS.xl,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              pt: 1,
+              pb: 'max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px)',
+              px: 2,
+              boxShadow: theme.shadows[16],
             },
           },
         }}
       >
-        <MenuItem
-          selected={previewDocType === 'cv'}
-          onClick={() => {
-            onPreviewDocTypeChange('cv');
-            setDocMenuAnchor(null);
+        {/* Drag Handle */}
+        <Box
+          sx={{
+            width: 36,
+            height: 4,
+            borderRadius: RADIUS_TOKENS.full,
+            bgcolor: 'divider',
+            mx: 'auto',
+            mb: 1.5,
+            mt: 0.5,
           }}
-        >
-          <ListItemIcon>
-            <ArticleRoundedIcon fontSize="small" color={previewDocType === 'cv' ? 'primary' : 'inherit'} />
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography variant="body2" sx={{ fontWeight: previewDocType === 'cv' ? 700 : 500, fontSize: '0.85rem' }}>
+        />
+
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
+            {t('preview:toolbar.selectDocType', 'Tipo de documento')}
+          </Typography>
+          <IconButton size="small" onClick={() => setIsDocSheetOpen(false)} sx={{ color: 'text.secondary' }}>
+            <CloseRoundedIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+          <ListItemButton
+            selected={previewDocType === 'cv'}
+            onClick={() => {
+              hapticsService.impactLight();
+              onPreviewDocTypeChange('cv');
+              setIsDocSheetOpen(false);
+            }}
+            sx={{
+              py: 1.75,
+              px: 2,
+              borderRadius: RADIUS_TOKENS.lg,
+              border: `1px solid ${previewDocType === 'cv' ? theme.palette.primary.main : theme.palette.divider}`,
+              bgcolor: previewDocType === 'cv' ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <ArticleRoundedIcon color={previewDocType === 'cv' ? 'primary' : 'inherit'} />
+              <Typography variant="body1" sx={{ fontWeight: previewDocType === 'cv' ? 700 : 500, color: 'text.primary' }}>
                 {t('preview:toolbar.docCv', 'Currículum')}
               </Typography>
-            }
-          />
-          {previewDocType === 'cv' && <CheckRoundedIcon fontSize="small" color="primary" />}
-        </MenuItem>
+            </Box>
+            {previewDocType === 'cv' && <CheckRoundedIcon color="primary" fontSize="small" />}
+          </ListItemButton>
 
-        <MenuItem
-          selected={previewDocType === 'cover-letter'}
-          onClick={() => {
-            onPreviewDocTypeChange('cover-letter');
-            setDocMenuAnchor(null);
-          }}
-        >
-          <ListItemIcon>
-            <EmailRoundedIcon fontSize="small" color={previewDocType === 'cover-letter' ? 'primary' : 'inherit'} />
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography variant="body2" sx={{ fontWeight: previewDocType === 'cover-letter' ? 700 : 500, fontSize: '0.85rem' }}>
+          <ListItemButton
+            selected={previewDocType === 'cover-letter'}
+            onClick={() => {
+              hapticsService.impactLight();
+              onPreviewDocTypeChange('cover-letter');
+              setIsDocSheetOpen(false);
+            }}
+            sx={{
+              py: 1.75,
+              px: 2,
+              borderRadius: RADIUS_TOKENS.lg,
+              border: `1px solid ${previewDocType === 'cover-letter' ? theme.palette.primary.main : theme.palette.divider}`,
+              bgcolor: previewDocType === 'cover-letter' ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <EmailRoundedIcon color={previewDocType === 'cover-letter' ? 'primary' : 'inherit'} />
+              <Typography variant="body1" sx={{ fontWeight: previewDocType === 'cover-letter' ? 700 : 500, color: 'text.primary' }}>
                 {t('preview:toolbar.docCoverLetter', 'Carta de presentación')}
               </Typography>
-            }
-          />
-          {previewDocType === 'cover-letter' && <CheckRoundedIcon fontSize="small" color="primary" />}
-        </MenuItem>
-      </Menu>
+            </Box>
+            {previewDocType === 'cover-letter' && <CheckRoundedIcon color="primary" fontSize="small" />}
+          </ListItemButton>
+        </List>
+      </Drawer>
 
-      {/* Language Variant Menu */}
-      <Menu
-        anchorEl={langMenuAnchor}
-        open={Boolean(langMenuAnchor)}
-        onClose={() => setLangMenuAnchor(null)}
+      {/* Language Variant Bottom Sheet */}
+      <Drawer
+        anchor="bottom"
+        open={isLangSheetOpen}
+        onClose={() => setIsLangSheetOpen(false)}
         slotProps={{
           paper: {
             sx: {
-              mt: 0.5,
-              minWidth: 210,
-              borderRadius: RADIUS_TOKENS.md,
+              borderTopLeftRadius: RADIUS_TOKENS.xl,
+              borderTopRightRadius: RADIUS_TOKENS.xl,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              pt: 1,
+              pb: 'max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px)',
+              px: 2,
+              boxShadow: theme.shadows[16],
             },
           },
         }}
       >
-        {/* Base Language Item */}
-        <MenuItem
-          selected={!activeLanguage || activeLanguage === baseLanguage}
-          onClick={() => {
-            setLangMenuAnchor(null);
-            onLanguageChange(baseLanguage || 'es');
+        {/* Drag Handle */}
+        <Box
+          sx={{
+            width: 36,
+            height: 4,
+            borderRadius: RADIUS_TOKENS.full,
+            bgcolor: 'divider',
+            mx: 'auto',
+            mb: 1.5,
+            mt: 0.5,
           }}
-        >
-          <ListItemIcon>
-            {(!activeLanguage || activeLanguage === baseLanguage) ? (
-              <CheckRoundedIcon fontSize="small" color="primary" />
-            ) : (
-              <Box sx={{ width: 20 }} />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                {`${(baseLanguage || 'es').toUpperCase()} (${t('preview:translation.baseLang', 'Original')})`}
-              </Typography>
-            }
-          />
-        </MenuItem>
+        />
 
-        {/* Existing Translation Variants */}
-        {translations &&
-          Object.values(translations).map((variant) => (
-            <MenuItem
-              key={variant.language}
-              selected={activeLanguage === variant.language}
-              onClick={() => {
-                setLangMenuAnchor(null);
-                onLanguageChange(variant.language);
-              }}
-            >
-              <ListItemIcon>
-                {activeLanguage === variant.language ? (
-                  <CheckRoundedIcon fontSize="small" color="primary" />
-                ) : (
-                  <Box sx={{ width: 20 }} />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                    {`${variant.language.toUpperCase()} (${variant.languageLabel || variant.language})`}
-                  </Typography>
-                }
-              />
-              {variant.isOutdated && (
-                <Chip
-                  size="small"
-                  label={t('preview:translation.outdatedBadge', 'Outdated')}
-                  color="warning"
-                  variant="outlined"
-                  sx={{ ml: 1, fontSize: '0.62rem', height: 18 }}
-                />
-              )}
-            </MenuItem>
-          ))}
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
+            {t('preview:toolbar.selectDocLanguage', 'Idioma del documento')}
+          </Typography>
+          <IconButton size="small" onClick={() => setIsLangSheetOpen(false)} sx={{ color: 'text.secondary' }}>
+            <CloseRoundedIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-        <Divider sx={{ my: 0.5 }} />
+        <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+          {/* Base Language Option */}
+          <ListItemButton
+            selected={!activeLanguage || activeLanguage === baseLanguage}
+            onClick={() => {
+              hapticsService.impactLight();
+              setIsLangSheetOpen(false);
+              onLanguageChange(baseLanguage || 'es');
+            }}
+            sx={{
+              py: 1.75,
+              px: 2,
+              borderRadius: RADIUS_TOKENS.lg,
+              border: `1px solid ${(!activeLanguage || activeLanguage === baseLanguage) ? theme.palette.primary.main : theme.palette.divider}`,
+              bgcolor: (!activeLanguage || activeLanguage === baseLanguage) ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: (!activeLanguage || activeLanguage === baseLanguage) ? 700 : 500, color: 'text.primary' }}>
+              {`${(baseLanguage || 'es').toUpperCase()} (${t('preview:translation.baseLang', 'Original')})`}
+            </Typography>
+            {(!activeLanguage || activeLanguage === baseLanguage) && <CheckRoundedIcon color="primary" fontSize="small" />}
+          </ListItemButton>
 
-        {/* Translate to new language option */}
-        <MenuItem
-          onClick={() => {
-            setLangMenuAnchor(null);
-            onOpenTranslateModal?.();
-          }}
-        >
-          <ListItemIcon>
-            <AutoAwesomeRoundedIcon fontSize="small" color="primary" />
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: 700, color: 'primary.main' }}>
-                {t('preview:translation.translateNewAction', '+ Traducir a otro idioma...')}
-              </Typography>
-            }
-          />
-        </MenuItem>
-      </Menu>
+          {/* Existing Translation Variants */}
+          {translations &&
+            Object.values(translations).map((variant) => {
+              const isSelected = activeLanguage === variant.language;
+              return (
+                <ListItemButton
+                  key={variant.language}
+                  selected={isSelected}
+                  onClick={() => {
+                    hapticsService.impactLight();
+                    setIsLangSheetOpen(false);
+                    onLanguageChange(variant.language);
+                  }}
+                  sx={{
+                    py: 1.75,
+                    px: 2,
+                    borderRadius: RADIUS_TOKENS.lg,
+                    border: `1px solid ${isSelected ? theme.palette.primary.main : theme.palette.divider}`,
+                    bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: isSelected ? 700 : 500, color: 'text.primary' }}>
+                      {`${variant.language.toUpperCase()} (${variant.languageLabel || variant.language})`}
+                    </Typography>
+                    {variant.isOutdated && (
+                      <Chip
+                        size="small"
+                        label={t('preview:translation.outdatedBadge', 'Outdated')}
+                        color="warning"
+                        variant="outlined"
+                        sx={{ fontSize: '0.65rem', height: 20 }}
+                      />
+                    )}
+                  </Box>
+                  {isSelected && <CheckRoundedIcon color="primary" fontSize="small" />}
+                </ListItemButton>
+              );
+            })}
+
+          <Divider sx={{ my: 0.5 }} />
+
+          {/* Translate with AI Action */}
+          <ListItemButton
+            onClick={() => {
+              hapticsService.impactLight();
+              setIsLangSheetOpen(false);
+              onOpenTranslateModal?.();
+            }}
+            sx={{
+              py: 1.75,
+              px: 2,
+              borderRadius: RADIUS_TOKENS.lg,
+              border: `1px dashed ${theme.palette.primary.main}`,
+              bgcolor: alpha(theme.palette.primary.main, 0.04),
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            }}
+          >
+            <AutoAwesomeRoundedIcon color="primary" fontSize="small" />
+            <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              {t('preview:translation.translateNewAction', '+ Traducir a otro idioma con IA...')}
+            </Typography>
+          </ListItemButton>
+        </List>
+      </Drawer>
     </Box>
   );
 };
