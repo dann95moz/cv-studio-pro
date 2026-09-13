@@ -99,3 +99,25 @@ Decompose immediately if a component:
 - **Memoize with Purpose**: Apply `useMemo` and `useCallback` when passing callbacks to memoized children (`React.memo`) or when performing expensive parsing / regex AST calculations.
 - **Pure Functions**: Keep utility helpers in `src/utils/` pure and easily testable.
 
+---
+
+## 6. Mobile & Cross-Platform UI Architecture Standards
+
+### 6.1. In-Sheet Sub-View Navigation Pattern
+- When a Bottom Sheet triggers secondary selection workflows (e.g., App Language Selector, Export Formats list):
+  - ❌ **Anti-Pattern**: Opening a secondary nested `<Dialog>`, nested `<Drawer>`, or floating `<Menu>`.
+  - ✅ **Standard**: Implement an internal sheet state:
+    ```tsx
+    const [sheetView, setSheetView] = useState<'main' | 'subview'>('main');
+    ```
+  - Transition between views within the same `<Drawer anchor="bottom">`. Provide an `<ArrowBackRoundedIcon>` button to return to `'main'`, and reset view state on drawer `onClose`.
+
+### 6.2. Platform-Aware Viewport Alignment
+- When rendering views directly on the device background (`platformService.isNative()`):
+  - Parent scroll containers must adjust vertical alignment dynamically:
+    ```tsx
+    justifyContent: platformService.isNative() && isChoiceMode ? 'center' : 'flex-start'
+    ```
+  - This guarantees short task blocks center within Steven Hoober's Natural Reach Zone on tall screens (20:9) without breaking standard scroll behavior on desktop web.
+
+

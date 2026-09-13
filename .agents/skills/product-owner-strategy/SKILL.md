@@ -87,6 +87,14 @@ Audit the user journey across the 5 core studio milestones to detect and elimina
    - *Friction*: Does the user lose track of which CV was sent to which company?
    - *Solutions*: 1-click application history logger with company name, salary range, interview status, and snapshot markdown.
 
+### Key Product Heuristics for Frictionless UI:
+- **Zero Redundant Action Clutter (Single Canonical Home)**:
+  - Never scatter duplicate triggers for the same action across multiple toolbars and menus. If an action already has a dedicated permanent home (e.g. "Mis Postulaciones" in the fixed bottom navigation bar, or "Sincronizar QR" in Step 1 Profile), omit it from general settings sheets to preserve cognitive focus and progressive disclosure.
+- **Eradication of Placeholder / Wireframe Subtitles**:
+  - Eliminate generic boilerplate subtitles that merely paraphrase the headline (e.g. "¿Cómo querés empezar tu perfil?" followed by "Elegí una opción para continuar"). Subtitles must either provide tangible decision-making value (e.g. duration or expected outcome) or be removed entirely to deliver a refined, confident product experience.
+- **Single Touch Target per Choice in Mobile Workflows**:
+  - Never fragment an onboarding choice into separate dropzones, internal nested buttons, or drag-and-drop text on touch screens. The entire row must serve as a single, tactile touch target that directly launches the file picker or next step.
+
 ---
 
 ## 4. Standard Feature Specification (PRD / User Story)

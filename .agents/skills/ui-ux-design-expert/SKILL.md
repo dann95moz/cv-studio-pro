@@ -53,7 +53,34 @@ All visual styles must derive from the centralized design system:
 
 ---
 
-## 4. Accessibility (a11y) & Usability Checklist
+## 4. Mobile & Touch Ergonomics Heuristics (Hoober Thumb Zone & Android MD Standards)
+
+### 4.1. Semantic Icon Selection
+- **Global Settings vs. Contextual Overflows**:
+  - ❌ **Anti-Pattern**: Using iOS-centric meatballs `•••` or vertical kebab `⋮` for global app preferences. In mobile UX (and particularly Android Material Design), a kebab menu implies *contextual actions for the specific item/screen* (e.g. "Archive" or "Spam" on an open email in Gmail).
+  - ✅ **Standard**: Global application preferences (Language, Theme, Tour replay, GitHub repository) must use a **Settings Gear icon (⚙ / `SettingsRoundedIcon`)**. This aligns user expectations and remains coherent across all wizard steps.
+
+### 4.2. Typography Hierarchy: Portadas vs. Pantallas de Trabajo
+- **Welcome & Hero Portadas**: Reserve Black / Heavy weights (`fontWeight: 800`–`900`) strictly for landing heroes where the headline is the sole visual protagonist.
+- **Working Tasks & Wizard Screens**: Calibrate headings in functional workspaces to **Semibold (`fontWeight: 600` / `700`)** with subtle tracking (`-0.02em`). This keeps the screen calm and prevents the headline from aggressively competing with interactive options and cards.
+
+### 4.3. Material Design List Inset Dividers
+- In lists with leading circular icons or avatars:
+  - ❌ **Anti-Pattern**: Running dividers across the entire width, cutting awkwardly underneath the icon.
+  - ✅ **Standard**: Indent list dividers to align flush with the text column (`ml: '72px'`, `mr: 1.5`). This reinforces the visual gestalt that the icon and its label form a single interactive unit.
+
+### 4.4. Vertical Optical Balance on Tall Displays (20:9)
+- On modern elongated screens with high vertical real estate:
+  - Avoid pinning short task blocks (e.g., a title + 3 option rows + helper link) directly to the top edge, leaving an awkward 400px abyss of black void below.
+  - Center the block vertically in the available viewport (`my: 'auto'`, `justifyContent: 'center'`) within the **Steven Hoober Natural Reach Zone** (25%–75% height). This maximizes thumb comfort (Fitts's Law) and eliminates visual imbalance.
+
+### 4.5. Bottom Sheet Paradigm (Zero Floating Menus on Mobile)
+- ❌ **STRICTLY FORBIDDEN ON MOBILE**: Anchored floating dropdown menus (`<Menu>`, `<Popover>`) floating in the air.
+- ✅ **MANDATORY**: Every secondary menu, overflow options, document selector, or format picker MUST open as a slide-up **Bottom Sheet** (`Drawer anchor="bottom"` with top drag handle `36×4px`, `borderTopLeftRadius: 16px`, `borderTopRightRadius: 16px`, and safe-area padding).
+
+---
+
+## 5. Accessibility (a11y) & Usability Checklist
 
 - [ ] **Contrast**: Text elements meet WCAG AA contrast ratio (minimum 4.5:1 for normal text).
 - [ ] **Keyboard Navigation**: Interactive elements have visible `:focus-visible` outlines and support Enter/Space activation.
@@ -62,11 +89,15 @@ All visual styles must derive from the centralized design system:
 
 ---
 
-## 5. Strict Design System (DS) Component Compliance Checklist
+## 6. Strict Design System (DS) Component Compliance Checklist
 
 When creating or modifying components:
 - [ ] **Buttons**: Must NEVER use manual `borderRadius: '6px' / '8px' / '10px'`. Must inherit `MuiButton` pill tokens (`RADIUS_TOKENS.full`).
 - [ ] **Chips**: Must NEVER use manual `borderRadius` or custom inline `height: 18`. Use standard `<Chip size="small" variant="filled | outlined" color="..." />`.
 - [ ] **Colors**: Use MUI palette tokens (`theme.palette.primary.main`, `theme.palette.success.main`, etc.) and `alpha(...)` instead of raw hex codes.
 - [ ] **Alignment**: Action buttons inside cards must use clean flex containers (`justifyContent: 'flex-start' | 'center'`) rather than stretching full-width arbitrarily.
+- [ ] **Mobile Menus**: Zero floating `<Menu>` or `<Popover>` in mobile components; all secondary choices must be Bottom Sheets (`Drawer anchor="bottom"`).
+- [ ] **Semantic Icons**: Use Settings (⚙) for global app preferences, not `•••` or kebab.
+- [ ] **Inset Dividers**: Lists with leading icons must use inset dividers (`ml: '72px'`) aligned to text.
+
 
