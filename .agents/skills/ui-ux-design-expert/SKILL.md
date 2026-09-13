@@ -95,6 +95,16 @@ All visual styles must derive from the centralized design system:
     - **Context vs. Action**: The headline sets the scene, but the interactive options are the true protagonists of the screen.
     - **Medium Weight (`fontWeight: 500`)**: Give decision screen headers a calm, refined medium weight (`500`) and clean letter-spacing (`-0.01em`). This creates natural visual hierarchy: the title provides context without visual aggression, allowing the interactive options (`600` / `700`) to hold clear focal priority.
 
+### 4.8. Sub-Flow Navigation & Reversibility (Never Trap the User)
+- **The One-Way Gate Anti-Pattern**:
+  - ❌ **Anti-Pattern**: Transitioning the candidate into a detail form or sub-flow without an explicit, visible, and system-level path back to the parent options screen.
+  - **Why It Fails**: Exploration is natural. Candidates tap "Guided form" or "Notes" just to explore what it entails. If they can't go back, they feel trapped and anxious about losing context or being committed to the wrong path.
+  - ✅ **Standard (Triple-Tier Back Affordance)**:
+    1. **Top App Bar Navigation Icon**: The header bar displays a back arrow (`[←]`) whenever the user is in a sub-view or non-root step.
+    2. **In-View Context Button**: Provide an in-view control (`[← Back to options]` / `[← Volver a opciones]`) directly above the sub-form.
+    3. **Android Hardware & Gesture Back**: Register an interceptor with `backButtonRegistry` so system back gestures and hardware buttons return to the choice screen seamlessly without exiting the app.
+    4. **Preserve Ephemeral State**: Returning to the options screen must never discard already typed data; store state safely so re-entering resumes without data loss.
+
 ---
 
 ## 5. Accessibility (a11y) & Usability Checklist
@@ -118,6 +128,7 @@ When creating or modifying components:
 - [ ] **Inset Dividers**: Lists with leading icons must use inset dividers (`ml: '72px'`) aligned to text.
 - [ ] **Recommended vs Selected**: Do NOT pre-highlight "Recommended" items with active borders/backgrounds. Use only explicit badge chips.
 - [ ] **Calm Context Typography**: Choice screen titles must use medium weight (`fontWeight: 500`) to provide calm context without overpowering interactive options.
+- [ ] **Reversible Sub-Flows**: Every sub-flow must provide top app bar `←`, in-view button, and system back interception to return to the options screen without data loss.
 
 
 

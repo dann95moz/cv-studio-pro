@@ -11,7 +11,8 @@
     "exportBackup": "Esporta Backup (.md)",
     "exportBackupTip": "Scarica il tuo profilo professionale in formato Markdown (.md)",
     "continueToTarget": "Continua alla Posizione Obiettivo",
-    "reviewProfile": "Rivedi"
+    "reviewProfile": "Rivedi",
+    "backToOptions": "Torna alle opzioni"
   },
   "dialog": {
     "confirmReplaceTitle": "Sostituire il profilo corrente?",

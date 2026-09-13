@@ -24,6 +24,7 @@ const getInitialTab = (): StudioTab => {
 export const createUiSlice: StateCreator<ResumeStore, [], [], UiSlice> = (set, get) => ({
   activeTab: getInitialTab(),
   wizardStep: 'profile',
+  masterDataMode: 'choice',
   globalNotification: null,
 
   setActiveTab: (tab: StudioTab) => {
@@ -36,6 +37,10 @@ export const createUiSlice: StateCreator<ResumeStore, [], [], UiSlice> = (set, g
 
   setWizardStep: (step: WizardStep) => {
     set({ wizardStep: step });
+  },
+
+  setMasterDataMode: (mode) => {
+    set({ masterDataMode: mode });
   },
 
   showNotification: (notif) => {

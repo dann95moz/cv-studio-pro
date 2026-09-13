@@ -8,13 +8,14 @@ import {
   ProfilePhotoCrop,
   StudioTab,
   WizardStep,
+  MasterDataMode,
   AIProviderSettings,
   GeneratedCvVersion,
   KanbanColumn,
   ApplicationItem,
   CvTranslationVariant,
   CVData,
-} from '../types/cv';
+} from '../types';
 
 export interface GlobalNotification {
   open: boolean;
@@ -27,9 +28,11 @@ export interface GlobalNotification {
 export interface UiSlice {
   activeTab: StudioTab;
   wizardStep: WizardStep;
+  masterDataMode: MasterDataMode;
   globalNotification: GlobalNotification | null;
   setActiveTab: (tab: StudioTab) => void;
   setWizardStep: (step: WizardStep) => void;
+  setMasterDataMode: (mode: MasterDataMode) => void;
   showNotification: (notif: Omit<GlobalNotification, 'open'>) => void;
   hideNotification: () => void;
   handleStartWizard: () => void;

@@ -96,6 +96,8 @@ Audit the user journey across the 5 core studio milestones to detect and elimina
   - Never fragment an onboarding choice into separate dropzones, internal nested buttons, or drag-and-drop text on touch screens. The entire row must serve as a single, tactile touch target that directly launches the file picker or next step.
 - **Disentangling Recommendation from Selection State**:
   - Never allow a 'recommended' designation to hijack the visual affordance of an active selection. All option rows must remain visually neutral and balanced in their resting state, so the candidate understands they have full autonomy to decide. An explicit badge chip (e.g. 'Recommended') communicates priority without falsely signaling that a choice was pre-selected.
+- **Frictionless Exploration & Total Reversibility**:
+  - A user must never fear exploring an onboarding or input option. If selecting an option feels like an irreversible commitment, cognitive friction spikes and candidates hesitate. Every sub-flow must provide immediate, friction-free reversibility (top header back arrow, in-view back button, and hardware back gesture) without punishing the candidate or wiping draft progress.
 
 ---
 

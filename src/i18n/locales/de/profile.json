@@ -11,7 +11,8 @@
     "exportBackup": "Sicherung exportieren (.md)",
     "exportBackupTip": "Laden Sie Ihr Karriereprofil als Markdown (.md) herunter",
     "continueToTarget": "Weiter zur Zielstelle",
-    "reviewProfile": "Überprüfen"
+    "reviewProfile": "Überprüfen",
+    "backToOptions": "Zurück zu Optionen"
   },
   "dialog": {
     "confirmReplaceTitle": "Aktuelles Profil ersetzen?",

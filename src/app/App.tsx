@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import {
   useResumeStore,
   useDerivedFlags,
@@ -64,6 +64,8 @@ export const App: React.FC = () => {
   const setActiveTab = useResumeStore((s) => s.setActiveTab);
   const wizardStep = useResumeStore((s) => s.wizardStep);
   const setWizardStep = useResumeStore((s) => s.setWizardStep);
+  const masterDataMode = useResumeStore((s) => s.masterDataMode);
+  const setMasterDataMode = useResumeStore((s) => s.setMasterDataMode);
   const hasMasterData = useResumeStore((s) => Boolean(s.masterData && s.masterData.trim().length > 10));
   const masterData = useResumeStore((s) => s.masterData);
   const setMasterData = useResumeStore((s) => s.setMasterData);
@@ -336,6 +338,52 @@ export const App: React.FC = () => {
     }
   }, [isWalkthroughOpen]);
 
+  const handleMobileTopHeaderBack = useCallback(() => {
+    if (activeTab === 'wizard') {
+      if (wizardStep === 'profile') {
+        if (masterDataMode !== 'choice') {
+          setMasterDataMode('choice');
+        }
+      } else if (wizardStep === 'target') {
+        setWizardStep('profile');
+      } else if (wizardStep === 'preview') {
+        setWizardStep('target');
+      }
+    }
+  }, [activeTab, wizardStep, masterDataMode, setMasterDataMode, setWizardStep]);
+
+  const canMobileGoBack =
+    activeTab === 'wizard' &&
+    ((wizardStep === 'profile' && masterDataMode !== 'choice') ||
+      wizardStep === 'target' ||
+      wizardStep === 'preview');
+
+  // Priority-based Android hardware back handler for wizard steps navigation
+  useEffect(() => {
+    if (activeTab === 'wizard') {
+      if (wizardStep === 'target') {
+        return backButtonRegistry.register({
+          id: 'wizard-step-target-back',
+          priority: 30,
+          handler: () => {
+            setWizardStep('profile');
+            return true;
+          },
+        });
+      }
+      if (wizardStep === 'preview') {
+        return backButtonRegistry.register({
+          id: 'wizard-step-preview-back',
+          priority: 30,
+          handler: () => {
+            setWizardStep('target');
+            return true;
+          },
+        });
+      }
+    }
+  }, [activeTab, wizardStep, setWizardStep]);
+
   return (
     <div className="studio-app">
       {/* Top Navbar: Visible on Desktop */}
@@ -380,7 +428,9 @@ export const App: React.FC = () => {
               : activeTab === 'landing'
               ? t('common:appName', 'CV Studio')
               : wizardStep === 'profile'
-              ? t('profile:stepper.profileShortLabel', 'Datos Maestro')
+              ? masterDataMode !== 'choice'
+                ? t('profile:modes.guidedTitle', 'Formulario de Perfil')
+                : t('profile:stepper.profileShortLabel', 'Datos Maestro')
               : wizardStep === 'target'
               ? t('profile:stepper.targetShortLabel', 'Oferta y Vacante')
               : t('profile:stepper.previewShortLabel', 'CV y PDF')
@@ -391,6 +441,7 @@ export const App: React.FC = () => {
             setWizardStep(step);
           }}
           activeWizardStep={wizardStep}
+          onBack={canMobileGoBack ? handleMobileTopHeaderBack : undefined}
           onOpenSync={handleScanOrSync}
           onOpenWalkthrough={handleOpenWalkthrough}
           onOpenApplications={() => setActiveTab('history')}

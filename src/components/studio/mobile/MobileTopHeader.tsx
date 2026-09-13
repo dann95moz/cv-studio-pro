@@ -43,6 +43,7 @@ export interface MobileTopHeaderProps {
   isWizard?: boolean;
   onSelectStep?: (step: WizardStep) => void;
   activeWizardStep?: WizardStep;
+  onBack?: () => void;
 }
 
 /**
@@ -61,6 +62,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
   isWizard = true,
   onSelectStep,
   activeWizardStep = 'preview',
+  onBack,
 }) => {
   const { t, i18n } = useTranslation(['common', 'profile', 'preview']);
   const theme = useTheme();
@@ -118,45 +120,93 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: 2,
+          px: 1.5,
           height: 52,
         }}
       >
-        {isWizard && activeWizardStep === 'preview' ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography
-              component="span"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectStep?.('target');
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}>
+          {onBack && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                hapticsService.impactLight();
+                onBack();
               }}
+              aria-label={t('common:actions.back', 'Atrás')}
               sx={{
-                fontWeight: 600,
-                fontSize: '0.92rem',
                 color: 'text.secondary',
-                cursor: 'pointer',
-                transition: 'color 0.15s ease',
-                '&:hover': { color: 'primary.main' },
-                '&:active': { opacity: 0.7 },
+                p: 0.75,
+                mr: 0.25,
+                '&:hover': {
+                  color: 'text.primary',
+                  bgcolor: alpha(theme.palette.text.primary, 0.08),
+                },
+                '&:active': {
+                  transform: 'scale(0.92)',
+                },
               }}
             >
-              {t('preview:toolbar.step2BreadcrumbPrefix', 'Vacante Objetivo')}
-            </Typography>
-            <Typography
-              component="span"
-              sx={{
-                color: 'text.disabled',
-                mx: 0.25,
-                fontSize: '0.85rem',
-                fontWeight: 500,
-              }}
-            >
-              &gt;
-            </Typography>
-            <Typography
-              component="span"
+              <ArrowBackRoundedIcon fontSize="small" />
+            </IconButton>
+          )}
+
+          {isWizard && activeWizardStep === 'preview' ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+              <Typography
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectStep?.('target');
+                }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.92rem',
+                  color: 'text.secondary',
+                  cursor: 'pointer',
+                  transition: 'color 0.15s ease',
+                  '&:hover': { color: 'primary.main' },
+                  '&:active': { opacity: 0.7 },
+                }}
+              >
+                {t('preview:toolbar.step2BreadcrumbPrefix', 'Vacante Objetivo')}
+              </Typography>
+              <Typography
+                component="span"
+                sx={{
+                  color: 'text.disabled',
+                  mx: 0.25,
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                }}
+              >
+                &gt;
+              </Typography>
+              <Typography
+                component="span"
+                onClick={
+                  onSelectStep
+                    ? () => {
+                        hapticsService.impactLight();
+                        setIsStepSheetOpen(true);
+                      }
+                    : undefined
+                }
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.92rem',
+                  color: 'text.primary',
+                  cursor: onSelectStep ? 'pointer' : 'default',
+                  letterSpacing: '-0.01em',
+                  '&:active': onSelectStep ? { opacity: 0.7 } : undefined,
+                }}
+              >
+                {t('preview:toolbar.step3Breadcrumb', 'CV en Vivo')}
+              </Typography>
+            </Box>
+          ) : (
+            <Box
               onClick={
-                onSelectStep
+                isWizard && onSelectStep
                   ? () => {
                       hapticsService.impactLight();
                       setIsStepSheetOpen(true);
@@ -164,54 +214,37 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
                   : undefined
               }
               sx={{
-                fontWeight: 700,
-                fontSize: '0.92rem',
-                color: 'text.primary',
-                cursor: onSelectStep ? 'pointer' : 'default',
-                letterSpacing: '-0.01em',
-                '&:active': onSelectStep ? { opacity: 0.7 } : undefined,
+                display: 'flex',
+                alignItems: 'center',
+                cursor: isWizard && onSelectStep ? 'pointer' : 'default',
+                userSelect: 'none',
+                minWidth: 0,
+                '&:active': isWizard && onSelectStep ? { opacity: 0.7 } : undefined,
               }}
             >
-              {t('preview:toolbar.step3Breadcrumb', 'CV en Vivo')}
-            </Typography>
-          </Box>
-        ) : (
-          <Box
-            onClick={
-              isWizard && onSelectStep
-                ? () => {
-                    hapticsService.impactLight();
-                    setIsStepSheetOpen(true);
-                  }
-                : undefined
-            }
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: isWizard && onSelectStep ? 'pointer' : 'default',
-              userSelect: 'none',
-              '&:active': isWizard && onSelectStep ? { opacity: 0.7 } : undefined,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                color: 'text.primary',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {isWizard
-                ? t('common:nav.stepCounter', 'Paso {{current}} de {{total}} · {{title}}', {
-                    current: currentStepNumber,
-                    total: totalSteps,
-                    title: stepTitle,
-                  })
-                : stepTitle}
-            </Typography>
-          </Box>
-        )}
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  color: 'text.primary',
+                  letterSpacing: '-0.01em',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {isWizard
+                  ? t('common:nav.stepCounter', 'Paso {{current}} de {{total}} · {{title}}', {
+                      current: currentStepNumber,
+                      total: totalSteps,
+                      title: stepTitle,
+                    })
+                  : stepTitle}
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
         <IconButton
           size="small"
@@ -219,6 +252,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
           aria-label={t('common:nav.settings', 'Configuración')}
           sx={{
             color: 'text.secondary',
+            flexShrink: 0,
             '&:hover': {
               color: 'text.primary',
               bgcolor: alpha(theme.palette.primary.main, 0.08),

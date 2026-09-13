@@ -11,7 +11,8 @@
     "exportBackup": "Exportar Respaldo (.md)",
     "exportBackupTip": "Descargar tu perfil profesional como archivo Markdown (.md)",
     "continueToTarget": "Continuar a Vacante Objetivo",
-    "reviewProfile": "Revisar"
+    "reviewProfile": "Revisar",
+    "backToOptions": "Volver a opciones"
   },
   "dialog": {
     "confirmReplaceTitle": "¿Reemplazar perfil actual?",

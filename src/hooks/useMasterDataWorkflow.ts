@@ -28,11 +28,8 @@ export const useMasterDataWorkflow = ({
     return /^##\s+/m.test(trimmed) || trimmed.startsWith('{') || trimmed.includes('"cvData"') || /```(?:json)?\s*\{/i.test(trimmed);
   };
 
-  const [editMode, setEditMode] = useState<MasterDataMode>(() => {
-    if (!content || !content.trim()) return 'choice';
-    if (isStructuredOrJson(content)) return 'guided';
-    return 'freeText';
-  });
+  const editMode = useResumeStore((s) => s.masterDataMode);
+  const setEditMode = useResumeStore((s) => s.setMasterDataMode);
   const [manualText, setManualText] = useState(content);
   const manualTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushGuidedRef = useRef<(() => void) | null>(null);
@@ -40,10 +37,7 @@ export const useMasterDataWorkflow = ({
 
   useEffect(() => {
     setManualText(content);
-    if (editMode === 'choice' && content && content.trim().length > 20) {
-      setEditMode(isStructuredOrJson(content) ? 'guided' : 'freeText');
-    }
-  }, [content, editMode]);
+  }, [content]);
 
   useEffect(() => {
     return () => {
@@ -98,7 +92,7 @@ export const useMasterDataWorkflow = ({
       flushGuidedRef.current?.();
     }
     setEditMode('choice');
-  }, [editMode, flushManual]);
+  }, [editMode, flushManual, setEditMode]);
 
   const handleManualTextChange = (val: string) => {
     setManualText(val);

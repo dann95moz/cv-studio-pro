@@ -11,7 +11,8 @@
     "exportBackup": "Export Backup (.md)",
     "exportBackupTip": "Download your career profile as Markdown (.md)",
     "continueToTarget": "Continue to Target Vacancy",
-    "reviewProfile": "Review"
+    "reviewProfile": "Review",
+    "backToOptions": "Back to Options"
   },
   "dialog": {
     "confirmReplaceTitle": "Replace current profile?",

@@ -14,6 +14,8 @@ export type WizardStep =
   | 'tailor' 
   | 'preview';
 
+export type MasterDataMode = 'choice' | 'freeText' | 'guided';
+
 export type StudioTab = 
   | 'landing'
   | 'wizard'

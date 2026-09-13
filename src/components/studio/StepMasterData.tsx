@@ -39,6 +39,7 @@ import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { useTranslation } from 'react-i18next';
 import { StepMasterDataProps } from '../../types';
 import { StudioSkeleton } from './StudioSkeleton';
@@ -49,6 +50,9 @@ import { useKeyboardStatus } from '../../hooks/useKeyboardStatus';
 import { ProfileCompletenessBar } from './profile/ProfileCompletenessBar';
 import { MasterDataChoiceView } from './profile/MasterDataChoiceView';
 import { platformService } from '../../core/platform';
+import { backButtonRegistry } from '../../core/backButtonRegistry';
+import { hapticsService } from '../../core/haptics';
+import { RADIUS_TOKENS } from '../../theme/dimensions';
 
 const GuidedProfileForm = React.lazy(() =>
   import('./GuidedProfileForm').then((m) => ({ default: m.GuidedProfileForm }))
@@ -118,8 +122,23 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
       setShowSampleConfirmDialog(true);
     } else {
       onLoadSample();
+      handleSelectMode('guided');
     }
   };
+
+  // Priority-based back handler to return from sub-forms (guided/freeText) to choice view
+  React.useEffect(() => {
+    if (editMode !== 'choice') {
+      return backButtonRegistry.register({
+        id: 'step-master-data-choice-back',
+        priority: 40,
+        handler: () => {
+          handleResetToChoice();
+          return true;
+        },
+      });
+    }
+  }, [editMode, handleResetToChoice]);
 
   return (
     <Box
@@ -229,6 +248,31 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
           >
             <Box sx={{ maxWidth: 720 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25, flexWrap: 'wrap' }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<ArrowBackRoundedIcon />}
+                  onClick={() => {
+                    hapticsService.impactLight();
+                    handleResetToChoice();
+                  }}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: '0.82rem',
+                    color: 'text.secondary',
+                    borderColor: 'divider',
+                    borderRadius: RADIUS_TOKENS.full,
+                    textTransform: 'none',
+                    '&:hover': {
+                      color: 'text.primary',
+                      borderColor: 'text.secondary',
+                      bgcolor: alpha(theme.palette.text.primary, 0.04),
+                    },
+                  }}
+                >
+                  {t('profile:actions.backToOptions', 'Volver a opciones')}
+                </Button>
+
                 <ToggleButtonGroup
                   size="small"
                   value={editMode}
@@ -629,6 +673,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
         onConfirm={() => {
           setShowSampleConfirmDialog(false);
           onLoadSample();
+          handleSelectMode('guided');
         }}
         title={t('profile:dialog.confirmLoadSampleTitle', 'Load sample profile?')}
         message={t(
