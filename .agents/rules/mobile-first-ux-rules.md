@@ -19,7 +19,7 @@ In early iterations, the desktop workspace layout (which features a 1200px horiz
 
 ### ✅ The Mobile-First Standard
 On mobile viewports (`xs`: 0px–599px), the interface must **not** be a scaled-down desktop app. It must adopt native mobile design patterns:
-- **Clean Top Header**: Step title + progress bar + single `•••` overflow menu.
+- **Clean Top Header**: Step title + progress bar + single Settings (⚙) icon.
 - **Secondary Document Bar**: Compact document switcher dropdown + language chip.
 - **Maximum Canvas Focus**: Unobstructed document preview occupying the maximum screen real estate.
 - **Floating Action Button (FAB) & Bottom Sheet**: Tool panels (Templates, Design, LinkedIn, Compare) live in a slide-up bottom sheet triggered from the thumb zone.
@@ -31,7 +31,7 @@ On mobile viewports (`xs`: 0px–599px), the interface must **not** be a scaled-
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│ Paso 3 de 3 · CV y PDF                              ••• │ ◄── 1. Clean Top Header
+│ Paso 3 de 3 · CV y PDF                                ⚙ │ ◄── 1. Clean Top Header
 ├─────────────────────────────────────────────────────────┤ (Accent progress bar)
 │ ┌──────────────────────┐  ┌───────┐                     │
 │ │ 📄 Currículum     ⌄  │  │ EN  ⌄ │                     │ ◄── 2. Secondary Document Bar
@@ -55,15 +55,15 @@ On mobile viewports (`xs`: 0px–599px), the interface must **not** be a scaled-
 ### Pillar 1: Clean Top Header & Step Progress
 - The top header on mobile (`xs`) must be a **single row** with a fixed height (`52px`–`56px`).
 - **Left**: Step title and breadcrumb (e.g. `Paso 3 de 3 · CV y PDF`).
-- **Right**: Single `•••` (More options / Overflow) `IconButton`.
+- **Right**: Single Settings (⚙) `IconButton` (`SettingsRoundedIcon`).
 - **Bottom**: Thin 2px accent progress bar.
 - ❌ **Forbidden on Mobile**: Placing Save, Re-tailor, Download PDF, or Autofit buttons directly in the top header.
 
 ---
 
-### Pillar 2: Global `•••` Overflow Bottom Sheet (Zero Floating Menus)
+### Pillar 2: Global Settings (⚙) Bottom Sheet (Zero Floating Menus)
 - ❌ **STRICTLY FORBIDDEN ON APP & MOBILE WEB**: Anchored floating dropdown menus (`<Menu>`, `<Popover>`) floating near the top or middle of the screen.
-- ✅ **MANDATORY**: Tapping `•••` MUST open a native **Slide-Up Bottom Sheet** (`Drawer anchor="bottom"` with top drag handle `—`, `borderTopLeftRadius: 16px`, `borderTopRightRadius: 16px`, and safe-area padding).
+- ✅ **MANDATORY**: Tapping ⚙ MUST open a native **Slide-Up Bottom Sheet** (`Drawer anchor="bottom"` with top drag handle `—`, `borderTopLeftRadius: 16px`, `borderTopRightRadius: 16px`, and safe-area padding).
 - Encapsulate meta-actions and system preferences inside this thumb-zone bottom sheet without duplicating primary navigation:
   - `🌐 Idioma app` (Navigates to an in-sheet language selection sub-view with Back button).
   - `☼ Tema` (Theme switcher: Claro / Oscuro).
@@ -188,7 +188,7 @@ In CV Studio mobile interfaces, Fitts's Law dictates 3 strict rules:
 4. ❌ **The "Cramp Zone" Anchor**: Pinning primary CTA buttons directly to the bottom bezel without $\ge 40\text{px}$–$48\text{px}$ safe elevation.
 5. ❌ **Notch / Status Bar Collision**: Placing `Skip` or close buttons with `< 24px` top clearance.
 6. ❌ **The 100px+ Empty Void**: Leaving massive dead space between paginators and primary action buttons.
-7. ❌ **Scattered Global Settings**: Theme and language toggles must not appear in 3 different toolbars. On mobile, they belong exclusively in the `•••` overflow menu.
+7. ❌ **Scattered Global Settings**: Theme and language toggles must not appear in 3 different toolbars. On mobile, they belong exclusively in the Settings (⚙) bottom sheet.
 8. ❌ **Floating / Anchored Menus (`<Menu>`, `<Popover>`)**: Floating popover menus anchored to header icons, dropdown triggers, or toolbar buttons are strictly forbidden on mobile. Every secondary choice, menu, or format picker MUST open as a slide-up Bottom Sheet (`Drawer anchor="bottom"`).
 
 ---
@@ -196,8 +196,8 @@ In CV Studio mobile interfaces, Fitts's Law dictates 3 strict rules:
 ## 5. Responsive Verification Checklist for Agents
 
 Before completing any task affecting UI or layout:
-1. [ ] Is the top header on `xs` clean and single-row with `•••` overflow menu?
-2. [ ] Are global settings (theme, app language, sync QR, GitHub) located in the `•••` bottom sheet on mobile?
+1. [ ] Is the top header on `xs` clean and single-row with Settings (⚙) icon?
+2. [ ] Are global preferences (theme, app language, tour, GitHub) located in the Settings (⚙) bottom sheet on mobile?
 3. [ ] Does the document canvas occupy the maximum viewport height without being crowded by stacked bars?
 4. [ ] Are tool panels (Templates, Design, LinkedIn, Diff) accessible via a bottom sheet or FAB?
 5. [ ] Is the bottom navigation (`Estudio`, `Postulaciones`) anchored at the bottom with proper safe-area padding?

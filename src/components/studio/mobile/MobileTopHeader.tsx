@@ -14,7 +14,7 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
@@ -216,7 +216,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
         <IconButton
           size="small"
           onClick={handleOpenOptions}
-          aria-label="more options"
+          aria-label={t('common:nav.settings', 'Configuración')}
           sx={{
             color: 'text.secondary',
             '&:hover': {
@@ -225,7 +225,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
             },
           }}
         >
-          <MoreHorizRoundedIcon />
+          <SettingsRoundedIcon fontSize="small" />
         </IconButton>
       </Box>
 
@@ -379,7 +379,7 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
             {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '1.05rem', color: 'text.primary' }}>
-                {t('common:nav.options', 'Opciones')}
+                {t('common:nav.settings', 'Configuración')}
               </Typography>
               <IconButton size="small" onClick={handleCloseOptions} sx={{ color: 'text.secondary' }}>
                 <CloseRoundedIcon fontSize="small" />

@@ -61,7 +61,7 @@ Mobile Web users interact via touch screens within mobile browsers (Safari, Chro
   - **Single Column Layout**: Multi-column desktop grids must cleanly collapse to a single ergonomic column.
   - **Thumb-Zone Navigation**: Use `MobileBottomNav` for quick switching between *Estudio* and *Postulaciones*.
   - **Top Header Clearance**: Compact single row ($52\text{px}$–$56\text{px}$) with safe top offset ($\ge 26\text{px}$ + safe-area) to avoid notch and clock collisions. See [mobile-first-ux-rules.md](file:///.agents/rules/mobile-first-ux-rules.md).
-  - **Bottom Sheet Paradigm for All Secondary Choices**: Every secondary menu, overflow options (`•••`), format picker, language switcher, or document selector MUST open as a slide-up Bottom Sheet (`Drawer anchor="bottom"`). Floating dropdown menus (`<Menu>`, `<Popover>`) are strictly forbidden.
+  - **Bottom Sheet Paradigm for All Secondary Choices**: Every secondary menu, global settings (⚙), format picker, language switcher, or document selector MUST open as a slide-up Bottom Sheet (`Drawer anchor="bottom"`). Floating dropdown menus (`<Menu>`, `<Popover>`) are strictly forbidden.
 
 ### 3.2. Graceful Hardware Fallbacks
 - ❌ **STRICTLY FORBIDDEN**: Calling native Capacitor plugins (camera, filesystem, background task) that reject or crash in mobile browsers.
