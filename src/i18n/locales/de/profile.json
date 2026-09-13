@@ -53,7 +53,18 @@
     "switchToFreeText": "Zu Freitext / Notizen wechseln",
     "syncCardTitle": "Von PC synchronisieren (QR-Code)",
     "syncCardDesc": "Haben Sie Ihren Lebenslauf bereits am Computer erstellt? Übertragen Sie Master-CV, Versionen und Bewerbungen sofort per verschlüsseltem QR oder Code.",
-    "syncCardAction": "Mit QR synchronisieren"
+    "syncCardAction": "Mit QR synchronisieren",
+    "syncToPhoneTitle": "Mit Smartphone synchronisieren (QR-Code)",
+    "syncToPhoneAction": "QR-Code generieren",
+    "nativeSubtitle": "Wähle eine Option, um fortzufahren.",
+    "stepHeaderShort": "Schritt 1 von 3 · Profil",
+    "recommendedChipShort": "Empfohlen",
+    "syncCardTitleShort": "Vom PC synchronisieren",
+    "syncCardShortDesc": "Übertrage deinen Lebenslauf mit einem QR-Code",
+    "importCardTitleShort": "Lebenslauf importieren",
+    "importCardShortDesc": "Lade dein PDF, TXT oder Markdown hoch",
+    "guidedCardTitleShort": "Geführtes Formular",
+    "guidedCardShortDesc": "Schritt für Schritt von Grund auf neu erstellen"
   },
   "modes": {
     "guidedAssistant": "Geführtes Formular",

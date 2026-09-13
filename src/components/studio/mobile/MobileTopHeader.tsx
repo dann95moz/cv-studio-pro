@@ -17,6 +17,8 @@ import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
+import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 import { useTranslation } from 'react-i18next';
 import { useThemeMode } from '../../../theme/ThemeContext';
 import { APP_LINKS } from '../../../constants/links';
@@ -28,6 +30,8 @@ export interface MobileTopHeaderProps {
   totalSteps?: number;
   stepTitle: string;
   onOpenSync: () => void;
+  onOpenWalkthrough?: () => void;
+  onOpenApplications?: () => void;
   isWizard?: boolean;
   onSelectStep?: (step: WizardStep) => void;
   activeWizardStep?: WizardStep;
@@ -42,6 +46,8 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
   totalSteps = 3,
   stepTitle,
   onOpenSync,
+  onOpenWalkthrough,
+  onOpenApplications,
   isWizard = true,
   onSelectStep,
   activeWizardStep = 'preview',
@@ -300,6 +306,36 @@ export const MobileTopHeader: React.FC<MobileTopHeaderProps> = ({
           </ListItemIcon>
           <ListItemText primary={t('common:nav.syncQr', 'Sincronizar (QR)')} />
         </MenuItem>
+
+        {/* My Applications */}
+        {onOpenApplications && (
+          <MenuItem
+            onClick={() => {
+              handleCloseMenu();
+              onOpenApplications();
+            }}
+          >
+            <ListItemIcon>
+              <BusinessRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary={t('common:nav.myApplications', 'Postulaciones')} />
+          </MenuItem>
+        )}
+
+        {/* View Tour / Intro Walkthrough */}
+        {onOpenWalkthrough && (
+          <MenuItem
+            onClick={() => {
+              handleCloseMenu();
+              onOpenWalkthrough();
+            }}
+          >
+            <ListItemIcon>
+              <AutoStoriesRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary={t('common:nav.viewWalkthrough', 'Ver introducción')} />
+          </MenuItem>
+        )}
 
         {/* View on GitHub */}
         <MenuItem

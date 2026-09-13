@@ -48,6 +48,7 @@ import { useMasterProfileCompleteness } from '../../hooks/useMasterProfileComple
 import { useKeyboardStatus } from '../../hooks/useKeyboardStatus';
 import { ProfileCompletenessBar } from './profile/ProfileCompletenessBar';
 import { MasterDataChoiceView } from './profile/MasterDataChoiceView';
+import { platformService } from '../../core/platform';
 
 const GuidedProfileForm = React.lazy(() =>
   import('./GuidedProfileForm').then((m) => ({ default: m.GuidedProfileForm }))
@@ -128,9 +129,17 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
         p: { xs: 1.5, sm: 2, md: 3 },
-        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 48px)', sm: 5, md: 6 },
+        pb: {
+          xs: platformService.isNative()
+            ? 'max(env(safe-area-inset-bottom, 0px), 24px)'
+            : 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+          sm: 5,
+          md: 6,
+        },
         display: 'flex',
-        justifyContent: 'center',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
         position: 'relative',
         boxSizing: 'border-box',
       }}

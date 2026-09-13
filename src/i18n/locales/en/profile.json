@@ -53,7 +53,18 @@
     "switchToFreeText": "Switch to Free Text / Notes",
     "syncCardTitle": "Sync from PC (QR Code)",
     "syncCardDesc": "Already have your CV on your computer? Transfer your Master CV, versions, and vacancies instantly via encrypted QR or pairing code.",
-    "syncCardAction": "Sync with QR"
+    "syncCardAction": "Sync with QR",
+    "syncToPhoneTitle": "Sync to Mobile (QR Code)",
+    "syncToPhoneAction": "Generate QR Code",
+    "nativeSubtitle": "Choose an option to continue.",
+    "stepHeaderShort": "Step 1 of 3 · Profile",
+    "recommendedChipShort": "Recommended",
+    "syncCardTitleShort": "Sync from PC",
+    "syncCardShortDesc": "Transfer your CV with a QR code",
+    "importCardTitleShort": "Import CV",
+    "importCardShortDesc": "Upload your PDF, TXT or Markdown",
+    "guidedCardTitleShort": "Guided form",
+    "guidedCardShortDesc": "Start from scratch, step by step"
   },
   "modes": {
     "guidedAssistant": "Guided Form",

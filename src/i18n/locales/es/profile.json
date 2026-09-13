@@ -53,7 +53,19 @@
     "switchToFreeText": "Cambiar a Texto Libre / Notas",
     "syncCardTitle": "Sincronizar desde PC (Código QR)",
     "syncCardDesc": "¿Ya creaste tu CV en tu computadora? Transfiere tu Master CV, versiones y postulaciones al instante mediante QR cifrado o código.",
-    "syncCardAction": "Sincronizar con QR"
+    "syncCardAction": "Sincronizar con QR",
+    "syncToPhoneTitle": "Sincronizar con Móvil (Código QR)",
+    "syncToPhoneDesc": "Genera un código QR para transferir tu Master CV, versiones y postulaciones a tu smartphone en un instante.",
+    "syncToPhoneAction": "Generar Código QR",
+    "nativeSubtitle": "Elige una opción para continuar.",
+    "stepHeaderShort": "Paso 1 de 3 · Perfil",
+    "recommendedChipShort": "Recomendado",
+    "syncCardTitleShort": "Sincronizar desde PC",
+    "syncCardShortDesc": "Transfiere tu CV con un código QR",
+    "importCardTitleShort": "Importar CV",
+    "importCardShortDesc": "Sube tu PDF, TXT o Markdown",
+    "guidedCardTitleShort": "Formulario guiado",
+    "guidedCardShortDesc": "Empezar de cero, paso a paso"
   },
   "modes": {
     "guidedAssistant": "Formulario Guiado",

@@ -53,7 +53,18 @@
     "switchToFreeText": "Passer au Texte Libre / Notes",
     "syncCardTitle": "Synchroniser depuis le PC (Code QR)",
     "syncCardDesc": "Vous avez déjà créé votre CV sur votre ordinateur ? Transférez instantanément votre Master CV, versions et candidatures via QR chiffré ou code.",
-    "syncCardAction": "Synchroniser avec QR"
+    "syncCardAction": "Synchroniser avec QR",
+    "syncToPhoneTitle": "Synchroniser vers le Mobile (Code QR)",
+    "syncToPhoneAction": "Générer un Code QR",
+    "nativeSubtitle": "Choisissez une option pour continuer.",
+    "stepHeaderShort": "Étape 1 sur 3 · Profil",
+    "recommendedChipShort": "Recommandé",
+    "syncCardTitleShort": "Synchroniser depuis le PC",
+    "syncCardShortDesc": "Transférez votre CV avec un code QR",
+    "importCardTitleShort": "Importer un CV",
+    "importCardShortDesc": "Téléversez votre PDF, TXT ou Markdown",
+    "guidedCardTitleShort": "Formulaire guidé",
+    "guidedCardShortDesc": "Commencer de zéro, étape par étape"
   },
   "modes": {
     "guidedAssistant": "Formulaire Guidé",

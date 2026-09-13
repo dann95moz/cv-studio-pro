@@ -13,6 +13,7 @@ import { ManualAiPromptModal } from '../components/studio/ai/ManualAiPromptModal
 import { DeviceSyncModal } from '../components/studio/sync/DeviceSyncModal';
 import { SnapshotConflictModal } from '../components/studio/sync/SnapshotConflictModal';
 import { useDeviceSync } from '../hooks/useDeviceSync';
+import { useFileUploader } from '../hooks/useFileUploader';
 import {
   BLANK_MASTER_DATA,
   DEMO_MASTER_DATA,
@@ -21,13 +22,14 @@ import {
 import { downloadTextFile, buildTimestampedFileName } from '../utils/fileUtils';
 import { useTranslation } from 'react-i18next';
 import { Box, Snackbar, Alert, Button } from '@mui/material';
-import { MobileTopHeader, MobileBottomNav } from '../components/studio/mobile';
+import { MobileTopHeader, MobileBottomNav, MobileOnboardingWalkthrough } from '../components/studio/mobile';
 import { useAndroidBackHandler } from '../hooks/useAndroidBackHandler';
 import { useForegroundResume } from '../hooks/useForegroundResume';
 import { backButtonRegistry } from '../core/backButtonRegistry';
 import { Capacitor } from '@capacitor/core';
 import { qrScannerService } from '../core/qrScannerService';
 import { hapticsService } from '../core/haptics';
+import { platformService } from '../core/platform';
 import './App.css';
 
 // Dynamically loaded tab views and wizard steps
@@ -99,8 +101,46 @@ export const App: React.FC = () => {
   const savedVersionsCount = useResumeStore((s) => s.savedVersions.length);
   const hasStarted = hasMasterData || hasApplications || savedVersionsCount > 0 || hasTargetJob || hasGeneratedCv;
 
-  // Show bottom navigation on mobile ONLY when user is past landing AND has active workspace / applications
-  const showMobileBottomNav = activeTab !== 'landing' && (hasStarted || activeTab === 'history');
+  // Show bottom navigation on mobile:
+  // On Native App: hide bottom bar while user is completing the wizard flow ("mientras se completa el flujo en app")
+  // On Web: visible when past landing AND has active workspace / history
+  const showMobileBottomNav = platformService.isNative()
+    ? (activeTab === 'history')
+    : (activeTab !== 'landing' && (hasStarted || activeTab === 'history'));
+
+  // Mobile Onboarding Walkthrough State (Auto-opened exclusively on Native App first launch)
+  const [isWalkthroughOpen, setIsWalkthroughOpen] = useState<boolean>(() => {
+    try {
+      const isSeen = localStorage.getItem('cv_studio_onboarding_completed') === 'true';
+      // Desktop Web and Mobile Web start directly at the landing page; native APK launches walkthrough
+      return platformService.isNative() && !isSeen;
+    } catch {
+      return false;
+    }
+  });
+
+  const handleCloseWalkthrough = () => {
+    try {
+      localStorage.setItem('cv_studio_onboarding_completed', 'true');
+    } catch (e) {
+      console.debug('[App] Error writing onboarding flag:', e);
+    }
+    setIsWalkthroughOpen(false);
+    if (platformService.isNative() || activeTab === 'landing') {
+      setActiveTab('wizard');
+      setWizardStep('profile');
+    }
+  };
+
+  const handleCompleteWalkthrough = () => {
+    handleCloseWalkthrough();
+    setActiveTab('wizard');
+    setWizardStep('profile');
+  };
+
+  const handleOpenWalkthrough = () => {
+    setIsWalkthroughOpen(true);
+  };
 
   // Multidevice Sync State & Hook
   const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
@@ -112,7 +152,12 @@ export const App: React.FC = () => {
     setIsSyncModalOpen(true);
   };
 
-  const handleScanOrSync = async () => {
+  const handleScanOrSync = async (defaultTab?: 'export' | 'import') => {
+    if (defaultTab) {
+      handleOpenSync(defaultTab);
+      return;
+    }
+
     // 1. Mobile-First: Directly invoke native camera QR scanner
     if (Capacitor.isNativePlatform()) {
       try {
@@ -156,8 +201,12 @@ export const App: React.FC = () => {
       }
     }
 
-    // 2. On Web or desktop: open sync modal in import tab
-    handleOpenSync('import');
+    // 2. On Web: Desktop defaults to 'export' (show QR to phone), Mobile Web defaults to 'import'
+    if (platformService.isDesktopWeb()) {
+      handleOpenSync('export');
+    } else {
+      handleOpenSync('import');
+    }
   };
 
   const handleModalScanCamera = async () => {
@@ -165,6 +214,43 @@ export const App: React.FC = () => {
     setTimeout(async () => {
       await handleScanOrSync();
     }, 150);
+  };
+
+  // Walkthrough Actions (Screen 3: Scan QR, Import PDF, Load Demo)
+  const { fileInputRef: walkthroughFileInputRef, openFileDialog: openWalkthroughFileDialog } = useFileUploader({
+    onFileLoaded: (content) => {
+      setMasterData(content);
+      setActiveTab('wizard');
+      setWizardStep('profile');
+      showNotification({
+        message: t('profile:importSuccess', 'CV importado correctamente'),
+        severity: 'success',
+      });
+    },
+  });
+
+  const handleWalkthroughScan = () => {
+    handleCloseWalkthrough();
+    setTimeout(() => {
+      handleScanOrSync();
+    }, 150);
+  };
+
+  const handleWalkthroughImport = () => {
+    handleCloseWalkthrough();
+    setTimeout(() => {
+      openWalkthroughFileDialog();
+    }, 150);
+  };
+
+  const handleWalkthroughDemo = () => {
+    handleCloseWalkthrough();
+    setMasterData(DEMO_MASTER_DATA);
+    setTargetJob(DEMO_TARGET_JOB);
+    setCompanyName('Stripe');
+    setTargetRole('Senior Frontend Engineer');
+    setActiveTab('wizard');
+    setWizardStep('preview');
   };
 
   // Listen for hash-based sync parameters on mount & hashchange (e.g. #sync?id=...#key=...)
@@ -188,6 +274,14 @@ export const App: React.FC = () => {
 
   // Background / Foreground synthesis recovery
   useForegroundResume();
+
+  // Guard: Native Android APK must never remain on or navigate to the Web Landing tab
+  useEffect(() => {
+    if (platformService.isNative() && activeTab === 'landing') {
+      setActiveTab('wizard');
+      setWizardStep('profile');
+    }
+  }, [activeTab, setActiveTab, setWizardStep]);
 
   // Register open modals in the Back Button Stack
   useEffect(() => {
@@ -228,6 +322,19 @@ export const App: React.FC = () => {
       });
     }
   }, [sync.pendingSnapshot, sync.conflictComparison, sync.handleCancelConflict]);
+
+  useEffect(() => {
+    if (isWalkthroughOpen) {
+      return backButtonRegistry.register({
+        id: 'walkthrough-modal',
+        priority: 120,
+        handler: () => {
+          handleCloseWalkthrough();
+          return true;
+        },
+      });
+    }
+  }, [isWalkthroughOpen]);
 
   return (
     <div className="studio-app">
@@ -284,7 +391,9 @@ export const App: React.FC = () => {
             setWizardStep(step);
           }}
           activeWizardStep={wizardStep}
-          onOpenSync={() => handleOpenSync('export')}
+          onOpenSync={handleScanOrSync}
+          onOpenWalkthrough={handleOpenWalkthrough}
+          onOpenApplications={() => setActiveTab('history')}
         />
       </Box>
 
@@ -311,8 +420,8 @@ export const App: React.FC = () => {
           boxSizing: 'border-box',
         }}
       >
-        {/* VIEW: WELCOME & ONBOARDING LANDING */}
-        {activeTab === 'landing' && (
+        {/* VIEW: WELCOME & ONBOARDING LANDING (Web Only - Native App uses MobileOnboardingWalkthrough + direct Studio) */}
+        {!platformService.isNative() && activeTab === 'landing' && (
           <Suspense fallback={<StudioSkeleton variant="landing" />}>
             <WelcomeLandingView onOpenSync={handleScanOrSync} />
           </Suspense>
@@ -566,6 +675,24 @@ export const App: React.FC = () => {
           </Alert>
         </Snackbar>
       )}
+
+      {/* Hidden file input for Walkthrough PDF/MD Import */}
+      <input
+        type="file"
+        ref={walkthroughFileInputRef}
+        style={{ display: 'none' }}
+        accept=".pdf,.md,.txt,application/pdf,text/plain,text/markdown"
+      />
+
+      {/* Mobile Onboarding Walkthrough Stepper */}
+      <MobileOnboardingWalkthrough
+        open={isWalkthroughOpen}
+        onClose={handleCloseWalkthrough}
+        onComplete={handleCompleteWalkthrough}
+        onScanQr={handleWalkthroughScan}
+        onImportPdf={handleWalkthroughImport}
+        onLoadDemo={handleWalkthroughDemo}
+      />
     </div>
   );
 };
