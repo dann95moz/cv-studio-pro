@@ -68,11 +68,13 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           width: '100%',
           maxWidth: 460,
           mx: 'auto',
+          my: 'auto',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
+          flex: 1,
           px: { xs: 2, sm: 2.5 },
-          pt: { xs: 2, sm: 3 },
-          pb: 2,
+          py: { xs: 2.5, sm: 3 },
           boxSizing: 'border-box',
           position: 'relative',
         }}
@@ -86,32 +88,20 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           onChange={onUploadFile}
         />
 
-        {/* Main Title & Subtitle directly on screen background */}
-        <Box sx={{ mb: 2.5 }}>
+        {/* Main Title directly on screen background (calm semibold typography) */}
+        <Box sx={{ mb: 2.5, px: 0.5 }}>
           <Typography
             variant="h5"
             component="h1"
             sx={{
-              fontWeight: 800,
-              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-              letterSpacing: '-0.025em',
-              lineHeight: 1.25,
+              fontWeight: 600,
+              fontSize: { xs: '1.42rem', sm: '1.65rem' },
+              letterSpacing: '-0.02em',
+              lineHeight: 1.28,
               color: 'text.primary',
-              mb: 0.75,
             }}
           >
             {t('profile:choice.title', '¿Cómo querés empezar tu perfil?')}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              fontSize: '0.94rem',
-              fontWeight: 400,
-              lineHeight: 1.45,
-            }}
-          >
-            {t('profile:choice.nativeSubtitle', 'Elegí una opción para continuar.')}
           </Typography>
         </Box>
 
@@ -173,8 +163,8 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
             <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
           </ButtonBase>
 
-          {/* Divider between Row 1 and Row 2 */}
-          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, mx: 1 }} />
+          {/* Material Design Inset Divider between Row 1 and Row 2 (starts after icon) */}
+          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, ml: '72px', mr: 1.5 }} />
 
           {/* Row 2: Importar CV (Recomendado - Primary Accent & Left Indicator) */}
           <ButtonBase
@@ -244,8 +234,8 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
             <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
           </ButtonBase>
 
-          {/* Divider between Row 2 and Row 3 */}
-          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, mx: 1 }} />
+          {/* Material Design Inset Divider between Row 2 and Row 3 (starts after icon) */}
+          <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, ml: '72px', mr: 1.5 }} />
 
           {/* Row 3: Formulario guiado */}
           <ButtonBase
@@ -298,8 +288,8 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           </ButtonBase>
         </Box>
 
-        {/* Subtle bottom action for demo sample (directly below options without void) */}
-        <Box sx={{ mt: 2.5, textAlign: 'center' }}>
+        {/* Subtle left-aligned action for demo sample (matching content margin) */}
+        <Box sx={{ mt: 2.5, px: 1.5, display: 'flex', justifyContent: 'flex-start' }}>
           <Button
             variant="text"
             size="small"
@@ -309,9 +299,13 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
             }}
             sx={{
               color: 'text.secondary',
-              fontSize: '0.84rem',
+              fontSize: '0.86rem',
               textTransform: 'none',
               fontWeight: 500,
+              p: 0,
+              minWidth: 'auto',
+              textAlign: 'left',
+              justifyContent: 'flex-start',
               '&:hover': {
                 color: 'primary.main',
                 bgcolor: 'transparent',

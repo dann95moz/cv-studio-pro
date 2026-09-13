@@ -143,7 +143,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start',
+        justifyContent: platformService.isNative() && editMode === 'choice' ? 'center' : 'flex-start',
         position: 'relative',
         boxSizing: 'border-box',
       }}
