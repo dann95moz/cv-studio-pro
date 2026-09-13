@@ -94,6 +94,8 @@ Audit the user journey across the 5 core studio milestones to detect and elimina
   - Eliminate generic boilerplate subtitles that merely paraphrase the headline (e.g. "¿Cómo querés empezar tu perfil?" followed by "Elegí una opción para continuar"). Subtitles must either provide tangible decision-making value (e.g. duration or expected outcome) or be removed entirely to deliver a refined, confident product experience.
 - **Single Touch Target per Choice in Mobile Workflows**:
   - Never fragment an onboarding choice into separate dropzones, internal nested buttons, or drag-and-drop text on touch screens. The entire row must serve as a single, tactile touch target that directly launches the file picker or next step.
+- **Disentangling Recommendation from Selection State**:
+  - Never allow a 'recommended' designation to hijack the visual affordance of an active selection. All option rows must remain visually neutral and balanced in their resting state, so the candidate understands they have full autonomy to decide. An explicit badge chip (e.g. 'Recommended') communicates priority without falsely signaling that a choice was pre-selected.
 
 ---
 

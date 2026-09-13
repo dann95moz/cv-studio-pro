@@ -78,6 +78,15 @@ All visual styles must derive from the centralized design system:
 - ❌ **STRICTLY FORBIDDEN ON MOBILE**: Anchored floating dropdown menus (`<Menu>`, `<Popover>`) floating in the air.
 - ✅ **MANDATORY**: Every secondary menu, overflow options, document selector, or format picker MUST open as a slide-up **Bottom Sheet** (`Drawer anchor="bottom"` with top drag handle `36×4px`, `borderTopLeftRadius: 16px`, `borderTopRightRadius: 16px`, and safe-area padding).
 
+### 4.6. Disentangling "Recommended" from "Selected / Active" States
+- **The Superposition Trap**:
+  - ❌ **Anti-Pattern**: Applying an accent border and tinted background fill to an option marked as "Recommended" in its resting state before the user has touched anything.
+  - **Why It Fails**: In digital UI semantics, a solid accent border + background wash communicates *"this item is currently selected / active / turned on"*. Giving that treatment to a recommendation creates ambiguity: the user assumes the choice was already made for them or that the option is pre-checked.
+  - ✅ **Standard**:
+    1. **Resting State Uniformity**: All available option rows share the identical resting surface (neutral background, identical borders or dividers).
+    2. **Explicit Recommendation Badge**: Express recommendation solely via an explicit textual badge (e.g. `<Chip label="Recommended" size="small" />`).
+    3. **Selection Affordance**: Reserve the accent border and tinted surface exclusively for active touches (`:active`), loading transitions, or when an item has truly been selected.
+
 ---
 
 ## 5. Accessibility (a11y) & Usability Checklist
@@ -99,5 +108,7 @@ When creating or modifying components:
 - [ ] **Mobile Menus**: Zero floating `<Menu>` or `<Popover>` in mobile components; all secondary choices must be Bottom Sheets (`Drawer anchor="bottom"`).
 - [ ] **Semantic Icons**: Use Settings (⚙) for global app preferences, not `•••` or kebab.
 - [ ] **Inset Dividers**: Lists with leading icons must use inset dividers (`ml: '72px'`) aligned to text.
+- [ ] **Recommended vs Selected**: Do NOT pre-highlight "Recommended" items with active borders/backgrounds. Use only explicit badge chips.
+
 
 

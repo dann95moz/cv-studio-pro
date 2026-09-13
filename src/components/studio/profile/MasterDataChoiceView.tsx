@@ -166,7 +166,7 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
           {/* Material Design Inset Divider between Row 1 and Row 2 (starts after icon) */}
           <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, ml: '72px', mr: 1.5 }} />
 
-          {/* Row 2: Importar CV (Recomendado - Primary Accent & Left Indicator) */}
+          {/* Row 2: Importar CV (Recomendado - Distinct by Chip badge, clean resting state) */}
           <ButtonBase
             onClick={() => {
               hapticsService.impactLight();
@@ -181,12 +181,10 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
               justifyContent: 'space-between',
               textAlign: 'left',
               borderRadius: RADIUS_TOKENS.lg,
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.12) : '#eff6ff',
               transition: 'all 0.15s ease',
               '&:active': {
                 transform: 'scale(0.985)',
-                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.2) : '#e0f0fe',
+                bgcolor: alpha(theme.palette.action.hover, 0.08),
               },
             }}
           >
@@ -199,8 +197,8 @@ export const MasterDataChoiceView: React.FC<MasterDataChoiceViewProps> = React.m
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  bgcolor: isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe',
-                  color: 'primary.main',
+                  bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
+                  color: 'text.primary',
                   flexShrink: 0,
                 }}
               >
