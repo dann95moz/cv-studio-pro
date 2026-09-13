@@ -1,12 +1,14 @@
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
+import { platformService } from './platform';
 
 /**
  * Universal Mobile Haptics Service for CV Studio Pro.
- * Provides subtle, tactile feedback on physical devices with silent fallbacks on desktop.
+ * Provides subtle, tactile feedback on physical mobile/native devices with strict silence on desktop web.
  */
 export const hapticsService = {
   async impactLight(): Promise<void> {
+    if (platformService.isDesktopWeb()) return;
     try {
       if (Capacitor.isNativePlatform()) {
         await Haptics.impact({ style: ImpactStyle.Light });
@@ -19,6 +21,7 @@ export const hapticsService = {
   },
 
   async impactMedium(): Promise<void> {
+    if (platformService.isDesktopWeb()) return;
     try {
       if (Capacitor.isNativePlatform()) {
         await Haptics.impact({ style: ImpactStyle.Medium });
@@ -31,6 +34,7 @@ export const hapticsService = {
   },
 
   async notificationSuccess(): Promise<void> {
+    if (platformService.isDesktopWeb()) return;
     try {
       if (Capacitor.isNativePlatform()) {
         await Haptics.notification({ type: NotificationType.Success });
@@ -43,6 +47,7 @@ export const hapticsService = {
   },
 
   async notificationWarning(): Promise<void> {
+    if (platformService.isDesktopWeb()) return;
     try {
       if (Capacitor.isNativePlatform()) {
         await Haptics.notification({ type: NotificationType.Warning });

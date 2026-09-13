@@ -13,6 +13,7 @@ import {
 
 import { secureStorage } from '../../core/secureStorage';
 import { hapticsService } from '../../core/haptics';
+import { platformService } from '../../core/platform';
 
 export const DEFAULT_AI_SETTINGS: AIProviderSettings = {
   provider: 'gemini',
@@ -226,9 +227,9 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
       // Non-critical session snapshot error
     }
 
-    // 2. Request OS background execution window via Capacitor BackgroundTask
+    // 2. Request OS background execution window via Capacitor BackgroundTask (native only)
     let bgTaskId: string | null = null;
-    if (typeof window !== 'undefined') {
+    if (platformService.isNative()) {
       import('@capawesome/capacitor-background-task').then(({ BackgroundTask }) => {
         BackgroundTask.beforeExit(async () => {
           // Keep thread execution window open during external app switching

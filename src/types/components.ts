@@ -141,7 +141,7 @@ export interface StepMasterDataProps {
   onPrevStep?: () => void;
   onNextStep: () => void;
   onContinue?: () => void;
-  onOpenSync?: () => void;
+  onOpenSync?: (tab?: 'export' | 'import') => void;
 }
 
 export interface StepTargetJobProps {
