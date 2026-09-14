@@ -1,31 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import { serializeCvDataToMarkdown, parseMarkdownToCvData, cleanCvData } from '../../core/parser';
-import { CVData, ContactItem, ContactType, ExperienceItem, SkillCategory } from '../../types/cv';
-import { BLANK_CV_DATA } from '../../constants/templates';
 import { ProfileNavRail, ProfileSectionKey } from './profile/ProfileNavRail';
-import { PersonalInfoSection } from './profile/PersonalInfoSection';
-import { SummarySection } from './profile/SummarySection';
-import { SkillsCategorizedPanel } from './profile/SkillsCategorizedPanel';
-import { ExperienceSection } from './profile/ExperienceSection';
-import { EducationSection } from './profile/EducationSection';
-import { LanguagesSection } from './profile/LanguagesSection';
-import { ProjectsSection } from './profile/ProjectsSection';
-import { CustomSectionPanel } from './profile/CustomSectionPanel';
 import { AddSectionModal } from './profile/AddSectionModal';
-import { CustomSectionPresetType } from '../../types/cv';
-import { useTranslation } from 'react-i18next';
 import { GuidedProfileFormProps } from '../../types';
 import { useSwipeGesture } from '../../hooks/useSwipeGesture';
-import { getLocalizedCategoryTitle } from '../../utils/skillCategoryUtils';
-
+import { useGuidedProfileData } from './profile/useGuidedProfileData';
+import { GuidedProfileActiveSection } from './profile/GuidedProfileActiveSection';
 
 export type { GuidedProfileFormProps };
-
-const EMPTY_EXPERIENCE: ExperienceItem[] = [];
-const EMPTY_EDUCATION: string[] = [];
-const EMPTY_LANGUAGES: string[] = [];
-const EMPTY_PROJECTS: ExperienceItem[] = [];
 
 /**
  * Step 1: Master-Detail Guided Visual Profile Form.
@@ -41,16 +23,9 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   onSectionChange: setControlledActiveSection,
   onComplete,
 }) => {
-  const { t } = useTranslation(['profile', 'common']);
-  const [formData, setFormData] = useState<CVData>(() => {
-    if (data) return cleanCvData(data);
-    if (markdownContent && markdownContent.trim().length > 0) {
-      return cleanCvData(parseMarkdownToCvData(markdownContent));
-    }
-    return cleanCvData(BLANK_CV_DATA);
-  });
   const [internalSection, setInternalSection] = useState<ProfileSectionKey>('personal');
   const activeSection = (controlledActiveSection as ProfileSectionKey) || internalSection;
+
   const handleSectionChange = useCallback(
     (sec: ProfileSectionKey) => {
       if (setControlledActiveSection) {
@@ -61,546 +36,22 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
     },
     [setControlledActiveSection]
   );
-  
-  const lastEmittedMarkdownRef = useRef<string>(markdownContent);
-  const formDataRef = useRef<CVData>(formData);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isDirtyRef = useRef<boolean>(false);
 
-  formDataRef.current = formData;
-
-  // Flush pending changes to parent
-  const flushChanges = useCallback(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-    if (!isDirtyRef.current) {
-      return;
-    }
-    isDirtyRef.current = false;
-    const newMarkdown = serializeCvDataToMarkdown(formDataRef.current);
-    if (newMarkdown !== lastEmittedMarkdownRef.current) {
-      lastEmittedMarkdownRef.current = newMarkdown;
-      onChange(newMarkdown);
-    }
-  }, [onChange]);
-
-  // Hook up onFlushRef for parent components
-  useEffect(() => {
-    if (onFlushRef) {
-      onFlushRef.current = flushChanges;
-    }
-    return () => {
-      if (onFlushRef) {
-        onFlushRef.current = null;
-      }
-    };
-  }, [flushChanges, onFlushRef]);
-
-  // Flush on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-      if (isDirtyRef.current) {
-        isDirtyRef.current = false;
-        const newMarkdown = serializeCvDataToMarkdown(formDataRef.current);
-        if (newMarkdown !== lastEmittedMarkdownRef.current) {
-          lastEmittedMarkdownRef.current = newMarkdown;
-          onChange(newMarkdown);
-        }
-      }
-    };
-  }, [onChange]);
-
-  // Synchronize when external data or markdownContent changes (from import, QR sync, sample load, free text edit, etc.)
-  useEffect(() => {
-    if (data) {
-      const cleaned = cleanCvData(data);
-      setFormData(cleaned);
-      formDataRef.current = cleaned;
-    } else if (markdownContent !== lastEmittedMarkdownRef.current) {
-      lastEmittedMarkdownRef.current = markdownContent;
-      const parsed = cleanCvData(
-        markdownContent && markdownContent.trim().length > 0
-          ? parseMarkdownToCvData(markdownContent)
-          : BLANK_CV_DATA
-      );
-      setFormData(parsed);
-      formDataRef.current = parsed;
-    }
-  }, [data, markdownContent]);
-
-  const scheduleEmit = useCallback(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(() => {
-      debounceTimerRef.current = null;
-      if (isDirtyRef.current) {
-        isDirtyRef.current = false;
-        const newMarkdown = serializeCvDataToMarkdown(formDataRef.current);
-        if (newMarkdown !== lastEmittedMarkdownRef.current) {
-          lastEmittedMarkdownRef.current = newMarkdown;
-          onChange(newMarkdown);
-        }
-      }
-    }, 250);
-  }, [onChange]);
-
-  const updateData = useCallback((updater: (prev: CVData) => CVData) => {
-    isDirtyRef.current = true;
-    setFormData(prev => {
-      const next = updater(prev);
-      formDataRef.current = next;
-      return next;
-    });
-    scheduleEmit();
-  }, [scheduleEmit]);
-
-  // Identity / Contact Callbacks
-  const handleNameChange = useCallback((name: string) => {
-    updateData(prev => ({ ...prev, name }));
-  }, [updateData]);
-
-  const handleTitleChange = useCallback((title: string) => {
-    updateData(prev => ({ ...prev, title }));
-  }, [updateData]);
-
-  const handleContactChange = useCallback((type: ContactType, label: string, url?: string) => {
-    updateData(prev => {
-      const remaining = prev.contacts.filter(c => c.type !== type);
-      if (label) {
-        let cleanText = label;
-        if (type === 'email') {
-          cleanText = cleanText.replace(/^mailto:/i, '');
-        }
-
-        let finalUrl = url?.trim();
-        if (type === 'email') {
-          finalUrl = cleanText ? `mailto:${cleanText}` : undefined;
-        } else if (!finalUrl && (type === 'linkedin' || type === 'github' || type === 'globe')) {
-          finalUrl = label.startsWith('http') ? label : `https://${label.replace(/^https?:\/\//, '')}`;
-        } else if (finalUrl && (type === 'linkedin' || type === 'github' || type === 'globe') && !finalUrl.startsWith('http')) {
-          finalUrl = `https://${finalUrl}`;
-        }
-
-        const newContact: ContactItem = {
-          type,
-          label: label.trim(),
-          url: finalUrl
-        };
-        return { ...prev, contacts: [...remaining, newContact] };
-      }
-      return { ...prev, contacts: remaining };
-    });
-  }, [updateData]);
-
-  // Summary Callbacks
-  const handleSummaryChange = useCallback((summary: string) => {
-    updateData(prev => ({ ...prev, summary }));
-  }, [updateData]);
-
-  // Skill category helpers
-  const handleSkillGroupCategoryChange = useCallback((index: number, newCategory: string) => {
-    updateData(prev => {
-      const groups = prev.skillGroups && prev.skillGroups.length > 0 ? [...prev.skillGroups] : [
-        { category: t('profile:sections.skills.defaultCore', 'Core Skills'), skills: [] },
-        { category: t('profile:sections.skills.defaultArchitecture', 'Specialties'), skills: [] },
-        { category: t('profile:sections.skills.defaultTooling', 'Tools'), skills: [] }
-      ];
-      if (!groups[index]) return prev;
-      groups[index] = { ...groups[index], category: newCategory };
-      return { ...prev, skillGroups: groups };
-    });
-  }, [updateData, t]);
-
-  const handleSkillGroupSkillsChange = useCallback((index: number, skillsStr: string) => {
-    updateData(prev => {
-      const groups = prev.skillGroups && prev.skillGroups.length > 0 ? [...prev.skillGroups] : [
-        { category: t('profile:sections.skills.defaultCore', 'Core Skills'), skills: [] },
-        { category: t('profile:sections.skills.defaultArchitecture', 'Specialties'), skills: [] },
-        { category: t('profile:sections.skills.defaultTooling', 'Tools'), skills: [] }
-      ];
-      if (!groups[index]) return prev;
-      groups[index] = {
-        ...groups[index],
-        skills: skillsStr.split(',').map(s => s.trim()).filter(Boolean)
-      };
-      return { ...prev, skillGroups: groups };
-    });
-  }, [updateData, t]);
-
-  const handleAddSkillGroup = useCallback(() => {
-    updateData(prev => {
-      const current = prev.skillGroups ? [...prev.skillGroups] : [];
-      const newIdx = current.length;
-      const defaultCategory = newIdx === 0
-        ? t('profile:sections.skills.defaultCore', 'Core Skills')
-        : newIdx === 1
-        ? t('profile:sections.skills.defaultArchitecture', 'Specialties')
-        : newIdx === 2
-        ? t('profile:sections.skills.defaultTooling', 'Tools')
-        : `${t('profile:sections.skills.groupName', 'Category')} ${newIdx + 1}`;
-
-      const newGroup: SkillCategory = {
-        category: defaultCategory,
-        skills: []
-      };
-      return {
-        ...prev,
-        skillGroups: [...current, newGroup]
-      };
-    });
-  }, [updateData, t]);
-
-  const handleRemoveSkillGroup = useCallback((index: number) => {
-    updateData(prev => ({
-      ...prev,
-      skillGroups: (prev.skillGroups || []).filter((_, i) => i !== index)
-    }));
-  }, [updateData]);
-
-  // Experience helpers
-  const handleExperienceChange = useCallback((index: number, field: keyof ExperienceItem, value: string | string[]) => {
-    updateData(prev => {
-      const expList = [...(prev.experience || [])];
-      expList[index] = { ...expList[index], [field]: value };
-      return { ...prev, experience: expList };
-    });
-  }, [updateData]);
-
-  const handleAddExperience = useCallback(() => {
-    const newExp: ExperienceItem = {
-      company: '',
-      role: '',
-      location: '',
-      date: '',
-      bullets: ['']
-    };
-    updateData(prev => ({
-      ...prev,
-      experience: [newExp, ...(prev.experience || [])]
-    }));
-  }, [updateData]);
-
-  const handleRemoveExperience = useCallback((index: number) => {
-    updateData(prev => ({
-      ...prev,
-      experience: (prev.experience || []).filter((_, i) => i !== index)
-    }));
-  }, [updateData]);
-
-  const handleAddBullet = useCallback((expIndex: number) => {
-    updateData(prev => {
-      const expList = [...(prev.experience || [])];
-      const targetExp = expList[expIndex];
-      const newBullets = [...targetExp.bullets, ''];
-      expList[expIndex] = { ...targetExp, bullets: newBullets };
-      return { ...prev, experience: expList };
-    });
-  }, [updateData]);
-
-  const handleUpdateBullet = useCallback((expIndex: number, bulletIndex: number, text: string) => {
-    updateData(prev => {
-      const expList = [...(prev.experience || [])];
-      const targetExp = expList[expIndex];
-      const nextBullets = [...targetExp.bullets];
-      nextBullets[bulletIndex] = text;
-      expList[expIndex] = { ...targetExp, bullets: nextBullets };
-      return { ...prev, experience: expList };
-    });
-  }, [updateData]);
-
-  const handleRemoveBullet = useCallback((expIndex: number, bulletIndex: number) => {
-    updateData(prev => {
-      const expList = [...(prev.experience || [])];
-      const targetExp = expList[expIndex];
-      const nextBullets = targetExp.bullets.filter((_, i) => i !== bulletIndex);
-      expList[expIndex] = { ...targetExp, bullets: nextBullets };
-      return { ...prev, experience: expList };
-    });
-  }, [updateData]);
-
-  // Education helpers
-  const handleUpdateEducation = useCallback((index: number, text: string) => {
-    updateData(prev => {
-      const eduList = [...(prev.education || [])];
-      eduList[index] = text;
-      return { ...prev, education: eduList };
-    });
-  }, [updateData]);
-
-  const handleAddEducation = useCallback(() => {
-    updateData(prev => ({
-      ...prev,
-      education: ['', ...(prev.education || [])]
-    }));
-  }, [updateData]);
-
-  const handleRemoveEducation = useCallback((index: number) => {
-    updateData(prev => ({
-      ...prev,
-      education: (prev.education || []).filter((_, i) => i !== index)
-    }));
-  }, [updateData]);
-
-  // Languages helpers
-  const handleUpdateLanguage = useCallback((index: number, text: string) => {
-    updateData(prev => {
-      const langList = [...(prev.languages || [])];
-      if (langList[index] === text) return prev;
-      langList[index] = text;
-      return { ...prev, languages: langList };
-    });
-  }, [updateData]);
-
-  const handleAddLanguage = useCallback(() => {
-    updateData(prev => ({
-      ...prev,
-      languages: [...(prev.languages || []), '']
-    }));
-  }, [updateData]);
-
-  const handleRemoveLanguage = useCallback((index: number) => {
-    updateData(prev => ({
-      ...prev,
-      languages: (prev.languages || []).filter((_, i) => i !== index)
-    }));
-  }, [updateData]);
-
-  // Projects helpers
-  const handleAddProject = useCallback(() => {
-    const newProj: ExperienceItem = {
-      company: '',
-      role: '',
-      location: '',
-      date: '',
-      bullets: ['']
-    };
-    updateData(prev => ({
-      ...prev,
-      projects: [...(prev.projects || []), newProj]
-    }));
-  }, [updateData]);
-
-  const handleProjectFieldChange = useCallback((index: number, field: keyof ExperienceItem, value: string | string[]) => {
-    updateData(prev => {
-      const list = [...(prev.projects || [])];
-      if (!list[index]) return prev;
-      let val = value;
-      if (typeof val === 'string' && (field === 'demoUrl' || field === 'repoUrl')) {
-        const trimmed = val.trim();
-        if (trimmed && !trimmed.startsWith('http') && (trimmed.includes('.') || trimmed.includes('/'))) {
-          val = `https://${trimmed.replace(/^https?:\/\//, '')}`;
-        } else {
-          val = trimmed;
-        }
-      }
-      if (list[index][field] === val) return prev;
-      list[index] = { ...list[index], [field]: val };
-      return { ...prev, projects: list };
-    });
-  }, [updateData]);
-
-  const handleRemoveProject = useCallback((index: number) => {
-    updateData(prev => ({
-      ...prev,
-      projects: (prev.projects || []).filter((_, i) => i !== index)
-    }));
-  }, [updateData]);
-
-  // Modal State for Adding Custom Section
   const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
 
-  // Custom Sections Handlers
-  const handleAddCustomSection = useCallback((title: string, presetType: CustomSectionPresetType) => {
-    const newId = `sec_${Date.now()}`;
-    updateData(prev => {
-      const current = prev.customSections || [];
-      return {
-        ...prev,
-        customSections: [
-          ...current,
-          {
-            id: newId,
-            title,
-            presetType,
-            items: [],
-          }
-        ]
-      };
-    });
-    handleSectionChange(`custom_${newId}`);
-  }, [updateData, handleSectionChange]);
-
-  const handleUpdateCustomSectionTitle = useCallback((sectionId: string, newTitle: string) => {
-    updateData(prev => ({
-      ...prev,
-      customSections: (prev.customSections || []).map(sec => 
-        sec.id === sectionId ? { ...sec, title: newTitle } : sec
-      )
-    }));
-  }, [updateData]);
-
-  const handleAddCustomSectionItem = useCallback((sectionId: string, itemText: string) => {
-    updateData(prev => ({
-      ...prev,
-      customSections: (prev.customSections || []).map(sec => 
-        sec.id === sectionId ? { ...sec, items: [...(sec.items || []), itemText] } : sec
-      )
-    }));
-  }, [updateData]);
-
-  const handleUpdateCustomSectionItem = useCallback((sectionId: string, index: number, newText: string) => {
-    updateData(prev => ({
-      ...prev,
-      customSections: (prev.customSections || []).map(sec => {
-        if (sec.id !== sectionId) return sec;
-        const newItems = [...(sec.items || [])];
-        newItems[index] = newText;
-        return { ...sec, items: newItems };
-      })
-    }));
-  }, [updateData]);
-
-  const handleRemoveCustomSectionItem = useCallback((sectionId: string, index: number) => {
-    updateData(prev => ({
-      ...prev,
-      customSections: (prev.customSections || []).map(sec => {
-        if (sec.id !== sectionId) return sec;
-        return { ...sec, items: (sec.items || []).filter((_, i) => i !== index) };
-      })
-    }));
-  }, [updateData]);
-
-  const handleRemoveCustomSection = useCallback((sectionId: string) => {
-    updateData(prev => ({
-      ...prev,
-      customSections: (prev.customSections || []).filter(sec => sec.id !== sectionId)
-    }));
-    handleSectionChange('personal');
-  }, [updateData, handleSectionChange]);
-
-  // Active custom section resolver
-  const activeCustomSection = useMemo(() => {
-    if (activeSection.startsWith('custom_')) {
-      const secId = activeSection.replace('custom_', '');
-      return (formData.customSections || []).find(sec => sec.id === secId || `custom_${sec.id}` === activeSection);
-    }
-    return null;
-  }, [activeSection, formData.customSections]);
-
-  // Compute section counts & completion status
-  const sectionCounts = useMemo(() => {
-    const personalComplete = Boolean(
-      formData.name &&
-      formData.name.trim().length > 2 &&
-      formData.contacts?.some(c => c.type === 'email' || c.type === 'location' || c.type === 'phone')
-    );
-    const summaryComplete = Boolean(formData.summary && formData.summary.trim().length > 25);
-    const skillsCount = (formData.skillGroups || []).reduce((acc, g) => acc + (g.skills?.length || 0), 0);
-    const experienceCount = (formData.experience || []).length;
-    const educationCount = (formData.education || []).length;
-    const languagesCount = (formData.languages || []).length;
-    const projectsCount = (formData.projects || []).length;
-
-    return {
-      personalComplete,
-      summaryComplete,
-      skillsCount,
-      experienceCount,
-      educationCount,
-      languagesCount,
-      projectsCount
-    };
-  }, [formData]);
-
-  // Check if profile satisfies minimum requirements or is complete
-  const isProfileComplete = useMemo(() => {
-    return Boolean(
-      sectionCounts.personalComplete &&
-      sectionCounts.summaryComplete &&
-      sectionCounts.skillsCount > 0 &&
-      (sectionCounts.experienceCount > 0 || sectionCounts.educationCount > 0)
-    );
-  }, [sectionCounts]);
-
-  // Ensure default skill groups if none exist
-  const skillGroups = useMemo(() => {
-    if (formData.skillGroups && formData.skillGroups.length > 0) {
-      return formData.skillGroups.map((g) => ({
-        ...g,
-        category: getLocalizedCategoryTitle(g.category, t),
-      }));
-    }
-    return [
-      { category: t('profile:sections.skills.defaultCore', 'Core Skills'), skills: [] },
-      { category: t('profile:sections.skills.defaultArchitecture', 'Specialties'), skills: [] },
-      { category: t('profile:sections.skills.defaultTooling', 'Tools'), skills: [] }
-    ];
-  }, [formData.skillGroups, t]);
-
-  // Ordered section keys for carousel navigation
-  const sectionKeys = useMemo<ProfileSectionKey[]>(() => {
-    const keys: ProfileSectionKey[] = [
-      'personal',
-      'summary',
-      'skills',
-      'experience',
-      'education',
-      'languages',
-      'projects',
-    ];
-    if (formData.customSections && formData.customSections.length > 0) {
-      formData.customSections.forEach((cs) => {
-        keys.push(`custom_${cs.id}`);
-      });
-    }
-    return keys;
-  }, [formData.customSections]);
-
-  const currentSectionIndex = sectionKeys.indexOf(activeSection);
-  const isLastSection = currentSectionIndex === sectionKeys.length - 1;
-
-  const handleNextInSequence = useCallback(() => {
-    if (isProfileComplete) {
-      onComplete?.();
-      return;
-    }
-    const nextIdx = currentSectionIndex + 1;
-    if (nextIdx < sectionKeys.length) {
-      handleSectionChange(sectionKeys[nextIdx]);
-    } else {
-      onComplete?.();
-    }
-  }, [isProfileComplete, currentSectionIndex, sectionKeys, handleSectionChange, onComplete]);
-
-  const handlePrevInSequence = useCallback(() => {
-    const prevIdx = currentSectionIndex - 1;
-    if (prevIdx >= 0) {
-      handleSectionChange(sectionKeys[prevIdx]);
-    }
-  }, [currentSectionIndex, sectionKeys, handleSectionChange]);
-
-  const handleSwipeLeft = useCallback(() => {
-    if (currentSectionIndex >= 0 && currentSectionIndex < sectionKeys.length - 1) {
-      handleSectionChange(sectionKeys[currentSectionIndex + 1]);
-    }
-  }, [sectionKeys, currentSectionIndex, handleSectionChange]);
-
-  const handleSwipeRight = useCallback(() => {
-    if (currentSectionIndex > 0) {
-      handleSectionChange(sectionKeys[currentSectionIndex - 1]);
-    }
-  }, [sectionKeys, currentSectionIndex, handleSectionChange]);
+  const profileData = useGuidedProfileData({
+    markdownContent,
+    onChange,
+    onFlushRef,
+    data,
+    activeSection,
+    onSectionChange: handleSectionChange,
+    onComplete,
+  });
 
   const swipeHandlers = useSwipeGesture({
-    onSwipeLeft: handleSwipeLeft,
-    onSwipeRight: handleSwipeRight,
+    onSwipeLeft: profileData.handleSwipeLeft,
+    onSwipeRight: profileData.handleSwipeRight,
     enabled: activeSection !== 'personal',
   });
 
@@ -614,16 +65,15 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
         height: { xs: 'auto', md: '100%' },
         minHeight: { xs: 'auto', md: 520 },
         alignItems: 'stretch',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
       }}
     >
-
       {/* 1. Left Navigation Rail (Desktop) / Mobile Top Section Bar (Mobile) */}
       <ProfileNavRail
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
-        sectionCounts={sectionCounts}
-        customSections={formData.customSections || []}
+        sectionCounts={profileData.sectionCounts}
+        customSections={profileData.formData.customSections || []}
         onAddSectionClick={() => setIsAddSectionModalOpen(true)}
       />
 
@@ -640,124 +90,52 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           transition: 'opacity 0.2s ease',
         }}
       >
-
-        {activeSection === 'personal' && (
-          <PersonalInfoSection
-            name={formData.name || ''}
-            title={formData.title || ''}
-            contacts={formData.contacts}
-            onNameChange={handleNameChange}
-            onTitleChange={handleTitleChange}
-            onContactChange={handleContactChange}
-            onAdvanceSection={handleNextInSequence}
-            isProfileComplete={isProfileComplete}
-          />
-        )}
-
-        {activeSection === 'summary' && (
-          <SummarySection
-            summary={formData.summary || ''}
-            onSummaryChange={handleSummaryChange}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
-
-        {activeSection === 'skills' && (
-          <SkillsCategorizedPanel
-            skillGroups={skillGroups}
-            onCategoryChange={handleSkillGroupCategoryChange}
-            onSkillsChange={handleSkillGroupSkillsChange}
-            onAddCategory={handleAddSkillGroup}
-            onRemoveCategory={handleRemoveSkillGroup}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
-
-        {activeSection === 'experience' && (
-          <ExperienceSection
-            experience={formData.experience || EMPTY_EXPERIENCE}
-            onFieldChange={handleExperienceChange}
-            onAddExperience={handleAddExperience}
-            onRemoveExperience={handleRemoveExperience}
-            onAddBullet={handleAddBullet}
-            onUpdateBullet={handleUpdateBullet}
-            onRemoveBullet={handleRemoveBullet}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
-
-        {activeSection === 'education' && (
-          <EducationSection
-            education={formData.education || EMPTY_EDUCATION}
-            onUpdateEducation={handleUpdateEducation}
-            onAddEducation={handleAddEducation}
-            onRemoveEducation={handleRemoveEducation}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
-
-        {activeSection === 'languages' && (
-          <LanguagesSection
-            languages={formData.languages || EMPTY_LANGUAGES}
-            onUpdateLanguage={handleUpdateLanguage}
-            onAddLanguage={handleAddLanguage}
-            onRemoveLanguage={handleRemoveLanguage}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
-
-        {activeSection === 'projects' && (
-          <ProjectsSection
-            projects={formData.projects || EMPTY_PROJECTS}
-            onFieldChange={handleProjectFieldChange}
-            onAddProject={handleAddProject}
-            onRemoveProject={handleRemoveProject}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
-
-        {/* Dynamic Custom Section Panel */}
-        {activeCustomSection && (
-          <CustomSectionPanel
-            section={activeCustomSection}
-            onUpdateTitle={(newTitle) => handleUpdateCustomSectionTitle(activeCustomSection.id, newTitle)}
-            onAddItem={(itemText) => handleAddCustomSectionItem(activeCustomSection.id, itemText)}
-            onUpdateItem={(index, newText) => handleUpdateCustomSectionItem(activeCustomSection.id, index, newText)}
-            onRemoveItem={(index) => handleRemoveCustomSectionItem(activeCustomSection.id, index)}
-            onRemoveSection={() => handleRemoveCustomSection(activeCustomSection.id)}
-            onBack={handlePrevInSequence}
-            onContinue={handleNextInSequence}
-            isLastSection={isLastSection || isProfileComplete}
-            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
-          />
-        )}
+        <GuidedProfileActiveSection
+          activeSection={activeSection}
+          formData={profileData.formData}
+          skillGroups={profileData.skillGroups}
+          activeCustomSection={profileData.activeCustomSection}
+          isProfileComplete={profileData.isProfileComplete}
+          isLastSection={profileData.isLastSection}
+          onNameChange={profileData.handleNameChange}
+          onTitleChange={profileData.handleTitleChange}
+          onContactChange={profileData.handleContactChange}
+          onSummaryChange={profileData.handleSummaryChange}
+          onSkillCategoryChange={profileData.handleSkillGroupCategoryChange}
+          onSkillsChange={profileData.handleSkillGroupSkillsChange}
+          onAddSkillGroup={profileData.handleAddSkillGroup}
+          onRemoveSkillGroup={profileData.handleRemoveSkillGroup}
+          onExperienceFieldChange={profileData.handleExperienceChange}
+          onAddExperience={profileData.handleAddExperience}
+          onRemoveExperience={profileData.handleRemoveExperience}
+          onAddBullet={profileData.handleAddBullet}
+          onUpdateBullet={profileData.handleUpdateBullet}
+          onRemoveBullet={profileData.handleRemoveBullet}
+          onUpdateEducation={profileData.handleUpdateEducation}
+          onAddEducation={profileData.handleAddEducation}
+          onRemoveEducation={profileData.handleRemoveEducation}
+          onUpdateLanguage={profileData.handleUpdateLanguage}
+          onAddLanguage={profileData.handleAddLanguage}
+          onRemoveLanguage={profileData.handleRemoveLanguage}
+          onAddProject={profileData.handleAddProject}
+          onProjectFieldChange={profileData.handleProjectFieldChange}
+          onRemoveProject={profileData.handleRemoveProject}
+          onUpdateCustomSectionTitle={profileData.handleUpdateCustomSectionTitle}
+          onAddCustomSectionItem={profileData.handleAddCustomSectionItem}
+          onUpdateCustomSectionItem={profileData.handleUpdateCustomSectionItem}
+          onRemoveCustomSectionItem={profileData.handleRemoveCustomSectionItem}
+          onRemoveCustomSection={profileData.handleRemoveCustomSection}
+          onPrevInSequence={profileData.handlePrevInSequence}
+          onNextInSequence={profileData.handleNextInSequence}
+        />
       </Box>
 
       {/* Add Custom Section Modal */}
       <AddSectionModal
         open={isAddSectionModalOpen}
         onClose={() => setIsAddSectionModalOpen(false)}
-        onAddSection={handleAddCustomSection}
+        onAddSection={profileData.handleAddCustomSection}
       />
     </Box>
   );
 };
-
