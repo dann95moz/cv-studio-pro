@@ -42,8 +42,8 @@ import { ApplicationGridCardProps } from '../../../types';
 import { getLocalizedColumnTitle } from '../../../utils/kanbanUtils';
 import { formatLocalizedDate } from '../../../utils/dateUtils';
 import { MatchScoreBadge } from '../../atoms';
-import { ConfirmDeleteDialog } from '../common/ConfirmDeleteDialog';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
+import { ApplicationCardMenus } from './ApplicationCardMenus';
 
 export const ApplicationGridCard: React.FC<ApplicationGridCardProps> = React.memo(({
   application,
@@ -272,99 +272,6 @@ export const ApplicationGridCard: React.FC<ApplicationGridCardProps> = React.mem
                     }}
                   />
                 </Tooltip>
-
-                <Menu
-                  anchorEl={langMenuAnchor}
-                  open={Boolean(langMenuAnchor)}
-                  onClose={() => setLangMenuAnchor(null)}
-                  slotProps={{ paper: { sx: { minWidth: 190 } } }}
-                >
-                  {/* Base Language Option */}
-                  <MenuItem
-                    selected={currentLang === baseLang}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLangMenuAnchor(null);
-                      onSelectLanguage?.(application.id, baseLang);
-                    }}
-                  >
-                    <ListItemIcon>
-                      {currentLang === baseLang ? (
-                        <CheckRoundedIcon fontSize="small" color="primary" />
-                      ) : (
-                        <Box sx={{ width: 20 }} />
-                      )}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 600 }}>
-                          {`${baseLang.toUpperCase()} (${t('history:language.baseOriginal', 'Original')})`}
-                        </Typography>
-                      }
-                    />
-                  </MenuItem>
-
-                  {/* Available Translations */}
-                  {attachedVersion.translations && Object.values(attachedVersion.translations).map((variant) => (
-                    <MenuItem
-                      key={variant.language}
-                      selected={currentLang === variant.language}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLangMenuAnchor(null);
-                        onSelectLanguage?.(application.id, variant.language);
-                      }}
-                    >
-                      <ListItemIcon>
-                        {currentLang === variant.language ? (
-                          <CheckRoundedIcon fontSize="small" color="primary" />
-                        ) : (
-                          <Box sx={{ width: 20 }} />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography sx={{ fontSize: '0.78rem', fontWeight: 600 }}>
-                            {`${variant.language.toUpperCase()} (${variant.languageLabel || variant.language})`}
-                          </Typography>
-                        }
-                      />
-                      {variant.isOutdated && (
-                        <Chip
-                          size="small"
-                          icon={<WarningAmberRoundedIcon sx={{ fontSize: '11px !important' }} />}
-                          label={t('history:language.outdated', 'Outdated')}
-                          color="warning"
-                          variant="outlined"
-                          sx={{ ml: 1, fontSize: '0.6rem', height: 18 }}
-                        />
-                      )}
-                    </MenuItem>
-                  ))}
-
-                  <Divider sx={{ my: 0.5 }} />
-
-                  {onLoadInStudio && (
-                    <MenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLangMenuAnchor(null);
-                        onLoadInStudio(attachedVersion.id);
-                      }}
-                    >
-                      <ListItemIcon>
-                        <TranslateRoundedIcon fontSize="small" color="primary" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: 'primary.main' }}>
-                            {t('history:language.translateInStudio', '+ Traducir en Studio...')}
-                          </Typography>
-                        }
-                      />
-                    </MenuItem>
-                  )}
-                </Menu>
               </>
             ) : null}
 
@@ -505,162 +412,27 @@ export const ApplicationGridCard: React.FC<ApplicationGridCardProps> = React.mem
         </CardActions>
       </Card>
 
-      {/* 1-Click Status Selection Menu */}
-      <Menu
-        anchorEl={statusMenuAnchor}
-        open={Boolean(statusMenuAnchor)}
-        onClose={handleCloseStatusMenu}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        slotProps={{
-          paper: {
-            sx: { minWidth: 200 },
-          },
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{
-            px: 2,
-            py: 0.75,
-            display: 'block',
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            color: 'text.secondary',
-            fontSize: '0.66rem',
-            letterSpacing: '0.5px',
-          }}
-        >
-          {t('history:status.moveToStage', 'Move to Stage')}
-        </Typography>
-
-        {allColumns.map((col) => {
-          const isSelected = col.id === application.columnId;
-          const colColor = col.color || theme.palette.primary.main;
-          return (
-            <MenuItem
-              key={col.id}
-              onClick={() => handleSelectStage(col.id)}
-              selected={isSelected}
-              sx={{ py: 0.75, gap: 1 }}
-            >
-              <Box
-                sx={{
-                  width: 9,
-                  height: 9,
-                  borderRadius: '50%',
-                  bgcolor: colColor,
-                  flexShrink: 0,
-                }}
-              />
-              <ListItemText
-                primary={
-                  <Typography variant="body2" sx={{ fontWeight: isSelected ? 700 : 500 }}>
-                    {getLocalizedColumnTitle(col, t)}
-                  </Typography>
-                }
-              />
-              {isSelected && <CheckRoundedIcon sx={{ fontSize: 16, color: 'primary.main', ml: 'auto' }} />}
-            </MenuItem>
-          );
-        })}
-
-        {onManageStages && (
-          <>
-            <Divider sx={{ my: 0.5 }} />
-            <MenuItem
-              onClick={() => {
-                handleCloseStatusMenu();
-                onManageStages();
-              }}
-              sx={{ py: 0.75, color: 'text.secondary' }}
-            >
-              <ListItemIcon sx={{ minWidth: 28, color: 'inherit' }}>
-                <SettingsRoundedIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    {t('history:actions.manageStages', 'Manage Stages...')}
-                  </Typography>
-                }
-              />
-            </MenuItem>
-          </>
-        )}
-      </Menu>
-
-      {/* Card Context Menu (Archive / Delete) */}
-      <Menu
-        anchorEl={moreMenuAnchor}
-        open={Boolean(moreMenuAnchor)}
-        onClose={handleCloseMoreMenu}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      >
-        {onTailorForApplication && (
-          <MenuItem
-            onClick={() => {
-              handleCloseMoreMenu();
-              onTailorForApplication(application);
-            }}
-            sx={{ gap: 1 }}
-          >
-            <ListItemIcon sx={{ minWidth: 28, color: 'primary.main' }}>
-              <AutoAwesomeRoundedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: 'primary.main' }}>
-                  {t('history:card.tailorCvForApp', '✨ Adaptar CV en Studio')}
-                </Typography>
-              }
-            />
-          </MenuItem>
-        )}
-
-        <MenuItem
-          onClick={() => {
-            handleCloseMoreMenu();
-            onArchive(application.id);
-          }}
-          sx={{ gap: 1 }}
-        >
-          <ListItemIcon sx={{ minWidth: 28 }}>
-            <ArchiveRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t('history:actions.archive', 'Archive Application')} />
-        </MenuItem>
-
-        <Divider sx={{ my: 0.5 }} />
-
-        <MenuItem
-          onClick={() => {
-            handleCloseMoreMenu();
-            setIsDeleteDialogOpen(true);
-          }}
-          sx={{ color: 'error.main', gap: 1 }}
-        >
-          <ListItemIcon sx={{ minWidth: 28, color: 'inherit' }}>
-            <DeleteOutlineRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t('common:actions.delete', 'Delete')} />
-        </MenuItem>
-      </Menu>
-
-      {/* Confirm Delete Dialog */}
-      <ConfirmDeleteDialog
-        open={isDeleteDialogOpen}
-        title={t('history:deleteAppTitle', 'Delete Application')}
-        message={t(
-          'history:deleteAppConfirm',
-          'Are you sure you want to remove {{company}} from your application tracking? This cannot be undone.',
-          { company: application.companyName }
-        )}
-        confirmLabel={t('common:actions.delete', 'Delete')}
-        cancelLabel={t('common:actions.cancel', 'Cancel')}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setIsDeleteDialogOpen(false)}
+      {/* Menus and Confirmation Dialogs */}
+      <ApplicationCardMenus
+        application={application}
+        allColumns={allColumns}
+        attachedVersion={attachedVersion}
+        statusMenuAnchor={statusMenuAnchor}
+        onCloseStatusMenu={handleCloseStatusMenu}
+        onMoveToStage={(colId) => onMoveToStage(application.id, colId)}
+        onManageStages={onManageStages}
+        moreMenuAnchor={moreMenuAnchor}
+        onCloseMoreMenu={handleCloseMoreMenu}
+        onArchive={onArchive}
+        onOpenDeleteDialog={() => setIsDeleteDialogOpen(true)}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        onCloseDeleteDialog={() => setIsDeleteDialogOpen(false)}
+        onConfirmDelete={handleConfirmDelete}
+        onTailorForApplication={onTailorForApplication}
+        langMenuAnchor={langMenuAnchor}
+        onCloseLangMenu={() => setLangMenuAnchor(null)}
+        onSelectLanguage={onSelectLanguage}
+        onLoadInStudio={onLoadInStudio}
       />
     </>
   );
