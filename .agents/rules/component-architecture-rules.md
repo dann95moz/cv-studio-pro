@@ -98,7 +98,25 @@ Every UI feature must be cleanly divided into **Smart Containers / Domain Hooks*
 
 ---
 
-## 6. Verification Checklist for Agents
+---
+
+## 6. The Facade Pattern Standard (Decoupled Domain Orchestration)
+
+To prevent cascading re-renders and tight coupling between UI components and granular state stores:
+1. **Domain Facades in `src/hooks/facades/`**:
+   - Complex views must not invoke 15–30 loose selectors from multiple Zustand slices directly.
+   - Introduce a domain facade hook (e.g. `useStudioFacade()`, `useStepTargetJobFacade()`).
+   - The facade encapsulates the store subscriptions, debouncing, auto-extractions, and high-level actions, returning clean, grouped objects (`navigation`, `documents`, `ai`, `system`).
+2. **Code-Splitting & Lazy Loading for Wizard Steps**:
+   - Heavy feature views (`StepMasterData`, `StepTargetJob`, `StepPreview`, `QualityAuditView`, `GapAnalysisView`) must be loaded dynamically via `React.lazy()` and wrapped in `<Suspense fallback={<StudioSkeleton />} />`.
+   - This ensures the Web bundle remains minimal (< 500 kB gzip) while Android (Capacitor) loads all chunks with zero latency from the local APK bundle.
+3. **Resilience & Error Boundaries**:
+   - All dynamic document rendering (such as `CVRenderer` inside `StepPreview`) and the application root (`main.tsx`) must be enclosed in an `<ErrorBoundary>`.
+   - Never allow an unhandled template or parsing exception to crash the entire application to a blank screen.
+
+---
+
+## 7. Verification Checklist for Agents
 
 Before authoring or refactoring any component:
 1. [ ] Is the component purely presentational (Dumb), or does it belong in `hooks/` / `store/`?
@@ -106,3 +124,6 @@ Before authoring or refactoring any component:
 3. [ ] Does the component avoid importing global stores or AI SDKs directly?
 4. [ ] Is the component under ~200 lines with a single, clear visual responsibility?
 5. [ ] Are repeated helpers and tokens imported from centralized utilities?
+6. [ ] Is the component protected with an `ErrorBoundary` if rendering dynamic external data?
+7. [ ] Does it use a domain Facade hook if coordinating multiple store domains?
+

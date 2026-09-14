@@ -123,8 +123,33 @@ walkDir(srcDir, (filePath) => {
         reportError(filePath, lineNum, 'Floating <Menu> or <Popover> detected in mobile component. All secondary choices on Mobile/Native must use slide-up Bottom Sheets (<Drawer anchor="bottom">).');
       }
     }
+
+    // L. Zero Store Imports in Dumb Layers (atoms, molecules, slots)
+    if ((filePath.includes(path.join('src', 'components', 'atoms')) ||
+         filePath.includes(path.join('src', 'components', 'molecules')) ||
+         filePath.includes(path.join('src', 'components', 'slots'))) && !isComment) {
+      if (/from\s+['"][^'"]*store[^'"]*['"]/.test(lineText)) {
+        reportError(filePath, lineNum, 'Direct store import in dumb component layer (atoms/molecules/slots) forbidden. Pass data and handlers via typed props.');
+      }
+    }
   });
+
+  // M. Component File Length Guidelines (SRP)
+  if (filePath.includes(path.join('src', 'components')) && lines.length > 650) {
+    if (!filePath.includes('templates') && !filePath.includes('pdf-extractor')) {
+      reportWarning(filePath, lines.length, `Monolithic component detected (${lines.length} lines). Consider decomposing into sub-components or domain hooks (SRP rule: < 250 lines).`);
+    }
+  }
 });
+
+// 1.5. Ensure ErrorBoundary wraps root application in main.tsx
+const mainTsxPath = path.join(srcDir, 'app', 'main.tsx');
+if (fs.existsSync(mainTsxPath)) {
+  const mainContent = fs.readFileSync(mainTsxPath, 'utf-8');
+  if (!mainContent.includes('<ErrorBoundary')) {
+    reportError(mainTsxPath, 1, 'Missing root <ErrorBoundary> wrapper in main.tsx. Root application must be protected against runtime rendering crashes.');
+  }
+}
 
 // 2. Scan i18n parity
 const localesDir = path.join(srcDir, 'i18n', 'locales');
