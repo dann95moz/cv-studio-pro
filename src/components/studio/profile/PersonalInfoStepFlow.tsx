@@ -700,97 +700,97 @@ export const PersonalInfoStepFlow: React.FC<PersonalInfoStepFlowProps> = ({
         </Fade>
       )}
 
-      {/* Bottom Step Action Controller */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 2,
-          pt: 1.5,
-          borderTop: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
-        }}
-      >
-        {/* Previous Field Button / Return to Summary */}
-        {isEditingSingleField ? (
-          <Button
-            size="medium"
-            variant="text"
-            color="inherit"
-            startIcon={<ArrowBackRoundedIcon />}
-            onClick={handlePrev}
-            sx={{
-              fontWeight: 600,
-              textTransform: 'none',
-              color: 'text.secondary',
-              px: 1.5,
-            }}
-          >
-            {t('profile:stepFlow.backToReview', 'Back to summary')}
-          </Button>
-        ) : currentStep > 0 && !isReviewScreen ? (
-          <Button
-            size="medium"
-            variant="text"
-            color="inherit"
-            startIcon={<ArrowBackRoundedIcon />}
-            onClick={handlePrev}
-            sx={{
-              fontWeight: 600,
-              textTransform: 'none',
-              color: 'text.secondary',
-              px: 1.5,
-            }}
-          >
-            {t('profile:stepFlow.prev', 'Previous')}
-          </Button>
-        ) : (
-          <Box />
-        )}
+      {/* Bottom Step Action Controller (Hidden on summary review when profile is already complete, as global Continue to Target Vacancy footer handles it) */}
+      {(!isReviewScreen || !isProfileComplete) && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            pt: 1.5,
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
+          }}
+        >
+          {/* Previous Field Button / Return to Summary */}
+          {isEditingSingleField ? (
+            <Button
+              size="medium"
+              variant="text"
+              color="inherit"
+              startIcon={<ArrowBackRoundedIcon />}
+              onClick={handlePrev}
+              sx={{
+                fontWeight: 600,
+                textTransform: 'none',
+                color: 'text.secondary',
+                px: 1.5,
+              }}
+            >
+              {t('profile:stepFlow.backToReview', 'Back to summary')}
+            </Button>
+          ) : currentStep > 0 && !isReviewScreen ? (
+            <Button
+              size="medium"
+              variant="text"
+              color="inherit"
+              startIcon={<ArrowBackRoundedIcon />}
+              onClick={handlePrev}
+              sx={{
+                fontWeight: 600,
+                textTransform: 'none',
+                color: 'text.secondary',
+                px: 1.5,
+              }}
+            >
+              {t('profile:stepFlow.prev', 'Previous')}
+            </Button>
+          ) : (
+            <Box />
+          )}
 
-        {/* Primary Action Button (Siguiente / Omitir / Guardar y volver / Confirmar) */}
-        {!isReviewScreen && activeConfig ? (
-          <Button
-            size="medium"
-            variant={!isEditingSingleField && activeConfig.isOptional && !currentValue.trim() ? 'outlined' : 'contained'}
-            color="primary"
-            endIcon={isEditingSingleField ? undefined : <ArrowForwardRoundedIcon />}
-            startIcon={isEditingSingleField ? <CheckCircleRoundedIcon sx={{ fontSize: 18 }} /> : undefined}
-            onClick={handleNext}
-            sx={{
-              fontWeight: 700,
-              px: 3,
-              py: 1,
-              minWidth: 140,
-            }}
-          >
-            {isEditingSingleField
-              ? t('profile:stepFlow.saveAndReturn', 'Save and return')
-              : activeConfig.isOptional && !currentValue.trim()
-              ? t('profile:stepFlow.skip', 'Skip')
-              : t('profile:stepFlow.next', 'Next')}
-          </Button>
-        ) : (
-          <Button
-            size="medium"
-            variant="contained"
-            color="primary"
-            disabled={!isAlreadyComplete}
-            endIcon={<ArrowForwardRoundedIcon />}
-            onClick={() => onAdvanceSection?.()}
-            sx={{
-              fontWeight: 700,
-              px: 3,
-              py: 1,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {isProfileComplete
-              ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy')
-              : t('profile:stepFlow.confirmAndContinue', 'Continue')}
-          </Button>
-        )}
-      </Box>
+          {/* Primary Action Button (Siguiente / Omitir / Guardar y volver / Confirmar) */}
+          {!isReviewScreen && activeConfig ? (
+            <Button
+              size="medium"
+              variant={!isEditingSingleField && activeConfig.isOptional && !currentValue.trim() ? 'outlined' : 'contained'}
+              color="primary"
+              endIcon={isEditingSingleField ? undefined : <ArrowForwardRoundedIcon />}
+              startIcon={isEditingSingleField ? <CheckCircleRoundedIcon sx={{ fontSize: 18 }} /> : undefined}
+              onClick={handleNext}
+              sx={{
+                fontWeight: 700,
+                px: 3,
+                py: 1,
+                minWidth: 140,
+              }}
+            >
+              {isEditingSingleField
+                ? t('profile:stepFlow.saveAndReturn', 'Save and return')
+                : activeConfig.isOptional && !currentValue.trim()
+                ? t('profile:stepFlow.skip', 'Skip')
+                : t('profile:stepFlow.next', 'Next')}
+            </Button>
+          ) : (
+            <Button
+              size="medium"
+              variant="contained"
+              color="primary"
+              disabled={!isAlreadyComplete}
+              endIcon={<ArrowForwardRoundedIcon />}
+              onClick={() => onAdvanceSection?.()}
+              sx={{
+                fontWeight: 700,
+                px: 3,
+                py: 1,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {t('profile:stepFlow.confirmAndContinue', 'Continue')}
+            </Button>
+          )}
+        </Box>
+      )}
     </Box>
   );
 };
