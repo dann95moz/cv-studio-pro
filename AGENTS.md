@@ -13,9 +13,9 @@ CV Studio is a local-first, privacy-respecting ATS resume builder, tailoring eng
 - **Component Library & Theming**: Material-UI (MUI v9) + Emotion (`@emotion/react`, `@emotion/styled`).
 - **State Management**: Zustand v5 (modular domain slices).
 - **Internationalization**: `i18next` + `react-i18next` (5 locales: `en`, `es`, `de`, `fr`, `it`).
-- **Markdown & PDF Generation**: `marked` (Markdown parsing), Native browser print / Puppeteer PDF generation.
+- **Markdown & PDF Generation**: `marked` (Markdown parsing), Direct vector PDF (`jsPDF` + `html2canvas`) and native browser print.
 - **AI Synthesis**: Google Gemini API (`@google/generative-ai`) and configurable OpenAI-compatible providers.
-- **CLI Engine**: `tsx` (runtime), `esbuild` (bundling to `bin/cli.mjs`).
+- **Cross-Platform**: Capacitor 8 (Android runtime, secure storage, file share, haptics).
 
 ---
 
@@ -55,12 +55,10 @@ customs CVs/
 ├── .agents/                      # Customization system (rules & skills)
 │   ├── rules/                    # Granular project rules (anti-patterns, styling, coding)
 │   └── skills/                   # On-demand agent runbooks & workflows
-├── bin/                          # Built CLI binary (cli.mjs)
 ├── prompts/                      # System prompts & AI templates
 ├── scripts/                      # Maintenance & compliance scripts (audit-codebase.mjs)
 ├── src/
 │   ├── app/                      # Main App container & wizard state
-│   ├── cli/                      # Command-line interface commands & wizard
 │   ├── components/               # Atomic Design components
 │   │   ├── atoms/                # Primitive UI elements (MatchScoreBadge, StatusDot, etc.)
 │   │   ├── molecules/            # Reusable interactive composites (SearchBarWithClear, etc.)
@@ -89,8 +87,8 @@ customs CVs/
 - `npm run build`: Typecheck with `tsc` and create optimized Vite production bundle in `dist/`.
 - `npm run typecheck`: Run TypeScript compiler without emitting files (`tsc --noEmit`).
 - `npm run check:compliance`: Run automated code hygiene, anti-patterns and i18n parity audit.
-- `npm run pdf`: Generate PDF from current `master-data.md` via Puppeteer CLI.
-- `npm run build:cli`: Bundle CLI executable with `esbuild`.
+- `npm run cap:sync`: Synchronize web build with Capacitor Android project.
+- `npm run cap:open`: Open native project in Android Studio.
 
 ---
 

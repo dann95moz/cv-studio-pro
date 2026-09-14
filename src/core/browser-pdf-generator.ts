@@ -4,8 +4,6 @@
  * ENVIRONMENT: Browser DOM only (React UI: 1-click Direct PDF Download).
  * ENGINE: html2canvas + jsPDF.
  * PURPOSE: Captures the rendered DOM resume element and downloads high-DPI PDFs directly in browser without print dialogs.
- * 
- * NOTE: For server/CLI Puppeteer PDF generation, see `src/core/cli-pdf-generator.ts`.
  */
 
 import React from 'react';

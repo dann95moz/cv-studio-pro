@@ -46,7 +46,7 @@ Traditional resume builders lock your data in proprietary cloud databases, charg
 | 🎨 **7 Engineered ATS Templates** | 7 layout themes (Modern Tech, Executive, Minimal ATS, Two-Column, Designer, Formal Legal, Academic Research). 
 | 🌈 **10 Curated Palettes + Custom HEX** | WCAG AA compliant color themes with dark/light mode and custom brand color picker. 
 | 🌐 **5-Language Internationalization** | Complete multilingual UI with instant locale switching (`English`, `Español`, `Deutsch`, `Français`, `Italiano`). 
-| 🖨️ **Dual PDF Export Engine** | Direct 1-click in-browser vector PDF generator + headless Puppeteer CLI with sub-millimeter margins. 
+| 🖨️ **High-DPI Vector PDF Engine** | Direct 1-click in-browser vector PDF generator (`html2canvas` + `jsPDF`) and native browser print with sub-millimeter margins. 
 
 ---
 
@@ -91,10 +91,11 @@ flowchart TB
         CVR["CVRenderer Component<br>(Dynamic CSS Custom Properties)"]
     end
 
-    subgraph TARGETS["🖥️ Dual Export Targets & Pipeline"]
-        STUDIO["CV Studio Web (Vite + React 19)<br>3-Step Wizard, Split Editor & Live A4 Height Calibration"]
+    subgraph TARGETS["🖥️ Export Targets & Application Surface"]
+        STUDIO["CV Studio Web & Android (Capacitor 8 + React 19)<br>3-Step Wizard, Split Editor & Live A4 Height Calibration"]
         KANBAN["Recruitment Kanban Pipeline<br>Drag & Drop Applications Tracker"]
-        PUPPETEER["Headless CLI SSR (Puppeteer)<br>Static Markup + Auto-Fit Scaling + Vector PDF"]
+        PDF["Direct 1-Click Vector PDF<br>(html2canvas + jsPDF)"]
+        PRINT["Native Browser Print Engine<br>(@media print CSS)"]
     end
 
     MD & TJ & RL --> STORE
@@ -109,7 +110,8 @@ flowchart TB
     LIVE --> CVR
     REGISTRY & PALETTES & TYPO & ICONS --> CVR
     CVR --> STUDIO
-    CVR --> PUPPETEER
+    CVR --> PDF
+    CVR --> PRINT
     STUDIO --> KANBAN
     STUDIO --> REGEN
 ```
@@ -127,29 +129,20 @@ customs-CVs/
 ├── prompts/                     # 🤖 Standalone AI prompt templates
 ├── src/
 │   ├── app/                     # Main Application root & layout orchestrator (App.tsx)
-│   ├── cli/                     # CLI orchestrator and interactive wizard (index.ts, commands)
 │   ├── components/              # Universal React components (CVRenderer, Icons, Slots)
+│   │   ├── atoms/               # Pure presentational UI elements (MatchScoreBadge, StatusDot)
+│   │   ├── molecules/           # Reusable interactive composites (SearchBarWithClear)
+│   │   ├── slots/               # Standardized CV document template slots (Header, Experience)
 │   │   ├── landing/             # Welcome & Onboarding view
-│   │   ├── feedback/            # User feedback modal & rating system
-│   │   ├── slots/               # Reusable atomic CV content slots (Header, Experience, etc.)
-│   │   └── studio/              # CV Studio Web UI
-│   │       ├── ai/              # Quick AI configuration & model testing modals
-│   │       ├── audit/           # Quality audit cards & interactive improvement modals
-│   │       ├── common/          # Shared components (LanguageSelector, StudioNavbar, etc.)
-│   │       ├── history/         # Kanban board, application cards, statistics header
-│   │       ├── preview/         # Preview toolbar, nav rail, side panels & live edit bubble
-│   │       ├── profile/         # Guided profile assistant form & delegated section cards
-│   │       ├── settings/        # AI credentials, synthesis rules & community credits
-│   │       └── tailor/          # AI model selector & page budget selector
+│   │   └── studio/              # CV Studio Web & Mobile UI
 │   ├── constants/               # Curated palettes, typography tokens, and project links
 │   ├── core/                    # Core business logic & services
 │   │   ├── ai/                  # AI Strategy pattern, prompt builder & bullet regenerator
 │   │   ├── parser/              # Markdown AST parser, serializer & slot mapper
 │   │   ├── audit-engine.ts      # 6-dimension quality & ATS audit evaluator
 │   │   ├── pdf-extractor.ts     # 100% Client-side local PDF parser (pdfjs)
-│   │   ├── browser-pdf-generator.ts # In-browser direct vector PDF generator (html2canvas/jsPDF)
-│   │   └── cli-pdf-generator.ts     # CLI & Node.js Puppeteer PDF compiler
-│   ├── hooks/                   # Custom stateful hooks (useFileUploader, usePrintPdf, etc.)
+│   │   └── browser-pdf-generator.ts # In-browser direct vector PDF generator (html2canvas/jsPDF)
+│   ├── hooks/                   # Custom stateful hooks & domain facades
 │   ├── i18n/                    # i18next configuration & 5 JSON locale directories
 │   ├── store/                   # Sliced Zustand store (cvData, design, ai, ui, history)
 │   ├── styles/                  # Clean vanilla CSS design tokens (tokens, preview, print)
@@ -163,9 +156,9 @@ customs-CVs/
 
 ---
 
-## 🚀 Quick Start & Usage
+## 🚀 Quick Start & Workflows
 
-### 1. Interactive Studio Web UI (Recommended)
+### 1. Interactive Studio Web UI (Vite + React 19)
 
 Start the local development server with instant Hot Module Reloading (HMR):
 ```bash
@@ -176,55 +169,31 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-### 2. Interactive Terminal Wizard (CLI)
+### 2. Native Android App (Capacitor 8)
 
-Prefer the terminal? Run the guided interactive CLI:
+Synchronize the web application with the native Android project:
 ```bash
-npm run wizard
-# or
-npm run cli
-```
-Guides you step-by-step through selecting markdown files from `outputs/`, applying templates/palettes, and tailoring resumes.
+# Build web assets and sync to native Android platform
+npm run cap:sync
 
----
-
-### 3. Compile PDFs via Headless CLI (`npm run pdf`)
-
-```bash
-# Export the most recent CV in outputs/ to PDF
-npm run pdf
-
-# Export a specific CV file
-npm run pdf outputs/CV_Jane_Doe_Stripe.md
-
-# Export with custom template and palette flags
-npm run pdf outputs/CV_Jane_Doe_Stripe.md -- --theme modern-tech --palette modern-indigo --font outfit --density compact --pages 1
-
-# Batch-compile all Markdown files in outputs/ to PDF
-npm run pdf:all
+# Open project in Android Studio to build APK or run in emulator
+npm run cap:open
 ```
 
 ---
 
-### 4. AI Tailoring via Terminal (`npm run generate`)
+### 3. AI Tailoring: Any Provider or 100% Free Manual Mode
 
-```bash
-# Standard tailoring for a company
-npm run generate "Stripe"
-
-# Tailoring with custom 1-page budget and styling parameters
-npm run generate "Google" -- --theme executive --palette corporate-blue --pages 1
-```
+CV Studio supports flexible AI workflows without locking you into a specific service:
+- **Direct API Keys**: Configure Google Gemini, OpenAI, Groq, OpenRouter, or local Ollama/LM Studio endpoints in Settings.
+- **Copy-Prompt Mode (Free & Privacy-First)**: CV Studio generates a tailored, ATS-calibrated prompt adhering to the Google XYZ formula. Copy it with one click, paste it into ChatGPT, Claude, DeepSeek, or any local LLM, and paste the response back into the studio.
 
 ---
 
-### 5. Automated Quality & ATS Audit (`npm run audit`)
+### 4. Direct 1-Click Vector PDF Export
 
-Evaluates the CV against recruiter standards, Google XYZ formula, action verbs, and keyword coverage:
-```bash
-npm run audit outputs/CV_Jane_Doe_Stripe.md
-```
-Outputs an executive 1-10 scorecard and gap report in `outputs/`.
+- **1-Click PDF**: Download high-resolution vector PDFs rendered with `html2canvas` + `jsPDF` directly in your browser or Android device without external servers or headless browser processes.
+- **Native Print**: Utilize `@media print` with pixel-perfect A4 dimensions (794px × 1123px) for crisp browser printing.
 
 ---
 
@@ -257,13 +226,13 @@ All palettes meet **WCAG AA contrast** requirements and ensure body copy remains
 | `forest-green` | `#16a34a` | Climate tech, Sustainability, Life Sciences & Healthcare |
 | `warm-amber` | `#d97706` | Client Success, Operations, Media, Consulting & Architecture |
 | `creative-coral` | `#ea580c` | UI/UX Design, Content Strategy & Consumer Product teams |
-| `custom` | `--color "#HEX"` | Any bespoke company brand color passed via CLI or UI |
+| `custom` | Custom HEX | Any bespoke company brand color configured via the Studio color picker |
 
 ---
 
 ## 🌐 Internationalization (i18n) - 5 Locales
 
-CV Studio includes built-in internationalization across **5 major languages** with 100% key synchronization across all 10 domain namespaces:
+CV Studio includes built-in internationalization across **5 major languages** with 100% key synchronization across all domain namespaces:
 
 - 🇺🇸 **English (`en`)** — Default / Baseline
 - 🇪🇸 **Español (`es`)**
@@ -271,7 +240,7 @@ CV Studio includes built-in internationalization across **5 major languages** wi
 - 🇫🇷 **Français (`fr`)**
 - 🇮🇹 **Italiano (`it`)**
 
-Locale is automatically detected from the browser and can be toggled in real time via the navbar language selector.
+Locale is automatically detected from the browser and can be toggled in real time via the studio navbar language selector.
 
 ---
 
@@ -301,31 +270,13 @@ Build the optimized Vite production bundle:
 npm run build
 ```
 
-Bundle the standalone CLI executable:
+Run automated compliance, hygiene, and i18n parity audit:
 ```bash
-npm run build:cli
+npm run check:compliance
 ```
 
 ---
 
 ## 📄 License
 
-MIT License © 2026 Daniel Corredor. Built with passion for engineers, designers, and leaders crafting bespoke career narratives.`, `target-job.md`, `.env`, and git configs, publishing only the compiled binary and themes.*
-
----
-
-## 🛡️ Quality & Verification
-
-Verify the entire codebase anytime using TypeScript's strict type checker:
-```bash
-npm run typecheck
-```
-Build the production web bundle:
-```bash
-npm run build
-```
-
----
-
-## 📄 License
-MIT License. Built for engineers and leaders crafting bespoke career narratives.
+MIT License © 2026 Daniel Corredor. Built with passion for engineers, designers, and leaders crafting bespoke career narratives.

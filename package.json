@@ -10,35 +10,8 @@
     "typecheck": "tsc --noEmit",
     "check:compliance": "node scripts/audit-codebase.mjs",
     "cap:sync": "npm run build && npx cap sync android",
-    "cap:open": "npx cap open android",
-    "pdf": "tsx src/cli/index.ts pdf",
-    "pdf:all": "tsx src/cli/index.ts pdf:all",
-    "pdf:modern": "tsx src/cli/index.ts pdf --theme modern-tech",
-    "pdf:executive": "tsx src/cli/index.ts pdf --theme executive",
-    "pdf:ats": "tsx src/cli/index.ts pdf --theme minimal-ats",
-    "pdf:two-column": "tsx src/cli/index.ts pdf --theme two-column",
-    "pdf:designer": "tsx src/cli/index.ts pdf --theme designer-uiux",
-    "pdf:formal": "tsx src/cli/index.ts pdf --theme formal-legal",
-    "pdf:academic": "tsx src/cli/index.ts pdf --theme academic-research",
-    "themes": "tsx src/cli/index.ts themes",
-    "palettes": "tsx src/cli/index.ts palettes",
-    "models": "tsx src/cli/index.ts models",
-    "generate": "tsx src/cli/index.ts generate",
-    "tailor": "tsx src/cli/index.ts generate",
-    "audit": "tsx src/cli/index.ts audit",
-    "quality": "tsx src/cli/index.ts audit",
-    "wizard": "tsx src/cli/index.ts wizard",
-    "cli": "tsx src/cli/index.ts wizard",
-    "build:cli": "esbuild src/cli/index.ts --bundle --platform=node --target=node18 --format=esm --packages=external --minify --outfile=bin/cli.mjs",
-    "prepublishOnly": "npm run build:cli"
+    "cap:open": "npx cap open android"
   },
-  "bin": {
-    "cv-engine": "./bin/cli.mjs"
-  },
-  "files": [
-    "bin",
-    "src/themes"
-  ],
   "keywords": [
     "cv",
     "resume",
@@ -46,7 +19,6 @@
     "react",
     "vite",
     "pdf-generator",
-    "puppeteer",
     "gemini-ai",
     "ats-friendly"
   ],
@@ -74,14 +46,12 @@
     "@types/dompurify": "^3.0.5",
     "@upstash/redis": "^1.38.4",
     "dompurify": "^3.4.14",
-    "dotenv": "^16.4.7",
     "html2canvas": "^1.4.1",
     "i18next": "^26.4.0",
     "i18next-browser-languagedetector": "^8.2.1",
     "jspdf": "^4.2.1",
     "marked": "^15.0.7",
     "pdfjs-dist": "^6.3.289",
-    "puppeteer": "^24.4.0",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -96,8 +66,6 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
-    "esbuild": "^0.28.2",
-    "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "vite": "^6.2.0"
   }
