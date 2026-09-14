@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import AttachFileRoundedIcon from '@mui/icons-material/AttachFileRounded';
-import { extractTargetCompany } from '../../core/parser';
 import { useFileUploader } from '../../hooks/useFileUploader';
 import { useTranslation } from 'react-i18next';
 import { StepTargetJobProps } from '../../types';
@@ -21,43 +20,13 @@ import { TargetJobMetadataBar } from './target/TargetJobMetadataBar';
 import { TargetJobFooterActions } from './target/TargetJobFooterActions';
 import { QuickScoreBadge } from './target/QuickScoreBadge';
 import { LiveJobDescriptionEditor } from './target/LiveJobDescriptionEditor';
-import { calculateQuickScore } from '../../core/matching/quickMatcher';
-import { useResumeStore } from '../../store/useResumeStore';
+import { useStepTargetJobFacade } from '../../hooks/facades/useStepTargetJobFacade';
 
 const ContextualAiModal = React.lazy(() =>
   import('./ai/ContextualAiModal').then((m) => ({ default: m.ContextualAiModal }))
 );
 
 export type { StepTargetJobProps };
-
-/**
- * Appends a skill to the user's Master CV Markdown under an existing skills header,
- * or creates a Technical Skills section if not present.
- */
-function addSkillToMasterMarkdown(masterMarkdown: string, skill: string): string {
-  const trimmedSkill = skill.trim();
-  if (!trimmedSkill) return masterMarkdown;
-
-  const escaped = trimmedSkill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const alreadyPresentRegex = new RegExp(`(^|[,•\\-\\s])${escaped}([,•\\-\\s]|$)`, 'i');
-  if (alreadyPresentRegex.test(masterMarkdown)) {
-    return masterMarkdown;
-  }
-
-  const skillsHeaderRegex = /(##[^\n]*(?:skills|habilidades|competencias|stack|technologies|tecnologías)[^\n]*\n)/i;
-  const match = masterMarkdown.match(skillsHeaderRegex);
-
-  if (match && match.index !== undefined) {
-    const insertPos = match.index + match[0].length;
-    return (
-      masterMarkdown.slice(0, insertPos) +
-      `- ${trimmedSkill}\n` +
-      masterMarkdown.slice(insertPos)
-    );
-  }
-
-  return `${masterMarkdown.trimEnd()}\n\n## Technical Skills\n- ${trimmedSkill}\n`;
-}
 
 export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   content,
@@ -78,110 +47,36 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
 }) => {
   const { t } = useTranslation(['target', 'common']);
   const theme = useTheme();
-  const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
-  const [skillToast, setSkillToast] = useState<string | null>(null);
   const lastClickRef = useRef<number>(0);
 
-  const [localContent, setLocalContent] = useState(content);
-  const [localCompany, setLocalCompany] = useState(companyName);
-  const [localRole, setLocalRole] = useState(targetRole);
-
-  const masterData = useResumeStore((s) => s.masterData);
-  const setMasterData = useResumeStore((s) => s.setMasterData);
-  const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
-  const quickMatchResult = React.useMemo(() => {
-    return calculateQuickScore(localContent, masterData);
-  }, [localContent, masterData]);
-
-  const handleAddSkillToMaster = (skill: string) => {
-    const trimmed = skill.trim();
-    if (!trimmed) return;
-
-    const updated = addSkillToMasterMarkdown(masterData, trimmed);
-    if (updated !== masterData) {
-      setMasterData(updated);
-    }
-
-    setSkillToast(
-      t('target:quickScore.skillAddedToast', {
-        skill: trimmed,
-        defaultValue: `Skill '${trimmed}' added to your Master Profile`,
-      })
-    );
-  };
-
-  const contentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const companyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const roleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setLocalContent(content);
-  }, [content]);
-
-  useEffect(() => {
-    setLocalCompany(companyName);
-  }, [companyName]);
-
-  useEffect(() => {
-    setLocalRole(targetRole);
-  }, [targetRole]);
-
-  useEffect(() => {
-    return () => {
-      if (contentTimerRef.current) clearTimeout(contentTimerRef.current);
-      if (companyTimerRef.current) clearTimeout(companyTimerRef.current);
-      if (roleTimerRef.current) clearTimeout(roleTimerRef.current);
-    };
-  }, []);
-
-  const flushAll = React.useCallback(() => {
-    if (contentTimerRef.current) {
-      clearTimeout(contentTimerRef.current);
-      contentTimerRef.current = null;
-      onChange(localContent);
-    }
-    if (companyTimerRef.current) {
-      clearTimeout(companyTimerRef.current);
-      companyTimerRef.current = null;
-      onCompanyChange(localCompany);
-    }
-    if (roleTimerRef.current) {
-      clearTimeout(roleTimerRef.current);
-      roleTimerRef.current = null;
-      onRoleChange(localRole);
-    }
-  }, [localContent, localCompany, localRole, onChange, onCompanyChange, onRoleChange]);
-
-  const handleContentChange = (val: string) => {
-    setLocalContent(val);
-    if (!localCompany) {
-      const extracted = extractTargetCompany(val);
-      if (extracted) {
-        setLocalCompany(extracted);
-        onCompanyChange(extracted);
-      }
-    }
-    if (contentTimerRef.current) clearTimeout(contentTimerRef.current);
-    contentTimerRef.current = setTimeout(() => {
-      onChange(val);
-    }, 400);
-  };
-
-  const handleCompanyChange = (val: string) => {
-    setLocalCompany(val);
-    if (companyTimerRef.current) clearTimeout(companyTimerRef.current);
-    companyTimerRef.current = setTimeout(() => {
-      onCompanyChange(val);
-    }, 400);
-  };
-
-  const handleRoleChange = (val: string) => {
-    setLocalRole(val);
-    if (roleTimerRef.current) clearTimeout(roleTimerRef.current);
-    roleTimerRef.current = setTimeout(() => {
-      onRoleChange(val);
-    }, 400);
-  };
+  const {
+    state: {
+      localContent,
+      localCompany,
+      localRole,
+      aiModalOpen,
+      skillToast,
+      quickMatchResult,
+      masterData,
+    },
+    actions: {
+      setAiModalOpen,
+      setSkillToast,
+      handleContentChange,
+      handleCompanyChange,
+      handleRoleChange,
+      handleAddSkillToMaster,
+      flushAll,
+      openManualPromptModal,
+    },
+  } = useStepTargetJobFacade({
+    content,
+    onChange,
+    companyName,
+    onCompanyChange,
+    targetRole,
+    onRoleChange,
+  });
 
   // Upload handler for .txt / .md files
   const { fileInputRef, handleFileUpload, handleDragOver, handleDrop } = useFileUploader({
