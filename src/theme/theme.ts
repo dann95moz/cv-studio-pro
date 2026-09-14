@@ -88,6 +88,9 @@ const getDesignTokens = (mode: ThemeMode): ThemeOptions => {
             ...getDimensionCssVariables(),
           },
           body: {
+            backgroundColor: tokens.background.default,
+            backgroundImage: tokens.ambientGlow,
+            backgroundAttachment: 'fixed',
             scrollbarColor: isDark
               ? `${tokens.border.light} ${tokens.background.input}`
               : `${tokens.border.light} ${tokens.background.default}`,
