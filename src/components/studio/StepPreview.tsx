@@ -1,25 +1,10 @@
-import React from 'react';
-import {
-  Box,
-  Button,
-  Chip,
-  Typography,
-  Snackbar,
-  Alert,
-  useTheme,
-  alpha,
-  Drawer,
-  useMediaQuery,
-} from '@mui/material';
-import { CVRenderer } from '../CVRenderer';
-import { CvLiveEditProvider } from './preview/CvLiveEditContext';
+import React, { useState, useEffect } from 'react';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { StepPreviewToolbar } from './preview/StepPreviewToolbar';
-import { StepPreviewNavRail } from './preview/StepPreviewNavRail';
+import { StepPreviewCanvas } from './preview/StepPreviewCanvas';
+import { StepPreviewSidePanels } from './preview/StepPreviewSidePanels';
+import { StepPreviewModals } from './preview/StepPreviewModals';
 import { StepPreviewProps } from '../../types';
-import { useTranslation } from 'react-i18next';
-import { StudioSkeleton } from './StudioSkeleton';
-import { TrackApplicationDialog } from './history/TrackApplicationDialog';
-import { RADIUS_TOKENS } from '../../theme/dimensions';
 import { useStepPreviewWorkflow } from '../../hooks/useStepPreviewWorkflow';
 import {
   MobileDocumentBar,
@@ -31,39 +16,13 @@ import { backButtonRegistry } from '../../core/backButtonRegistry';
 import { useCanvasTouchGestures } from '../../hooks/useCanvasTouchGestures';
 import { CanvasZoomFloatingCapsule } from './preview/CanvasZoomFloatingCapsule';
 
-// Dynamically loaded preview sidebars
-const TemplatesPanel = React.lazy(() =>
-  import('./preview/TemplatesPanel').then((m) => ({ default: m.TemplatesPanel }))
-);
-const DesignFormattingPanel = React.lazy(() =>
-  import('./preview/DesignFormattingPanel').then((m) => ({ default: m.DesignFormattingPanel }))
-);
 const PreviewAuditGapDrawer = React.lazy(() =>
   import('./preview/PreviewAuditGapDrawer').then((m) => ({ default: m.PreviewAuditGapDrawer }))
-);
-const CoverLetterView = React.lazy(() =>
-  import('./preview/CoverLetterView').then((m) => ({ default: m.CoverLetterView }))
-);
-const LinkedInPanel = React.lazy(() =>
-  import('./preview/LinkedInPanel').then((m) => ({ default: m.LinkedInPanel }))
-);
-const VersionDiffModal = React.lazy(() =>
-  import('./history/VersionDiffModal').then((m) => ({ default: m.VersionDiffModal }))
-);
-const GitHubStarToast = React.lazy(() =>
-  import('./GitHubStarToast').then((m) => ({ default: m.GitHubStarToast }))
-);
-const CvTranslateModal = React.lazy(() =>
-  import('./preview/CvTranslateModal').then((m) => ({ default: m.CvTranslateModal }))
-);
-const AdaptToNewOfferModal = React.lazy(() =>
-  import('./preview/AdaptToNewOfferModal').then((m) => ({ default: m.AdaptToNewOfferModal }))
 );
 
 export type { StepPreviewProps };
 
 export const StepPreview: React.FC<StepPreviewProps> = () => {
-  const { t } = useTranslation(['preview', 'target', 'common']);
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
 
@@ -90,9 +49,6 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     setIsHudMinimized,
     handleToggleSidePanel,
     handleOpenFullAudit,
-    mobileViewMode,
-    setMobileViewMode,
-    mobileZoomMode,
     setMobileZoomMode,
     canvasScale,
     sheetHeight,
@@ -155,7 +111,6 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     isPromptOpen,
     dismissPrompt,
     openGitHubAndDismiss,
-    // Translation & Multi-language Variant System
     activeLanguage,
     setActiveLanguage,
     currentBaseLanguage,
@@ -170,7 +125,6 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     handleTranslateFull,
     handleTranslateIncremental,
     handleQuickSyncOutdated,
-    // Adapt to New Offer Workflow
     cvMarkdown,
     isAdaptModalOpen,
     handleOpenAdaptModal,
@@ -179,7 +133,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     handleAdaptNewOfferWithAi,
   } = useStepPreviewWorkflow();
 
-  const [isMobileToolsOpen, setIsMobileToolsOpen] = React.useState(false);
+  const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false);
 
   // 0ms Touch Gestures for mobile A4 canvas (Pinch-to-zoom & 2-finger pan)
   const {
@@ -194,8 +148,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
 
   const effectiveCanvasScale = isMobile ? dynamicCanvasScale : canvasScale;
 
-  // Register mobile tools bottom sheet and active modals in the back button stack
-  React.useEffect(() => {
+  // Register mobile tools bottom sheet and audit drawer in the back button stack
+  useEffect(() => {
     if (isMobileToolsOpen) {
       return backButtonRegistry.register({
         id: 'preview-mobile-tools',
@@ -208,20 +162,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     }
   }, [isMobileToolsOpen]);
 
-  React.useEffect(() => {
-    if (activeSidePanel) {
-      return backButtonRegistry.register({
-        id: 'preview-side-panel',
-        priority: 60,
-        handler: () => {
-          handleToggleSidePanel(activeSidePanel);
-          return true;
-        },
-      });
-    }
-  }, [activeSidePanel, handleToggleSidePanel]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuditGapOpen) {
       return backButtonRegistry.register({
         id: 'preview-audit-drawer',
@@ -234,102 +175,17 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     }
   }, [isAuditGapOpen, setIsAuditGapOpen]);
 
-  React.useEffect(() => {
-    if (isDiffModalOpen) {
-      return backButtonRegistry.register({
-        id: 'preview-diff-modal',
-        priority: 100,
-        handler: () => {
-          handleCloseDiffModal();
-          return true;
-        },
-      });
-    }
-  }, [isDiffModalOpen, handleCloseDiffModal]);
-
-  React.useEffect(() => {
-    if (isTrackModalOpen) {
-      return backButtonRegistry.register({
-        id: 'preview-track-modal',
-        priority: 100,
-        handler: () => {
-          setIsTrackModalOpen(false);
-          return true;
-        },
-      });
-    }
-  }, [isTrackModalOpen, setIsTrackModalOpen]);
-
-  React.useEffect(() => {
-    if (isTranslateModalOpen) {
-      return backButtonRegistry.register({
-        id: 'preview-translate-modal',
-        priority: 100,
-        handler: () => {
-          handleCloseTranslateModal();
-          return true;
-        },
-      });
-    }
-  }, [isTranslateModalOpen, handleCloseTranslateModal]);
-
-  React.useEffect(() => {
-    if (isAdaptModalOpen) {
-      return backButtonRegistry.register({
-        id: 'preview-adapt-modal',
-        priority: 100,
-        handler: () => {
-          handleCloseAdaptModal();
-          return true;
-        },
-      });
-    }
-  }, [isAdaptModalOpen, handleCloseAdaptModal]);
-
-  const panelContent = activeSidePanel && (
-    <React.Suspense fallback={<StudioSkeleton variant="drawer" />}>
-      {(activeSidePanel === 'design' || activeSidePanel === 'templates') && (
-        <DesignFormattingPanel
-          customColor={customColor}
-          onCustomColorChange={setCustomColor}
-          palette={palette}
-          onSelectPalette={setPalette}
-          fontFamily={fontFamily}
-          onFontFamilyChange={setFontFamily}
-          spacingDensity={spacingDensity}
-          onSpacingDensityChange={setSpacingDensity}
-          pageFormat={pageFormat}
-          onPageFormatChange={setPageFormat}
-          onAutoFit={handleMagicAutoFit}
-          sheetHeight={sheetHeight}
-          a4PagePx={targetPagePx}
-          estimatedPages={estimatedPages}
-          photo={photo}
-          onPhotoChange={setProfilePhoto}
-          onPhotoToggle={setProfilePhotoEnabled}
-          activeTheme={theme}
-          theme={theme}
-          onSelectTheme={setTheme}
-          initialTab={activeSidePanel === 'templates' ? 'templates' : 'formatting'}
-          onClose={() => setActiveSidePanel(null)}
-        />
-      )}
-
-      {activeSidePanel === 'linkedin' && (
-        <LinkedInPanel
-          cvData={parsedCv}
-          companyName={companyName}
-          targetRole={targetRole}
-          targetJob={targetJob}
-          providerSettings={providerSettings}
-          onClose={() => setActiveSidePanel(null)}
-        />
-      )}
-    </React.Suspense>
-  );
-
   return (
-    <div className="preview-workspace-layout" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
+    <div
+      className="preview-workspace-layout"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
+    >
       {/* Top Studio Control Bar: Desktop Toolbar */}
       <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
         <StepPreviewToolbar
@@ -371,7 +227,10 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           activeVersionId={activeVersionId}
           companyName={companyName}
           targetRole={targetRole}
-          matchScore={gapInfo.matchScore || (auditReport.overallScore ? Math.round(auditReport.overallScore * 10) : 0)}
+          matchScore={
+            gapInfo.matchScore ||
+            (auditReport.overallScore ? Math.round(auditReport.overallScore * 10) : 0)
+          }
           onSelectVersion={handleLoadVersion}
           onPinAsGeneric={handlePinAsGeneric}
           onUnpinGeneric={handleUnpinGeneric}
@@ -395,7 +254,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
         />
       </Box>
 
-      {/* Mobile-First Tertiary Diagnostic Bar: Calidad, Ajuste (Brechas), Prep */}
+      {/* Mobile-First Tertiary Diagnostic Bar */}
       <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
         <MobileDiagnosticBar
           auditScore={auditReport?.overallScore ?? 0}
@@ -408,186 +267,76 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
         />
       </Box>
 
-      {/* Main Studio Body: Vertical Left Rail + Side Drawer + Sheet Canvas + Right Audit/Gap Drawer */}
-      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, overflow: 'hidden', position: 'relative' }}>
-        {/* 1. Left Tool Rail (Desktop only, mobile uses FAB + Bottom Sheet) */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, height: '100%' }}>
-          <StepPreviewNavRail
-            activeSidePanel={activeSidePanel}
-            onToggleSidePanel={handleToggleSidePanel}
-          />
-        </Box>
+      {/* Main Studio Body */}
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        {/* Left Side Panels (NavRail & Expandable Drawer) */}
+        <StepPreviewSidePanels
+          isMobile={isMobile}
+          activeSidePanel={activeSidePanel}
+          onToggleSidePanel={handleToggleSidePanel}
+          onCloseSidePanel={() => setActiveSidePanel(null)}
+          customColor={customColor}
+          onCustomColorChange={setCustomColor}
+          palette={palette}
+          onSelectPalette={setPalette}
+          fontFamily={fontFamily}
+          onFontFamilyChange={setFontFamily}
+          spacingDensity={spacingDensity}
+          onSpacingDensityChange={setSpacingDensity}
+          pageFormat={pageFormat}
+          onPageFormatChange={setPageFormat}
+          onAutoFit={handleMagicAutoFit}
+          sheetHeight={sheetHeight}
+          a4PagePx={targetPagePx}
+          estimatedPages={estimatedPages}
+          photo={photo}
+          onPhotoChange={setProfilePhoto}
+          onPhotoToggle={setProfilePhotoEnabled}
+          theme={theme}
+          onSelectTheme={setTheme}
+          parsedCv={parsedCv}
+          companyName={companyName}
+          targetRole={targetRole}
+          targetJob={targetJob}
+          providerSettings={providerSettings}
+        />
 
-        {/* 2. Expandable Left Side Panel (Desktop only - Mobile uses Bottom Sheet Drawer) */}
-        {!isMobile && activeSidePanel && (
-          <Box
-            className="no-print preview-side-panel"
-            sx={{
-              position: 'relative',
-              width: 330,
-              maxWidth: 360,
-              borderRight: `1px solid ${muiTheme.palette.divider}`,
-              bgcolor: 'background.paper',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              overflowY: 'auto',
-              flexShrink: 0,
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-          >
-            {panelContent}
-          </Box>
-        )}
+        {/* Center Canvas: A4 Sheet / Cover Letter */}
+        <StepPreviewCanvas
+          previewDocType={previewDocType}
+          canvasContainerRef={canvasContainerRef}
+          paperRef={paperRef}
+          effectiveCanvasScale={effectiveCanvasScale}
+          targetPageWidthPx={targetPageWidthPx}
+          targetPagePx={targetPagePx}
+          sheetHeight={sheetHeight}
+          overflowPercentage={overflowPercentage}
+          isOverflowing={isOverflowing}
+          pageFormat={pageFormat}
+          parsedCv={parsedCv}
+          theme={theme}
+          palette={palette}
+          customColor={customColor}
+          fontFamily={fontFamily}
+          spacingDensity={spacingDensity}
+          photo={photo}
+          companyName={companyName}
+          targetRole={targetRole}
+          onTriggerDirectDownloadPdf={onTriggerDirectDownloadPdf}
+          isAuditGapOpen={isAuditGapOpen}
+          isHudMinimized={isHudMinimized}
+        />
 
-        {/* 3. Main Center Canvas: Document Sheet & Mobile Touch Editor or Cover Letter */}
-        <div
-          className="preview-canvas-wrapper"
-          style={{
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            height: '100%',
-            minHeight: 0,
-            minWidth: 0,
-            overflow: 'hidden',
-            order: 2,
-          }}
-        >
-          {previewDocType === 'cover-letter' ? (
-            <Box
-              sx={{
-                flex: 1,
-                minHeight: 0,
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                p: { xs: 1.5, sm: 3 },
-                pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 64px)', sm: 6 },
-                bgcolor: 'background.default',
-                display: 'flex',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-              }}
-            >
-              <React.Suspense fallback={<StudioSkeleton variant="preview" />}>
-                <CoverLetterView
-                  cvData={parsedCv}
-                  companyName={companyName}
-                  targetRole={targetRole}
-                  themeId={theme}
-                  paletteId={palette}
-                  customColor={customColor}
-                  fontFamily={fontFamily}
-                  onExportPdf={onTriggerDirectDownloadPdf}
-                />
-              </React.Suspense>
-            </Box>
-          ) : (
-            <>
-              {/* Document Canvas: Exact A4 simulation with responsive auto-scaling and dynamic balanced centering */}
-              <Box
-                component="main"
-                ref={canvasContainerRef}
-                className="preview-pane-canvas"
-                sx={{
-                  position: 'relative',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  flex: 1,
-                  height: '100%',
-                  minHeight: 0,
-                  width: '100%',
-                  overflowX: 'auto',
-                  overflowY: 'auto',
-                  WebkitOverflowScrolling: 'touch',
-                  p: { xs: 1.5, sm: 2, md: 3.5 },
-                  pr: {
-                    xs: 1.5,
-                    sm: 2,
-                    md: !isAuditGapOpen && !isHudMinimized ? 'calc(215px + 28px)' : 3.5,
-                  },
-                  pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', sm: 5, md: 6 },
-                  boxSizing: 'border-box',
-                  transition: 'padding 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '@media print': {
-                    display: 'block !important',
-                    visibility: 'visible !important',
-                    overflow: 'visible !important',
-                    p: '0 !important',
-                    m: '0 !important',
-                  },
-                }}
-              >
-                {/* Scaled Wrapper Container with strict visual pixel footprint */}
-                <div
-                  className="paper-scale-container"
-                  style={{
-                    width: effectiveCanvasScale < 1 ? `${targetPageWidthPx * effectiveCanvasScale}px` : `${targetPageWidthPx}px`,
-                    height: effectiveCanvasScale < 1 ? `${(sheetHeight || targetPagePx) * effectiveCanvasScale}px` : (sheetHeight > 0 ? `${sheetHeight}px` : 'auto'),
-                    minHeight: effectiveCanvasScale < 1 ? `${targetPagePx * effectiveCanvasScale}px` : `${targetPagePx}px`,
-                    position: 'relative',
-                    margin: '0 auto',
-                    flexShrink: 0,
-                    transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), height 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                >
-                  <div
-                    className="paper-sheet-wrapper"
-                    style={{
-                      width: `${targetPageWidthPx}px`,
-                      minHeight: `${targetPagePx}px`,
-                      transform: effectiveCanvasScale < 1 ? `scale(${effectiveCanvasScale})` : undefined,
-                      transformOrigin: 'top left',
-                      position: effectiveCanvasScale < 1 ? 'absolute' : 'relative',
-                      top: 0,
-                      left: 0,
-                      transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}
-                  >
-                    <div
-                      ref={paperRef}
-                      className={`paper-sheet ${overflowPercentage > 0 && overflowPercentage <= 25 ? 'compact-fit' : ''}`}
-                      style={{
-                        width: `${targetPageWidthPx}px`,
-                        minHeight: `${targetPagePx}px`,
-                        margin: '0 auto',
-                      }}
-                    >
-                      <CvLiveEditProvider parsedCv={parsedCv} isEditable={true}>
-                        <CVRenderer
-                          data={parsedCv}
-                          theme={theme}
-                          palette={palette}
-                          customColor={palette === 'custom' ? customColor : undefined}
-                          fontFamily={fontFamily}
-                          spacingDensity={spacingDensity}
-                          photo={photo}
-                        />
-                      </CvLiveEditProvider>
-                    </div>
-
-                    {/* Visual Page Break Marker only on actual overflow */}
-                    {isOverflowing && (
-                      <div
-                        className="page-break-guide"
-                        style={{
-                          top: `${targetPagePx}px`,
-                        }}
-                      >
-                        <span>✂️ {t('preview:toolbar.pageBoundary', 'Page 1 Boundary ({{format}} Standard)', { format: pageFormat.toUpperCase() })}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Box>
-            </>
-          )}
-        </div>
-
-        {/* 4. Unified Right-Side Audit & Gap Drawer */}
+        {/* Right-Side Audit & Gap Drawer */}
         <Box
           sx={{
             order: 3,
@@ -661,104 +410,41 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
         />
       </Box>
 
-      {/* One-Time Post-Export GitHub Star Satisfaction Toast */}
-      <React.Suspense fallback={null}>
-        <GitHubStarToast
-          open={isPromptOpen}
-          onClose={dismissPrompt}
-          onStarClick={openGitHubAndDismiss}
-        />
-      </React.Suspense>
-
-      {/* Opt-in Track Application Dialog */}
-      <TrackApplicationDialog
-        open={isTrackModalOpen}
-        onClose={() => setIsTrackModalOpen(false)}
-        onConfirm={handleConfirmTrackApplication}
-        prefillCompany={companyName}
-        prefillRole={targetRole}
+      {/* Preview Dialogs, Modals, and Feedback */}
+      <StepPreviewModals
+        isTrackModalOpen={isTrackModalOpen}
+        onCloseTrackModal={() => setIsTrackModalOpen(false)}
+        onConfirmTrackApplication={handleConfirmTrackApplication}
+        companyName={companyName}
+        targetRole={targetRole}
         savedVersions={savedVersions}
-        existingApplications={applications}
-        columns={kanbanColumns}
+        applications={applications}
+        kanbanColumns={kanbanColumns}
+        isDiffModalOpen={isDiffModalOpen}
+        onCloseDiffModal={handleCloseDiffModal}
+        diffInitialVersionAId={diffInitialVersionAId}
+        diffInitialVersionBId={diffInitialVersionBId}
+        isTranslateModalOpen={isTranslateModalOpen}
+        onCloseTranslateModal={handleCloseTranslateModal}
+        currentBaseLanguage={currentBaseLanguage}
+        translations={translations}
+        providerSettings={providerSettings}
+        activeModelName={activeModelName}
+        isTranslating={isTranslating}
+        onTranslateFull={handleTranslateFull}
+        onTranslateIncremental={handleTranslateIncremental}
+        isAdaptModalOpen={isAdaptModalOpen}
+        onCloseAdaptModal={handleCloseAdaptModal}
+        cvMarkdown={cvMarkdown}
+        onUseCurrentCvForNewOffer={handleUseCurrentCvForNewOffer}
+        onAdaptNewOfferWithAi={handleAdaptNewOfferWithAi}
+        isGenerating={isGenerating}
+        isPromptOpen={isPromptOpen}
+        onDismissPrompt={dismissPrompt}
+        onStarClick={openGitHubAndDismiss}
+        trackSuccess={trackSuccess}
+        onCloseTrackSuccess={() => setTrackSuccess(false)}
       />
-
-      {/* Visual Version Diff Modal */}
-      <React.Suspense fallback={null}>
-        <VersionDiffModal
-          open={isDiffModalOpen}
-          onClose={handleCloseDiffModal}
-          initialVersionAId={diffInitialVersionAId}
-          initialVersionBId={diffInitialVersionBId}
-        />
-      </React.Suspense>
-
-      {/* CV AI Translation Modal */}
-      <React.Suspense fallback={null}>
-        {isTranslateModalOpen && (
-          <CvTranslateModal
-            open={isTranslateModalOpen}
-            onClose={handleCloseTranslateModal}
-            baseLanguage={currentBaseLanguage}
-            translations={translations}
-            activeProviderName={providerSettings.provider}
-            activeModelName={activeModelName}
-            isTranslating={isTranslating}
-            onTranslateFull={handleTranslateFull}
-            onTranslateIncremental={handleTranslateIncremental}
-          />
-        )}
-      </React.Suspense>
-
-      {/* Adapt CV to Another Job Offer Modal */}
-      <React.Suspense fallback={null}>
-        {isAdaptModalOpen && (
-          <AdaptToNewOfferModal
-            open={isAdaptModalOpen}
-            onClose={handleCloseAdaptModal}
-            currentCompanyName={companyName}
-            currentTargetRole={targetRole}
-            currentCvMarkdown={cvMarkdown}
-            onUseCurrent={handleUseCurrentCvForNewOffer}
-            onGenerateNew={handleAdaptNewOfferWithAi}
-            isGenerating={isGenerating}
-          />
-        )}
-      </React.Suspense>
-
-      {/* Toast Feedback when application is tracked */}
-      <Snackbar
-        open={trackSuccess}
-        autoHideDuration={3000}
-        onClose={() => setTrackSuccess(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" variant="filled" sx={{ fontWeight: 600 }}>
-          {t('preview:toolbar.trackedSuccess', 'Saved to My Applications')}
-        </Alert>
-      </Snackbar>
-
-      {/* Mobile Tool Drawer (Bottom Sheet on mobile when opened via FAB) */}
-      {isMobile && (
-        <Drawer
-          anchor="bottom"
-          open={Boolean(activeSidePanel)}
-          onClose={() => setActiveSidePanel(null)}
-          slotProps={{
-            paper: {
-              sx: {
-                maxHeight: '85vh',
-                borderTopLeftRadius: RADIUS_TOKENS.xl,
-                borderTopRightRadius: RADIUS_TOKENS.xl,
-                bgcolor: 'background.paper',
-                overflowY: 'auto',
-              },
-            },
-          }}
-        >
-          <Box sx={{ width: 36, height: 4, bgcolor: 'divider', borderRadius: RADIUS_TOKENS.full, mx: 'auto', mt: 1.5, mb: 0.5 }} />
-          {panelContent}
-        </Drawer>
-      )}
     </div>
   );
 };
