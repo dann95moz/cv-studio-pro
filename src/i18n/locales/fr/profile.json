@@ -94,6 +94,8 @@
     "ready": "Profil professionnel prêt pour l'adaptation",
 
     "tipLoadSample": "Astuce : Cliquez sur 'Charger un Profil Exemple' pour tester immédiatement",
+    "minimumRequired": "Ajoutez vos coordonnées de base et au moins une section clé (expérience ou compétences) pour débloquer l'offre cible",
+    "minFieldsHint": "Requis pour continuer : infos de contact + expérience ou compétences",
     "importingPdf": "Lecture et structuration de votre CV PDF...",
     "ocrReading": "Lecture de la structure du document PDF...",
     "ocrScanning": "PDF numérisé détecté. Initialisation du moteur OCR local...",
@@ -115,7 +117,45 @@
     "experience": "Expérience",
     "education": "Formation",
     "languages": "Langues",
-    "projects": "Projets"
+    "projects": "Projets",
+    "prevSection": "Section précédente",
+    "nextSection": "Section suivante",
+    "sheetTitle": "Sections du profil",
+    "sectionCounter": "{{current}} sur {{total}} sections"
+  },
+  "stepFlow": {
+    "questions": {
+      "fullName": "Quel est votre nom complet ?",
+      "jobTitle": "Quel est votre poste visé ou spécialité ?",
+      "email": "À quelle adresse email peut-on vous contacter ?",
+      "location": "Où résidez-vous ?",
+      "phone": "Avez-vous un numéro de téléphone de contact ?",
+      "linkedin": "Avez-vous un profil LinkedIn ?",
+      "portfolio": "Avez-vous un portfolio ou site web personnel ?"
+    },
+    "hints": {
+      "fullName": "Ce nom apparaîtra en haut de votre CV.",
+      "jobTitle": "Votre titre professionnel clé (ex. Staff Frontend Architect, Lead DevOps).",
+      "email": "Les recruteurs et outils ATS l'utiliseront pour vous contacter.",
+      "location": "Ville et pays (ex. Paris, France ou Télétravail).",
+      "phone": "Optionnel. Utile si l'employeur privilégie les appels ou WhatsApp.",
+      "linkedin": "Optionnel. Recommandé pour valoriser votre réseau professionnel.",
+      "portfolio": "Optionnel. Idéal pour mettre en avant vos réalisations concrètes."
+    },
+    "stepCount": "{{current}} sur {{total}}",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "skip": "Passer",
+    "skipped": "Ignoré",
+    "edit": "Modifier",
+    "switchClassic": "Voir tous les champs",
+    "switchStep": "Mode pas à pas",
+    "reviewTitle": "Informations personnelles complètes !",
+    "reviewSubtitle": "Vérifiez vos coordonnées avant de continuer.",
+    "confirmAndContinue": "Continuer",
+    "saveAndReturn": "Enregistrer et retourner",
+    "backToReview": "Retour au résumé",
+    "emailInvalid": "Veuillez saisir un format d'email valide."
   },
   "sections": {
     "personalInfo": {
@@ -127,12 +167,20 @@
       "location": "Localisation / Ville, Pays",
       "linkedin": "Lien LinkedIn",
       "github": "Lien GitHub",
-      "portfolio": "Portfolio / Site Web"
+      "portfolio": "Portfolio / Site Web",
+      "subtitle": "Informations clés affichées en haut de votre CV.",
+      "addOptional": "+ Ajouter des liens ou coordonnées optionnels :",
+      "removeFieldTip": "Supprimer le champ optionnel"
     },
     "summary": {
       "title": "Résumé Professionnel",
       "label": "Synthèse Exécutive & Proposition de Valeur",
-      "placeholder": "Rédigez 3 à 4 phrases percutantes mettant en valeur votre expertise technique principale, vos compétences d'architecture et vos résultats chiffrés..."
+      "question": "Comment résumez-vous votre profil professionnel ?",
+      "hint": "Rédigez 2 à 4 phrases mettant en valeur votre expérience clé, vos spécialités et votre valeur ajoutée.",
+      "placeholder": "Rédigez 2 à 4 phrases mettant en valeur votre expérience principale, vos spécialités et votre parcours professionnel...",
+      "word": "mot",
+      "words": "mots",
+      "idealWords": "(idéal : 40–90)"
     },
     "experience": {
       "title": "Expérience Professionnelle",
@@ -147,19 +195,21 @@
       "removeRole": "Supprimer l'Expérience"
     },
     "skills": {
-      "title": "Compétences Techniques",
-      "desc": "Organisez vos compétences en catégories claires. Tapez une compétence et appuyez sur Entrée.",
-      "empty": "Aucune compétence ajoutée. Tapez ci-dessous ou choisissez une suggestion.",
-      "addPlaceholder": "Tapez et appuyez sur Entrée...",
-      "inputPlaceholder": "Tapez et appuyez sur Entrée",
-      "quickSuggestions": "Suggéré :",
+      "title": "Compétences & Savoir-faire",
+      "desc": "Organisez vos compétences en catégories claires.",
+      "empty": "Aucune compétence ajoutée ici pour le moment.",
+      "addPlaceholder": "Tapez une compétence...",
+      "inputPlaceholder": "ex. Gestion de Projet...",
       "addGroup": "Ajouter une Catégorie",
+      "addCategoryAction": "+ Ajouter une catégorie",
       "groupName": "Nom de la Catégorie",
-      "defaultCore": "Fondamentaux & Langages",
-      "defaultArchitecture": "Architecture & Frameworks",
-      "defaultTooling": "Outils, Cloud & CI/CD",
+      "defaultCore": "Compétences Clés",
+      "defaultArchitecture": "Spécialités",
+      "defaultTooling": "Outils",
       "skillsList": "Compétences (séparées par des virgules)",
-      "removeGroup": "Supprimer la Catégorie"
+      "removeGroup": "Supprimer la Catégorie",
+      "renameGroup": "Renommer la Catégorie",
+      "skillSingular": "compétence"
     },
     "education": {
       "title": "Formation & Certifications",
@@ -167,11 +217,11 @@
       "degree": "Intitulé du Diplôme / Certification",
       "institution": "Établissement / Université / Organisme",
       "year": "Année ou Période (ex. 2018 – 2022)",
-      "degreePlaceholder": "ex. Master en Informatique",
-      "institutionPlaceholder": "ex. Sorbonne Université / Udemy",
+      "degreePlaceholder": "ex. Licence / Master / Certification",
+      "institutionPlaceholder": "ex. Université / École / Plateforme",
       "yearPlaceholder": "ex. 2018 – 2022",
       "description": "Description / Réalisations clés (facultatif)",
-      "descriptionPlaceholder": "ex. Conception et développement d'applications web réactives avec React, Redux, OAuth et Firebase...",
+      "descriptionPlaceholder": "ex. Diplômé avec mention, spécialisation ou réalisations majeures...",
       "location": "Lieu (optionnel)",
       "edit": "Modifier",
       "cancel": "Annuler",
@@ -192,6 +242,8 @@
       "levelB1": "B1 • Intermédiaire",
       "levelA2": "A2 • Élémentaire",
       "levelA1": "A1 • Débutant",
+      "customLanguage": "+ Saisir une autre langue...",
+      "chooseFromList": "Choisir dans la liste",
       "empty": "Aucune langue ajoutée pour le moment.",
       "remove": "Supprimer"
     },

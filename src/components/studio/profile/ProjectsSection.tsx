@@ -17,6 +17,7 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import { useTranslation } from 'react-i18next';
 import { ExperienceItem, ProjectsSectionProps } from '../../../types';
+import { GuidedSectionNavFooter } from './GuidedSectionNavFooter';
 
 export type { ProjectsSectionProps };
 
@@ -91,8 +92,38 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
           freeSolo
           options={CATEGORY_SUGGESTIONS}
           value={proj.role || ''}
-          onInputChange={(_event, newInputValue) => {
-            onFieldChange(projIdx, 'role', newInputValue);
+          blurOnSelect
+          slotProps={{
+            popper: {
+              placement: 'bottom-start',
+              modifiers: [
+                {
+                  name: 'flip',
+                  enabled: false,
+                },
+                {
+                  name: 'preventOverflow',
+                  options: {
+                    altAxis: false,
+                    padding: 8,
+                  },
+                },
+              ],
+            },
+            paper: {
+              elevation: 4,
+              sx: {
+                maxHeight: 220,
+              },
+            },
+          }}
+          onChange={(_event, newValue) => {
+            onFieldChange(projIdx, 'role', typeof newValue === 'string' ? newValue : newValue || '');
+          }}
+          onInputChange={(_event, newInputValue, reason) => {
+            if (reason === 'input' || reason === 'clear') {
+              onFieldChange(projIdx, 'role', newInputValue);
+            }
           }}
           renderInput={(params) => (
             <TextField
@@ -154,7 +185,10 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = React.memo(({
   projects,
   onFieldChange,
   onAddProject,
-  onRemoveProject
+  onRemoveProject,
+  onBack,
+  onContinue,
+  isLastSection = true,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -194,7 +228,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = React.memo(({
         >
           <Typography variant="body2" color="text.secondary">
 
-            {t('profile:sections.projects.empty', 'No hay proyectos agregados aún. Agrega proyectos personales, open-source o iniciativas.')}
+            {t('profile:sections.projects.empty', 'No hay proyectos agregados aún (opcional). Agrega proyectos personales, open-source o iniciativas.')}
           </Typography>
         </Paper>
       ) : (
@@ -210,6 +244,14 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = React.memo(({
           ))}
         </Stack>
       )}
+
+      {/* Navigation Footer */}
+      <GuidedSectionNavFooter
+        onBack={onBack}
+        onContinue={onContinue}
+        continueDisabled={false}
+        isLastSection={isLastSection}
+      />
     </Box>
   );
 });

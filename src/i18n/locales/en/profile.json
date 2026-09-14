@@ -94,6 +94,8 @@
     "ready": "Career profile ready for tailoring",
 
     "tipLoadSample": "Tip: Click 'Load Sample Profile' to test right away",
+    "minimumRequired": "Add basic contact info and at least one core section (experience or skills) to unlock tailoring",
+    "minFieldsHint": "Required to advance: basic info + experience or skills",
     "importingPdf": "Reading and structuring your PDF resume...",
     "ocrReading": "Reading PDF document structure...",
     "ocrScanning": "Scanned PDF detected. Initializing OCR engine...",
@@ -115,7 +117,45 @@
     "experience": "Experience",
     "education": "Education",
     "languages": "Languages",
-    "projects": "Projects"
+    "projects": "Projects",
+    "prevSection": "Previous section",
+    "nextSection": "Next section",
+    "sheetTitle": "Profile Sections",
+    "sectionCounter": "{{current}} of {{total}} sections"
+  },
+  "stepFlow": {
+    "questions": {
+      "fullName": "What is your full name?",
+      "jobTitle": "What is your target role or headline?",
+      "email": "What email can employers reach you at?",
+      "location": "Where are you located?",
+      "phone": "Do you have a contact phone number?",
+      "linkedin": "Do you have a LinkedIn profile?",
+      "portfolio": "Do you have a portfolio or personal website?"
+    },
+    "hints": {
+      "fullName": "This will appear as the main name heading on your resume.",
+      "jobTitle": "Your core professional headline (e.g. Staff Frontend Architect, Lead DevOps).",
+      "email": "Recruiters and ATS systems will use this to contact you.",
+      "location": "City and Country (e.g. London, UK or Remote - US).",
+      "phone": "Optional. Useful if employers reach out via phone or WhatsApp.",
+      "linkedin": "Optional. Recommended so evaluators can review your network and recommendations.",
+      "portfolio": "Optional. Great for demonstrating live demos, GitHub repositories, or design work."
+    },
+    "stepCount": "{{current}} of {{total}}",
+    "prev": "Previous",
+    "next": "Next",
+    "skip": "Skip",
+    "skipped": "Skipped",
+    "edit": "Edit",
+    "switchClassic": "View all fields",
+    "switchStep": "Step-by-step mode",
+    "reviewTitle": "Personal Information Complete!",
+    "reviewSubtitle": "Verify that your details are accurate before continuing.",
+    "confirmAndContinue": "Continue",
+    "saveAndReturn": "Save and return",
+    "backToReview": "Back to summary",
+    "emailInvalid": "Please enter a valid email format."
   },
   "sections": {
     "personalInfo": {
@@ -127,12 +167,20 @@
       "location": "Location / City, Country",
       "linkedin": "LinkedIn URL",
       "github": "GitHub URL",
-      "portfolio": "Portfolio / Website"
+      "portfolio": "Portfolio / Website",
+      "subtitle": "Key details displayed at the top of your resume.",
+      "addOptional": "+ Add optional links or contact details:",
+      "removeFieldTip": "Remove optional field"
     },
     "summary": {
       "title": "Professional Summary",
       "label": "Executive Summary & Core Value Proposition",
-      "placeholder": "Write 3-4 impactful sentences highlighting your core engineering expertise, architectural strengths, and quantitative track record..."
+      "question": "How would you summarize your professional profile?",
+      "hint": "Write 2-4 sentences highlighting your core experience, specialty, and unique value.",
+      "placeholder": "Write 2-4 sentences highlighting your core experience, specializations, and professional background...",
+      "word": "word",
+      "words": "words",
+      "idealWords": "(ideal: 40–90)"
     },
     "experience": {
       "title": "Work Experience & Roles",
@@ -147,19 +195,21 @@
       "removeRole": "Remove Role"
     },
     "skills": {
-      "title": "Technical Skills & Competencies",
-      "desc": "Organize your technical competencies into clean categories. Type a skill and press Enter, or click suggestions.",
-      "empty": "No skills added yet in this group. Type below or pick a suggestion.",
-      "addPlaceholder": "Type and press Enter...",
-      "inputPlaceholder": "Type and press Enter",
-      "quickSuggestions": "Suggested:",
-      "addGroup": "Add Skill Category",
+      "title": "Skills & Competencies",
+      "desc": "Organize your competencies and skills into clear categories.",
+      "empty": "No skills added here yet.",
+      "addPlaceholder": "Type a skill...",
+      "inputPlaceholder": "e.g. Project Management...",
+      "addGroup": "Add Category",
+      "addCategoryAction": "+ Add category",
       "groupName": "Category Name",
-      "defaultCore": "Core & Languages",
-      "defaultArchitecture": "Architecture & Frameworks",
-      "defaultTooling": "Tooling, Cloud & CI/CD",
+      "defaultCore": "Core Skills",
+      "defaultArchitecture": "Specialties",
+      "defaultTooling": "Tools",
       "skillsList": "Skills (comma separated)",
-      "removeGroup": "Remove Category"
+      "removeGroup": "Delete Category",
+      "renameGroup": "Rename Category",
+      "skillSingular": "skill"
     },
     "education": {
       "title": "Education & Certifications",
@@ -167,11 +217,11 @@
       "degree": "Degree / Certification Title",
       "institution": "Institution / University / Issuer",
       "year": "Year or Period (e.g. 2018 – 2022)",
-      "degreePlaceholder": "e.g. B.S. in Computer Science",
-      "institutionPlaceholder": "e.g. UC Berkeley / Udemy",
+      "degreePlaceholder": "e.g. Bachelor's / Diploma / Professional Certificate",
+      "institutionPlaceholder": "e.g. University / Institution / Platform",
       "yearPlaceholder": "e.g. 2018 – 2022",
       "description": "Description / Key Achievements (optional)",
-      "descriptionPlaceholder": "e.g. Designed and developed responsive web applications with React, Redux, OAuth, and Firebase...",
+      "descriptionPlaceholder": "e.g. Graduated with honors, specialization or key projects...",
       "location": "Location (optional)",
       "edit": "Edit",
       "cancel": "Cancel",
@@ -192,6 +242,8 @@
       "levelB1": "B1 • Intermediate",
       "levelA2": "A2 • Elementary",
       "levelA1": "A1 • Beginner",
+      "customLanguage": "+ Type another language...",
+      "chooseFromList": "Choose from list",
       "empty": "No languages added yet.",
       "remove": "Remove"
     },

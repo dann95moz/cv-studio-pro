@@ -95,6 +95,8 @@
     "ready": "Perfil profesional listo para adaptar",
 
     "tipLoadSample": "Consejo: Haz clic en 'Cargar Perfil de Ejemplo' para probar de inmediato",
+    "minimumRequired": "Completa tus datos de contacto y al menos una sección (experiencia o habilidades) para desbloquear la vacante",
+    "minFieldsHint": "Mínimo requerido: datos personales + experiencia o habilidades",
     "importingPdf": "Leyendo y estructurando tu CV en PDF...",
     "ocrReading": "Leyendo estructura del documento PDF...",
     "ocrScanning": "PDF escaneado detectado. Iniciando motor de OCR local...",
@@ -116,7 +118,45 @@
     "experience": "Experiencia",
     "education": "Educación",
     "languages": "Idiomas",
-    "projects": "Proyectos"
+    "projects": "Proyectos",
+    "prevSection": "Sección anterior",
+    "nextSection": "Sección siguiente",
+    "sheetTitle": "Secciones del Perfil",
+    "sectionCounter": "{{current}} de {{total}} secciones"
+  },
+  "stepFlow": {
+    "questions": {
+      "fullName": "¿Cuál es tu nombre completo?",
+      "jobTitle": "¿Cuál es tu cargo o titular profesional?",
+      "email": "¿Cuál es tu correo electrónico de contacto?",
+      "location": "¿En qué ciudad y país vives?",
+      "phone": "¿Tienes un número de teléfono de contacto?",
+      "linkedin": "¿Tienes un perfil de LinkedIn?",
+      "portfolio": "¿Tienes un sitio web o portafolio personal?"
+    },
+    "hints": {
+      "fullName": "Así aparecerá tu nombre en el encabezado principal de tu currículum.",
+      "jobTitle": "Tu titular profesional (ej. Staff Frontend Architect, Lead DevOps).",
+      "email": "Los reclutadores y sistemas ATS lo utilizarán para comunicarse contigo.",
+      "location": "Ciudad y país (ej. Bogotá, Colombia o Remoto - Latinoamérica).",
+      "phone": "Opcional. Ideal si las empresas coordinan entrevistas por teléfono o WhatsApp.",
+      "linkedin": "Opcional. Clave para que los evaluadores validen recomendaciones y tu red.",
+      "portfolio": "Opcional. Excelente para demostrar proyectos en vivo, repositorios o diseño."
+    },
+    "stepCount": "{{current}} de {{total}}",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "skipped": "Omitido",
+    "edit": "Editar",
+    "switchClassic": "Ver todos",
+    "switchStep": "Modo paso a paso",
+    "reviewTitle": "¡Información personal completa!",
+    "reviewSubtitle": "Verifica que tus datos sean correctos antes de continuar.",
+    "confirmAndContinue": "Continuar",
+    "saveAndReturn": "Guardar y volver",
+    "backToReview": "Volver al resumen",
+    "emailInvalid": "Por favor ingresa un formato de correo electrónico válido."
   },
   "sections": {
     "personalInfo": {
@@ -128,12 +168,20 @@
       "location": "Ubicación / Ciudad, País",
       "linkedin": "Enlace a LinkedIn",
       "github": "Enlace a GitHub",
-      "portfolio": "Portafolio / Sitio Web"
+      "portfolio": "Portafolio / Sitio Web",
+      "subtitle": "Datos clave visibles en la cabecera de tu currículum.",
+      "addOptional": "+ Agregar enlaces o contacto adicional (opcional):",
+      "removeFieldTip": "Quitar campo opcional"
     },
     "summary": {
       "title": "Resumen Profesional",
       "label": "Resumen Ejecutivo y Propuesta de Valor",
-      "placeholder": "Escribe 3-4 oraciones de alto impacto destacando tu experiencia técnica principal, fortalezas de arquitectura y trayectoria cuantitativa..."
+      "question": "¿Cómo resumes tu perfil profesional?",
+      "hint": "Escribe 2-4 oraciones destacando tu experiencia principal, especialidad y valor diferencial.",
+      "placeholder": "Escribe 2-4 oraciones destacando tu experiencia principal, especialidad y trayectoria profesional...",
+      "word": "palabra",
+      "words": "palabras",
+      "idealWords": "(ideal: 40–90)"
     },
     "experience": {
       "title": "Experiencia Laboral",
@@ -148,19 +196,21 @@
       "removeRole": "Eliminar Puesto"
     },
     "skills": {
-      "title": "Habilidades Técnicas y Competencias",
-      "desc": "Organiza tus competencias técnicas en categorías claras. Escribe una habilidad y presiona Enter, o haz clic en sugerencias.",
-      "empty": "No hay habilidades agregadas en este grupo. Escribe abajo o elige una sugerencia.",
-      "addPlaceholder": "Escribe y presiona Enter...",
-      "inputPlaceholder": "Escribe y presiona Enter",
-      "quickSuggestions": "Sugeridas:",
-      "addGroup": "Agregar Categoría de Habilidades",
+      "title": "Habilidades y Competencias",
+      "desc": "Organiza tus competencias y habilidades en categorías claras.",
+      "empty": "Aún no agregaste habilidades acá.",
+      "addPlaceholder": "Escribe una habilidad...",
+      "inputPlaceholder": "ej. Gestión de Proyectos...",
+      "addGroup": "Agregar Categoría",
+      "addCategoryAction": "+ Agregar categoría",
       "groupName": "Nombre de Categoría",
-      "defaultCore": "Fundamentales y Lenguajes",
-      "defaultArchitecture": "Arquitectura y Frameworks",
-      "defaultTooling": "Herramientas, Cloud y CI/CD",
+      "defaultCore": "Competencias Clave",
+      "defaultArchitecture": "Especialidades",
+      "defaultTooling": "Herramientas",
       "skillsList": "Habilidades (separadas por comas)",
-      "removeGroup": "Eliminar Categoría"
+      "removeGroup": "Eliminar Categoría",
+      "renameGroup": "Renombrar Categoría",
+      "skillSingular": "habilidad"
     },
     "education": {
       "title": "Educación y Certificaciones",
@@ -168,11 +218,11 @@
       "degree": "Título / Grado / Certificación",
       "institution": "Institución / Universidad / Emisor",
       "year": "Año o Periodo (ej. 2018 – 2022)",
-      "degreePlaceholder": "ej. Ingeniería de Sistemas",
-      "institutionPlaceholder": "ej. Universidad Nacional / Udemy",
+      "degreePlaceholder": "ej. Licenciatura / Diplomado / Grado",
+      "institutionPlaceholder": "ej. Universidad / Instituto / Plataforma",
       "yearPlaceholder": "ej. 2018 – 2022",
       "description": "Descripción / Logros clave (opcional)",
-      "descriptionPlaceholder": "ej. Diseñé y desarrollé aplicaciones web responsivas con React, Redux, OAuth y Firebase...",
+      "descriptionPlaceholder": "ej. Graduado con honores, especialización o logros destacados...",
       "location": "Ubicación (opcional)",
       "edit": "Editar",
       "cancel": "Cancelar",
@@ -193,6 +243,8 @@
       "levelB1": "B1 • Intermedio",
       "levelA2": "A2 • Elemental / Básico",
       "levelA1": "A1 • Principiante",
+      "customLanguage": "+ Escribir otro idioma...",
+      "chooseFromList": "Elegir de la lista",
       "empty": "No hay idiomas agregados aún.",
       "remove": "Eliminar"
     },

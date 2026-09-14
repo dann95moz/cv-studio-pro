@@ -12,7 +12,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Autocomplete,
   useTheme,
   alpha
 } from '@mui/material';
@@ -20,8 +19,10 @@ import {
 import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import FormatListBulletedRoundedIcon from '@mui/icons-material/FormatListBulletedRounded';
 import { useTranslation } from 'react-i18next';
 import { LanguagesSectionProps } from '../../../types';
+import { GuidedSectionNavFooter } from './GuidedSectionNavFooter';
 
 export type { LanguagesSectionProps };
 
@@ -30,7 +31,7 @@ export interface StructuredLanguageEntry {
   level: string;
 }
 
-const COMMON_LANGUAGES = [
+export const POPULAR_LANGUAGES = [
   'Español',
   'English',
   'Français',
@@ -38,7 +39,18 @@ const COMMON_LANGUAGES = [
   'Italiano',
   'Português',
   '中文 (Chinese)',
-  '日本語 (Japanese)'
+  '日本語 (Japanese)',
+  '한국어 (Korean)',
+  'Русский (Russian)',
+  'العربية (Arabic)',
+  'Nederlands (Dutch)',
+  'Polski (Polish)',
+  'Svenska (Swedish)',
+  'Türkçe (Turkish)',
+  'हिन्दी (Hindi)',
+  'Català',
+  'Euskara',
+  'Galego',
 ];
 
 /**
@@ -81,6 +93,22 @@ export function parseLanguageEntry(raw: string): StructuredLanguageEntry {
 }
 
 /**
+ * Standardizes any raw language proficiency level string to one of the 7 supported Select values.
+ */
+export function matchStandardLevel(rawLevel: string): string {
+  if (!rawLevel) return 'B2 • Upper Intermediate';
+  const lower = rawLevel.trim().toLowerCase();
+  if (lower.includes('nativ') || lower.includes('biling')) return 'Native';
+  if (lower.includes('c2') || lower.includes('maestr') || lower.includes('mastery')) return 'C2 • Full Professional / Mastery';
+  if (lower.includes('c1') || lower.includes('avanzad') || lower.includes('advanced') || lower.includes('fluido')) return 'C1 • Advanced';
+  if (lower.includes('b2') || lower.includes('upper') || lower.includes('profesional') || lower.includes('professional')) return 'B2 • Upper Intermediate';
+  if (lower.includes('b1') || lower.includes('intermedio') || lower.includes('intermediate')) return 'B1 • Intermediate';
+  if (lower.includes('a2') || lower.includes('elemental') || lower.includes('elementary') || lower.includes('básico') || lower.includes('basico')) return 'A2 • Elementary';
+  if (lower.includes('a1') || lower.includes('princip') || lower.includes('beginner')) return 'A1 • Beginner';
+  return 'B2 • Upper Intermediate';
+}
+
+/**
  * Serializes name and level back into standardized Markdown
  */
 export function formatLanguageEntry(name: string, level: string): string {
@@ -88,6 +116,7 @@ export function formatLanguageEntry(name: string, level: string): string {
   const cleanLevel = (level || '').trim().replace(/\*\*/g, '');
   if (!cleanName && !cleanLevel) return '';
   if (!cleanLevel) return cleanName;
+  if (!cleanName) return cleanLevel;
   return `${cleanName}: ${cleanLevel}`;
 }
 
@@ -95,10 +124,14 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
   languages,
   onUpdateLanguage,
   onAddLanguage,
-  onRemoveLanguage
+  onRemoveLanguage,
+  onBack,
+  onContinue,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
+
+  const [customInputIndices, setCustomInputIndices] = React.useState<Set<number>>(new Set());
 
   const levelOptions = useMemo(() => [
     { value: 'Native', label: t('profile:sections.languages.levelNative', 'Nativo / Bilingüe') },
@@ -111,7 +144,8 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
   ], [t]);
 
   const handleFieldChange = (index: number, field: 'name' | 'level', value: string) => {
-    const current = parseLanguageEntry(languages[index]);
+    const current = parseLanguageEntry(languages[index] || '');
+    if (current[field] === value) return;
     const updated = {
       ...current,
       [field]: value
@@ -155,23 +189,39 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
             borderRadius: 1.5,
             borderColor: theme.palette.divider,
             bgcolor: alpha(theme.palette.text.primary, 0.015),
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1.5,
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            {t('profile:sections.languages.empty', 'No hay idiomas agregados aún.')}
+            {t('profile:sections.languages.empty', 'No hay idiomas agregados aún (se requiere al menos uno).')}
           </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => onUpdateLanguage(languages.length, '**Español:** Nativo')}
+            >
+              + {t('profile:sections.languages.quickSpanish', 'Español (Nativo)')}
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => onUpdateLanguage(languages.length, '**Inglés:** Profesional (C1)')}
+            >
+              + {t('profile:sections.languages.quickEnglish', 'Inglés (C1 Profesional)')}
+            </Button>
+          </Box>
         </Paper>
       ) : (
         <Stack spacing={1.5}>
           {languages.map((lang, idx) => {
             const parsed = parseLanguageEntry(lang);
-
-            // Find matching level value or fallback to custom/first
-            const matchedLevel = levelOptions.find(opt => 
-              opt.value.toLowerCase() === parsed.level.toLowerCase() ||
-              opt.label.toLowerCase() === parsed.level.toLowerCase() ||
-              parsed.level.toLowerCase().startsWith(opt.value.toLowerCase().split(' ')[0])
-            )?.value || (parsed.level || 'B2 • Upper Intermediate');
+            const matchedLevel = matchStandardLevel(parsed.level);
 
             return (
               <Box
@@ -194,22 +244,96 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
                 {/* Inputs responsive layout */}
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1.2fr 1.5fr' }, gap: 1.5, flex: 1 }}>
                   {/* Left: Language Selector / Input */}
-                  <Autocomplete
-                    freeSolo
-                    size="small"
-                    options={COMMON_LANGUAGES}
-                    value={parsed.name}
-                    onInputChange={(_e, newInputValue) => {
-                      handleFieldChange(idx, 'name', newInputValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
+                  {customInputIndices.has(idx) ? (
+                    <TextField
+                      size="small"
+                      fullWidth
+                      label={t('profile:sections.languages.language', 'Idioma')}
+                      placeholder={t('profile:sections.languages.languagePlaceholder', 'ej. Español, Inglés...')}
+                      value={parsed.name}
+                      onChange={(e) => handleFieldChange(idx, 'name', e.target.value)}
+                      slotProps={{
+                        input: {
+                          endAdornment: (
+                            <Tooltip title={t('profile:sections.languages.chooseFromList', 'Elegir de la lista')}>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setCustomInputIndices((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(idx);
+                                    return next;
+                                  });
+                                }}
+                                sx={{ color: 'text.secondary' }}
+                              >
+                                <FormatListBulletedRoundedIcon sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            </Tooltip>
+                          ),
+                        },
+                      }}
+                    />
+                  ) : (
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id={`lang-name-label-${idx}`}>
+                        {t('profile:sections.languages.language', 'Idioma')}
+                      </InputLabel>
+                      <Select
+                        labelId={`lang-name-label-${idx}`}
                         label={t('profile:sections.languages.language', 'Idioma')}
-                        placeholder={t('profile:sections.languages.languagePlaceholder', 'ej. Español, Inglés...')}
-                      />
-                    )}
-                  />
+                        value={parsed.name || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === '__custom__') {
+                            setCustomInputIndices((prev) => new Set(prev).add(idx));
+                          } else {
+                            handleFieldChange(idx, 'name', val);
+                          }
+                        }}
+                        MenuProps={{
+                          disableScrollLock: true,
+                          anchorOrigin: {
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                          },
+                          transformOrigin: {
+                            vertical: 'top',
+                            horizontal: 'left',
+                          },
+                          slotProps: {
+                            paper: {
+                              sx: {
+                                maxHeight: 280,
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        {parsed.name && !POPULAR_LANGUAGES.includes(parsed.name) && (
+                          <MenuItem value={parsed.name}>
+                            {parsed.name}
+                          </MenuItem>
+                        )}
+                        {POPULAR_LANGUAGES.map((langName) => (
+                          <MenuItem key={langName} value={langName}>
+                            {langName}
+                          </MenuItem>
+                        ))}
+                        <MenuItem
+                          value="__custom__"
+                          sx={{
+                            color: 'primary.main',
+                            fontWeight: 700,
+                            borderTop: `1px dashed ${theme.palette.divider}`,
+                            mt: 0.5,
+                          }}
+                        >
+                          {t('profile:sections.languages.customLanguage', '+ Escribir otro idioma...')}
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
 
                   {/* Right: Proficiency Level Selector */}
                   <FormControl size="small" fullWidth>
@@ -221,6 +345,24 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
                       label={t('profile:sections.languages.proficiency', 'Nivel de Dominio')}
                       value={matchedLevel}
                       onChange={(e) => handleFieldChange(idx, 'level', e.target.value)}
+                      MenuProps={{
+                        disableScrollLock: true,
+                        anchorOrigin: {
+                          vertical: 'bottom',
+                          horizontal: 'left',
+                        },
+                        transformOrigin: {
+                          vertical: 'top',
+                          horizontal: 'left',
+                        },
+                        slotProps: {
+                          paper: {
+                            sx: {
+                              maxHeight: 260,
+                            },
+                          },
+                        },
+                      }}
                     >
                       {levelOptions.map((opt) => (
                         <MenuItem key={opt.value} value={opt.value}>
@@ -250,6 +392,13 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
           })}
         </Stack>
       )}
+
+      {/* Navigation Footer */}
+      <GuidedSectionNavFooter
+        onBack={onBack}
+        onContinue={onContinue}
+        continueDisabled={languages.length === 0}
+      />
     </Box>
   );
 });

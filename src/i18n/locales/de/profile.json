@@ -94,6 +94,8 @@
     "ready": "Karriereprofil bereit für die Anpassung",
 
     "tipLoadSample": "Tipp: Klicken Sie auf 'Beispielprofil laden', um direkt zu testen",
+    "minimumRequired": "Füge grundlegende Kontaktdaten und mindestens einen Hauptbereich (Berufserfahrung oder Fähigkeiten) hinzu, um die Anpassung freizuschalten",
+    "minFieldsHint": "Erforderlich: Kontaktdaten + Erfahrung oder Fähigkeiten",
     "importingPdf": "PDF-Lebenslauf wird gelesen und strukturiert...",
     "ocrReading": "PDF-Dokumentstruktur wird analysiert...",
     "ocrScanning": "Gescannter PDF-Lebenslauf erkannt. Lokale OCR-Engine wird gestartet...",
@@ -115,7 +117,45 @@
     "experience": "Erfahrung",
     "education": "Ausbildung",
     "languages": "Sprachen",
-    "projects": "Projekte"
+    "projects": "Projekte",
+    "prevSection": "Vorheriger Abschnitt",
+    "nextSection": "Nächster Abschnitt",
+    "sheetTitle": "Profilbereiche",
+    "sectionCounter": "{{current}} von {{total}} Abschnitten"
+  },
+  "stepFlow": {
+    "questions": {
+      "fullName": "Wie lautet Ihr vollständiger Name?",
+      "jobTitle": "Was ist Ihre Wunschposition oder Ihr Schwerpunkt?",
+      "email": "Unter welcher E-Mail-Adresse sind Sie erreichbar?",
+      "location": "Wo befinden Sie sich?",
+      "phone": "Haben Sie eine Telefonnummer für Rückfragen?",
+      "linkedin": "Haben Sie ein LinkedIn-Profil?",
+      "portfolio": "Haben Sie eine persönliche Webseite oder ein Portfolio?"
+    },
+    "hints": {
+      "fullName": "Dieser Name wird als Hauptüberschrift auf Ihrem Lebenslauf angezeigt.",
+      "jobTitle": "Ihre Kernkompetenz (z.B. Senior Software Engineer, DevOps Lead).",
+      "email": "Personalverantwortliche und ATS-Systeme nutzen diese Adresse zur Kontaktaufnahme.",
+      "location": "Stadt und Land (z.B. Berlin, Deutschland oder Remote).",
+      "phone": "Optional. Nützlich für telefonische Rückfragen oder WhatsApp.",
+      "linkedin": "Optional. Empfohlen zur Überprüfung Ihres beruflichen Netzwerks.",
+      "portfolio": "Optional. Hervorragend geeignet, um Arbeitsproben oder Code zu zeigen."
+    },
+    "stepCount": "{{current}} von {{total}}",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "skipped": "Übersprungen",
+    "edit": "Bearbeiten",
+    "switchClassic": "Alle Felder anzeigen",
+    "switchStep": "Schritt-für-Schritt-Modus",
+    "reviewTitle": "Persönliche Daten vollständig!",
+    "reviewSubtitle": "Überprüfen Sie Ihre Angaben, bevor Sie fortfahren.",
+    "confirmAndContinue": "Weiter",
+    "saveAndReturn": "Speichern und zurück",
+    "backToReview": "Zurück zur Übersicht",
+    "emailInvalid": "Bitte geben Sie ein gültiges E-Mail-Format ein."
   },
   "sections": {
     "personalInfo": {
@@ -127,12 +167,20 @@
       "location": "Wohnort / Stadt, Land",
       "linkedin": "LinkedIn-Profil",
       "github": "GitHub-Profil",
-      "portfolio": "Portfolio / Webseite"
+      "portfolio": "Portfolio / Webseite",
+      "subtitle": "Wichtige Angaben im Kopfbereich Ihres Lebenslaufs.",
+      "addOptional": "+ Optionale Links oder Kontaktdaten hinzufügen:",
+      "removeFieldTip": "Optionales Feld entfernen"
     },
     "summary": {
       "title": "Berufliches Profil",
       "label": "Kurzprofil & Kernkompetenzen",
-      "placeholder": "Verfassen Sie 3-4 prägnante Sätze zu Ihrer technischen Expertise, Ihren Architekturschwerpunkten und messbaren Erfolgen..."
+      "question": "Wie fassen Sie Ihr berufliches Profil zusammen?",
+      "hint": "Schreiben Sie 2–4 Sätze, die Ihre Kernkompetenzen, Schwerpunkte und Ihren Mehrwert hervorheben.",
+      "placeholder": "Schreiben Sie 2–4 Sätze zu Ihrer wichtigsten Berufserfahrung, Spezialisierung und Ihrem Werdegang...",
+      "word": "Wort",
+      "words": "Wörter",
+      "idealWords": "(ideal: 40–90)"
     },
     "experience": {
       "title": "Berufserfahrung",
@@ -147,19 +195,21 @@
       "removeRole": "Position entfernen"
     },
     "skills": {
-      "title": "Technische Fähigkeiten & Kompetenzen",
-      "desc": "Organisieren Sie Ihre Kompetenzen in Kategorien. Tippen Sie eine Fähigkeit ein und drücken Sie Enter.",
-      "empty": "Noch keine Fähigkeiten hinzugefügt. Tippen Sie unten oder wählen Sie einen Vorschlag.",
-      "addPlaceholder": "Eingeben und Enter drücken...",
-      "inputPlaceholder": "Eingeben und Enter drücken",
-      "quickSuggestions": "Vorschläge:",
+      "title": "Fähigkeiten & Kompetenzen",
+      "desc": "Organisieren Sie Ihre Kompetenzen in Kategorien.",
+      "empty": "Hier wurden noch keine Fähigkeiten hinzugefügt.",
+      "addPlaceholder": "Fähigkeit eingeben...",
+      "inputPlaceholder": "z.B. Projektmanagement...",
       "addGroup": "Kategorie hinzufügen",
+      "addCategoryAction": "+ Kategorie hinzufügen",
       "groupName": "Kategoriename",
-      "defaultCore": "Kernkompetenzen & Sprachen",
-      "defaultArchitecture": "Architektur & Frameworks",
-      "defaultTooling": "Werkzeuge, Cloud & CI/CD",
+      "defaultCore": "Kernkompetenzen",
+      "defaultArchitecture": "Schwerpunkte",
+      "defaultTooling": "Tools",
       "skillsList": "Fähigkeiten (kommagetrennt)",
-      "removeGroup": "Kategorie entfernen"
+      "removeGroup": "Kategorie löschen",
+      "renameGroup": "Kategorie umbenennen",
+      "skillSingular": "Fähigkeit"
     },
     "education": {
       "title": "Ausbildung & Zertifikate",
@@ -167,11 +217,11 @@
       "degree": "Abschluss- / Zertifikatstitel",
       "institution": "Institution / Universität / Aussteller",
       "year": "Jahr oder Zeitraum (z.B. 2018 – 2022)",
-      "degreePlaceholder": "z.B. B.Sc. Informatik",
-      "institutionPlaceholder": "z.B. TU München / Udemy",
+      "degreePlaceholder": "z.B. Bachelor / Diplom / Zertifikat",
+      "institutionPlaceholder": "z.B. Universität / Institut / Plattform",
       "yearPlaceholder": "z.B. 2018 – 2022",
       "description": "Beschreibung / Wichtigste Erfolge (optional)",
-      "descriptionPlaceholder": "z.B. Konzeption und Entwicklung responsiver Webanwendungen mit React, Redux, OAuth und Firebase...",
+      "descriptionPlaceholder": "z.B. Mit Auszeichnung abgeschlossen, Schwerpunkt oder wichtige Projekte...",
       "location": "Ort (optional)",
       "edit": "Bearbeiten",
       "cancel": "Abbrechen",
@@ -192,6 +242,8 @@
       "levelB1": "B1 • Gute Mittelstufe",
       "levelA2": "A2 • Grundkenntnisse",
       "levelA1": "A1 • Anfänger",
+      "customLanguage": "+ Andere Sprache eingeben...",
+      "chooseFromList": "Aus Liste wählen",
       "empty": "Noch keine Sprachen hinzugefügt.",
       "remove": "Entfernen"
     },

@@ -92,6 +92,8 @@
   "status": {
     "ready": "Profilo professionale pronto per l'adattamento",
     "tipLoadSample": "Suggerimento: Clicca su 'Carica Profilo di Esempio' per testare subito",
+    "minimumRequired": "Inserisci i dati di contatto di base e almeno una sezione principale (esperienza o competenze) per sbloccare la posizione obiettivo",
+    "minFieldsHint": "Richiesto per avanzare: dati di contatto + esperienza o competenze",
     "importingPdf": "Lettura e strutturazione del tuo CV in PDF...",
     "ocrReading": "Lettura della struttura del documento PDF...",
     "ocrScanning": "PDF scansionato rilevato. Avvio del motore OCR locale...",
@@ -113,7 +115,45 @@
     "experience": "Esperienza",
     "education": "Istruzione",
     "languages": "Lingue",
-    "projects": "Progetti"
+    "projects": "Progetti",
+    "prevSection": "Sezione precedente",
+    "nextSection": "Sezione successiva",
+    "sheetTitle": "Sezioni del profilo",
+    "sectionCounter": "{{current}} di {{total}} sezioni"
+  },
+  "stepFlow": {
+    "questions": {
+      "fullName": "Qual è il tuo nome completo?",
+      "jobTitle": "Qual è il tuo ruolo professionale principale?",
+      "email": "Qual è la tua email di contatto?",
+      "location": "Dove risiedi attualmente?",
+      "phone": "Hai un numero di telefono di contatto?",
+      "linkedin": "Hai un profilo LinkedIn?",
+      "portfolio": "Hai un portfolio o un sito web personale?"
+    },
+    "hints": {
+      "fullName": "Questo apparirà come titolo principale nell'intestazione del tuo CV.",
+      "jobTitle": "Il tuo titolo o headline professionale (es. Staff Frontend Architect, Lead DevOps).",
+      "email": "I recruiter e i sistemi ATS lo utilizzeranno per contattarti.",
+      "location": "Città e Paese (es. Roma, Italia o Remote - EU).",
+      "phone": "Opzionale. Utile se i selezionatori desiderano chiamarti o scriverti su WhatsApp.",
+      "linkedin": "Opzionale. Consigliato affinché possano verificare la tua rete e le raccomandazioni.",
+      "portfolio": "Opzionale. Ottimo per mostrare progetti reali, repository GitHub o design."
+    },
+    "stepCount": "{{current}} di {{total}}",
+    "prev": "Precedente",
+    "next": "Avanti",
+    "skip": "Salta",
+    "skipped": "Saltato",
+    "edit": "Modifica",
+    "switchClassic": "Vedi tutti i campi",
+    "switchStep": "Modalità passo-passo",
+    "reviewTitle": "Informazioni personali completate!",
+    "reviewSubtitle": "Verifica che i tuoi dati siano corretti prima di procedere.",
+    "confirmAndContinue": "Continua",
+    "saveAndReturn": "Salva e torna",
+    "backToReview": "Torna al riepilogo",
+    "emailInvalid": "Inserisci un formato email valido."
   },
   "sections": {
     "personalInfo": {
@@ -125,12 +165,20 @@
       "location": "Località / Città, Paese",
       "linkedin": "Profilo LinkedIn",
       "github": "Profilo GitHub",
-      "portfolio": "Portfolio / Sito Web"
+      "portfolio": "Portfolio / Sito Web",
+      "subtitle": "Informazioni chiave visibili nell'intestazione del tuo CV.",
+      "addOptional": "+ Aggiungi link o contatti opzionali:",
+      "removeFieldTip": "Rimuovi campo opzionale"
     },
     "summary": {
       "title": "Riepilogo Professionale",
       "label": "Sintesi Esecutiva & Proposta di Valore",
-      "placeholder": "Scrivi 3-4 frasi incisive che evidenzino le tue competenze tecniche principali, i punti di forza nell'architettura software e i risultati quantificabili..."
+      "question": "Come riassumi il tuo profilo professionale?",
+      "hint": "Scrivi 2–4 frasi evidenziando la tua esperienza chiave, la tua specializzazione e il tuo valore aggiunto.",
+      "placeholder": "Scrivi 2–4 frasi che evidenzino la tua esperienza principale, le tue specializzazioni e il tuo percorso professionale...",
+      "word": "parola",
+      "words": "parole",
+      "idealWords": "(ideale: 40–90)"
     },
     "experience": {
       "title": "Esperienza Lavorativa",
@@ -145,19 +193,21 @@
       "removeRole": "Rimuovi Posizione"
     },
     "skills": {
-      "title": "Competenze Tecniche",
-      "desc": "Organizza le tue competenze in categorie chiare. Digita una competenza e premi Invio, o clicca sui suggerimenti.",
-      "empty": "Nessuna competenza aggiunta in questo gruppo. Digita qui sotto o scegli un suggerimento.",
-      "addPlaceholder": "Digita e premi Invio...",
-      "inputPlaceholder": "Digita e premi Invio",
-      "quickSuggestions": "Suggeriti:",
+      "title": "Competenze & Abilità",
+      "desc": "Organizza le tue competenze in categorie chiare.",
+      "empty": "Nessuna competenza aggiunta qui finora.",
+      "addPlaceholder": "Digita una competenza...",
+      "inputPlaceholder": "es. Gestione Progetti...",
       "addGroup": "Aggiungi Categoria",
+      "addCategoryAction": "+ Aggiungi categoria",
       "groupName": "Nome Categoria",
-      "defaultCore": "Competenze di Base & Linguaggi",
-      "defaultArchitecture": "Architettura & Framework",
-      "defaultTooling": "Strumenti, Cloud & CI/CD",
+      "defaultCore": "Competenze Chiave",
+      "defaultArchitecture": "Specializzazioni",
+      "defaultTooling": "Strumenti",
       "skillsList": "Competenze (separate da virgola)",
-      "removeGroup": "Rimuovi Categoria"
+      "removeGroup": "Elimina Categoria",
+      "renameGroup": "Rinomina Categoria",
+      "skillSingular": "competenza"
     },
     "education": {
       "title": "Istruzione & Certificazioni",
@@ -165,11 +215,11 @@
       "degree": "Titolo di Studio / Certificazione",
       "institution": "Istituto / Università / Ente",
       "year": "Anno o Periodo (es. 2018 – 2022)",
-      "degreePlaceholder": "es. Laurea in Informatica",
-      "institutionPlaceholder": "es. Università di Bologna / Udemy",
+      "degreePlaceholder": "es. Laurea / Diploma / Certificazione",
+      "institutionPlaceholder": "es. Università / Istituto / Piattaforma",
       "yearPlaceholder": "es. 2018 – 2022",
       "description": "Descrizione / Traguardi chiave (opzionale)",
-      "descriptionPlaceholder": "es. Progettazione e sviluppo di applicazioni web reattive con React, Redux, OAuth e Firebase...",
+      "descriptionPlaceholder": "es. Laureato con lode, specializzazione o progetti chiave...",
       "location": "Luogo (opzionale)",
       "edit": "Modifica",
       "cancel": "Annulla",
@@ -190,6 +240,8 @@
       "levelB1": "B1 • Intermedio",
       "levelA2": "A2 • Elementare",
       "levelA1": "A1 • Principiante",
+      "customLanguage": "+ Inserisci un'altra lingua...",
+      "chooseFromList": "Scegli dall'elenco",
       "empty": "Nessuna lingua aggiunta.",
       "remove": "Rimuovi"
     },
