@@ -127,7 +127,7 @@ Examples:
   npm run pdf outputs/Sample_CV_Stripe.md -- --theme modern-tech --palette modern-indigo --font outfit
 
   # Generate compact 1-page PDF using designer pastel template
-  npm run pdf outputs/CV_Daniel.md -- --theme designer-uiux --palette accent-teal --density compact --pages 1
+  npm run pdf outputs/CV_AlexMorgan.md -- --theme designer-uiux --palette accent-teal --density compact --pages 1
 
   # Batch-generate all CVs with corporate navy executive styling
   npm run pdf:all -- --theme executive --palette corporate-blue

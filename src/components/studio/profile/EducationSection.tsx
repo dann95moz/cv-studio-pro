@@ -22,6 +22,7 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
 import { useTranslation } from 'react-i18next';
 import { EducationSectionProps } from '../../../types';
+import { GuidedSectionNavFooter } from './GuidedSectionNavFooter';
 
 export type { EducationSectionProps };
 
@@ -141,7 +142,9 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
   education,
   onUpdateEducation,
   onAddEducation,
-  onRemoveEducation
+  onRemoveEducation,
+  onBack,
+  onContinue,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -165,6 +168,9 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
 
   const handleSaveEdit = (idx: number) => {
     if (!degreeField.trim() && !institutionField.trim()) {
+      if (!education[idx] || !education[idx].trim()) {
+        onRemoveEducation(idx);
+      }
       setEditingIndex(null);
       return;
     }
@@ -181,16 +187,19 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
   };
 
   const handleCancelEdit = () => {
+    if (editingIndex !== null && (!education[editingIndex] || !education[editingIndex].trim())) {
+      onRemoveEducation(editingIndex);
+    }
     setEditingIndex(null);
   };
 
   const handleAddNewItem = () => {
     onAddEducation();
-    // Start editing the newly added first item
+    // Start editing the newly added first item with completely empty fields
     setEditingIndex(0);
-    setDegreeField('Nuevo Título / Certificación');
-    setInstitutionField('Institución / Universidad');
-    setYearField('2024');
+    setDegreeField('');
+    setInstitutionField('');
+    setYearField('');
     setDescriptionField('');
   };
 
@@ -205,7 +214,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <SchoolRoundedIcon color="primary" sx={{ fontSize: 20 }} />
           <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: '0.98rem' }}>
-            {t('profile:sections.education.title', 'Educación y Certificaciones')}
+            {t('profile:sections.education.title', 'Education & Certifications')}
           </Typography>
         </Box>
 
@@ -216,7 +225,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
           startIcon={<AddRoundedIcon sx={{ fontSize: 16 }} />}
           onClick={handleAddNewItem}
         >
-          {t('profile:sections.education.addEducation', 'Agregar Certificación o Título')}
+          {t('profile:sections.education.addEducation', 'Add Degree / Certification')}
         </Button>
       </Box>
 
@@ -233,7 +242,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            {t('profile:sections.education.empty', 'No hay registros de educación aún. Haz clic en "Agregar" para comenzar.')}
+            {t('profile:sections.education.empty', 'No education records added yet. Click "Add Degree" to begin.')}
           </Typography>
         </Paper>
       ) : (
@@ -257,30 +266,30 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
                   }}
                 >
                   <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', textTransform: 'uppercase' }}>
-                    {t('profile:sections.education.edit', 'Editar Registro Educativo')}
+                    {t('profile:sections.education.edit', 'Edit Education Record')}
                   </Typography>
 
                   {/* 3 Structured Input Fields */}
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1.5fr 1.5fr 1fr' }, gap: 1.5 }}>
                     <TextField
-                      autoFocus
+                      autoFocus={!degreeField}
                       size="small"
-                      label={t('profile:sections.education.degree', 'Título / Grado / Certificación')}
-                      placeholder={t('profile:sections.education.degreePlaceholder', 'ej. Ingeniería de Sistemas')}
+                      label={t('profile:sections.education.degree', 'Degree / Certification Title')}
+                      placeholder={t('profile:sections.education.degreePlaceholder', "e.g. Bachelor's / Diploma / Professional Certificate")}
                       value={degreeField}
                       onChange={(e) => setDegreeField(e.target.value)}
                     />
                     <TextField
                       size="small"
-                      label={t('profile:sections.education.institution', 'Institución / Universidad / Emisor')}
-                      placeholder={t('profile:sections.education.institutionPlaceholder', 'ej. Universidad Nacional / Udemy')}
+                      label={t('profile:sections.education.institution', 'Institution / University / Issuer')}
+                      placeholder={t('profile:sections.education.institutionPlaceholder', 'e.g. University / Institution / Platform')}
                       value={institutionField}
                       onChange={(e) => setInstitutionField(e.target.value)}
                     />
                     <TextField
                       size="small"
-                      label={t('profile:sections.education.year', 'Año o Rango')}
-                      placeholder={t('profile:sections.education.yearPlaceholder', 'ej. 2018 – 2022')}
+                      label={t('profile:sections.education.year', 'Year or Period')}
+                      placeholder={t('profile:sections.education.yearPlaceholder', 'e.g. 2020 – 2024')}
                       value={yearField}
                       onChange={(e) => setYearField(e.target.value)}
                     />
@@ -293,8 +302,8 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
                     multiline
                     minRows={2}
                     maxRows={4}
-                    label={t('profile:sections.education.description', 'Descripción / Logros (Opcional)')}
-                    placeholder={t('profile:sections.education.descriptionPlaceholder', 'ej. Diseñé y desarrollé aplicaciones web responsivas...')}
+                    label={t('profile:sections.education.description', 'Description / Key Achievements (Optional)')}
+                    placeholder={t('profile:sections.education.descriptionPlaceholder', 'e.g. Graduated with honors, specialization or key projects...')}
                     value={descriptionField}
                     onChange={(e) => setDescriptionField(e.target.value)}
                   />
@@ -306,7 +315,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
                       onClick={handleCancelEdit}
                       startIcon={<CloseRoundedIcon sx={{ fontSize: 16 }} />}
                     >
-                      {t('profile:sections.education.cancel', 'Cancelar')}
+                      {t('profile:sections.education.cancel', 'Cancel')}
                     </Button>
                     <Button
                       size="small"
@@ -314,7 +323,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
                       onClick={() => handleSaveEdit(idx)}
                       startIcon={<CheckRoundedIcon sx={{ fontSize: 16 }} />}
                     >
-                      {t('profile:sections.education.save', 'Guardar')}
+                      {t('profile:sections.education.save', 'Save')}
                     </Button>
                   </Box>
                 </Paper>
@@ -377,7 +386,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
-                    <Tooltip title={t('profile:sections.education.edit', 'Editar')}>
+                    <Tooltip title={t('profile:sections.education.edit', 'Edit')}>
                       <IconButton
                         size="small"
                         onClick={() => handleStartEdit(idx, edu)}
@@ -385,7 +394,7 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
                         <EditRoundedIcon sx={{ fontSize: 16 }} />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title={t('profile:sections.education.remove', 'Eliminar')}>
+                    <Tooltip title={t('profile:sections.education.remove', 'Remove')}>
                       <IconButton
                         size="small"
                         color="error"
@@ -447,6 +456,13 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
           {t('common:actions.collapse', 'Mostrar menos')}
         </Button>
       )}
+
+      {/* Navigation Footer */}
+      <GuidedSectionNavFooter
+        onBack={onBack}
+        onContinue={onContinue}
+        continueDisabled={education.length === 0}
+      />
     </Box>
   );
 });

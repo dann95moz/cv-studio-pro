@@ -21,7 +21,7 @@ export function sanitizeFileName(text: string): string {
 }
 
 /**
- * Cleans and un-snakes raw text (e.g. 'Daniel_Corredor_Acosta' -> 'Daniel Corredor Acosta')
+ * Cleans and un-snakes raw text (e.g. 'Alex_Morgan' -> 'Alex Morgan')
  * while preserving natural accents, spaces, and casing.
  */
 export function cleanHumanText(text: string): string {
@@ -39,7 +39,7 @@ export function cleanHumanText(text: string): string {
 }
 
 /**
- * Extracts candidate initials (e.g. 'Daniel Corredor' -> 'DC') for monograms
+ * Extracts candidate initials (e.g. 'Alex Morgan' -> 'AM') for monograms
  */
 export function extractCandidateInitials(name?: string): string {
   if (!name) return 'CV';
