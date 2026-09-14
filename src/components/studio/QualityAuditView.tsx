@@ -19,16 +19,23 @@ import { downloadTextFile, buildTimestampedFileName } from '../../utils/fileUtil
 import { AuditImprovementModal } from './audit/AuditImprovementModal';
 import { AuditSectionCard } from './audit/AuditSectionCard';
 import { useAuditActions } from '../../hooks/useAuditActions';
-import { useAuditReport } from '../../store';
+import { QualityAuditReport } from '../../types/audit';
 
 export type { QualityAuditViewProps };
 
+const DEFAULT_EMPTY_REPORT: QualityAuditReport = {
+  candidateName: '',
+  targetCompany: '',
+  overallScore: 0,
+  sections: [],
+  strategicPillars: [],
+  markdownReport: '',
+};
+
 export const QualityAuditView: React.FC<QualityAuditViewProps> = ({
-  report: propReport,
+  report = DEFAULT_EMPTY_REPORT,
   onRefresh
 }) => {
-  const hookReport = useAuditReport();
-  const report = propReport || hookReport;
   const { t } = useTranslation(['audit', 'common']);
   const theme = useTheme();
   const {

@@ -6,23 +6,19 @@ import { safeMarkdown } from '../../utils/sanitize';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../Icons';
 import { GapAnalysisViewProps } from '../../types';
-import { useGapInfo } from '../../store';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 
 export type { GapAnalysisViewProps };
 
 export const GapAnalysisView: React.FC<GapAnalysisViewProps> = ({
   gapMarkdown,
-  matchScore: propMatchScore,
-  keywords: propKeywords,
+  matchScore = 0,
+  keywords = [],
   companyName,
   targetRole,
   onDownload
 }) => {
   const { t } = useTranslation(['gap', 'common', 'preview']);
-  const hookGapInfo = useGapInfo();
-  const matchScore = propMatchScore ?? hookGapInfo.matchScore;
-  const keywords = propKeywords ?? hookGapInfo.keywords;
   const [viewMode, setViewMode] = useState<'formatted' | 'raw'>('formatted');
   const { copied, copy } = useCopyToClipboard();
 
