@@ -73,3 +73,9 @@ export interface BulletAuditIssue {
   suggestionKey: string;
   defaultSuggestion: string;
 }
+
+export interface GapAnalysisInfo {
+  matchScore: number;
+  keywords: string[];
+}
+

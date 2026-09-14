@@ -128,3 +128,12 @@ export interface MarkdownFileItem {
   content: string;
 }
 
+export interface GlobalNotification {
+  open: boolean;
+  message: string;
+  severity?: 'success' | 'info' | 'warning' | 'error';
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+

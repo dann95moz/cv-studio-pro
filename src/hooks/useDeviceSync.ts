@@ -499,3 +499,6 @@ export const useDeviceSync = () => {
     handleCancelConflict,
   };
 };
+
+export type UseDeviceSyncReturn = ReturnType<typeof useDeviceSync>;
+

@@ -2,19 +2,28 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { extractCandidateName } from './parser';
 import { APP_LINKS } from '../constants/links';
 
+declare global {
+  interface Uint8Array {
+    toHex?(): string;
+  }
+  interface Map<K, V> {
+    getOrInsertComputed?(key: K, callback: () => V): V;
+  }
+}
+
 // Polyfill Uint8Array.prototype.toHex if missing in current JavaScript engine / WebWorker
-if (typeof Uint8Array !== 'undefined' && typeof (Uint8Array.prototype as any).toHex !== 'function') {
-  (Uint8Array.prototype as any).toHex = function () {
-    return Array.from(this as Uint8Array)
+if (typeof Uint8Array !== 'undefined' && typeof Uint8Array.prototype.toHex !== 'function') {
+  Uint8Array.prototype.toHex = function (this: Uint8Array): string {
+    return Array.from(this)
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
   };
 }
 
 // Polyfill Map.prototype.getOrInsertComputed for pdfjs-dist compatibility across older browsers and runtimes
-if (typeof Map !== 'undefined' && typeof (Map.prototype as any).getOrInsertComputed !== 'function') {
-  (Map.prototype as any).getOrInsertComputed = function (key: any, callback: () => any) {
-    if (this.has(key)) return this.get(key);
+if (typeof Map !== 'undefined' && typeof Map.prototype.getOrInsertComputed !== 'function') {
+  Map.prototype.getOrInsertComputed = function <K, V>(this: Map<K, V>, key: K, callback: () => V): V {
+    if (this.has(key)) return this.get(key)!;
     const value = callback();
     this.set(key, value);
     return value;
@@ -752,7 +761,7 @@ export async function extractRawTextFromPdf(
         if (ctx) {
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-          await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+          await page.render({ canvasContext: ctx, viewport } as Parameters<typeof page.render>[0]).promise;
           const imgDataUrl = canvas.toDataURL('image/png');
           const ret = await worker.recognize(imgDataUrl);
           let pageStr = ret.data.text.trim();
