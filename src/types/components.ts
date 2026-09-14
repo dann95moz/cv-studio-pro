@@ -188,6 +188,7 @@ export interface PersonalInfoSectionProps {
   onContactChange: (type: ContactType, label: string, url?: string) => void;
   onChange?: (info: { name: string; title: string; contacts: ContactItem[] }) => void;
   onAdvanceSection?: () => void;
+  isProfileComplete?: boolean;
 }
 
 export interface SummarySectionProps {
@@ -198,6 +199,8 @@ export interface SummarySectionProps {
   onChange?: (summary: string) => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
+  isLastSection?: boolean;
 }
 
 export interface ExperienceSectionProps {
@@ -213,6 +216,8 @@ export interface ExperienceSectionProps {
   onChange?: (items: ExperienceItem[]) => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
+  isLastSection?: boolean;
 }
 
 export interface EducationSectionProps {
@@ -225,6 +230,8 @@ export interface EducationSectionProps {
   onChange?: (items: string[]) => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
+  isLastSection?: boolean;
 }
 
 export interface LanguagesSectionProps {
@@ -237,6 +244,8 @@ export interface LanguagesSectionProps {
   onChange?: (items: string[]) => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
+  isLastSection?: boolean;
 }
 
 export interface ProjectsSectionProps {
@@ -249,6 +258,7 @@ export interface ProjectsSectionProps {
   onChange?: (items: ExperienceItem[]) => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
   isLastSection?: boolean;
 }
 

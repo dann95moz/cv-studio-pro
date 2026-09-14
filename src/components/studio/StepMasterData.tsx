@@ -443,8 +443,8 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             </Paper>
           )}
 
-        {/* Navigation Footer (Rendered in Markdown / FreeText modes only when minimum profile requirements are met; Guided mode has its own card-integrated navigation) */}
-        {editMode !== 'guided' && completeness.hasMinimumProfile && (
+        {/* Global Navigation Footer: Displayed whenever minimum profile requirements are met */}
+        {completeness.hasMinimumProfile && (
           <Paper
             elevation={2}
             sx={{

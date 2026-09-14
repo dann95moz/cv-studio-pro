@@ -12,6 +12,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = React.mem
   onTitleChange,
   onContactChange,
   onAdvanceSection,
+  isProfileComplete = false,
 }) => {
   return (
     <PersonalInfoStepFlow
@@ -22,6 +23,7 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = React.mem
       onTitleChange={onTitleChange}
       onContactChange={onContactChange}
       onAdvanceSection={onAdvanceSection}
+      isProfileComplete={isProfileComplete}
     />
   );
 });

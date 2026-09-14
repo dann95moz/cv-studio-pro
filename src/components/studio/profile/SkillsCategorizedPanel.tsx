@@ -34,6 +34,8 @@ export interface SkillsCategorizedPanelProps {
   onRemoveCategory: (index: number) => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
+  isLastSection?: boolean;
 }
 
 export const SkillsCategorizedPanel: React.FC<SkillsCategorizedPanelProps> = ({
@@ -44,6 +46,8 @@ export const SkillsCategorizedPanel: React.FC<SkillsCategorizedPanelProps> = ({
   onRemoveCategory,
   onBack,
   onContinue,
+  continueLabel,
+  isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -340,6 +344,8 @@ export const SkillsCategorizedPanel: React.FC<SkillsCategorizedPanelProps> = ({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={skillGroups.reduce((acc, g) => acc + (g.skills?.length || 0), 0) === 0}
+        continueLabel={continueLabel}
+        isLastSection={isLastSection}
       />
     </Box>
   );

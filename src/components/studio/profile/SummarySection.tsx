@@ -19,6 +19,8 @@ export const SummarySection: React.FC<SummarySectionProps> = React.memo(({
   onSummaryChange,
   onBack,
   onContinue,
+  continueLabel,
+  isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -137,6 +139,8 @@ export const SummarySection: React.FC<SummarySectionProps> = React.memo(({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={!isValid}
+        continueLabel={continueLabel}
+        isLastSection={isLastSection}
       />
     </Box>
   );

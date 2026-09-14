@@ -145,6 +145,8 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
   onRemoveEducation,
   onBack,
   onContinue,
+  continueLabel,
+  isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -462,6 +464,8 @@ export const EducationSection: React.FC<EducationSectionProps> = React.memo(({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={education.length === 0}
+        continueLabel={continueLabel}
+        isLastSection={isLastSection}
       />
     </Box>
   );

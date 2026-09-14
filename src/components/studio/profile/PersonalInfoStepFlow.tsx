@@ -32,6 +32,7 @@ export interface PersonalInfoStepFlowProps {
   onTitleChange: (title: string) => void;
   onContactChange: (type: ContactType, label: string, url?: string) => void;
   onAdvanceSection?: () => void;
+  isProfileComplete?: boolean;
 }
 
 interface StepFieldConfig {
@@ -58,6 +59,7 @@ export const PersonalInfoStepFlow: React.FC<PersonalInfoStepFlowProps> = ({
   onTitleChange,
   onContactChange,
   onAdvanceSection,
+  isProfileComplete = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -199,6 +201,17 @@ export const PersonalInfoStepFlow: React.FC<PersonalInfoStepFlowProps> = ({
   const [isEditingSingleField, setIsEditingSingleField] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const prevStepRef = useRef<number | null>(null);
+
+  // When complete data is available (e.g. from async load, sample load, or parent update),
+  // ensure user sees the Review Summary checklist instead of being stuck in the single-field flow,
+  // unless user is explicitly editing a single field.
+  const previousCompleteRef = useRef(isAlreadyComplete);
+  useEffect(() => {
+    if (isAlreadyComplete && !previousCompleteRef.current && currentStep === 0 && !isEditingSingleField) {
+      setCurrentStep(totalFields);
+    }
+    previousCompleteRef.current = isAlreadyComplete;
+  }, [isAlreadyComplete, currentStep, isEditingSingleField, totalFields]);
 
   const isReviewScreen = currentStep >= totalFields;
   const activeConfig = !isReviewScreen ? stepsConfig[currentStep] : null;
@@ -395,47 +408,71 @@ export const PersonalInfoStepFlow: React.FC<PersonalInfoStepFlowProps> = ({
             {t('profile:stepFlow.backToReview', 'Back to summary')}
           </Button>
         ) : !isReviewScreen ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-            {/* Step Dots */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              {stepsConfig.map((s, idx) => {
-                const isPassed = idx < currentStep;
-                const isCurrent = idx === currentStep;
-                return (
-                  <Box
-                    key={s.id}
-                    onClick={() => handleJumpToField(idx)}
-                    sx={{
-                      width: isCurrent ? 18 : 6,
-                      height: 6,
-                      borderRadius: 9999,
-                      bgcolor: isCurrent
-                        ? 'primary.main'
-                        : isPassed
-                        ? alpha(theme.palette.primary.main, 0.45)
-                        : alpha(theme.palette.text.disabled, 0.25),
-                      cursor: 'pointer',
-                      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}
-                  />
-                );
-              })}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              {/* Step Dots */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                {stepsConfig.map((s, idx) => {
+                  const isPassed = idx < currentStep;
+                  const isCurrent = idx === currentStep;
+                  return (
+                    <Box
+                      key={s.id}
+                      onClick={() => handleJumpToField(idx)}
+                      sx={{
+                        width: isCurrent ? 18 : 6,
+                        height: 6,
+                        borderRadius: 9999,
+                        bgcolor: isCurrent
+                          ? 'primary.main'
+                          : isPassed
+                          ? alpha(theme.palette.primary.main, 0.45)
+                          : alpha(theme.palette.text.disabled, 0.25),
+                        cursor: 'pointer',
+                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                    />
+                  );
+                })}
+              </Box>
+
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  fontSize: '0.75rem',
+                  letterSpacing: 0.2,
+                }}
+              >
+                {t('profile:stepFlow.stepCount', '{{current}} of {{total}}', {
+                  current: currentStep + 1,
+                  total: totalFields,
+                })}
+              </Typography>
             </Box>
 
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 700,
-                color: 'text.secondary',
-                fontSize: '0.75rem',
-                letterSpacing: 0.2,
-              }}
-            >
-              {t('profile:stepFlow.stepCount', '{{current}} of {{total}}', {
-                current: currentStep + 1,
-                total: totalFields,
-              })}
-            </Typography>
+            {isAlreadyComplete && (
+              <Button
+                size="small"
+                variant="text"
+                color="primary"
+                startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 16 }} />}
+                onClick={() => {
+                  setIsEditingSingleField(false);
+                  setCurrentStep(totalFields);
+                  setValidationError(null);
+                }}
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  textTransform: 'none',
+                  px: 1,
+                }}
+              >
+                {t('profile:stepFlow.backToReview', 'Back to summary')}
+              </Button>
+            )}
           </Box>
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -748,7 +785,9 @@ export const PersonalInfoStepFlow: React.FC<PersonalInfoStepFlowProps> = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {t('profile:stepFlow.confirmAndContinue', 'Continue')}
+            {isProfileComplete
+              ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy')
+              : t('profile:stepFlow.confirmAndContinue', 'Continue')}
           </Button>
         )}
       </Box>

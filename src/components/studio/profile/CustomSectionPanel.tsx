@@ -35,6 +35,7 @@ export interface CustomSectionPanelProps {
   onRemoveSection: () => void;
   onBack?: () => void;
   onContinue?: () => void;
+  continueLabel?: string;
   isLastSection?: boolean;
 }
 
@@ -66,6 +67,7 @@ export const CustomSectionPanel: React.FC<CustomSectionPanelProps> = ({
   onRemoveSection,
   onBack,
   onContinue,
+  continueLabel,
   isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
@@ -317,6 +319,7 @@ export const CustomSectionPanel: React.FC<CustomSectionPanelProps> = ({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={false}
+        continueLabel={continueLabel}
         isLastSection={isLastSection}
       />
 

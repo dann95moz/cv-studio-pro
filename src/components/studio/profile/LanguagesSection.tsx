@@ -127,6 +127,8 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
   onRemoveLanguage,
   onBack,
   onContinue,
+  continueLabel,
+  isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -398,6 +400,8 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={languages.length === 0}
+        continueLabel={continueLabel}
+        isLastSection={isLastSection}
       />
     </Box>
   );

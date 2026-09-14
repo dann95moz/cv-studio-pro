@@ -519,6 +519,16 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
     };
   }, [formData]);
 
+  // Check if profile satisfies minimum requirements or is complete
+  const isProfileComplete = useMemo(() => {
+    return Boolean(
+      sectionCounts.personalComplete &&
+      sectionCounts.summaryComplete &&
+      sectionCounts.skillsCount > 0 &&
+      (sectionCounts.experienceCount > 0 || sectionCounts.educationCount > 0)
+    );
+  }, [sectionCounts]);
+
   // Ensure default skill groups if none exist
   const skillGroups = useMemo(() => {
     if (formData.skillGroups && formData.skillGroups.length > 0) {
@@ -557,13 +567,17 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const isLastSection = currentSectionIndex === sectionKeys.length - 1;
 
   const handleNextInSequence = useCallback(() => {
+    if (isProfileComplete) {
+      onComplete?.();
+      return;
+    }
     const nextIdx = currentSectionIndex + 1;
     if (nextIdx < sectionKeys.length) {
       handleSectionChange(sectionKeys[nextIdx]);
     } else {
       onComplete?.();
     }
-  }, [currentSectionIndex, sectionKeys, handleSectionChange, onComplete]);
+  }, [isProfileComplete, currentSectionIndex, sectionKeys, handleSectionChange, onComplete]);
 
   const handlePrevInSequence = useCallback(() => {
     const prevIdx = currentSectionIndex - 1;
@@ -636,6 +650,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onTitleChange={handleTitleChange}
             onContactChange={handleContactChange}
             onAdvanceSection={handleNextInSequence}
+            isProfileComplete={isProfileComplete}
           />
         )}
 
@@ -645,6 +660,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onSummaryChange={handleSummaryChange}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
 
@@ -657,6 +674,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onRemoveCategory={handleRemoveSkillGroup}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
 
@@ -671,6 +690,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onRemoveBullet={handleRemoveBullet}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
 
@@ -682,6 +703,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onRemoveEducation={handleRemoveEducation}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
 
@@ -693,6 +716,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onRemoveLanguage={handleRemoveLanguage}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
 
@@ -704,7 +729,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onRemoveProject={handleRemoveProject}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
-            isLastSection={isLastSection}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
 
@@ -719,7 +745,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onRemoveSection={() => handleRemoveCustomSection(activeCustomSection.id)}
             onBack={handlePrevInSequence}
             onContinue={handleNextInSequence}
-            isLastSection={isLastSection}
+            isLastSection={isLastSection || isProfileComplete}
+            continueLabel={isProfileComplete ? t('profile:actions.continueToTarget', 'Continue to Target Vacancy') : undefined}
           />
         )}
       </Box>

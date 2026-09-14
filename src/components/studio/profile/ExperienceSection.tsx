@@ -213,6 +213,8 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = React.memo(({
   onRemoveBullet,
   onBack,
   onContinue,
+  continueLabel,
+  isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -289,10 +291,13 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = React.memo(({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={false}
+        isLastSection={isLastSection}
         continueLabel={
-          experience.length === 0
+          continueLabel
+            ? continueLabel
+            : experience.length === 0
             ? t('profile:sections.experience.continueWithout', 'Continuar sin experiencia')
-            : t('profile:stepFlow.next', 'Continuar')
+            : undefined
         }
       />
     </Box>

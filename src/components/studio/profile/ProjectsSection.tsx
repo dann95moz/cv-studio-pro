@@ -188,6 +188,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = React.memo(({
   onRemoveProject,
   onBack,
   onContinue,
+  continueLabel,
   isLastSection = true,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
@@ -250,6 +251,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = React.memo(({
         onBack={onBack}
         onContinue={onContinue}
         continueDisabled={false}
+        continueLabel={continueLabel}
         isLastSection={isLastSection}
       />
     </Box>
