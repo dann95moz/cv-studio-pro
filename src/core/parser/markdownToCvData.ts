@@ -50,7 +50,13 @@ export function normalizeSkillCategory(category: string, lang: SupportedLanguage
     lower.includes('programmiersprache') ||
     lower.includes('fundamento') ||
     lower.includes('core web') ||
-    lower.includes('core fundamental')
+    lower.includes('core fundamental') ||
+    lower === 'core skills' ||
+    lower === 'competencias clave' ||
+    lower === 'kernkompetenzen' ||
+    lower === 'compétences clés' ||
+    lower === 'competenze chiave' ||
+    lower === 'core competencies'
   ) {
     return langDef.skillsCategories.languages;
   }
@@ -61,7 +67,11 @@ export function normalizeSkillCategory(category: string, lang: SupportedLanguage
     lower.includes('ecosystem') ||
     lower.includes('ecosistema') ||
     lower.includes('ökosystem') ||
-    lower.includes('écosystème')
+    lower.includes('écosystème') ||
+    lower.includes('specialt') ||
+    lower.includes('especialidad') ||
+    lower.includes('schwerpunkt') ||
+    lower.includes('specializzazion')
   ) {
     return langDef.skillsCategories.frameworks;
   }
@@ -77,7 +87,6 @@ export function normalizeSkillCategory(category: string, lang: SupportedLanguage
     return langDef.skillsCategories.tooling;
   }
   if (
-    lower === 'core skills' ||
     lower === 'skills' ||
     lower === 'technical skills' ||
     lower === 'competencies' ||

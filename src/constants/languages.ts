@@ -44,9 +44,9 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       websites: 'SITIOS WEB Y PERFILES'
     },
     skillsCategories: {
-      languages: 'Lenguajes y Fundamentos',
-      frameworks: 'Frameworks, Arquitectura y Ecosistema',
-      tooling: 'Herramientas, Testing, CI/CD e Integración IA'
+      languages: 'Competencias Clave',
+      frameworks: 'Especialidades',
+      tooling: 'Herramientas'
     },
     gapReportTitle: 'REPORTE DE ESTRATEGIA Y MATCHING (Análisis de Brechas)',
     gapLabels: {
@@ -72,9 +72,9 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       websites: 'WEBSITES & PROFILE'
     },
     skillsCategories: {
-      languages: 'Programmiersprachen & Grundlagen',
-      frameworks: 'Frameworks, Architektur & Ökosystem',
-      tooling: 'Werkzeuge, Testing, CI/CD & KI-Integrationen'
+      languages: 'Kernkompetenzen',
+      frameworks: 'Schwerpunkte',
+      tooling: 'Werkzeuge'
     },
     gapReportTitle: 'MATCHING- & ANPASSUNGSSTRATEGIEBERICHT (Gap-Analyse)',
     gapLabels: {
@@ -100,9 +100,9 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       websites: 'SITES WEB & PROFILS'
     },
     skillsCategories: {
-      languages: 'Langages et Fondamentaux',
-      frameworks: 'Frameworks, Architecture et Écosystème',
-      tooling: 'Outils, Tests, CI/CD et Intégrations IA'
+      languages: 'Compétences Clés',
+      frameworks: 'Spécialités',
+      tooling: 'Outils'
     },
     gapReportTitle: 'RAPPORT DE STRATÉGIE ET D’ADÉQUATION (Analyse des Écarts)',
     gapLabels: {
@@ -128,9 +128,9 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       websites: 'SITI WEB E PROFILI'
     },
     skillsCategories: {
-      languages: 'Linguaggi e Fondamenti',
-      frameworks: 'Framework, Architettura ed Ecosistema',
-      tooling: 'Strumenti, Testing, CI/CD e Integrazioni IA'
+      languages: 'Competenze Chiave',
+      frameworks: 'Specializzazioni',
+      tooling: 'Strumenti'
     },
     gapReportTitle: 'RAPPORTO DI STRATEGIA E ALLINEAMENTO (Analisi dei Gap)',
     gapLabels: {
@@ -156,9 +156,9 @@ export const LANGUAGE_DEFINITIONS: Record<SupportedLanguage, DetectedLanguage> =
       websites: 'WEBSITES, PORTFOLIOS, PROFILES'
     },
     skillsCategories: {
-      languages: 'Languages & Core Fundamentals',
-      frameworks: 'Frameworks, Architecture & Ecosystem',
-      tooling: 'Tooling, Testing, CI/CD & AI Integrations'
+      languages: 'Core Skills',
+      frameworks: 'Specialties',
+      tooling: 'Tools'
     },
     gapReportTitle: 'MATCHING & TAILORING STRATEGY REPORT (Gap Analysis)',
     gapLabels: {

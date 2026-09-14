@@ -34,3 +34,11 @@ Translations are divided by feature domain namespaces:
   ```
 - **Interpolation Syntax**: Use `{{variableName}}` for dynamic values (e.g., `Step {{number}}`, `{{count}} items`).
 - **Zero Hardcoded User-Facing Text**: Never render raw user-facing strings directly in components without wrapping them in `t()`.
+
+## 4. Default Entity Names & Seed Data (Dynamic Localization vs Static Storage)
+
+- **Root Cause of Language Bleed**: Seeding default entity titles (such as default skill categories `Core Skills`, `Specialties`, `Tools` or default section headers) as static string literals in mutable state or Markdown freezes them in a single language. If initialized or saved in English, switching the UI language to Spanish leaves those entity titles in English while surrounding labels translate, causing an inconsistent UI.
+- **Mandatory Standards**:
+  1. **Dynamic Localization Resolvers**: Standard default categories or section seeds must pass through a dynamic localization helper (e.g., `getLocalizedCategoryTitle(rawName, t)`) at render time so they automatically adapt to the user's active UI locale.
+  2. **Preserve User Customizations**: The resolver must recognize standard system seeds across all 5 languages and only translate those. Custom user-created names (e.g., "Litigación Civil", "Cloud Architecture") must pass through unchanged.
+  3. **Data Serialization vs. UI Presentation**: When persisting to Markdown or state, accept localized titles or standard canonical keys, but always ensure the UI layer resolves standard keys dynamically rather than displaying raw stored strings.

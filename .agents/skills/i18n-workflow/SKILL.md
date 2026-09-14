@@ -51,3 +51,6 @@ src/i18n/locales/
      ```
 5. **Validation**:
    - Switch language via the language dropdown in UI or Settings to verify rendering in all 5 locales.
+6. **Dynamic Resolvers for Default Entity Seeds**:
+   - When dealing with domain entity seeds (e.g., default skill categories `Core Skills`, `Specialties`, `Tools`), never display stored entity strings directly in the UI if they could be frozen in a previous language.
+   - Use dynamic localization resolvers (`getLocalizedCategoryTitle` in `src/utils/skillCategoryUtils.ts`) so standard categories automatically adapt to the user's active locale while preserving custom user-defined items.
