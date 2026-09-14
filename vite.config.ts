@@ -173,6 +173,15 @@ export default defineConfig({
             if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('dompurify') || id.includes('fflate')) {
               return 'vendor-pdf';
             }
+            if (id.includes('pdfjs-dist')) {
+              return 'vendor-pdfjs';
+            }
+            if (id.includes('tesseract.js')) {
+              return 'vendor-ocr';
+            }
+            if (id.includes('@dnd-kit')) {
+              return 'vendor-dnd';
+            }
             if (id.includes('zustand')) {
               return 'vendor-zustand';
             }
