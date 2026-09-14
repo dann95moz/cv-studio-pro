@@ -20,6 +20,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import { useTranslation } from 'react-i18next';
 import { ExperienceItem, ExperienceSectionProps } from '../../../types';
+import { GuidedSectionNavFooter } from './GuidedSectionNavFooter';
 
 export type { ExperienceSectionProps };
 
@@ -209,7 +210,9 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = React.memo(({
   onRemoveExperience,
   onAddBullet,
   onUpdateBullet,
-  onRemoveBullet
+  onRemoveBullet,
+  onBack,
+  onContinue,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -258,7 +261,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = React.memo(({
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            {t('profile:sections.experience.empty', 'No hay experiencias laborales agregadas aún.')}
+            {t('profile:sections.experience.empty', 'No hay experiencias laborales agregadas aún (opcional).')}
           </Typography>
         </Paper>
 
@@ -280,6 +283,18 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = React.memo(({
           ))}
         </Stack>
       )}
+
+      {/* Navigation Footer */}
+      <GuidedSectionNavFooter
+        onBack={onBack}
+        onContinue={onContinue}
+        continueDisabled={false}
+        continueLabel={
+          experience.length === 0
+            ? t('profile:sections.experience.continueWithout', 'Continuar sin experiencia')
+            : t('profile:stepFlow.next', 'Continuar')
+        }
+      />
     </Box>
   );
 });

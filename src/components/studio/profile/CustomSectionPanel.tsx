@@ -24,6 +24,7 @@ import RecordVoiceOverRoundedIcon from '@mui/icons-material/RecordVoiceOverRound
 import PushPinRoundedIcon from '@mui/icons-material/PushPinRounded';
 import { useTranslation } from 'react-i18next';
 import { CustomSection, CustomSectionPresetType } from '../../../types/cv';
+import { GuidedSectionNavFooter } from './GuidedSectionNavFooter';
 
 export interface CustomSectionPanelProps {
   section: CustomSection;
@@ -32,6 +33,9 @@ export interface CustomSectionPanelProps {
   onUpdateItem: (index: number, newText: string) => void;
   onRemoveItem: (index: number) => void;
   onRemoveSection: () => void;
+  onBack?: () => void;
+  onContinue?: () => void;
+  isLastSection?: boolean;
 }
 
 export const getPresetIcon = (presetType?: CustomSectionPresetType, fontSize = 20, color?: string) => {
@@ -60,6 +64,9 @@ export const CustomSectionPanel: React.FC<CustomSectionPanelProps> = ({
   onUpdateItem,
   onRemoveItem,
   onRemoveSection,
+  onBack,
+  onContinue,
+  isLastSection = false,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
@@ -304,6 +311,14 @@ export const CustomSectionPanel: React.FC<CustomSectionPanelProps> = ({
           </Box>
         )}
       </Box>
+
+      {/* Navigation Footer */}
+      <GuidedSectionNavFooter
+        onBack={onBack}
+        onContinue={onContinue}
+        continueDisabled={false}
+        isLastSection={isLastSection}
+      />
 
       {/* Delete Section Modal */}
       <ConfirmDeleteDialog

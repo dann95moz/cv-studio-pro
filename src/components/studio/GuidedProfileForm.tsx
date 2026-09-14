@@ -16,6 +16,8 @@ import { AddSectionModal } from './profile/AddSectionModal';
 import { CustomSectionPresetType } from '../../types/cv';
 import { useTranslation } from 'react-i18next';
 import { GuidedProfileFormProps } from '../../types';
+import { useSwipeGesture } from '../../hooks/useSwipeGesture';
+import { getLocalizedCategoryTitle } from '../../utils/skillCategoryUtils';
 
 
 export type { GuidedProfileFormProps };
@@ -37,6 +39,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   data,
   activeSection: controlledActiveSection,
   onSectionChange: setControlledActiveSection,
+  onComplete,
 }) => {
   const { t } = useTranslation(['profile', 'common']);
   const [formData, setFormData] = useState<CVData>(() => {
@@ -205,9 +208,9 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleSkillGroupCategoryChange = useCallback((index: number, newCategory: string) => {
     updateData(prev => {
       const groups = prev.skillGroups && prev.skillGroups.length > 0 ? [...prev.skillGroups] : [
-        { category: t('profile:sections.skills.defaultCore', 'Core & Languages'), skills: ['TypeScript', 'JavaScript ES6+', 'HTML5', 'CSS3'] },
-        { category: t('profile:sections.skills.defaultArchitecture', 'Architecture & Frameworks'), skills: ['State Management', 'Clean Architecture', 'REST APIs'] },
-        { category: t('profile:sections.skills.defaultTooling', 'Tooling, Cloud & CI/CD'), skills: ['Git', 'Vite', 'CI/CD'] }
+        { category: t('profile:sections.skills.defaultCore', 'Core Skills'), skills: [] },
+        { category: t('profile:sections.skills.defaultArchitecture', 'Specialties'), skills: [] },
+        { category: t('profile:sections.skills.defaultTooling', 'Tools'), skills: [] }
       ];
       if (!groups[index]) return prev;
       groups[index] = { ...groups[index], category: newCategory };
@@ -218,9 +221,9 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleSkillGroupSkillsChange = useCallback((index: number, skillsStr: string) => {
     updateData(prev => {
       const groups = prev.skillGroups && prev.skillGroups.length > 0 ? [...prev.skillGroups] : [
-        { category: t('profile:sections.skills.defaultCore', 'Core & Languages'), skills: ['TypeScript', 'JavaScript ES6+', 'HTML5', 'CSS3'] },
-        { category: t('profile:sections.skills.defaultArchitecture', 'Architecture & Frameworks'), skills: ['State Management', 'Clean Architecture', 'REST APIs'] },
-        { category: t('profile:sections.skills.defaultTooling', 'Tooling, Cloud & CI/CD'), skills: ['Git', 'Vite', 'CI/CD'] }
+        { category: t('profile:sections.skills.defaultCore', 'Core Skills'), skills: [] },
+        { category: t('profile:sections.skills.defaultArchitecture', 'Specialties'), skills: [] },
+        { category: t('profile:sections.skills.defaultTooling', 'Tools'), skills: [] }
       ];
       if (!groups[index]) return prev;
       groups[index] = {
@@ -236,16 +239,16 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
       const current = prev.skillGroups ? [...prev.skillGroups] : [];
       const newIdx = current.length;
       const defaultCategory = newIdx === 0
-        ? t('profile:sections.skills.defaultCore', 'Core & Languages')
+        ? t('profile:sections.skills.defaultCore', 'Core Skills')
         : newIdx === 1
-        ? t('profile:sections.skills.defaultArchitecture', 'Architecture & Frameworks')
+        ? t('profile:sections.skills.defaultArchitecture', 'Specialties')
         : newIdx === 2
-        ? t('profile:sections.skills.defaultTooling', 'Tooling, Cloud & CI/CD')
-        : `${t('profile:sections.skills.groupName', 'Categoría')} ${newIdx + 1}`;
+        ? t('profile:sections.skills.defaultTooling', 'Tools')
+        : `${t('profile:sections.skills.groupName', 'Category')} ${newIdx + 1}`;
 
       const newGroup: SkillCategory = {
         category: defaultCategory,
-        skills: ['TypeScript', 'JavaScript']
+        skills: []
       };
       return {
         ...prev,
@@ -272,13 +275,11 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
 
   const handleAddExperience = useCallback(() => {
     const newExp: ExperienceItem = {
-      company: 'Nueva Empresa',
-      role: 'Cargo / Especialización',
-      location: 'Ubicación / Remoto',
-      date: 'Ene 2023 – Presente',
-      bullets: [
-        'Lideró la arquitectura de módulos frontend logrando una reducción del 35% en tiempos de carga.'
-      ]
+      company: '',
+      role: '',
+      location: '',
+      date: '',
+      bullets: ['']
     };
     updateData(prev => ({
       ...prev,
@@ -297,7 +298,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
     updateData(prev => {
       const expList = [...(prev.experience || [])];
       const targetExp = expList[expIndex];
-      const newBullets = [...targetExp.bullets, 'Logro clave medido por métricas cuantificables implementando soluciones escalables.'];
+      const newBullets = [...targetExp.bullets, ''];
       expList[expIndex] = { ...targetExp, bullets: newBullets };
       return { ...prev, experience: expList };
     });
@@ -336,7 +337,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleAddEducation = useCallback(() => {
     updateData(prev => ({
       ...prev,
-      education: ['**Ingeniería / Licenciatura** — Universidad / Plataforma, 2024', ...(prev.education || [])]
+      education: ['', ...(prev.education || [])]
     }));
   }, [updateData]);
 
@@ -351,6 +352,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleUpdateLanguage = useCallback((index: number, text: string) => {
     updateData(prev => {
       const langList = [...(prev.languages || [])];
+      if (langList[index] === text) return prev;
       langList[index] = text;
       return { ...prev, languages: langList };
     });
@@ -359,7 +361,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleAddLanguage = useCallback(() => {
     updateData(prev => ({
       ...prev,
-      languages: [...(prev.languages || []), '**Inglés:** Profesional (C1)']
+      languages: [...(prev.languages || []), '']
     }));
   }, [updateData]);
 
@@ -373,13 +375,11 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   // Projects helpers
   const handleAddProject = useCallback(() => {
     const newProj: ExperienceItem = {
-      company: 'Nuevo Proyecto',
-      role: 'Personal Project',
-      location: 'github.com/usuario/proyecto',
-      date: '2024',
-      bullets: [
-        'Desarrolló una plataforma escalable con TypeScript y arquitectura limpia.'
-      ]
+      company: '',
+      role: '',
+      location: '',
+      date: '',
+      bullets: ['']
     };
     updateData(prev => ({
       ...prev,
@@ -390,6 +390,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   const handleProjectFieldChange = useCallback((index: number, field: keyof ExperienceItem, value: string | string[]) => {
     updateData(prev => {
       const list = [...(prev.projects || [])];
+      if (!list[index]) return prev;
       let val = value;
       if (typeof val === 'string' && (field === 'demoUrl' || field === 'repoUrl')) {
         const trimmed = val.trim();
@@ -399,6 +400,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           val = trimmed;
         }
       }
+      if (list[index][field] === val) return prev;
       list[index] = { ...list[index], [field]: val };
       return { ...prev, projects: list };
     });
@@ -497,7 +499,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
     const personalComplete = Boolean(
       formData.name &&
       formData.name.trim().length > 2 &&
-      formData.contacts?.some(c => c.type === 'email' || c.type === 'location')
+      formData.contacts?.some(c => c.type === 'email' || c.type === 'location' || c.type === 'phone')
     );
     const summaryComplete = Boolean(formData.summary && formData.summary.trim().length > 25);
     const skillsCount = (formData.skillGroups || []).reduce((acc, g) => acc + (g.skills?.length || 0), 0);
@@ -520,14 +522,73 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
   // Ensure default skill groups if none exist
   const skillGroups = useMemo(() => {
     if (formData.skillGroups && formData.skillGroups.length > 0) {
-      return formData.skillGroups;
+      return formData.skillGroups.map((g) => ({
+        ...g,
+        category: getLocalizedCategoryTitle(g.category, t),
+      }));
     }
     return [
-      { category: t('profile:sections.skills.defaultCore', 'Core & Languages'), skills: ['TypeScript', 'JavaScript ES6+', 'HTML5', 'CSS3'] },
-      { category: t('profile:sections.skills.defaultArchitecture', 'Architecture & Frameworks'), skills: ['State Management', 'Clean Architecture', 'REST APIs'] },
-      { category: t('profile:sections.skills.defaultTooling', 'Tooling, Cloud & CI/CD'), skills: ['Git', 'Vite', 'CI/CD'] }
+      { category: t('profile:sections.skills.defaultCore', 'Core Skills'), skills: [] },
+      { category: t('profile:sections.skills.defaultArchitecture', 'Specialties'), skills: [] },
+      { category: t('profile:sections.skills.defaultTooling', 'Tools'), skills: [] }
     ];
   }, [formData.skillGroups, t]);
+
+  // Ordered section keys for carousel navigation
+  const sectionKeys = useMemo<ProfileSectionKey[]>(() => {
+    const keys: ProfileSectionKey[] = [
+      'personal',
+      'summary',
+      'skills',
+      'experience',
+      'education',
+      'languages',
+      'projects',
+    ];
+    if (formData.customSections && formData.customSections.length > 0) {
+      formData.customSections.forEach((cs) => {
+        keys.push(`custom_${cs.id}`);
+      });
+    }
+    return keys;
+  }, [formData.customSections]);
+
+  const currentSectionIndex = sectionKeys.indexOf(activeSection);
+  const isLastSection = currentSectionIndex === sectionKeys.length - 1;
+
+  const handleNextInSequence = useCallback(() => {
+    const nextIdx = currentSectionIndex + 1;
+    if (nextIdx < sectionKeys.length) {
+      handleSectionChange(sectionKeys[nextIdx]);
+    } else {
+      onComplete?.();
+    }
+  }, [currentSectionIndex, sectionKeys, handleSectionChange, onComplete]);
+
+  const handlePrevInSequence = useCallback(() => {
+    const prevIdx = currentSectionIndex - 1;
+    if (prevIdx >= 0) {
+      handleSectionChange(sectionKeys[prevIdx]);
+    }
+  }, [currentSectionIndex, sectionKeys, handleSectionChange]);
+
+  const handleSwipeLeft = useCallback(() => {
+    if (currentSectionIndex >= 0 && currentSectionIndex < sectionKeys.length - 1) {
+      handleSectionChange(sectionKeys[currentSectionIndex + 1]);
+    }
+  }, [sectionKeys, currentSectionIndex, handleSectionChange]);
+
+  const handleSwipeRight = useCallback(() => {
+    if (currentSectionIndex > 0) {
+      handleSectionChange(sectionKeys[currentSectionIndex - 1]);
+    }
+  }, [sectionKeys, currentSectionIndex, handleSectionChange]);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+    enabled: activeSection !== 'personal',
+  });
 
   return (
     <Box
@@ -543,7 +604,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
       }}
     >
 
-      {/* 1. Left Navigation Rail (Desktop) / Top Tabs (Mobile) */}
+      {/* 1. Left Navigation Rail (Desktop) / Mobile Top Section Bar (Mobile) */}
       <ProfileNavRail
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
@@ -552,14 +613,17 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
         onAddSectionClick={() => setIsAddSectionModalOpen(true)}
       />
 
-      {/* 2. Right Content Active Workspace Panel */}
+      {/* 2. Right Content Active Workspace Panel with Carousel Swipe Support */}
       <Box
+        {...swipeHandlers}
         sx={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           minWidth: 0,
-          overflowY: { xs: 'visible', md: 'auto' }
+          overflowY: { xs: 'visible', md: 'auto' },
+          touchAction: 'pan-y',
+          transition: 'opacity 0.2s ease',
         }}
       >
 
@@ -571,6 +635,7 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onNameChange={handleNameChange}
             onTitleChange={handleTitleChange}
             onContactChange={handleContactChange}
+            onAdvanceSection={handleNextInSequence}
           />
         )}
 
@@ -578,6 +643,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
           <SummarySection
             summary={formData.summary || ''}
             onSummaryChange={handleSummaryChange}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
           />
         )}
 
@@ -588,6 +655,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onSkillsChange={handleSkillGroupSkillsChange}
             onAddCategory={handleAddSkillGroup}
             onRemoveCategory={handleRemoveSkillGroup}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
           />
         )}
 
@@ -600,6 +669,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onAddBullet={handleAddBullet}
             onUpdateBullet={handleUpdateBullet}
             onRemoveBullet={handleRemoveBullet}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
           />
         )}
 
@@ -609,6 +680,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onUpdateEducation={handleUpdateEducation}
             onAddEducation={handleAddEducation}
             onRemoveEducation={handleRemoveEducation}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
           />
         )}
 
@@ -618,6 +691,8 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onUpdateLanguage={handleUpdateLanguage}
             onAddLanguage={handleAddLanguage}
             onRemoveLanguage={handleRemoveLanguage}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
           />
         )}
 
@@ -627,6 +702,9 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onFieldChange={handleProjectFieldChange}
             onAddProject={handleAddProject}
             onRemoveProject={handleRemoveProject}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
+            isLastSection={isLastSection}
           />
         )}
 
@@ -639,6 +717,9 @@ export const GuidedProfileForm: React.FC<GuidedProfileFormProps> = ({
             onUpdateItem={(index, newText) => handleUpdateCustomSectionItem(activeCustomSection.id, index, newText)}
             onRemoveItem={(index) => handleRemoveCustomSectionItem(activeCustomSection.id, index)}
             onRemoveSection={() => handleRemoveCustomSection(activeCustomSection.id)}
+            onBack={handlePrevInSequence}
+            onContinue={handleNextInSequence}
+            isLastSection={isLastSection}
           />
         )}
       </Box>

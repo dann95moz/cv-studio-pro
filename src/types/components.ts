@@ -173,6 +173,7 @@ export interface GuidedProfileFormProps {
   onFlushRef?: React.MutableRefObject<(() => void) | null>;
   activeSection?: string;
   onSectionChange?: (section: string) => void;
+  onComplete?: () => void;
 }
 
 
@@ -186,6 +187,7 @@ export interface PersonalInfoSectionProps {
   onTitleChange: (val: string) => void;
   onContactChange: (type: ContactType, label: string, url?: string) => void;
   onChange?: (info: { name: string; title: string; contacts: ContactItem[] }) => void;
+  onAdvanceSection?: () => void;
 }
 
 export interface SummarySectionProps {
@@ -194,6 +196,8 @@ export interface SummarySectionProps {
   summary: string;
   onSummaryChange: (val: string) => void;
   onChange?: (summary: string) => void;
+  onBack?: () => void;
+  onContinue?: () => void;
 }
 
 export interface ExperienceSectionProps {
@@ -207,6 +211,8 @@ export interface ExperienceSectionProps {
   onUpdateBullet: (expIndex: number, bulletIndex: number, text: string) => void;
   onRemoveBullet: (expIndex: number, bulletIndex: number) => void;
   onChange?: (items: ExperienceItem[]) => void;
+  onBack?: () => void;
+  onContinue?: () => void;
 }
 
 export interface EducationSectionProps {
@@ -217,6 +223,8 @@ export interface EducationSectionProps {
   onAddEducation: () => void;
   onRemoveEducation: (index: number) => void;
   onChange?: (items: string[]) => void;
+  onBack?: () => void;
+  onContinue?: () => void;
 }
 
 export interface LanguagesSectionProps {
@@ -227,6 +235,8 @@ export interface LanguagesSectionProps {
   onAddLanguage: () => void;
   onRemoveLanguage: (index: number) => void;
   onChange?: (items: string[]) => void;
+  onBack?: () => void;
+  onContinue?: () => void;
 }
 
 export interface ProjectsSectionProps {
@@ -237,6 +247,9 @@ export interface ProjectsSectionProps {
   onAddProject: () => void;
   onRemoveProject: (index: number) => void;
   onChange?: (items: ExperienceItem[]) => void;
+  onBack?: () => void;
+  onContinue?: () => void;
+  isLastSection?: boolean;
 }
 
 // ---------------------------------------------------------------------------

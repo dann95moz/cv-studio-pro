@@ -32,18 +32,13 @@ import { hapticsService } from '../core/haptics';
 import { platformService } from '../core/platform';
 import './App.css';
 
-// Dynamically loaded tab views and wizard steps
+import { StepMasterData } from '../components/studio/StepMasterData';
+import { StepTargetJob } from '../components/studio/StepTargetJob';
+import { StepPreview } from '../components/studio/StepPreview';
+
+// Dynamically loaded tab views
 const WelcomeLandingView = lazy(() =>
   import('../components/landing/WelcomeLandingView').then((m) => ({ default: m.WelcomeLandingView }))
-);
-const StepMasterData = lazy(() =>
-  import('../components/studio/StepMasterData').then((m) => ({ default: m.StepMasterData }))
-);
-const StepTargetJob = lazy(() =>
-  import('../components/studio/StepTargetJob').then((m) => ({ default: m.StepTargetJob }))
-);
-const StepPreview = lazy(() =>
-  import('../components/studio/StepPreview').then((m) => ({ default: m.StepPreview }))
 );
 const QualityAuditView = lazy(() =>
   import('../components/studio/QualityAuditView').then((m) => ({ default: m.QualityAuditView }))
@@ -482,48 +477,42 @@ export const App: React.FC = () => {
         {activeTab === 'wizard' && (
           <>
             {wizardStep === 'profile' && (
-              <Suspense fallback={<StudioSkeleton variant="masterData" />}>
-                <StepMasterData
-                  content={masterData}
-                  onChange={setMasterData}
-                  onLoadSample={() => setMasterData(DEMO_MASTER_DATA)}
-                  onResetTemplate={() => setMasterData(BLANK_MASTER_DATA)}
-                  onNextStep={() => setWizardStep('target')}
-                  onOpenSync={handleScanOrSync}
-                />
-              </Suspense>
+              <StepMasterData
+                content={masterData}
+                onChange={setMasterData}
+                onLoadSample={() => setMasterData(DEMO_MASTER_DATA)}
+                onResetTemplate={() => setMasterData(BLANK_MASTER_DATA)}
+                onNextStep={() => setWizardStep('target')}
+                onOpenSync={handleScanOrSync}
+              />
             )}
 
             {wizardStep === 'target' && (
-              <Suspense fallback={<StudioSkeleton variant="targetJob" />}>
-                <StepTargetJob
-                  content={targetJob}
-                  onChange={setTargetJob}
-                  companyName={companyName}
-                  onCompanyChange={setCompanyName}
-                  targetRole={targetRole}
-                  onRoleChange={setTargetRole}
-                  providerSettings={providerSettings}
-                  onProviderSettingsChange={setProviderSettings}
-                  onLoadSample={() => {
-                    setTargetJob(DEMO_TARGET_JOB);
-                    setCompanyName('Stripe');
-                    setTargetRole('Senior Frontend Engineer');
-                  }}
-                  onPrevStep={() => setWizardStep('profile')}
-                  onNextStep={() => setWizardStep('preview')}
-                  onGenerate={handleGenerate}
-                  isGenerating={isGenerating}
-                  generationStep={generationStep}
-                  hasGeneratedCv={hasGeneratedCv}
-                />
-              </Suspense>
+              <StepTargetJob
+                content={targetJob}
+                onChange={setTargetJob}
+                companyName={companyName}
+                onCompanyChange={setCompanyName}
+                targetRole={targetRole}
+                onRoleChange={setTargetRole}
+                providerSettings={providerSettings}
+                onProviderSettingsChange={setProviderSettings}
+                onLoadSample={() => {
+                  setTargetJob(DEMO_TARGET_JOB);
+                  setCompanyName('Stripe');
+                  setTargetRole('Senior Frontend Engineer');
+                }}
+                onPrevStep={() => setWizardStep('profile')}
+                onNextStep={() => setWizardStep('preview')}
+                onGenerate={handleGenerate}
+                isGenerating={isGenerating}
+                generationStep={generationStep}
+                hasGeneratedCv={hasGeneratedCv}
+              />
             )}
 
             {(wizardStep === 'preview' || wizardStep === 'tailor') && (
-              <Suspense fallback={<StudioSkeleton variant="preview" />}>
-                <StepPreview />
-              </Suspense>
+              <StepPreview />
             )}
           </>
         )}

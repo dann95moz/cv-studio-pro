@@ -6,6 +6,7 @@ import {
   Stack,
   Typography,
   useTheme,
+  useMediaQuery,
   alpha
 } from '@mui/material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
@@ -36,6 +37,7 @@ export const StudioSkeleton: React.FC<StudioSkeletonProps> = ({
   const { t } = useTranslation('common');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const getStatusText = (): string => {
     if (customMessage) return customMessage;
@@ -304,6 +306,61 @@ export const StudioSkeleton: React.FC<StudioSkeletonProps> = ({
             <Skeleton key={i} variant="rounded" width="100%" height={70} sx={{ borderRadius: 1.5 }} />
           ))}
         </Stack>
+      </Box>
+    );
+  }
+
+  // Mobile-adapted Step Flow Skeleton (Guided Profile Form & Personal Info)
+  if (isMobile && (variant === 'guidedForm' || variant === 'masterData')) {
+    return (
+      <Box sx={{ width: '100%', maxWidth: 580, mx: 'auto', p: { xs: 1.5, sm: 2 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          {statusPill}
+        </Box>
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            borderRadius: 2,
+            border: `1px solid ${theme.palette.divider}`,
+            bgcolor: 'background.paper',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2.5,
+            minHeight: 420,
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Micro-stepper dots */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1.5, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.6)}` }}>
+            <Stack direction="row" spacing={0.75}>
+              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <Skeleton key={i} variant="circular" width={8} height={8} />
+              ))}
+            </Stack>
+            <Skeleton variant="text" width={45} height={18} />
+          </Box>
+
+          {/* Hero Question Block */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, my: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.75 }}>
+              <Skeleton variant="rounded" width={44} height={44} sx={{ borderRadius: 2, flexShrink: 0 }} />
+              <Box sx={{ flex: 1 }}>
+                <Skeleton variant="text" width="80%" height={30} />
+                <Skeleton variant="text" width="55%" height={18} sx={{ mt: 0.5 }} />
+              </Box>
+            </Box>
+
+            {/* Single Hero Input Box */}
+            <Skeleton variant="rounded" width="100%" height={54} sx={{ borderRadius: 2, mt: 1 }} />
+          </Box>
+
+          {/* Bottom Actions */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: `1px solid ${alpha(theme.palette.divider, 0.6)}` }}>
+            <Skeleton variant="text" width={60} height={24} />
+            <Skeleton variant="rounded" width={130} height={42} sx={{ borderRadius: 9999 }} />
+          </Box>
+        </Paper>
       </Box>
     );
   }

@@ -13,6 +13,7 @@ export interface ProfileCompletenessResult {
   missingSections: MissingSectionItem[];
   completedCount: number;
   totalCount: number;
+  hasMinimumProfile: boolean;
 }
 
 export const useMasterProfileCompleteness = (masterData: string): ProfileCompletenessResult => {
@@ -31,6 +32,7 @@ export const useMasterProfileCompleteness = (masterData: string): ProfileComplet
         ],
         completedCount: 0,
         totalCount: 6,
+        hasMinimumProfile: false,
       };
     }
 
@@ -44,7 +46,7 @@ export const useMasterProfileCompleteness = (masterData: string): ProfileComplet
       (candidateName && candidateName.length >= 3)
     );
     const hasEmailOrContact = Boolean(
-      (parsed.contacts && parsed.contacts.length > 0 && parsed.contacts.some(c => c.type === 'email' || c.type === 'linkedin' || c.type === 'phone' || (c.label && c.label.includes('@')))) ||
+      (parsed.contacts && parsed.contacts.length > 0 && parsed.contacts.some(c => c.type === 'email' || c.type === 'linkedin' || c.type === 'phone' || c.type === 'location' || (c.label && c.label.includes('@')))) ||
       /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(masterData)
     );
     const personalPassed = hasName && hasEmailOrContact;
@@ -163,12 +165,18 @@ export const useMasterProfileCompleteness = (masterData: string): ProfileComplet
       level = 'good';
     }
 
+    // Required core sections for a complete profile (Experience and Projects are optional)
+    const hasMinimumProfile = Boolean(
+      personalPassed && hasSummary && hasSkills && hasEducation && hasLanguages
+    );
+
     return {
       score,
       level,
       missingSections,
       completedCount,
       totalCount: checks.length,
+      hasMinimumProfile,
     };
   }, [masterData]);
 };

@@ -38,20 +38,15 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import { useTranslation } from 'react-i18next';
 import { StepMasterDataProps } from '../../types';
-import { StudioSkeleton } from './StudioSkeleton';
 import { ConfirmDeleteDialog } from './common/ConfirmDeleteDialog';
 import { useMasterDataWorkflow } from '../../hooks/useMasterDataWorkflow';
 import { useMasterProfileCompleteness } from '../../hooks/useMasterProfileCompleteness';
-import { useKeyboardStatus } from '../../hooks/useKeyboardStatus';
 import { ProfileCompletenessBar } from './profile/ProfileCompletenessBar';
 import { MasterDataChoiceView } from './profile/MasterDataChoiceView';
 import { platformService } from '../../core/platform';
 import { backButtonRegistry } from '../../core/backButtonRegistry';
 import { hapticsService } from '../../core/haptics';
-
-const GuidedProfileForm = React.lazy(() =>
-  import('./GuidedProfileForm').then((m) => ({ default: m.GuidedProfileForm }))
-);
+import { GuidedProfileForm } from './GuidedProfileForm';
 
 export type { StepMasterDataProps };
 
@@ -65,7 +60,6 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
   const { t } = useTranslation(['profile', 'common']);
   const theme = useTheme();
   const completeness = useMasterProfileCompleteness(content);
-  const { isKeyboardVisible } = useKeyboardStatus();
 
   const wordCount = React.useMemo(() => {
     if (!content || !content.trim()) return 0;
@@ -215,7 +209,7 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             maxWidth: 1200,
             display: 'flex',
             flexDirection: 'column',
-            gap: 2.5,
+            gap: { xs: 1.5, md: 2.5 },
           }}
         >
           {/* Hidden File Input for uploads */}
@@ -227,11 +221,16 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             onChange={handleFileUpload}
           />
 
-          {/* Dedicated Header for Active Mode */}
+          {/* Dedicated Header for Active Mode (Hidden on mobile & native app in guided mode) */}
           <Paper
             sx={{
               p: { xs: 2, md: 2.5 },
-              display: 'flex',
+              display:
+                editMode === 'guided'
+                  ? platformService.isNative()
+                    ? 'none'
+                    : { xs: 'none', md: 'flex' }
+                  : 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
               alignItems: { xs: 'flex-start', sm: 'center' },
               justifyContent: 'space-between',
@@ -336,7 +335,6 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             <>
               <ProfileCompletenessBar
                 completeness={completeness}
-                onSelectMissingSection={(secId) => setActiveGuidedSection(secId)}
               />
               <Paper
                 sx={{
@@ -350,15 +348,14 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
                   borderRadius: 2,
                 }}
               >
-                <React.Suspense fallback={<StudioSkeleton variant="guidedForm" />}>
-                  <GuidedProfileForm
-                    markdownContent={content}
-                    onChange={onChange}
-                    onFlushRef={flushGuidedRef}
-                    activeSection={activeGuidedSection}
-                    onSectionChange={setActiveGuidedSection}
-                  />
-                </React.Suspense>
+                <GuidedProfileForm
+                  markdownContent={content}
+                  onChange={onChange}
+                  onFlushRef={flushGuidedRef}
+                  activeSection={activeGuidedSection}
+                  onSectionChange={setActiveGuidedSection}
+                  onComplete={handleContinue}
+                />
               </Paper>
             </>
           )}
@@ -446,86 +443,69 @@ export const StepMasterData: React.FC<StepMasterDataProps> = ({
             </Paper>
           )}
 
-        {/* Navigation Footer */}
-        <Paper
-          elevation={isKeyboardVisible ? 12 : 2}
-          sx={{
-            p: { xs: 2, sm: 2 },
-            px: { xs: 2, sm: 2.5 },
-            pb: { xs: 2.5, sm: 2 },
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'stretch', sm: 'center' },
-            justifyContent: 'space-between',
-            border: `1px solid ${theme.palette.divider}`,
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            gap: { xs: 1.5, sm: 2 },
-            boxShadow: 2,
-            // Keyboard anchoring: Dock cleanly at bottom of viewport when virtual keyboard is active on mobile
-            ...(isKeyboardVisible && {
-              position: { xs: 'fixed', sm: 'static' },
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: theme.zIndex.appBar,
-              borderRadius: { xs: 0, sm: 2 },
-              borderBottom: { xs: 'none', sm: `1px solid ${theme.palette.divider}` },
-              p: { xs: 1.25, sm: 2 },
-              px: { xs: 2, sm: 2.5 },
-              flexDirection: { xs: 'row', sm: 'row' },
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }),
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
-            <StepFooterStatus
-              status={hasData ? 'ready' : 'warning'}
-              label={
-                hasData
-                  ? t('profile:status.ready', 'Career profile ready for tailoring')
-                  : t('profile:status.tipLoadSample', "Tip: Click 'Import from PDF' or 'Load Sample Profile' to start")
-              }
-            />
-
-            {/* Contextual Backup Export only when there is actual profile data */}
-            {hasData && (
-              <Tooltip title={t('profile:actions.exportBackupTip', 'Download your career profile as Markdown (.md)')}>
-                <Button
-                  size="small"
-                  variant="text"
-                  color="inherit"
-                  startIcon={<FileDownloadRoundedIcon sx={{ fontSize: 16 }} />}
-                  onClick={handleDownload}
-                  sx={{
-                    fontSize: '0.75rem',
-                    color: 'text.secondary',
-                    textTransform: 'none',
-                    '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.06) },
-                  }}
-                >
-                  {t('profile:actions.exportBackup', 'Export Backup (.md)')}
-                </Button>
-              </Tooltip>
-            )}
-          </Box>
-
-          <Button
-            variant="contained"
-            color="primary"
-            endIcon={<ArrowForwardRoundedIcon />}
-            onClick={handleContinue}
+        {/* Navigation Footer (Rendered in Markdown / FreeText modes only when minimum profile requirements are met; Guided mode has its own card-integrated navigation) */}
+        {editMode !== 'guided' && completeness.hasMinimumProfile && (
+          <Paper
+            elevation={2}
             sx={{
-              fontWeight: 700,
-              px: 3,
-              py: 1.2,
-              width: { xs: '100%', sm: 'auto' },
+              p: { xs: 2, sm: 2 },
+              px: { xs: 2, sm: 2.5 },
+              pb: { xs: 2.5, sm: 2 },
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'stretch', sm: 'center' },
+              justifyContent: 'space-between',
+              border: `1px solid ${theme.palette.divider}`,
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              gap: { xs: 1.5, sm: 2 },
+              boxShadow: 2,
             }}
           >
-            {t('profile:actions.continueToTarget', 'Continue to Target Vacancy')}
-          </Button>
-        </Paper>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+              <StepFooterStatus
+                status="ready"
+                label={t('profile:status.ready', 'Career profile ready for tailoring')}
+              />
+
+              {/* Contextual Backup Export only when there is actual profile data */}
+              {hasData && (
+                <Tooltip title={t('profile:actions.exportBackupTip', 'Download your career profile as Markdown (.md)')}>
+                  <Button
+                    size="small"
+                    variant="text"
+                    color="inherit"
+                    startIcon={<FileDownloadRoundedIcon sx={{ fontSize: 16 }} />}
+                    onClick={handleDownload}
+                    sx={{
+                      fontSize: '0.75rem',
+                      color: 'text.secondary',
+                      textTransform: 'none',
+                      '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.06) },
+                    }}
+                  >
+                    {t('profile:actions.exportBackup', 'Export Backup (.md)')}
+                  </Button>
+                </Tooltip>
+              )}
+            </Box>
+
+            <Button
+              variant="contained"
+              color="primary"
+              endIcon={<ArrowForwardRoundedIcon />}
+              onClick={handleContinue}
+              sx={{
+                fontWeight: 700,
+                px: 3,
+                py: 1.2,
+                width: { xs: '100%', sm: 'auto' },
+              }}
+            >
+              {t('profile:actions.continueToTarget', 'Continue to Target Vacancy')}
+            </Button>
+          </Paper>
+        )}
 
         {/* Dedicated End-of-Scroll Safe Spacer */}
         <Box sx={{ height: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 40px)', sm: 20 }, flexShrink: 0 }} />
