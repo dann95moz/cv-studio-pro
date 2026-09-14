@@ -142,6 +142,15 @@
       "linkedin": "Optional. Recommended so evaluators can review your network and recommendations.",
       "portfolio": "Optional. Great for demonstrating live demos, GitHub repositories, or design work."
     },
+    "placeholders": {
+      "fullName": "e.g. Alex Morgan",
+      "jobTitle": "e.g. Senior Software Engineer | Full Stack & Cloud",
+      "email": "e.g. alex.morgan@example.com",
+      "location": "e.g. London, UK or Remote",
+      "phone": "e.g. +1 555 123 4567",
+      "linkedin": "linkedin.com/in/username",
+      "portfolio": "myportfolio.dev"
+    },
     "stepCount": "{{current}} of {{total}}",
     "prev": "Previous",
     "next": "Next",
@@ -192,7 +201,14 @@
       "bullets": "Achievements & Responsibilities (XYZ Formula)",
       "logros": "Key Achievements",
       "addBullet": "Add Bullet Point",
-      "removeRole": "Remove Role"
+      "removeRole": "Remove Role",
+      "placeholders": {
+        "company": "e.g. Acme Corp, Google, Globant",
+        "role": "e.g. Senior Frontend Engineer",
+        "dates": "e.g. Oct 2021 – Present",
+        "location": "e.g. London, UK / Remote",
+        "bullet": "Key achievement measured by impact or metrics (e.g. Increased conversion by 28% through...)"
+      }
     },
     "skills": {
       "title": "Skills & Competencies",
@@ -259,7 +275,12 @@
       "demoUrl": "Live Demo / Web URL",
       "repoUrl": "Repository URL",
       "bullets": "Highlights & Metrics",
-      "remove": "Remove Project"
+      "remove": "Remove Project",
+      "projectNamePlaceholder": "e.g. CV Studio Pro",
+      "rolePlaceholder": "e.g. Personal Project / Open Source",
+      "demoUrlPlaceholder": "e.g. https://my-app.vercel.app",
+      "repoUrlPlaceholder": "e.g. https://github.com/user/project",
+      "bulletsPlaceholder": "Brief project overview, technical stack, and measurable impact..."
     }
   },
   "stepper": {

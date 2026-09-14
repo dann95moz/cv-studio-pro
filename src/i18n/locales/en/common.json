@@ -120,6 +120,7 @@
     "regenerate": "Regenerate",
     "importDescription": "Paste the sync link generated on your other device or enter the pairing code.",
     "inputLabel": "Sync link or Pairing Code (e.g. CV-78K2)",
+    "inputPlaceholder": "https://...#sync?id=... or CV-...",
     "securityNotice": "Before overwriting any data, a date and changes comparison will be displayed to ensure you don't accidentally overwrite your latest work.",
     "connecting": "Downloading and decrypting...",
     "pullAction": "Connect & Download",

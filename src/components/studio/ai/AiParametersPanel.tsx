@@ -259,7 +259,7 @@ export const AiParametersPanel: React.FC<AiParametersPanelProps> = ({
               fullWidth
               size="small"
               label={t('settings:providers.customModelTag', 'Local Model Tag (Ollama / LM Studio)')}
-              placeholder="e.g. qwen2.5:14b, deepseek-r1:14b"
+              placeholder={t('settings:providers.customModelTagPlaceholder', 'e.g. qwen2.5:14b, deepseek-r1:14b')}
               helperText={t('settings:providers.customModelTagHelp', "Specify the exact model tag (e.g., qwen2.5:14b, deepseek-r1:14b). Run 'ollama list' to view installed models.")}
               value={settings.model === 'custom-local-model' ? '' : settings.model}
               onChange={(e) => onSettingsChange({ ...settings, model: e.target.value.trim() || 'custom-local-model' })}

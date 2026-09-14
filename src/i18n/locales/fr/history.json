@@ -66,6 +66,7 @@
     "editTitle": "Modifier l'étape",
     "newTitle": "Nouvelle étape Kanban",
     "nameField": "Nom de l'étape",
+    "namePlaceholder": "ex. Appel Recruteur, Offre, Entretien RH",
     "colorTheme": "Couleur d'accentuation",
     "preview": "Aperçu en direct",
     "defaultName": "Étape d'exemple"
@@ -182,8 +183,11 @@
     "jobUrlField": "Lien de l'offre ou URL de discussion (Optionnel)",
     "initialColumn": "Étape Initiale",
     "salary": "Salaire / Budget (Optionnel)",
+    "salaryPlaceholder": "120k € - 140k €",
     "location": "Localisation / Politique Télétravail",
+    "locationPlaceholder": "ex. Paris, France / Télétravail",
     "notes": "Notes personnelles & contact recruteur",
+    "notesPlaceholder": "ex. Recommandé par Alex ; le recruteur a mis l'accent sur l'ingénierie de performance...",
     "hideDetails": "Masquer les détails supplémentaires",
     "addDetails": "+ Ajouter lieu & notes",
     "confirm": "Ajouter au Tableau Kanban"
@@ -244,6 +248,7 @@
     "duration": "Durée",
     "meetingLink": "Lien de réunion (Google Meet, Zoom, Teams)",
     "interviewer": "Recruteur / Contact (Facultatif)",
+    "interviewerPlaceholder": "ex. Sarah Jenkins (Talent Lead)",
     "notes": "Notes supplémentaires",
     "notesPlaceholder": "Points clés, questions préparées...",
     "downloadIcs": "Télécharger l'événement (.ics)"

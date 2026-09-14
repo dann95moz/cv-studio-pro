@@ -354,7 +354,10 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               onBlur={() => onChange(localContent)}
               masterData={masterData}
               highlightsEnabled={true}
-              placeholder="# Job Title / Target Role&#10;Company Name • Location / Remote&#10;&#10;## About the Role&#10;Paste the full vacancy responsibilities, requirements, and tech stack here..."
+              placeholder={t(
+                'target:editor.placeholder',
+                '# Job Title / Target Role\nCompany Name • Location / Remote\n\n## About the Role\nPaste the full vacancy responsibilities, requirements, and tech stack here...'
+              )}
             />
           </Box>
         </Paper>

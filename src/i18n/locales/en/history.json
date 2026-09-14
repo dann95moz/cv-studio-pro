@@ -66,6 +66,7 @@
     "editTitle": "Edit Stage",
     "newTitle": "New Kanban Stage",
     "nameField": "Stage Name",
+    "namePlaceholder": "e.g. Recruiter Call, Offer, Screening",
     "colorTheme": "Accent Color",
     "preview": "Live Preview",
     "defaultName": "Sample Stage"
@@ -182,8 +183,11 @@
     "jobUrlField": "Job Link or Chat URL (Optional)",
     "initialColumn": "Initial Stage",
     "salary": "Salary / Budget (Optional)",
+    "salaryPlaceholder": "$120k - $140k",
     "location": "Location / Remote Policy",
+    "locationPlaceholder": "e.g. San Francisco, CA / Remote",
     "notes": "Personal Notes & Interview Contact",
+    "notesPlaceholder": "e.g. Referred by Alex; Interviewer highlighted performance engineering...",
     "hideDetails": "Hide additional details",
     "addDetails": "+ Add location & notes",
     "confirm": "Track in Kanban Board"
@@ -244,6 +248,7 @@
     "duration": "Duration",
     "meetingLink": "Meeting Link (Google Meet, Zoom, Teams)",
     "interviewer": "Interviewer / Contact (Optional)",
+    "interviewerPlaceholder": "e.g. Sarah Jenkins (Talent Lead)",
     "notes": "Additional Notes",
     "notesPlaceholder": "Key topics, questions to ask, requirements...",
     "downloadIcs": "Download Event (.ics)"

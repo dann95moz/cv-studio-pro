@@ -85,7 +85,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
           size="small"
           value={proj.company || ''}
           onChange={(e) => onFieldChange(projIdx, 'company', e.target.value)}
-          placeholder="e.g. CV Studio Pro"
+          placeholder={t('profile:sections.projects.projectNamePlaceholder', 'e.g. CV Studio Pro')}
           fullWidth
         />
         <Autocomplete
@@ -130,7 +130,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
               {...params}
               label={t('profile:sections.projects.role', 'Categoría / Rol')}
               size="small"
-              placeholder="e.g. Personal Project"
+              placeholder={t('profile:sections.projects.rolePlaceholder', 'e.g. Personal Project / Open Source')}
             />
           )}
         />
@@ -142,7 +142,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
           size="small"
           value={proj.demoUrl || ''}
           onChange={(e) => onFieldChange(projIdx, 'demoUrl', e.target.value)}
-          placeholder="e.g. https://my-app.vercel.app"
+          placeholder={t('profile:sections.projects.demoUrlPlaceholder', 'e.g. https://my-app.vercel.app')}
           fullWidth
         />
         <TextField
@@ -150,7 +150,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
           size="small"
           value={proj.repoUrl || (proj.location && (proj.location.includes('github') || proj.location.startsWith('http')) ? proj.location : '')}
           onChange={(e) => onFieldChange(projIdx, 'repoUrl', e.target.value)}
-          placeholder="e.g. https://github.com/user/project"
+          placeholder={t('profile:sections.projects.repoUrlPlaceholder', 'e.g. https://github.com/user/project')}
           fullWidth
         />
         <TextField
@@ -158,7 +158,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
           size="small"
           value={proj.date || ''}
           onChange={(e) => onFieldChange(projIdx, 'date', e.target.value)}
-          placeholder={t('profile:sections.projects.datePlaceholder', 'ej. 2024 (opcional)')}
+          placeholder={t('profile:sections.projects.datePlaceholder', 'e.g. 2024 (optional)')}
           fullWidth
         />
       </Box>
@@ -174,7 +174,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({
           const lines = e.target.value.split('\n').filter((l) => l.trim().length > 0);
           onFieldChange(projIdx, 'bullets', lines);
         }}
-        placeholder="Breve descripción del proyecto, impacto técnico y métricas conseguidas..."
+        placeholder={t('profile:sections.projects.bulletsPlaceholder', 'Brief project overview, technical stack, and measurable impact...')}
         fullWidth
       />
     </Paper>

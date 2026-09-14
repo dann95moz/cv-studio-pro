@@ -93,7 +93,11 @@ export const PersonalInfoSingleField: React.FC<PersonalInfoSingleFieldProps> = R
             }}
             error={Boolean(validationError)}
             helperText={validationError}
-            placeholder={activeConfig.placeholder}
+            placeholder={
+              activeConfig.placeholderKey
+                ? t(activeConfig.placeholderKey, activeConfig.defaultPlaceholder || activeConfig.placeholder)
+                : activeConfig.placeholder
+            }
             slotProps={{
               input: {
                 sx: {

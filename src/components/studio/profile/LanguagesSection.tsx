@@ -251,7 +251,7 @@ export const LanguagesSection: React.FC<LanguagesSectionProps> = React.memo(({
                       size="small"
                       fullWidth
                       label={t('profile:sections.languages.language', 'Idioma')}
-                      placeholder={t('profile:sections.languages.languagePlaceholder', 'ej. Español, Inglés...')}
+                      placeholder={t('profile:sections.languages.languagePlaceholder', 'e.g. English, Spanish...')}
                       value={parsed.name}
                       onChange={(e) => handleFieldChange(idx, 'name', e.target.value)}
                       slotProps={{

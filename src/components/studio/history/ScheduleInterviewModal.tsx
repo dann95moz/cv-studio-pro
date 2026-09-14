@@ -183,7 +183,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
 
         <TextField
           label={t('history:calendar.interviewer', 'Entrevistador / Reclutador (Opcional)')}
-          placeholder="Ej. Laura Gómez (Talent Lead)"
+          placeholder={t('history:calendar.interviewerPlaceholder', 'e.g. Sarah Jenkins (Talent Lead)')}
           value={interviewerName}
           onChange={(e) => setInterviewerName(e.target.value)}
           size="small"
@@ -192,7 +192,7 @@ export const ScheduleInterviewModal: React.FC<ScheduleInterviewModalProps> = ({
 
         <TextField
           label={t('history:calendar.notes', 'Notas adicionales')}
-          placeholder={t('history:calendar.notesPlaceholder', 'Temas clave a repasar, preguntas preparadas...')}
+          placeholder={t('history:calendar.notesPlaceholder', 'Key topics, questions to ask, requirements...')}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           multiline

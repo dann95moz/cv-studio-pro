@@ -66,6 +66,7 @@
     "editTitle": "Phase bearbeiten",
     "newTitle": "Neue Kanban-Phase",
     "nameField": "Phasenname",
+    "namePlaceholder": "z.B. Erstgespräch, Angebot, Screening",
     "colorTheme": "Akzentfarbe",
     "preview": "Live-Vorschau",
     "defaultName": "Beispiel-Phase"
@@ -182,8 +183,11 @@
     "jobUrlField": "Stellenanzeigen-Link oder Chat-URL (Optional)",
     "initialColumn": "Startphase",
     "salary": "Gehalt / Budget (Optional)",
+    "salaryPlaceholder": "120k € - 140k €",
     "location": "Standort / Remote-Regelung",
+    "locationPlaceholder": "z.B. Berlin, Deutschland / Remote",
     "notes": "Persönliche Notizen & Ansprechpartner",
+    "notesPlaceholder": "z.B. Empfohlen von Alex; Fokus lag auf Performance Engineering...",
     "hideDetails": "Zusätzliche Details ausblenden",
     "addDetails": "+ Standort & Notizen hinzufügen",
     "confirm": "Zum Kanban-Board hinzufügen"
@@ -244,6 +248,7 @@
     "duration": "Dauer",
     "meetingLink": "Meeting-Link (Google Meet, Zoom, Teams)",
     "interviewer": "Interviewer / Ansprechpartner (Optional)",
+    "interviewerPlaceholder": "z.B. Sarah Jenkins (Talent Lead)",
     "notes": "Zusätzliche Notizen",
     "notesPlaceholder": "Schwerpunkte, vorbereitete Fragen, Notizen...",
     "downloadIcs": "Termin herunterladen (.ics)"

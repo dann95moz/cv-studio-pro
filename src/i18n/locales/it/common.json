@@ -120,6 +120,7 @@
     "regenerate": "Rigenera",
     "importDescription": "Incolla il link di sincronizzazione generato sull'altro dispositivo o inserisci il codice di accoppiamento.",
     "inputLabel": "Link di sincronizzazione o Codice (es. CV-78K2)",
+    "inputPlaceholder": "https://...#sync?id=... oppure CV-...",
     "securityNotice": "Prima di sovrascrivere i dati, verrà mostrato un confronto per evitare di sovrascrivere modifiche più recenti.",
     "connecting": "Scaricamento e decrittografia...",
     "pullAction": "Connetti & Scarica",

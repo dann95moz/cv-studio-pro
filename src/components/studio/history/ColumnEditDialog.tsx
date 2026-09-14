@@ -90,7 +90,7 @@ export const ColumnEditDialog: React.FC<ColumnEditDialogProps> = ({
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
         <TextField
           label={t('history:column.nameField', 'Stage Name')}
-          placeholder="e.g. Recruiter Call, Offer, Screening"
+          placeholder={t('history:column.namePlaceholder', 'e.g. Recruiter Call, Offer, Screening')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           fullWidth

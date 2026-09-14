@@ -469,7 +469,7 @@ export const TrackApplicationDialog: React.FC<TrackApplicationDialogProps> = ({
 
           <TextField
             label={t('history:trackModal.salary', 'Salary / Budget (Optional)')}
-            placeholder="$120k - $140k"
+            placeholder={t('history:trackModal.salaryPlaceholder', '$120k - $140k')}
             value={salary}
             onChange={(e) => setSalary(e.target.value)}
             fullWidth
@@ -494,7 +494,7 @@ export const TrackApplicationDialog: React.FC<TrackApplicationDialogProps> = ({
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 0.5 }}>
             <TextField
               label={t('history:trackModal.location', 'Location / Remote Policy')}
-              placeholder="San Francisco, CA / Remote"
+              placeholder={t('history:trackModal.locationPlaceholder', 'e.g. San Francisco, CA / Remote')}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               fullWidth
@@ -502,7 +502,7 @@ export const TrackApplicationDialog: React.FC<TrackApplicationDialogProps> = ({
             />
             <TextField
               label={t('history:trackModal.notes', 'Personal Notes & Interview Contact')}
-              placeholder="Referred by Alex; Interviewer highlighted performance engineering..."
+              placeholder={t('history:trackModal.notesPlaceholder', 'e.g. Referred by Alex; Interviewer highlighted performance engineering...')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               fullWidth

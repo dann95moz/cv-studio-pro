@@ -142,6 +142,15 @@
       "linkedin": "Optionnel. Recommandé pour valoriser votre réseau professionnel.",
       "portfolio": "Optionnel. Idéal pour mettre en avant vos réalisations concrètes."
     },
+    "placeholders": {
+      "fullName": "ex. Alexandre Dupont",
+      "jobTitle": "ex. Ingénieur Logiciel Senior | Full Stack & Cloud",
+      "email": "ex. alexandre.dupont@exemple.fr",
+      "location": "ex. Paris, France ou Télétravail",
+      "phone": "ex. +33 6 12 34 56 78",
+      "linkedin": "linkedin.com/in/identifiant",
+      "portfolio": "monportfolio.dev"
+    },
     "stepCount": "{{current}} sur {{total}}",
     "prev": "Précédent",
     "next": "Suivant",
@@ -192,7 +201,14 @@
       "bullets": "Réalisations & Responsabilités (Formule XYZ)",
       "logros": "Réalisations principales",
       "addBullet": "Ajouter un Point de Réalisation",
-      "removeRole": "Supprimer l'Expérience"
+      "removeRole": "Supprimer l'Expérience",
+      "placeholders": {
+        "company": "ex. Acme Corp, Google, Globant",
+        "role": "ex. Ingénieur Frontend Senior",
+        "dates": "ex. Oct 2021 – Présent",
+        "location": "ex. Paris, France / Télétravail",
+        "bullet": "Action clé mesurée par l'impact ou les indicateurs (ex. Augmentation de la conversion de 28% grâce à...)"
+      }
     },
     "skills": {
       "title": "Compétences & Savoir-faire",
@@ -259,7 +275,12 @@
       "demoUrl": "Démo en direct / URL du site",
       "repoUrl": "URL du dépôt",
       "bullets": "Points Clés & Métriques",
-      "remove": "Supprimer le Projet"
+      "remove": "Supprimer le Projet",
+      "projectNamePlaceholder": "ex. CV Studio Pro",
+      "rolePlaceholder": "ex. Projet Personnel / Open Source",
+      "demoUrlPlaceholder": "ex. https://mon-app.vercel.app",
+      "repoUrlPlaceholder": "ex. https://github.com/utilisateur/projet",
+      "bulletsPlaceholder": "Bref aperçu du projet, technologies utilisées et impact mesurable..."
     }
   },
   "stepper": {

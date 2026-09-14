@@ -122,28 +122,28 @@ const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({
               size="small"
               value={exp.company}
               onChange={(e) => onFieldChange(expIdx, 'company', e.target.value)}
-              placeholder="e.g. Aval Digital Labs"
+              placeholder={t('profile:sections.experience.placeholders.company', 'e.g. Acme Corp, Google, Globant')}
             />
             <TextField
               label={t('profile:sections.experience.role', 'Cargo / Puesto')}
               size="small"
               value={exp.role || ''}
               onChange={(e) => onFieldChange(expIdx, 'role', e.target.value)}
-              placeholder="e.g. Frontend Developer"
+              placeholder={t('profile:sections.experience.placeholders.role', 'e.g. Senior Frontend Engineer')}
             />
             <TextField
               label={t('profile:sections.experience.dates', 'Fechas')}
               size="small"
               value={exp.date || ''}
               onChange={(e) => onFieldChange(expIdx, 'date', e.target.value)}
-              placeholder="e.g. Oct 2024 – Presente"
+              placeholder={t('profile:sections.experience.placeholders.dates', 'e.g. Oct 2021 – Present')}
             />
             <TextField
               label={t('profile:sections.experience.location', 'Ubicación / Modalidad')}
               size="small"
               value={exp.location || ''}
               onChange={(e) => onFieldChange(expIdx, 'location', e.target.value)}
-              placeholder="e.g. Remoto, Colombia"
+              placeholder={t('profile:sections.experience.placeholders.location', 'e.g. London, UK / Remote')}
             />
           </Box>
 
@@ -164,7 +164,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = React.memo(({
                     size="small"
                     value={bullet}
                     onChange={(e) => onUpdateBullet(expIdx, bIdx, e.target.value)}
-                    placeholder="Acción clave lograda medida por métricas o impacto..."
+                    placeholder={t('profile:sections.experience.placeholders.bullet', 'Key achievement measured by impact or metrics (e.g. Increased conversion by 28% through...)')}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         fontSize: '0.86rem',

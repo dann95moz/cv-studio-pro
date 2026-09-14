@@ -120,6 +120,7 @@
     "regenerate": "Regenerar",
     "importDescription": "Pega el enlace de sincronización generado en tu otro dispositivo o ingresa el código de emparejamiento.",
     "inputLabel": "Enlace de sincronización o Código (ej. CV-78K2)",
+    "inputPlaceholder": "https://...#sync?id=... o CV-...",
     "securityNotice": "Antes de sobrescribir cualquier dato, se mostrará una comparativa de fechas y cambios para que verifiques que no te estés pisando a ti mismo.",
     "connecting": "Descargando y descifrando...",
     "pullAction": "Conectar y Descargar",

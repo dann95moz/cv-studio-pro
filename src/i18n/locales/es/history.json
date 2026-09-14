@@ -66,6 +66,7 @@
     "editTitle": "Editar Etapa",
     "newTitle": "Nueva Etapa Kanban",
     "nameField": "Nombre de la Etapa",
+    "namePlaceholder": "ej. Llamada de Reclutador, Oferta, Evaluación",
     "colorTheme": "Color Distintivo",
     "preview": "Vista Previa",
     "defaultName": "Etapa de Ejemplo"
@@ -182,8 +183,11 @@
     "jobUrlField": "Enlace a la Oferta o Chat (Opcional)",
     "initialColumn": "Etapa Inicial",
     "salary": "Salario / Presupuesto (Opcional)",
+    "salaryPlaceholder": "120k € - 140k € / $120k - $140k",
     "location": "Ubicación / Modalidad de Trabajo",
+    "locationPlaceholder": "ej. Madrid, España / Remoto",
     "notes": "Notas Personales y Contacto de Entrevista",
+    "notesPlaceholder": "ej. Recomendado por Carlos; el reclutador enfatizó ingeniería de rendimiento...",
     "hideDetails": "Ocultar detalles adicionales",
     "addDetails": "+ Añadir ubicación y notas",
     "confirm": "Añadir al Tablero Kanban"
@@ -244,6 +248,7 @@
     "duration": "Duración",
     "meetingLink": "Enlace de Reunión (Google Meet, Zoom, Teams)",
     "interviewer": "Entrevistador / Contacto (Opcional)",
+    "interviewerPlaceholder": "ej. Laura Gómez (Talent Lead)",
     "notes": "Notas adicionales",
     "notesPlaceholder": "Temas clave a repasar, preguntas preparadas...",
     "downloadIcs": "Descargar Evento (.ics)"

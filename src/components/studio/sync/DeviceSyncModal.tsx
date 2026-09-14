@@ -296,7 +296,7 @@ export const DeviceSyncModal: React.FC<DeviceSyncModalProps> = ({
             <TextField
               fullWidth
               label={t('common:sync.inputLabel', 'Enlace de sincronización o Código (ej. CV-78K2)')}
-              placeholder="https://...#sync?id=... o CV-..."
+              placeholder={t('common:sync.inputPlaceholder', 'https://...#sync?id=... or CV-...')}
               value={importInput}
               onChange={(e) => setImportInput(e.target.value)}
               size="small"

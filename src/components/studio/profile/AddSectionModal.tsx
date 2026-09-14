@@ -279,7 +279,7 @@ export const AddSectionModal: React.FC<AddSectionModalProps> = ({
             setCustomTitle(e.target.value);
             if (error) setError(false);
           }}
-          placeholder={t('profile:customSections.inputPlaceholder', 'Ej. Certificaciones Profesionales')}
+          placeholder={t('profile:customSections.inputPlaceholder', 'e.g. Certifications & Licenses')}
           error={error}
           helperText={error ? t('profile:customSections.errorRequired', 'El título es requerido') : ''}
         />

@@ -120,6 +120,7 @@
     "regenerate": "Régénérer",
     "importDescription": "Collez le lien de synchronisation généré sur votre autre appareil ou entrez le code de jumelage.",
     "inputLabel": "Lien de synchronisation ou code (ex. CV-78K2)",
+    "inputPlaceholder": "https://...#sync?id=... ou CV-...",
     "securityNotice": "Avant d'écraser des données, une comparaison sera affichée pour vous assurer de ne pas écraser vos modifications récentes.",
     "connecting": "Téléchargement et déchiffrement...",
     "pullAction": "Connecter & Télécharger",

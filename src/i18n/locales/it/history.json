@@ -66,6 +66,7 @@
     "editTitle": "Modifica Fase",
     "newTitle": "Nuova Fase Kanban",
     "nameField": "Nome della Fase",
+    "namePlaceholder": "es. Chiamata Recruiter, Offerta, Screening",
     "colorTheme": "Colore di Accento",
     "preview": "Anteprima",
     "defaultName": "Fase di esempio"
@@ -182,8 +183,11 @@
     "jobUrlField": "Link offerta o URL chat (Opzionale)",
     "initialColumn": "Fase Iniziale",
     "salary": "Stipendio / Budget (Opzionale)",
+    "salaryPlaceholder": "120k € - 140k €",
     "location": "Sede / Politica da Remoto",
+    "locationPlaceholder": "es. Milano, Italia / Da remoto",
     "notes": "Note personali & contatto recruiter",
+    "notesPlaceholder": "es. Segnalato da Alex; il selezionatore ha evidenziato l'ingegneria delle prestazioni...",
     "hideDetails": "Nascondi dettagli aggiuntivi",
     "addDetails": "+ Aggiungi sede e note",
     "confirm": "Aggiungi alla Bacheca Kanban"
@@ -244,6 +248,7 @@
     "duration": "Durata",
     "meetingLink": "Link della riunione (Google Meet, Zoom, Teams)",
     "interviewer": "Intervistatore / Contatto (Opzionale)",
+    "interviewerPlaceholder": "es. Sarah Jenkins (Talent Lead)",
     "notes": "Note aggiuntive",
     "notesPlaceholder": "Argomenti chiave, domande preparate...",
     "downloadIcs": "Scarica Evento (.ics)"

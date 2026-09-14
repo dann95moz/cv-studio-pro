@@ -120,6 +120,7 @@
     "regenerate": "Neu generieren",
     "importDescription": "Fügen Sie den auf Ihrem anderen Gerät generierten Synchronisierungslink ein oder geben Sie den Kopplungscode ein.",
     "inputLabel": "Sync-Link oder Kopplungscode (z. B. CV-78K2)",
+    "inputPlaceholder": "https://...#sync?id=... oder CV-...",
     "securityNotice": "Vor dem Überschreiben von Daten wird ein Vergleich angezeigt, um sicherzustellen, dass Sie neuere Änderungen nicht versehentlich überschreiben.",
     "connecting": "Herunterladen und Entschlüsseln...",
     "pullAction": "Verbinden & Herunterladen",

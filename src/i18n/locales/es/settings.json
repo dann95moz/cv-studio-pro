@@ -41,6 +41,7 @@
     "customUrl": "URL Personalizada",
     "custom": "Personalizado",
     "customModelTag": "Etiqueta del Modelo Local (Ollama / LM Studio)",
+    "customModelTagPlaceholder": "ej. qwen2.5:14b, deepseek-r1:14b",
     "customModelTagHelp": "Especifica la etiqueta exacta del modelo (ej. qwen2.5:14b, deepseek-r1:14b). Ejecuta 'ollama list' para ver los modelos instalados.",
     "ollamaCorsTitle": "Comando de inicio de Ollama con CORS:",
     "keyStoredSecurely": "Clave guardada de forma segura en el almacenamiento local privado de tu navegador.",

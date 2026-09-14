@@ -84,30 +84,30 @@ export const CustomSectionPanel: React.FC<CustomSectionPanelProps> = ({
       case 'certifications':
         return t(
           'profile:customSections.placeholders.certifications',
-          'Ej. AWS Certified Solutions Architect – Associate (2024) • Amazon Web Services'
+          'e.g. AWS Certified Solutions Architect – Associate (2024) • Amazon Web Services'
         );
       case 'awards':
         return t(
           'profile:customSections.placeholders.awards',
-          'Ej. 1er Lugar – Hackathon Nacional de Inteligencia Artificial (2023)'
+          'e.g. 1st Place – National Artificial Intelligence Hackathon (2023)'
         );
       case 'publications':
         return t(
           'profile:customSections.placeholders.publications',
-          'Ej. "Arquitecturas Reactivas en Sistemas Distribuidos", Conferencia IEEE (2022)'
+          'e.g. "Reactive Architectures in Distributed Systems", IEEE Conference (2022)'
         );
       case 'volunteering':
         return t(
           'profile:customSections.placeholders.volunteering',
-          'Ej. Mentor de Programación Web – Fundación Código Libre (2021 – Presente)'
+          'e.g. Web Development Mentor – Open Code Initiative (2021 – Present)'
         );
       case 'conferences':
         return t(
           'profile:customSections.placeholders.conferences',
-          'Ej. Speaker: "Microfrontends a Gran Escala" – TechConf Latam (2023)'
+          'e.g. Speaker: "Microfrontends at Scale" – TechConf Latam (2023)'
         );
       default:
-        return t('profile:customSections.placeholders.custom', 'Escribe un logro, detalle o elemento para esta sección...');
+        return t('profile:customSections.placeholders.custom', 'Type an achievement, item, or detail for this section...');
     }
   };
 

@@ -225,7 +225,7 @@ export const AdaptToNewOfferModal: React.FC<AdaptToNewOfferModalProps> = ({
             fullWidth
             size="small"
             label={t('preview:adaptModal.companyLabel', 'Empresa objetivo')}
-            placeholder={t('preview:adaptModal.companyPlaceholder', 'Ej: Stripe, Mercado Libre, Globant')}
+            placeholder={t('preview:adaptModal.companyPlaceholder', 'e.g. Stripe, Google, Acme')}
             value={companyName}
             onChange={(e) => {
               setCompanyName(e.target.value);
@@ -241,7 +241,7 @@ export const AdaptToNewOfferModal: React.FC<AdaptToNewOfferModalProps> = ({
             fullWidth
             size="small"
             label={t('preview:adaptModal.roleLabel', 'Cargo objetivo')}
-            placeholder={t('preview:adaptModal.rolePlaceholder', 'Ej: Senior Frontend Engineer')}
+            placeholder={t('preview:adaptModal.rolePlaceholder', 'e.g. Senior Frontend Engineer')}
             value={targetRole}
             onChange={(e) => {
               setTargetRole(e.target.value);
@@ -275,7 +275,7 @@ export const AdaptToNewOfferModal: React.FC<AdaptToNewOfferModalProps> = ({
             fullWidth
             multiline
             rows={isMobile ? 5 : 6}
-            placeholder={t('preview:adaptModal.jobDescPlaceholder', 'Pega aquí el texto de la vacante, requisitos técnicos o responsabilidades...')}
+            placeholder={t('preview:adaptModal.jobDescPlaceholder', 'Paste the job post text, requirements, or responsibilities here...')}
             value={jobText}
             onChange={(e) => handleJobTextChange(e.target.value)}
             sx={{

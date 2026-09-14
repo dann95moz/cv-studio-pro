@@ -12,6 +12,8 @@ export interface StepFieldConfig {
   defaultQuestion: string;
   hintKey: string;
   defaultHint: string;
+  placeholderKey?: string;
+  defaultPlaceholder?: string;
   placeholder: string;
   isOptional: boolean;
   type: 'name' | 'title' | 'contact';
@@ -58,6 +60,8 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'What is your full name?',
       hintKey: 'profile:stepFlow.hints.fullName',
       defaultHint: 'This will appear as the main heading on your resume.',
+      placeholderKey: 'profile:stepFlow.placeholders.fullName',
+      defaultPlaceholder: 'e.g. Alex Morgan',
       placeholder: 'e.g. Alex Morgan',
       isOptional: false,
     },
@@ -69,6 +73,8 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'What is your professional title or headline?',
       hintKey: 'profile:stepFlow.hints.jobTitle',
       defaultHint: 'Your headline (e.g. Staff Frontend Architect, Lead DevOps).',
+      placeholderKey: 'profile:stepFlow.placeholders.jobTitle',
+      defaultPlaceholder: 'e.g. Senior Software Engineer | Full Stack & Cloud',
       placeholder: 'e.g. Senior Software Engineer | Full Stack & Cloud',
       isOptional: false,
     },
@@ -82,6 +88,8 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'What email can recruiters reach you at?',
       hintKey: 'profile:stepFlow.hints.email',
       defaultHint: 'Recruiters and ATS systems will use this to contact you.',
+      placeholderKey: 'profile:stepFlow.placeholders.email',
+      defaultPlaceholder: 'e.g. alex.morgan@example.com',
       placeholder: 'e.g. alex.morgan@example.com',
       isOptional: false,
     },
@@ -94,7 +102,9 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'Where are you located?',
       hintKey: 'profile:stepFlow.hints.location',
       defaultHint: 'City and Country (e.g. London, UK or Remote - US).',
-      placeholder: 'e.g. Madrid, Spain | Remote',
+      placeholderKey: 'profile:stepFlow.placeholders.location',
+      defaultPlaceholder: 'e.g. London, UK or Remote',
+      placeholder: 'e.g. London, UK or Remote',
       isOptional: false,
     },
     {
@@ -107,6 +117,8 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'Do you have a contact phone number?',
       hintKey: 'profile:stepFlow.hints.phone',
       defaultHint: 'Optional. Useful if employers reach out via phone or WhatsApp.',
+      placeholderKey: 'profile:stepFlow.placeholders.phone',
+      defaultPlaceholder: 'e.g. +1 555 123 4567',
       placeholder: 'e.g. +1 555 123 4567',
       isOptional: true,
     },
@@ -120,6 +132,8 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'Do you have a LinkedIn profile?',
       hintKey: 'profile:stepFlow.hints.linkedin',
       defaultHint: 'Optional. Recommended so evaluators can review your network and recommendations.',
+      placeholderKey: 'profile:stepFlow.placeholders.linkedin',
+      defaultPlaceholder: 'linkedin.com/in/username',
       placeholder: 'linkedin.com/in/username',
       isOptional: true,
     },
@@ -133,6 +147,8 @@ export function getStepsConfig(theme: Theme): StepFieldConfig[] {
       defaultQuestion: 'Do you have a portfolio or personal website?',
       hintKey: 'profile:stepFlow.hints.portfolio',
       defaultHint: 'Optional. Great for demonstrating live demos, GitHub repositories, or design work.',
+      placeholderKey: 'profile:stepFlow.placeholders.portfolio',
+      defaultPlaceholder: 'myportfolio.dev',
       placeholder: 'myportfolio.dev',
       isOptional: true,
     },

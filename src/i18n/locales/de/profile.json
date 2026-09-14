@@ -134,13 +134,22 @@
       "portfolio": "Haben Sie eine persönliche Webseite oder ein Portfolio?"
     },
     "hints": {
-      "fullName": "Dieser Name wird als Hauptüberschrift auf Ihrem Lebenslauf angezeigt.",
-      "jobTitle": "Ihre Kernkompetenz (z.B. Senior Software Engineer, DevOps Lead).",
-      "email": "Personalverantwortliche und ATS-Systeme nutzen diese Adresse zur Kontaktaufnahme.",
+      "fullName": "Dieser Name erscheint als Hauptüberschrift auf Ihrem Lebenslauf.",
+      "jobTitle": "Ihre Berufsbezeichnung (z.B. Staff Frontend Architect, Lead DevOps).",
+      "email": "Recruiter und ATS-Systeme nutzen diese E-Mail zur Kontaktaufnahme.",
       "location": "Stadt und Land (z.B. Berlin, Deutschland oder Remote).",
       "phone": "Optional. Nützlich für telefonische Rückfragen oder WhatsApp.",
       "linkedin": "Optional. Empfohlen zur Überprüfung Ihres beruflichen Netzwerks.",
       "portfolio": "Optional. Hervorragend geeignet, um Arbeitsproben oder Code zu zeigen."
+    },
+    "placeholders": {
+      "fullName": "z.B. Alexander Weber",
+      "jobTitle": "z.B. Senior Software Engineer | Full Stack & Cloud",
+      "email": "z.B. alexander.weber@beispiel.de",
+      "location": "z.B. Berlin, Deutschland oder Remote",
+      "phone": "z.B. +49 170 1234567",
+      "linkedin": "linkedin.com/in/benutzername",
+      "portfolio": "meinportfolio.dev"
     },
     "stepCount": "{{current}} von {{total}}",
     "prev": "Zurück",
@@ -192,7 +201,14 @@
       "bullets": "Erfolge & Aufgaben (XYZ-Formel)",
       "logros": "Wichtigste Erfolge",
       "addBullet": "Erfolgspunkt hinzufügen",
-      "removeRole": "Position entfernen"
+      "removeRole": "Position entfernen",
+      "placeholders": {
+        "company": "z.B. Acme Corp, Google, Globant",
+        "role": "z.B. Senior Frontend Engineer",
+        "dates": "z.B. Okt 2021 – Heute",
+        "location": "z.B. Berlin, Deutschland / Remote",
+        "bullet": "Wichtigster Erfolg gemessen an Wirkung oder Kennzahlen (z.B. Steigerung der Konversion um 28% durch...)"
+      }
     },
     "skills": {
       "title": "Fähigkeiten & Kompetenzen",
@@ -259,7 +275,12 @@
       "demoUrl": "Live-Demo / Website-URL",
       "repoUrl": "Repository-URL",
       "bullets": "Highlights & Kennzahlen",
-      "remove": "Projekt entfernen"
+      "remove": "Projekt entfernen",
+      "projectNamePlaceholder": "z.B. CV Studio Pro",
+      "rolePlaceholder": "z.B. Eigenes Projekt / Open Source",
+      "demoUrlPlaceholder": "z.B. https://meine-app.vercel.app",
+      "repoUrlPlaceholder": "z.B. https://github.com/benutzer/projekt",
+      "bulletsPlaceholder": "Kurze Projektübersicht, Technologien und messbarer Einfluss..."
     }
   },
   "stepper": {
