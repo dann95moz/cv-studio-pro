@@ -13,6 +13,7 @@ import {
 import { EditableText } from '../components/studio/preview/EditableText';
 import { useCvLiveEdit } from '../components/studio/preview/CvLiveEditContext';
 import { ProfilePhotoDisplay } from '../components/studio/photo/ProfilePhotoDisplay';
+import { resolveContactDisplay } from '../utils/sanitize';
 
 /**
  * Corporate Top Banner Template (Photo 2 Reference):
@@ -88,40 +89,56 @@ export const ExecutiveTemplate: React.FC<CVTemplateProps> = ({ slots, theme }) =
           <aside className="banner-side-col">
             {/* Direct Contact Information */}
             {basicContacts.length > 0 && (
-              <div className="banner-side-section banner-contacts-block">
-                <ul className="banner-contact-list">
-                  {basicContacts.map((c, i) => (
-                    <li key={i} className="banner-contact-item">
-                      <Icon type={c.type} size={13} />
-                      {c.url ? (
-                        <a href={c.url} target="_blank" rel="noopener noreferrer">
-                          {c.label}
-                        </a>
-                      ) : (
-                        <span>{c.label}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+               <div className="banner-side-section banner-contacts-block">
+                 <ul className="banner-contact-list">
+                   {basicContacts.map((c, i) => {
+                     const { url, displayLabel } = resolveContactDisplay(c);
+                     return (
+                       <li key={i} className="banner-contact-item">
+                         {url ? (
+                           <a href={url} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                             <Icon type={c.type} size={13} />
+                             <span>{displayLabel}</span>
+                           </a>
+                         ) : (
+                           <span className="cv-contact-plain">
+                             <Icon type={c.type} size={13} />
+                             <span>{displayLabel}</span>
+                           </span>
+                         )}
+                       </li>
+                     );
+                   })}
+                 </ul>
+               </div>
+             )}
 
             {/* Websites, Portfolios, Profiles */}
             {linkContacts.length > 0 && (
-              <div className="banner-side-section banner-links-block">
-                <h3 className="banner-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
-                <ul className="banner-link-list">
-                  {linkContacts.map((c, i) => (
-                    <li key={i} className="banner-link-item">
-                      <Icon type={c.type} size={13} />
-                      <a href={c.url || '#'} target="_blank" rel="noopener noreferrer">
-                        {c.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+               <div className="banner-side-section banner-links-block">
+                 <h3 className="banner-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
+                 <ul className="banner-link-list">
+                   {linkContacts.map((c, i) => {
+                     const { url, displayLabel } = resolveContactDisplay(c);
+                     return (
+                       <li key={i} className="banner-link-item">
+                         {url ? (
+                           <a href={url} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                             <Icon type={c.type} size={13} />
+                             <span>{displayLabel}</span>
+                           </a>
+                         ) : (
+                           <span className="cv-contact-plain">
+                             <Icon type={c.type} size={13} />
+                             <span>{displayLabel}</span>
+                           </span>
+                         )}
+                       </li>
+                     );
+                   })}
+                 </ul>
+               </div>
+             )}
 
             {/* Skills */}
             {slots.skills && (

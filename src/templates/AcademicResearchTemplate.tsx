@@ -2,7 +2,7 @@ import React from 'react';
 import { CVTemplateProps } from './types';
 import { extractCandidateInitials } from '../core/parser';
 import { Icon } from '../components/Icons';
-import { safeMarkdownInline } from '../utils/sanitize';
+import { safeMarkdownInline, resolveContactDisplay } from '../utils/sanitize';
 import { 
   SummarySlot, 
   SkillsSlot, 
@@ -50,20 +50,28 @@ export const AcademicResearchTemplate: React.FC<CVTemplateProps> = ({ slots, the
           {basicContacts.length > 0 && (
             <div className="dualtone-side-block">
               <ul className="dualtone-contact-list">
-                {basicContacts.map((c, i) => (
-                  <li key={i} className="dualtone-contact-item">
-                    <span className="dualtone-icon-badge">
-                      <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
-                    </span>
-                    {c.url ? (
-                      <a href={c.url} target="_blank" rel="noopener noreferrer">
-                        {c.label}
-                      </a>
-                    ) : (
-                      <span>{c.label}</span>
-                    )}
-                  </li>
-                ))}
+                {basicContacts.map((c, i) => {
+                  const { resolvedUrl, displayLabel } = resolveContactDisplay(c);
+                  return (
+                    <li key={i} className="dualtone-contact-item">
+                      {resolvedUrl ? (
+                        <a href={resolvedUrl} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                          <span className="dualtone-icon-badge">
+                            <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                          </span>
+                          <span>{displayLabel}</span>
+                        </a>
+                      ) : (
+                        <>
+                          <span className="dualtone-icon-badge">
+                            <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                          </span>
+                          <span>{displayLabel}</span>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -73,13 +81,19 @@ export const AcademicResearchTemplate: React.FC<CVTemplateProps> = ({ slots, the
             <div className="dualtone-side-block">
               <h3 className="dualtone-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
               <ul className="dualtone-link-list">
-                {linkContacts.map((c, i) => (
-                  <li key={i} className="dualtone-link-item">
-                    <a href={c.url || '#'} target="_blank" rel="noopener noreferrer">
-                      {c.label}
-                    </a>
-                  </li>
-                ))}
+                {linkContacts.map((c, i) => {
+                  const { resolvedUrl, displayLabel } = resolveContactDisplay(c);
+                  return (
+                    <li key={i} className="dualtone-link-item">
+                      <a href={resolvedUrl || '#'} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                        <span className="dualtone-icon-badge">
+                          <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                        </span>
+                        <span>{displayLabel}</span>
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

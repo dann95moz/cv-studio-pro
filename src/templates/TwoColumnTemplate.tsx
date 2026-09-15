@@ -2,7 +2,7 @@ import React from 'react';
 import { CVTemplateProps } from './types';
 import { extractCandidateInitials } from '../core/parser';
 import { Icon } from '../components/Icons';
-import { safeMarkdownInline } from '../utils/sanitize';
+import { safeMarkdownInline, resolveContactDisplay } from '../utils/sanitize';
 import { 
   SummarySlot, 
   ExperienceSlot, 
@@ -104,20 +104,28 @@ export const TwoColumnTemplate: React.FC<CVTemplateProps> = ({ slots, theme }) =
           {basicContacts.length > 0 && (
             <div className="contrast-side-block">
               <ul className="contrast-contact-list">
-                {basicContacts.map((c, i) => (
-                  <li key={i} className="contrast-contact-item">
-                    <span className="contrast-icon-badge">
-                      <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
-                    </span>
-                    {c.url ? (
-                      <a href={c.url} target="_blank" rel="noopener noreferrer">
-                        {c.label}
-                      </a>
-                    ) : (
-                      <span>{c.label}</span>
-                    )}
-                  </li>
-                ))}
+                {basicContacts.map((c, i) => {
+                  const { url, displayLabel } = resolveContactDisplay(c);
+                  return (
+                    <li key={i} className="contrast-contact-item">
+                      {url ? (
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="contrast-contact-link">
+                          <span className="contrast-icon-badge">
+                            <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                          </span>
+                          <span>{displayLabel}</span>
+                        </a>
+                      ) : (
+                        <span className="contrast-contact-plain">
+                          <span className="contrast-icon-badge">
+                            <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                          </span>
+                          <span>{displayLabel}</span>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -127,13 +135,28 @@ export const TwoColumnTemplate: React.FC<CVTemplateProps> = ({ slots, theme }) =
             <div className="contrast-side-block">
               <h3 className="contrast-side-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
               <ul className="contrast-link-list">
-                {linkContacts.map((c, i) => (
-                  <li key={i} className="contrast-link-item">
-                    <a href={c.url || '#'} target="_blank" rel="noopener noreferrer">
-                      {c.label}
-                    </a>
-                  </li>
-                ))}
+                {linkContacts.map((c, i) => {
+                  const { url, displayLabel } = resolveContactDisplay(c);
+                  return (
+                    <li key={i} className="contrast-link-item">
+                      {url ? (
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="contrast-contact-link">
+                          <span className="contrast-icon-badge">
+                            <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                          </span>
+                          <span>{displayLabel}</span>
+                        </a>
+                      ) : (
+                        <span className="contrast-contact-plain">
+                          <span className="contrast-icon-badge">
+                            <Icon type={c.type} size={11} style={{ margin: 0, verticalAlign: 'middle', display: 'block' }} />
+                          </span>
+                          <span>{displayLabel}</span>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

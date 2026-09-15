@@ -1,8 +1,9 @@
 import React from 'react';
 import { CVTemplateProps } from './types';
-import { safeMarkdown, safeMarkdownInline, getCleanContactLabel } from '../utils/sanitize';
+import { safeMarkdown, safeMarkdownInline, getCleanContactLabel, resolveContactDisplay } from '../utils/sanitize';
 import { EditableText } from '../components/studio/preview/EditableText';
 import { useCvLiveEdit } from '../components/studio/preview/CvLiveEditContext';
+import { Icon } from '../components/Icons';
 
 export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, data, photo }) => {
   const liveEdit = useCvLiveEdit();
@@ -87,15 +88,25 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', color: '#475569' }}>
             {header.contacts.map((c, idx) => {
-              const displayLabel = getCleanContactLabel(c);
+              const { resolvedUrl, displayLabel } = resolveContactDisplay(c);
               return (
                 <div key={idx} style={{ wordBreak: 'break-word' }}>
-                  {c.url ? (
-                    <a href={c.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600 }}>
-                      {displayLabel}
+                  {resolvedUrl ? (
+                    <a
+                      href={resolvedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cv-contact-link"
+                      style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Icon type={c.type} size={11} />
+                      <span>{displayLabel}</span>
                     </a>
                   ) : (
-                    <span>{displayLabel}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon type={c.type} size={11} />
+                      <span>{displayLabel}</span>
+                    </span>
                   )}
                 </div>
               );

@@ -12,6 +12,7 @@ import {
 import { EditableText } from '../components/studio/preview/EditableText';
 import { useCvLiveEdit } from '../components/studio/preview/CvLiveEditContext';
 import { ProfilePhotoDisplay } from '../components/studio/photo/ProfilePhotoDisplay';
+import { resolveContactDisplay } from '../utils/sanitize';
 
 /**
  * Editorial Pastel Card Template (Photo 4 Reference):
@@ -64,18 +65,24 @@ export const DesignerUiuxTemplate: React.FC<CVTemplateProps> = ({ slots, theme }
             )}
             <div className="pastel-card-divider" />
             <ul className="pastel-card-contacts">
-              {basicContacts.map((c, i) => (
-                <li key={i} className="pastel-contact-item">
-                  <Icon type={c.type} size={12} />
-                  {c.url ? (
-                    <a href={c.url} target="_blank" rel="noopener noreferrer">
-                      {c.label}
-                    </a>
-                  ) : (
-                    <span>{c.label}</span>
-                  )}
-                </li>
-              ))}
+              {basicContacts.map((c, i) => {
+                const { resolvedUrl, displayLabel } = resolveContactDisplay(c);
+                return (
+                  <li key={i} className="pastel-contact-item">
+                    {resolvedUrl ? (
+                      <a href={resolvedUrl} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                        <Icon type={c.type} size={12} />
+                        <span>{displayLabel}</span>
+                      </a>
+                    ) : (
+                      <>
+                        <Icon type={c.type} size={12} />
+                        <span>{displayLabel}</span>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
@@ -111,13 +118,17 @@ export const DesignerUiuxTemplate: React.FC<CVTemplateProps> = ({ slots, theme }
               <div className="pastel-section pastel-links-block">
                 <h3 className="cv-section-title">{slots.websitesTitle || 'Websites, Portfolios, Profiles'}</h3>
                 <ul className="pastel-links-list">
-                  {linkContacts.map((c, i) => (
-                    <li key={i}>
-                      <a href={c.url || '#'} target="_blank" rel="noopener noreferrer">
-                        {c.label}
-                      </a>
-                    </li>
-                  ))}
+                  {linkContacts.map((c, i) => {
+                    const { resolvedUrl, displayLabel } = resolveContactDisplay(c);
+                    return (
+                      <li key={i}>
+                        <a href={resolvedUrl || '#'} target="_blank" rel="noopener noreferrer" className="cv-contact-link">
+                          <Icon type={c.type} size={12} />
+                          <span>{displayLabel}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

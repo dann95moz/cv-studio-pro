@@ -4,7 +4,7 @@ import { HeaderSlotProps } from '../../templates/types';
 import { Icon } from '../Icons';
 import { EditableText } from '../studio/preview/EditableText';
 import { useCvLiveEdit } from '../studio/preview/CvLiveEditContext';
-import { getCleanContactLabel } from '../../utils/sanitize';
+import { resolveContactDisplay } from '../../utils/sanitize';
 
 export type { HeaderSlotProps };
 
@@ -39,38 +39,26 @@ export const HeaderSlot: React.FC<HeaderSlotProps> = ({
       {showContactsInHeader && data.contacts.length > 0 && (
         <div className="cv-contact-list">
           {data.contacts.map((c, i) => {
-            const displayLabel = getCleanContactLabel(c);
-            let resolvedUrl = c.url?.trim();
-            if (!resolvedUrl) {
-              const raw = (c.label || '').trim();
-              if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
-                if (raw.includes('.') || raw.startsWith('http')) {
-                  resolvedUrl = raw.startsWith('http') ? raw : `https://${raw.replace(/^https?:\/\//, '')}`;
-                }
-              } else if (c.type === 'email' && raw.includes('@')) {
-                resolvedUrl = raw.startsWith('mailto:') ? raw : `mailto:${raw.replace(/^mailto:/i, '')}`;
-              } else if (c.type === 'phone' && /[\d+]/.test(raw)) {
-                resolvedUrl = `tel:${raw.replace(/[^\d+]/g, '')}`;
-              }
-            } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !resolvedUrl.startsWith('http')) {
-              resolvedUrl = `https://${resolvedUrl}`;
-            }
+            const { url: resolvedUrl, displayLabel } = resolveContactDisplay(c);
 
             return (
               <span key={i} className="cv-contact-item">
-                <Icon type={c.type} />
-                {resolvedUrl && !liveEdit?.isLiveEditing ? (
-                  <a href={resolvedUrl} target="_blank" rel="noopener noreferrer">
-                    {displayLabel}
+                {resolvedUrl ? (
+                  <a 
+                    href={resolvedUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="cv-contact-link"
+                    title={displayLabel}
+                  >
+                    <Icon type={c.type} />
+                    <span>{displayLabel}</span>
                   </a>
                 ) : (
-                  <EditableText
-                    tagName="span"
-                    value={c.label}
-                    htmlContent={c.label ? (marked.parseInline(c.label) as string) : ''}
-                    onSave={(newLabel) => liveEdit?.updateContact(i, newLabel)}
-                    placeholder="Contact Info"
-                  />
+                  <span className="cv-contact-plain">
+                    <Icon type={c.type} />
+                    <span>{displayLabel}</span>
+                  </span>
                 )}
               </span>
             );
