@@ -10,43 +10,18 @@ import {
 } from './types';
 import { LANGUAGE_DEFINITIONS, SupportedLanguage, DetectedLanguage } from '../constants/languages';
 import { normalizeSkillCategory } from '../core/parser/markdownToCvData';
+import { resolveContactDisplay } from '../utils/sanitize';
 
 /**
- * Normalizes contact item labels to clean human-friendly badges (LinkedIn, GitHub, Portfolio)
+ * Normalizes contact item labels to clean human-friendly badges/handles (LinkedIn, GitHub, Portfolio)
+ * while ensuring valid fully qualified URLs (https://, mailto:, tel:).
  */
 function cleanContactDisplayLabel(c: ContactItem): ContactItem {
-  let label = c.label;
-  let url = c.url?.trim();
-
-  if (!url) {
-    if (c.type === 'email' && label.includes('@')) {
-      url = `mailto:${label.replace(/^mailto:/i, '')}`;
-    } else if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
-      if (label.includes('.') || label.startsWith('http')) {
-        url = label.startsWith('http') ? label : `https://${label.replace(/^https?:\/\//, '')}`;
-      }
-    }
-  } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !url.startsWith('http')) {
-    url = `https://${url}`;
-  }
-
-  if (c.type === 'linkedin') {
-    if (label.startsWith('http') || label.includes('linkedin.com') || label.includes('/in/')) {
-      label = 'LinkedIn';
-    }
-  } else if (c.type === 'github') {
-    if (label.startsWith('http') || label.includes('github.com')) {
-      label = 'GitHub';
-    }
-  } else if (c.type === 'globe') {
-    if (label.startsWith('http') || label.includes('http://') || label.includes('https://') || label.includes('www.')) {
-      label = 'Portfolio';
-    }
-  }
+  const resolved = resolveContactDisplay(c);
   return {
     ...c,
-    label,
-    url
+    label: resolved.displayLabel,
+    url: resolved.url || c.url
   };
 }
 

@@ -53,12 +53,18 @@
   font-size: inherit;
 }
 
-.cv-contact-item a {
+.cv-contact-item a,
+a.cv-contact-link {
   color: inherit;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
 }
 
-.cv-contact-item a:hover {
+.cv-contact-item a:hover,
+a.cv-contact-link:hover {
   text-decoration: underline;
 }
 
