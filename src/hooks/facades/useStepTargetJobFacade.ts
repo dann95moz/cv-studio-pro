@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useResumeStore } from '../../store';
 import { extractTargetCompany, extractTargetRole } from '../../core/parser';
 import { calculateQuickScore } from '../../core/matching/quickMatcher';
+import { buildPrompts } from '../../core/ai-service';
 
 /**
  * Appends a skill to the user's Master CV Markdown under an existing skills header,
@@ -30,7 +31,7 @@ function addSkillToMasterMarkdown(masterMarkdown: string, skill: string): string
     );
   }
 
-  return `${masterMarkdown.trimEnd()}\n\n## Technical Skills\n- ${trimmedSkill}\n`;
+  return masterMarkdown + `\n\n## Technical Skills\n- ${trimmedSkill}\n`;
 }
 
 export interface UseStepTargetJobFacadeProps {
@@ -56,7 +57,7 @@ export function useStepTargetJobFacade({
   targetRole,
   onRoleChange,
 }: UseStepTargetJobFacadeProps) {
-  const { t } = useTranslation(['target', 'common']);
+  const { t } = useTranslation(['target', 'common', 'settings']);
 
   // Toast state
   const [skillToast, setSkillToast] = useState<string | null>(null);
@@ -187,6 +188,53 @@ export function useStepTargetJobFacade({
     [masterData, setMasterData, t]
   );
 
+  /**
+   * Directly copies the calibrated prompt to clipboard, emits success toast,
+   * and opens the modal ready for pasting the generated AI response.
+   */
+  const handleCopyPromptAndOpenModal = useCallback(async () => {
+    flushAll();
+    const {
+      masterData: storeMaster,
+      rules,
+      pageBudget,
+      providerSettings,
+      showNotification,
+    } = useResumeStore.getState();
+
+    const prompts = buildPrompts({
+      masterData: storeMaster || masterData,
+      targetJob: localContent,
+      rules,
+      companyName: localCompany || undefined,
+      targetRole: localRole || undefined,
+      pageBudget,
+      providerSettings,
+    });
+    const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
+
+    try {
+      await navigator.clipboard.writeText(bundle);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = bundle;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+
+    showNotification({
+      message: t(
+        'settings:providers.promptCopiedToast',
+        'Prompt copied to clipboard! Paste it into your favorite AI and bring the result back here.'
+      ),
+      severity: 'success',
+    });
+
+    openManualPromptModal(bundle);
+  }, [flushAll, localContent, localCompany, localRole, masterData, openManualPromptModal, t]);
+
   return {
     state: {
       localContent,
@@ -204,6 +252,7 @@ export function useStepTargetJobFacade({
       handleAddSkillToMaster,
       flushAll,
       openManualPromptModal,
+      handleCopyPromptAndOpenModal,
     },
   };
 }

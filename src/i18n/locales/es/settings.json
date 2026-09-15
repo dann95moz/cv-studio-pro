@@ -77,6 +77,8 @@
     "copyPrompt": "Copiar Prompt",
     "promptCopied": "¡Prompt copiado al portapapeles!",
     "promptCopiedToast": "¡Prompt copiado al portapapeles! Pégalo en tu IA favorita y trae el resultado aquí.",
+    "promptCopiedHelper": "El prompt ya está copiado en tu portapapeles. Pega la respuesta de tu IA abajo:",
+    "reCopyPrompt": "Copiar de nuevo",
     "generateCvAction": "Generar CV",
     "pasteAiResponse": "Pegar Respuesta de la IA",
     "pasteAiResponsePlaceholder": "Pega aquí la respuesta completa generada por ChatGPT, Claude, Gemini...",

@@ -77,6 +77,8 @@
     "copyPrompt": "Prompt kopieren",
     "promptCopied": "Prompt in die Zwischenablage kopiert!",
     "promptCopiedToast": "Prompt in die Zwischenablage kopiert! Füge ihn in deine bevorzugte KI ein und bringe das Ergebnis hierher.",
+    "promptCopiedHelper": "Prompt in die Zwischenablage kopiert. Fügen Sie die Antwort Ihrer KI unten ein:",
+    "reCopyPrompt": "Erneut kopieren",
     "generateCvAction": "CV generieren",
     "pasteAiResponse": "KI-Antwort einfügen",
     "pasteAiResponsePlaceholder": "Fügen Sie hier die vollständige Antwort von ChatGPT, Claude, Gemini ein...",

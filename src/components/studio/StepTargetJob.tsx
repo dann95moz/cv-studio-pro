@@ -59,7 +59,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
       handleRoleChange,
       handleAddSkillToMaster,
       flushAll,
-      openManualPromptModal,
+      handleCopyPromptAndOpenModal,
     },
   } = useStepTargetJobFacade({
     content,
@@ -106,8 +106,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
 
   const handleOpenManualPrompt = () => {
     if (isGenerating || !hasJob) return;
-    flushAll();
-    openManualPromptModal();
+    handleCopyPromptAndOpenModal();
   };
 
   return (

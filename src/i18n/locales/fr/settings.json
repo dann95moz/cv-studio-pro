@@ -77,6 +77,8 @@
     "copyPrompt": "Copier le prompt",
     "promptCopied": "Prompt copié dans le presse-papiers !",
     "promptCopiedToast": "Prompt copié dans le presse-papiers ! Collez-le dans votre IA préférée et rapportez le résultat ici.",
+    "promptCopiedHelper": "Le prompt est copié dans votre presse-papiers. Collez la réponse de votre IA ci-dessous :",
+    "reCopyPrompt": "Copier à nouveau",
     "generateCvAction": "Générer le CV",
     "pasteAiResponse": "Coller la Réponse IA",
     "pasteAiResponsePlaceholder": "Collez ici la réponse complète générée par ChatGPT, Claude, Gemini...",
