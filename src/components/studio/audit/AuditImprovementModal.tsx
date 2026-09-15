@@ -14,6 +14,7 @@ import {
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { useTranslation } from 'react-i18next';
+import { RADIUS_TOKENS } from '../../../theme/dimensions';
 import { ActionModalState, AuditImprovementModalProps } from '../../../types';
 
 export type { ActionModalState, AuditImprovementModalProps };
@@ -27,7 +28,41 @@ export const AuditImprovementModal: React.FC<AuditImprovementModalProps> = ({
   const { t } = useTranslation(['audit', 'common']);
 
   return (
-    <Dialog open={modalState.open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={modalState.open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: { xs: `${RADIUS_TOKENS.xl} ${RADIUS_TOKENS.xl} 0 0`, sm: RADIUS_TOKENS.xl },
+            m: { xs: 0, sm: 2 },
+            position: { xs: 'fixed', sm: 'relative' },
+            bottom: { xs: 0, sm: 'auto' },
+            maxHeight: { xs: '92vh', sm: '88vh' },
+            width: { xs: '100%', sm: 'auto' },
+            pt: { xs: 'max(calc(env(safe-area-inset-top, 0px) + 4px), 8px)', sm: 0 },
+            pb: { xs: 'max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px)', sm: 0 },
+            pl: { xs: 'env(safe-area-inset-left, 0px)', sm: 0 },
+            pr: { xs: 'env(safe-area-inset-right, 0px)', sm: 0 },
+          },
+        },
+      }}
+    >
+      {/* Mobile Drag Handle Pill */}
+      <Box
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          width: 36,
+          height: 4,
+          borderRadius: RADIUS_TOKENS.full,
+          bgcolor: 'divider',
+          mx: 'auto',
+          mb: 1.5,
+          mt: 0.5,
+        }}
+      />
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <AutoAwesomeRoundedIcon color="primary" />

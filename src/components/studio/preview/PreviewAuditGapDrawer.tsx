@@ -357,8 +357,8 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
         <Box
           sx={{
             position: { xs: 'fixed', md: 'relative' },
-            top: { xs: 0, md: 'auto' },
-            bottom: { xs: 0, md: 'auto' },
+            top: 0,
+            bottom: 0,
             left: { xs: 0, sm: 'auto' },
             right: 0,
             width: { xs: '100%', sm: 380, md: 380 },
@@ -368,8 +368,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
             display: 'flex',
             flexDirection: 'column',
             height: { xs: '100dvh', md: '100%' },
-            overflowY: 'auto',
-            overflowX: 'hidden',
+            overflow: 'hidden',
             flexShrink: 0,
             zIndex: { xs: theme.zIndex.modal, md: 10 },
             boxSizing: 'border-box',
@@ -379,7 +378,9 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
           <Box
             sx={{
               p: 1,
-              px: { xs: 1, sm: 1.5 },
+              pt: { xs: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 24px)', md: 1 },
+              pl: { xs: 'max(calc(env(safe-area-inset-left, 0px) + 8px), 12px)', sm: 1.5 },
+              pr: { xs: 'max(calc(env(safe-area-inset-right, 0px) + 8px), 12px)', sm: 1.5 },
               borderBottom: `1px solid ${theme.palette.divider}`,
               display: 'flex',
               alignItems: 'center',
@@ -389,6 +390,7 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
               boxSizing: 'border-box',
               width: '100%',
               minWidth: 0,
+              flexShrink: 0,
             }}
           >
             <ButtonGroup size="small" variant="outlined" sx={{ flex: 1, minWidth: 0, display: 'flex' }}>
@@ -454,7 +456,21 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
           </Box>
 
           {/* Panel Content Body */}
-          <Box sx={{ p: { xs: 1.5, sm: 2 }, pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 36px)', sm: 4 }, display: 'flex', flexDirection: 'column', gap: 2.5, flex: 1, overflowY: 'auto', overflowX: 'hidden', boxSizing: 'border-box' }}>
+          <Box
+            sx={{
+              p: { xs: 1.5, sm: 2 },
+              pl: { xs: 'max(calc(env(safe-area-inset-left, 0px) + 12px), 16px)', sm: 2 },
+              pr: { xs: 'max(calc(env(safe-area-inset-right, 0px) + 12px), 16px)', sm: 2 },
+              pb: { xs: 'max(calc(env(safe-area-inset-bottom, 0px) + 40px), 56px)', sm: 4 },
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2.5,
+              flex: 1,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              boxSizing: 'border-box',
+            }}
+          >
             {/* TAB 1: AUDIT BREAKDOWN */}
             {activeTab === 'audit' && (
               <>
@@ -564,6 +580,22 @@ export const PreviewAuditGapDrawer: React.FC<PreviewAuditGapDrawerProps> = React
           onClose={() => setFullReportModalOpen(false)}
           fullWidth
           maxWidth="md"
+          slotProps={{
+            paper: {
+              sx: {
+                borderRadius: { xs: `${RADIUS_TOKENS.xl} ${RADIUS_TOKENS.xl} 0 0`, sm: RADIUS_TOKENS.xl },
+                m: { xs: 0, sm: 2 },
+                position: { xs: 'fixed', sm: 'relative' },
+                bottom: { xs: 0, sm: 'auto' },
+                maxHeight: { xs: '92vh', sm: '88vh' },
+                width: { xs: '100%', sm: 'auto' },
+                pt: { xs: 'max(calc(env(safe-area-inset-top, 0px) + 4px), 8px)', sm: 0 },
+                pb: { xs: 'max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px)', sm: 0 },
+                pl: { xs: 'env(safe-area-inset-left, 0px)', sm: 0 },
+                pr: { xs: 'env(safe-area-inset-right, 0px)', sm: 0 },
+              },
+            },
+          }}
         >
           <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span>{t('gap:title', 'Target Job Gap Analysis Report')}</span>

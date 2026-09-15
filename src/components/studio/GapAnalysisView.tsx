@@ -93,7 +93,7 @@ export const GapAnalysisView: React.FC<GapAnalysisViewProps> = ({
 
       {/* Full Gap Report Formatted / Markdown View */}
       <div className="gap-card">
-        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="card-icon">
               <Icon type="file-text" size={16} />

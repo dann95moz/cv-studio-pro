@@ -177,10 +177,10 @@ export const QualityAuditView: React.FC<QualityAuditViewProps> = ({
             </Box>
           </Box>
 
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
             <HexagonRadarChart
               dimensions={radarDimensions}
-              size={320}
+              size={300}
               actualLabel={t('audit:radar.actualLabel', 'Actual')}
               targetLabel={t('audit:radar.targetLabel', 'Objetivo para esta vacante')}
               targetShortLabel={t('audit:radar.targetShort', 'Meta')}
@@ -201,7 +201,7 @@ export const QualityAuditView: React.FC<QualityAuditViewProps> = ({
             onClick={handleToggleAll}
             sx={{ fontSize: '0.75rem', fontWeight: 600, py: 0.25, px: 1.5 }}
           >
-            {allExpanded ? 'Collapse All' : 'Expand All'}
+            {allExpanded ? t('common:actions.collapseAll', 'Collapse All') : t('common:actions.expandAll', 'Expand All')}
           </Button>
         </div>
 
@@ -247,7 +247,7 @@ export const QualityAuditView: React.FC<QualityAuditViewProps> = ({
                   onClick={() => handleOpenAction(p.recommendationForMasterData, p.pillarName)}
                   sx={{ fontSize: '0.75rem', fontWeight: 600, py: 0.25, px: 1 }}
                 >
-                  Execute Lever
+                  {t('audit:actions.executeLever', 'Execute Lever')}
                 </Button>
               </div>
             </div>
