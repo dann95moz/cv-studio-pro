@@ -98,7 +98,7 @@ export const CURATED_PALETTES: Record<Exclude<PaletteId, 'custom'>, PaletteConfi
     accentColor: '#0f172a', // Deep Onyx
     accentLight: 'rgba(15, 23, 42, 0.06)',
     accentBorder: 'rgba(15, 23, 42, 0.2)',
-    accentHover: '#000000',
+    accentHover: '#1e293b',
     headerBg: '#0f172a',
     sidebarBg: '#0f172a',
     badgeBg: '#f8fafc',

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Button,
   ButtonBase,
   Chip,
   CircularProgress,
@@ -13,6 +12,7 @@ import FormatListBulletedRoundedIcon from '@mui/icons-material/FormatListBullete
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
 import { useTranslation } from 'react-i18next';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
 import { hapticsService } from '../../../core/haptics';
@@ -27,8 +27,12 @@ export interface NativeChoiceListProps {
 }
 
 /**
- * Native mobile presentation for Step 1 mode selection.
- * Pure dumb presentational component living directly on screen background.
+ * NativeChoiceList
+ * Clean, mobile-first entrance view for Step 1 onboarding:
+ * - Squircle avatar icon header
+ * - Centered title and subtitle
+ * - 3 Stacked interactive option cards with featured "Importar CV"
+ * - Centered sample profile trigger
  */
 export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
   onSelectGuided,
@@ -58,38 +62,68 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
     <Box
       sx={{
         width: '100%',
-        maxWidth: 460,
+        maxWidth: 480,
         mx: 'auto',
         my: 'auto',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         flex: 1,
-        px: { xs: 2, sm: 2.5 },
-        py: { xs: 2.5, sm: 3 },
+        px: { xs: 2, sm: 3 },
+        py: { xs: 3, sm: 4 },
         boxSizing: 'border-box',
         position: 'relative',
       }}
     >
-      {/* Main Title directly on screen background */}
-      <Box sx={{ mb: 2.5, px: 0.5 }}>
+      {/* 1. Centered Profile Squircle Icon */}
+      <Box
+        sx={{
+          width: 72,
+          height: 72,
+          borderRadius: RADIUS_TOKENS.xl,
+          bgcolor: isDark ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.08),
+          border: `1px solid ${isDark ? alpha(theme.palette.primary.main, 0.25) : alpha(theme.palette.primary.main, 0.20)}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mx: 'auto',
+          mb: 3,
+          color: 'primary.main',
+        }}
+      >
+        <PersonOutlineRoundedIcon sx={{ fontSize: 36 }} />
+      </Box>
+
+      {/* 2. Main Title & Subtitle (Centered) */}
+      <Box sx={{ mb: 3.5, px: 0.5, textAlign: 'center' }}>
         <Typography
           variant="h5"
           component="h1"
           sx={{
-            fontWeight: 500,
-            fontSize: { xs: '1.35rem', sm: '1.5rem' },
-            letterSpacing: '-0.01em',
-            lineHeight: 1.3,
+            fontWeight: 800,
+            fontSize: { xs: '1.45rem', sm: '1.65rem' },
+            letterSpacing: '-0.02em',
+            lineHeight: 1.25,
             color: 'text.primary',
+            mb: 0.75,
           }}
         >
           {t('profile:choice.title', '¿Cómo querés empezar tu perfil?')}
         </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            fontSize: '0.92rem',
+            lineHeight: 1.4,
+          }}
+        >
+          {t('profile:choice.nativeSubtitle', 'Elegí una opción para continuar.')}
+        </Typography>
       </Box>
 
-      {/* 3 Native Interactive Option Rows */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+      {/* 3. Three Interactive Option Cards */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, width: '100%' }}>
         {/* Row 1: Sincronizar desde PC */}
         <ButtonBase
           onClick={() => {
@@ -100,23 +134,23 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
           sx={{
             width: '100%',
             py: 1.75,
-            px: 1.5,
+            px: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             textAlign: 'left',
             borderRadius: RADIUS_TOKENS.lg,
-            borderLeft: selectedOption === 'sync'
-              ? `4px solid ${theme.palette.primary.main}`
-              : '4px solid transparent',
+            border: `1px solid ${selectedOption === 'sync' ? theme.palette.primary.main : theme.palette.divider}`,
             bgcolor: selectedOption === 'sync'
               ? (isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff')
-              : 'transparent',
-            transition: 'all 0.15s ease',
+              : (isDark ? alpha(theme.palette.text.primary, 0.02) : 'background.paper'),
+            transition: 'all 0.18s ease',
+            '&:hover': {
+              bgcolor: isDark ? alpha(theme.palette.text.primary, 0.05) : alpha(theme.palette.primary.main, 0.03),
+              borderColor: alpha(theme.palette.primary.main, 0.35),
+            },
             '&:active': {
               transform: 'scale(0.985)',
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff',
             },
           }}
         >
@@ -129,10 +163,8 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: selectedOption === 'sync'
-                  ? (isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe')
-                  : (isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9'),
-                color: selectedOption === 'sync' ? 'primary.main' : 'text.primary',
+                bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : alpha(theme.palette.text.primary, 0.04),
+                color: 'text.primary',
                 flexShrink: 0,
                 transition: 'all 0.15s ease',
               }}
@@ -140,7 +172,7 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
               <QrCodeScannerRoundedIcon sx={{ fontSize: 22 }} />
             </Box>
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.25, color: 'text.primary' }}>
                 {t('profile:choice.syncCardTitleShort', 'Sincronizar desde PC')}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
@@ -151,10 +183,7 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
           <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
         </ButtonBase>
 
-        {/* Divider */}
-        <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, ml: '72px', mr: 1.5 }} />
-
-        {/* Row 2: Importar CV */}
+        {/* Row 2: Importar CV (Featured / Recommended) */}
         <ButtonBase
           onClick={() => {
             hapticsService.impactLight();
@@ -163,24 +192,25 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
           }}
           sx={{
             width: '100%',
-            py: 1.75,
-            px: 1.5,
+            py: 1.85,
+            px: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             textAlign: 'left',
             borderRadius: RADIUS_TOKENS.lg,
-            borderLeft: selectedOption === 'import'
-              ? `4px solid ${theme.palette.primary.main}`
-              : '4px solid transparent',
-            bgcolor: selectedOption === 'import'
-              ? (isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff')
-              : 'transparent',
-            transition: 'all 0.15s ease',
+            borderLeft: `4px solid ${theme.palette.primary.main}`,
+            borderTop: `1px solid ${isDark ? alpha(theme.palette.primary.main, 0.35) : alpha(theme.palette.primary.main, 0.28)}`,
+            borderRight: `1px solid ${isDark ? alpha(theme.palette.primary.main, 0.35) : alpha(theme.palette.primary.main, 0.28)}`,
+            borderBottom: `1px solid ${isDark ? alpha(theme.palette.primary.main, 0.35) : alpha(theme.palette.primary.main, 0.28)}`,
+            bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+            transition: 'all 0.18s ease',
+            '&:hover': {
+              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : alpha(theme.palette.primary.main, 0.07),
+              borderColor: 'primary.main',
+            },
             '&:active': {
               transform: 'scale(0.985)',
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff',
             },
           }}
         >
@@ -193,10 +223,8 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: selectedOption === 'import'
-                  ? (isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe')
-                  : (isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9'),
-                color: selectedOption === 'import' ? 'primary.main' : 'text.primary',
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.22) : alpha(theme.palette.primary.main, 0.15),
+                color: 'primary.main',
                 flexShrink: 0,
                 transition: 'all 0.15s ease',
               }}
@@ -205,7 +233,7 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
             </Box>
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.25, color: 'text.primary' }}>
                   {t('profile:choice.importCardTitleShort', 'Importar CV')}
                 </Typography>
                 <Chip
@@ -216,8 +244,8 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
                     fontSize: '0.72rem',
                     fontWeight: 600,
                     borderRadius: RADIUS_TOKENS.full,
-                    bgcolor: isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe',
-                    color: isDark ? '#93c5fd' : '#1d4ed8',
+                    bgcolor: isDark ? alpha(theme.palette.primary.main, 0.22) : alpha(theme.palette.primary.main, 0.14),
+                    color: isDark ? '#7dd3fc' : '#0284c7',
                     border: 'none',
                     '& .MuiChip-label': { px: 1 },
                   }}
@@ -228,11 +256,8 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
               </Typography>
             </Box>
           </Box>
-          <ChevronRightRoundedIcon sx={{ color: 'text.disabled', fontSize: 22, ml: 1, flexShrink: 0 }} />
+          <ChevronRightRoundedIcon sx={{ color: 'primary.main', fontSize: 22, ml: 1, flexShrink: 0 }} />
         </ButtonBase>
-
-        {/* Divider */}
-        <Box sx={{ height: '1px', bgcolor: theme.palette.divider, my: 0.5, ml: '72px', mr: 1.5 }} />
 
         {/* Row 3: Formulario guiado */}
         <ButtonBase
@@ -244,23 +269,23 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
           sx={{
             width: '100%',
             py: 1.75,
-            px: 1.5,
+            px: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             textAlign: 'left',
             borderRadius: RADIUS_TOKENS.lg,
-            borderLeft: selectedOption === 'form'
-              ? `4px solid ${theme.palette.primary.main}`
-              : '4px solid transparent',
+            border: `1px solid ${selectedOption === 'form' ? theme.palette.primary.main : theme.palette.divider}`,
             bgcolor: selectedOption === 'form'
               ? (isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff')
-              : 'transparent',
-            transition: 'all 0.15s ease',
+              : (isDark ? alpha(theme.palette.text.primary, 0.02) : 'background.paper'),
+            transition: 'all 0.18s ease',
+            '&:hover': {
+              bgcolor: isDark ? alpha(theme.palette.text.primary, 0.05) : alpha(theme.palette.primary.main, 0.03),
+              borderColor: alpha(theme.palette.primary.main, 0.35),
+            },
             '&:active': {
               transform: 'scale(0.985)',
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.14) : '#eff6ff',
             },
           }}
         >
@@ -273,10 +298,8 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: selectedOption === 'form'
-                  ? (isDark ? alpha(theme.palette.primary.main, 0.25) : '#dbeafe')
-                  : (isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9'),
-                color: selectedOption === 'form' ? 'primary.main' : 'text.primary',
+                bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : alpha(theme.palette.text.primary, 0.04),
+                color: 'text.primary',
                 flexShrink: 0,
                 transition: 'all 0.15s ease',
               }}
@@ -284,7 +307,7 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
               <FormatListBulletedRoundedIcon sx={{ fontSize: 22 }} />
             </Box>
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.25, color: 'text.primary' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.25, color: 'text.primary' }}>
                 {t('profile:choice.guidedCardTitleShort', 'Formulario guiado')}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.84rem', mt: 0.25, lineHeight: 1.35 }}>
@@ -296,35 +319,29 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
         </ButtonBase>
       </Box>
 
-      {/* Sample Demo Button */}
-      <Box sx={{ mt: 2.5, px: 1.5, display: 'flex', justifyContent: 'flex-start' }}>
-        <Button
-          variant="text"
-          size="small"
-          onClick={() => {
-            hapticsService.impactLight();
-            onLoadSample();
-          }}
-          sx={{
-            color: 'text.secondary',
-            fontSize: '0.86rem',
-            textTransform: 'none',
-            fontWeight: 500,
-            p: 0,
-            minWidth: 'auto',
-            textAlign: 'left',
-            justifyContent: 'flex-start',
-            '&:hover': {
+      {/* 4. Centered Sample Profile Link */}
+      <Box sx={{ mt: 3.5, display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.88rem' }}>
+          {t('profile:choice.sampleQuestion', '¿Solo probando?')}{' '}
+          <Box
+            component="span"
+            onClick={() => {
+              hapticsService.impactLight();
+              onLoadSample();
+            }}
+            sx={{
               color: 'primary.main',
-              bgcolor: 'transparent',
-            },
-          }}
-        >
-          {t('profile:choice.sampleQuestion', '¿Solo quieres probar?')}{' '}
-          <Box component="span" sx={{ color: 'primary.main', fontWeight: 700, ml: 0.5 }}>
-            {t('profile:choice.loadSampleAction', 'Cargar Ejemplo')}
+              fontWeight: 700,
+              cursor: 'pointer',
+              ml: 0.5,
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
+          >
+            {t('profile:choice.loadSampleAction', 'Cargar perfil de ejemplo')}
           </Box>
-        </Button>
+        </Typography>
       </Box>
 
       {/* Processing Overlay */}
@@ -334,7 +351,7 @@ export const NativeChoiceList: React.FC<NativeChoiceListProps> = React.memo(({
             position: 'absolute',
             inset: 0,
             zIndex: 20,
-            bgcolor: isDark ? 'rgba(7, 10, 18, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+            bgcolor: isDark ? 'rgba(11, 15, 25, 0.88)' : 'rgba(241, 244, 249, 0.88)',
             backdropFilter: 'blur(6px)',
             display: 'flex',
             flexDirection: 'column',
