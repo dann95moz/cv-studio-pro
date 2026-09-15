@@ -11,6 +11,7 @@
     "tailorNow": "Lebenslauf jetzt anpassen",
     "tailoring": "Lebenslauf wird angepasst...",
     "byoAiPrompt": "Prompt kopieren (Eigene KI)",
+    "copyPrompt": "Prompt kopieren",
     "viewExisting": "Vorhandenen Lebenslauf ansehen"
   },
   "fields": {

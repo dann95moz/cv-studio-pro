@@ -15,6 +15,7 @@ export interface AppGlobalOverlaysProps {
   manualPromptBundle: string;
   onCloseManualPromptModal: () => void;
   onSubmitManualResponse: (response: string) => void;
+  onCopyPrompt?: () => void;
   globalNotification: GlobalNotification | null;
   onHideNotification: () => void;
 }
@@ -28,6 +29,7 @@ export const AppGlobalOverlays: React.FC<AppGlobalOverlaysProps> = ({
   manualPromptBundle,
   onCloseManualPromptModal,
   onSubmitManualResponse,
+  onCopyPrompt,
   globalNotification,
   onHideNotification,
 }) => {
@@ -67,6 +69,7 @@ export const AppGlobalOverlays: React.FC<AppGlobalOverlaysProps> = ({
         onClose={onCloseManualPromptModal}
         promptText={manualPromptBundle}
         onSubmitResponse={onSubmitManualResponse}
+        onCopyPrompt={onCopyPrompt}
       />
 
       {/* Global Toast Notification */}
@@ -76,7 +79,10 @@ export const AppGlobalOverlays: React.FC<AppGlobalOverlaysProps> = ({
           autoHideDuration={6000}
           onClose={onHideNotification}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          sx={{ top: { xs: '72px', sm: '80px' } }}
+          sx={{
+            top: { xs: '72px', sm: '80px' },
+            zIndex: (theme) => theme.zIndex.snackbar + 100,
+          }}
         >
           <Alert
             severity={globalNotification.severity || 'success'}

@@ -12,7 +12,6 @@ import {
   Paper,
   Chip,
   Tooltip,
-  Collapse,
   useTheme,
   alpha,
   Alert,
@@ -21,10 +20,6 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
-import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
-import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import { useTranslation } from 'react-i18next';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
 
@@ -33,18 +28,23 @@ export interface ManualAiPromptModalProps {
   onClose: () => void;
   promptText: string;
   onSubmitResponse: (response: string) => void;
+  onCopyPrompt?: () => void;
   isProcessing?: boolean;
   title?: string;
 }
 
 /**
- * Dumb/Presentational Modal for Bring-Your-Own-AI (BYO-AI) Prompt & Paste workflow.
+ * Dumb/Presentational Modal & Bottom Sheet for Bring-Your-Own-AI (BYO-AI) Prompt & Paste workflow.
+ * - Mobile: Renders as an ergonomic slide-up bottom sheet with native drag pill and max screen focus.
+ * - Desktop: Renders as a focused, centered dialog.
+ * - Streamlined: Minimal single-click copy action and expansive response textarea for pasting.
  */
 export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
   open,
   onClose,
   promptText,
   onSubmitResponse,
+  onCopyPrompt,
   isProcessing = false,
   title,
 }) => {
@@ -53,7 +53,6 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
   const isDark = theme.palette.mode === 'dark';
 
   const [copied, setCopied] = useState(false);
-  const [showFullPrompt, setShowFullPrompt] = useState(false);
   const [responseInput, setResponseInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -62,6 +61,7 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
       await navigator.clipboard.writeText(promptText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+      onCopyPrompt?.();
     } catch {
       // Fallback if clipboard API is restricted
       const textarea = document.createElement('textarea');
@@ -72,6 +72,7 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
       document.body.removeChild(textarea);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+      onCopyPrompt?.();
     }
   };
 
@@ -88,19 +89,39 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       slotProps={{
         paper: {
           sx: {
-            borderRadius: RADIUS_TOKENS.xl,
-            p: { xs: 1, sm: 2 },
+            borderRadius: { xs: `${RADIUS_TOKENS.xl} ${RADIUS_TOKENS.xl} 0 0`, sm: RADIUS_TOKENS.xl },
+            m: { xs: 0, sm: 2 },
+            position: { xs: 'fixed', sm: 'relative' },
+            bottom: { xs: 0, sm: 'auto' },
+            maxHeight: { xs: '92vh', sm: '88vh' },
+            width: { xs: '100%', sm: 'auto' },
+            p: { xs: 1.5, sm: 2 },
+            pb: { xs: 'max(calc(env(safe-area-inset-bottom, 0px) + 16px), 20px)', sm: 2.5 },
           },
         },
       }}
     >
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {/* Mobile Drag Handle Pill */}
+      <Box
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          width: 36,
+          height: 4,
+          borderRadius: RADIUS_TOKENS.full,
+          bgcolor: 'divider',
+          mx: 'auto',
+          mb: 1.5,
+          mt: 0.5,
+        }}
+      />
+
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1, px: { xs: 1, sm: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <AutoAwesomeRoundedIcon color="success" />
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             {title || t('settings:providers.byoAiTitle', 'Bring Your Own AI (Prompt & Paste)')}
@@ -117,140 +138,65 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
-        {/* Step 1: Copy Prompt Card */}
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important', px: { xs: 1, sm: 2 } }}>
+        {/* Step 1: Copy Prompt Card (Streamlined, compact) */}
         <Paper
           variant="outlined"
           sx={{
-            p: 2,
+            p: { xs: 1.5, sm: 2 },
             borderRadius: RADIUS_TOKENS.md,
             bgcolor: isDark ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.success.main, 0.02),
             borderColor: alpha(theme.palette.success.main, 0.25),
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            justifyContent: 'space-between',
             gap: 1.5,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main' }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.main', mb: 0.25 }}>
               {t('settings:providers.byoAiStep1', '1. Copy Calibrated Prompt')}
             </Typography>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Button
-                size="small"
-                variant="outlined"
-                color="inherit"
-                startIcon={showFullPrompt ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
-                onClick={() => setShowFullPrompt((p) => !p)}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  textTransform: 'none',
-                  borderColor: alpha(theme.palette.divider, 0.8),
-                }}
-              >
-                {showFullPrompt
-                  ? t('settings:providers.hidePrompt', 'Hide prompt')
-                  : t('settings:providers.viewPrompt', 'View prompt')}
-              </Button>
-
-              <Button
-                size="small"
-                variant="contained"
-                color="success"
-                startIcon={copied ? <CheckRoundedIcon /> : <ContentCopyRoundedIcon />}
-                onClick={handleCopyPrompt}
-                sx={{ fontWeight: 700, textTransform: 'none' }}
-              >
-                {copied
-                  ? t('settings:providers.promptCopied', 'Prompt Copied!')
-                  : t('settings:providers.copyPrompt', 'Copy Full Prompt')}
-              </Button>
-            </Box>
-          </Box>
-
-          <Collapse in={showFullPrompt} timeout="auto" unmountOnExit>
-            <TextField
-              fullWidth
-              multiline
-              rows={7}
-              value={promptText}
-              slotProps={{ input: { readOnly: true } }}
-              sx={{
-                '& .MuiInputBase-root': {
-                  fontFamily: 'monospace',
-                  fontSize: '0.78rem',
-                  bgcolor: 'background.default',
-                },
-              }}
-            />
-          </Collapse>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-              {t('settings:providers.openInWebAi', 'Open in Web AI:')}
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4 }}>
+              {t(
+                'settings:providers.byoAiStep1Desc',
+                'CV Studio formats your master data, target vacancy, and ATS rules into a single calibrated prompt.'
+              )}
             </Typography>
-            <Button
-              size="small"
-              variant="text"
-              color="inherit"
-              href="https://chatgpt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-              sx={{ fontSize: '0.74rem', textTransform: 'none', py: 0 }}
-            >
-              ChatGPT
-            </Button>
-            <Button
-              size="small"
-              variant="text"
-              color="inherit"
-              href="https://claude.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-              sx={{ fontSize: '0.74rem', textTransform: 'none', py: 0 }}
-            >
-              Claude
-            </Button>
-            <Button
-              size="small"
-              variant="text"
-              color="inherit"
-              href="https://gemini.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-              sx={{ fontSize: '0.74rem', textTransform: 'none', py: 0 }}
-            >
-              Gemini
-            </Button>
-            <Button
-              size="small"
-              variant="text"
-              color="inherit"
-              href="https://chat.deepseek.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '13px !important' }} />}
-              sx={{ fontSize: '0.74rem', textTransform: 'none', py: 0 }}
-            >
-              DeepSeek
-            </Button>
           </Box>
+
+          <Button
+            size="medium"
+            variant="contained"
+            color="success"
+            startIcon={copied ? <CheckRoundedIcon /> : <ContentCopyRoundedIcon />}
+            onClick={handleCopyPrompt}
+            sx={{
+              fontWeight: 700,
+              textTransform: 'none',
+              px: 2.5,
+              py: 0.9,
+              flexShrink: 0,
+              alignSelf: { xs: 'stretch', sm: 'center' },
+            }}
+          >
+            {copied
+              ? t('settings:providers.promptCopied', 'Prompt Copied!')
+              : t('settings:providers.copyPrompt', 'Copy Prompt')}
+          </Button>
         </Paper>
 
-        {/* Step 2: Paste Response */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {/* Step 2: Paste Response (Expanded Space) */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flex: 1 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
             {t('settings:providers.pasteAiResponse', '2. Paste AI Response')}
           </Typography>
           <TextField
             fullWidth
             multiline
-            rows={6}
+            minRows={8}
+            maxRows={14}
             placeholder={t(
               'settings:providers.pasteAiResponsePlaceholder',
               'Paste the complete response generated by ChatGPT, Claude, Gemini here...'
@@ -268,7 +214,10 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
             sx={{
               '& .MuiInputBase-root': {
                 fontFamily: 'monospace',
-                fontSize: '0.8rem',
+                fontSize: '0.82rem',
+                lineHeight: 1.5,
+                minHeight: { xs: '180px', sm: '220px' },
+                alignItems: 'flex-start',
               },
             }}
           />
@@ -281,7 +230,7 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: 'space-between' }}>
+      <DialogActions sx={{ px: { xs: 1, sm: 2 }, pb: 1, pt: 1, justifyContent: 'space-between' }}>
         <Button variant="text" color="inherit" onClick={onClose} disabled={isProcessing}>
           {t('common:actions.cancel', 'Cancel')}
         </Button>
@@ -296,12 +245,12 @@ export const ManualAiPromptModal: React.FC<ManualAiPromptModalProps> = ({
             <Button
               variant="contained"
               color="primary"
-              startIcon={<PlayArrowRoundedIcon />}
+              startIcon={<AutoAwesomeRoundedIcon />}
               onClick={handleProcess}
               disabled={isProcessing || !responseInput.trim()}
               sx={{ fontWeight: 700, px: 3 }}
             >
-              {t('settings:providers.processResponseAndContinue', 'Process Response & Continue')}
+              {t('settings:providers.generateCvAction', 'Generate CV')}
             </Button>
           </span>
         </Tooltip>

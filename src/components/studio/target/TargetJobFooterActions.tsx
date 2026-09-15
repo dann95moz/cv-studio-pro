@@ -113,7 +113,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
                 width: { xs: '100%', sm: 'auto' },
               }}
             >
-              {t('target:actions.byoAiPrompt', 'Copy Prompt (My Own AI)')}
+              {t('target:actions.copyPrompt', 'Copy Prompt')}
             </Button>
 
             {/* Primary: Direct AI Tailor */}
@@ -152,7 +152,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               width: { xs: '100%', sm: 'auto' },
             }}
           >
-            {t('target:actions.byoAiPrompt', 'Copy Prompt (My Own AI)')}
+            {t('target:actions.copyPrompt', 'Copy Prompt')}
           </Button>
         )}
       </Box>

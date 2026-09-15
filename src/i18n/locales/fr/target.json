@@ -11,6 +11,7 @@
     "tailorNow": "Adapter le CV Maintenant",
     "tailoring": "Adaptation du CV...",
     "byoAiPrompt": "Copier le prompt (Ma propre IA)",
+    "copyPrompt": "Copier le prompt",
     "viewExisting": "Voir le CV Existant"
   },
   "fields": {

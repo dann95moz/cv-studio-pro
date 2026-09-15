@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
@@ -19,7 +19,7 @@ import { DEMO_MASTER_DATA, DEMO_TARGET_JOB } from '../constants/templates';
 import './App.css';
 
 export const App: React.FC = () => {
-  const { t } = useTranslation(['common', 'profile']);
+  const { t } = useTranslation(['common', 'profile', 'settings']);
 
   const {
     navigation: {
@@ -174,6 +174,16 @@ export const App: React.FC = () => {
     setMasterDataMode,
   });
 
+  const handlePromptCopied = useCallback(() => {
+    showNotification({
+      message: t(
+        'settings:providers.promptCopiedToast',
+        'Prompt copied to clipboard! Paste it into your favorite AI and bring the result back here.'
+      ),
+      severity: 'success',
+    });
+  }, [showNotification, t]);
+
   return (
     <div className="studio-app">
       {/* Header Bar (Desktop Navbar, Stepper, Mobile Top Header) */}
@@ -245,6 +255,7 @@ export const App: React.FC = () => {
         manualPromptBundle={manualPromptBundle}
         onCloseManualPromptModal={closeManualPromptModal}
         onSubmitManualResponse={submitManualResponse}
+        onCopyPrompt={handlePromptCopied}
         globalNotification={globalNotification}
         onHideNotification={hideNotification}
       />
