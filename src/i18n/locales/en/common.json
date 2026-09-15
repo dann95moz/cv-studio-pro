@@ -51,7 +51,9 @@
     "filter": "Filter",
     "apply": "Apply",
     "retry": "Retry",
-    "paste": "Paste"
+    "paste": "Paste",
+    "collapseAll": "Collapse All",
+    "expandAll": "Expand All"
   },
   "language": {
     "selectLanguage": "Language",

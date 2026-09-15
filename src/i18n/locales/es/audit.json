@@ -130,7 +130,8 @@
     "linkPortfolio": "Enlazar GitHub / Portafolio",
     "addCertification": "Añadir Certificación Oficial",
     "reorganizeCategories": "Reorganize en 3 Categorías",
-    "applyAction": "Aplicar Acción"
+    "applyAction": "Aplicar Acción",
+    "executeLever": "Ejecutar Palanca"
   },
   "appliedSuccess": "¡Se aplicó con éxito \"{{title}}\" a tu CV adaptado!",
   "status": {

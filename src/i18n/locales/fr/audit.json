@@ -130,7 +130,8 @@
     "linkPortfolio": "Lier GitHub / Portfolio",
     "addCertification": "Ajouter une certification officielle",
     "reorganizeCategories": "Réorganiser en 3 catégories",
-    "applyAction": "Appliquer l'action"
+    "applyAction": "Appliquer l'action",
+    "executeLever": "Activer le levier"
   },
   "appliedSuccess": "\"{{title}}\" a été appliqué avec succès à votre CV adapté !",
   "status": {

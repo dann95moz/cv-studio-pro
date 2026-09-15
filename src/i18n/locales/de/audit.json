@@ -130,7 +130,8 @@
     "linkPortfolio": "GitHub / Portfolio verknüpfen",
     "addCertification": "Offizielle Zertifizierung hinzufügen",
     "reorganizeCategories": "In 3 Kategorien umstrukturieren",
-    "applyAction": "Aktion anwenden"
+    "applyAction": "Aktion anwenden",
+    "executeLever": "Hebel anwenden"
   },
   "appliedSuccess": "\"{{title}}\" wurde erfolgreich auf Ihren angepassten Lebenslauf angewendet!",
   "status": {

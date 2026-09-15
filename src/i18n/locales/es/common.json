@@ -51,7 +51,9 @@
     "filter": "Filtrar",
     "apply": "Aplicar",
     "retry": "Reintentar",
-    "paste": "Pegar"
+    "paste": "Pegar",
+    "collapseAll": "Colapsar Todo",
+    "expandAll": "Expandir Todo"
   },
   "language": {
     "selectLanguage": "Idioma",

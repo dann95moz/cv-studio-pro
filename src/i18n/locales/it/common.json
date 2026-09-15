@@ -51,7 +51,9 @@
     "filter": "Filtra",
     "apply": "Applica",
     "retry": "Riprova",
-    "paste": "Incolla"
+    "paste": "Incolla",
+    "collapseAll": "Comprimi tutto",
+    "expandAll": "Espandi tutto"
   },
   "language": {
     "selectLanguage": "Lingua",
