@@ -49,7 +49,8 @@ export const HexagonRadarChart: React.FC<HexagonRadarChartProps> = ({
   if (numAxes < 3) return null;
 
   const center = size / 2;
-  const maxRadius = (size / 2) - 52; // margin for outer text labels
+  const maxRadius = (size / 2) - 58; // margin for outer text labels
+  const svgPadding = 55;
 
   const angleStep = (2 * Math.PI) / numAxes;
   const startAngle = -Math.PI / 2; // Point top vertex straight up
@@ -111,10 +112,13 @@ export const HexagonRadarChart: React.FC<HexagonRadarChartProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        maxWidth: size + 80,
+        maxWidth: { xs: '100%', sm: size + 60 },
         mx: 'auto',
         position: 'relative',
         userSelect: 'none',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        p: { xs: 0.5, sm: 1 },
       }}
     >
       {/* Top Legend Bar */}
@@ -162,10 +166,10 @@ export const HexagonRadarChart: React.FC<HexagonRadarChartProps> = ({
 
       {/* SVG Canvas */}
       <svg
-        viewBox={`0 0 ${size} ${size}`}
+        viewBox={`-${svgPadding} -${svgPadding} ${size + svgPadding * 2} ${size + svgPadding * 2}`}
         width="100%"
-        height="100%"
-        style={{ overflow: 'visible' }}
+        height="auto"
+        style={{ display: 'block', maxWidth: '100%', overflow: 'visible' }}
       >
         {/* Concentric Grid Polygons */}
         {gridPolygons.map((pts, idx) => (
@@ -310,7 +314,8 @@ export const HexagonRadarChart: React.FC<HexagonRadarChartProps> = ({
             p: 1.5,
             px: 2,
             width: '100%',
-            maxWidth: 360,
+            maxWidth: { xs: '100%', sm: 360 },
+            boxSizing: 'border-box',
             borderRadius: 2,
             bgcolor: isDark ? alpha(theme.palette.background.paper, 0.8) : alpha(primaryColor, 0.04),
             border: `1px solid ${alpha(primaryColor, 0.3)}`,
