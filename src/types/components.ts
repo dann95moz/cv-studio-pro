@@ -110,12 +110,6 @@ export interface WizardStepperProps {
   canNavigateTo?: (step: WizardStep) => boolean;
 }
 
-export interface ContextualAiModalProps {
-  open: boolean;
-  onClose: () => void;
-  settings: AIProviderSettings;
-  onSaveAndGenerate: (updatedSettings: AIProviderSettings) => void;
-}
 
 export interface PreviewAuditGapDrawerProps {
   auditReport: QualityAuditReport;

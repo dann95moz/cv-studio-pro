@@ -19,7 +19,11 @@
     "role": "Target Role / Job Title",
     "rolePlaceholder": "e.g. Senior Frontend Engineer",
     "vacancyLength": "Vacancy Length",
-    "words": "words"
+    "words": "words",
+    "detectedCompanyHint": "Company auto-detected from job description. Click to edit.",
+    "detectedRoleHint": "Role auto-detected from job description. Click to edit.",
+    "editMeta": "Edit company or role",
+    "editMetaTitle": "Edit Vacancy Info"
   },
   "editor": {
     "editText": "Edit Text",

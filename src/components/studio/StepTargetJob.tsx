@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import {
   Box,
   Paper,
@@ -16,15 +16,11 @@ import { useFileUploader } from '../../hooks/useFileUploader';
 import { useTranslation } from 'react-i18next';
 import { StepTargetJobProps } from '../../types';
 import { TargetJobProgressBanner } from './target/TargetJobProgressBanner';
-import { TargetJobMetadataBar } from './target/TargetJobMetadataBar';
+import { TargetJobDetectedMetaChips } from './target/TargetJobDetectedMetaChips';
 import { TargetJobFooterActions } from './target/TargetJobFooterActions';
 import { QuickScoreBadge } from './target/QuickScoreBadge';
 import { LiveJobDescriptionEditor } from './target/LiveJobDescriptionEditor';
 import { useStepTargetJobFacade } from '../../hooks/facades/useStepTargetJobFacade';
-
-const ContextualAiModal = React.lazy(() =>
-  import('./ai/ContextualAiModal').then((m) => ({ default: m.ContextualAiModal }))
-);
 
 export type { StepTargetJobProps };
 
@@ -36,14 +32,12 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   targetRole,
   onRoleChange,
   onLoadSample,
-  onPrevStep,
   onNextStep,
   onGenerate,
   isGenerating = false,
   generationStep,
   hasGeneratedCv = false,
   providerSettings,
-  onProviderSettingsChange,
 }) => {
   const { t } = useTranslation(['target', 'common']);
   const theme = useTheme();
@@ -54,13 +48,11 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
       localContent,
       localCompany,
       localRole,
-      aiModalOpen,
       skillToast,
       quickMatchResult,
       masterData,
     },
     actions: {
-      setAiModalOpen,
       setSkillToast,
       handleContentChange,
       handleCompanyChange,
@@ -87,10 +79,18 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
 
   const hasJob = localContent.trim().length > 40 && !localContent.includes('[Paste the raw job description');
   const wordCount = localContent.trim().split(/\s+/).filter(Boolean).length;
-  const isManual = providerSettings?.provider === 'manual';
+
+  // Determine if the user has a configured API key or local model in Settings
+  const hasConfiguredApiKey = Boolean(
+    providerSettings && (
+      (providerSettings.provider === 'local') ||
+      (providerSettings.provider === 'custom' && providerSettings.customEndpoint?.trim()) ||
+      (providerSettings.apiKey && providerSettings.apiKey.trim().length > 5)
+    )
+  );
 
   const handleTailorAndProceed = () => {
-    if (isGenerating) return;
+    if (isGenerating || !hasJob) return;
     flushAll();
 
     const now = Date.now();
@@ -99,36 +99,15 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
     }
     lastClickRef.current = now;
 
-    if (isManual) {
-      if (!hasJob) return;
-      openManualPromptModal();
-      return;
-    }
-
-    const isConfigured = Boolean(
-      providerSettings && (
-        (providerSettings.provider === 'local') ||
-        (providerSettings.provider === 'custom' && providerSettings.customEndpoint?.trim()) ||
-        (providerSettings.apiKey && providerSettings.apiKey.trim().length > 5)
-      )
-    );
-
-    if (!isConfigured) {
-      setAiModalOpen(true);
-      return;
-    }
-
     if (onGenerate) {
       onGenerate();
     }
   };
 
-  const handleSaveModalAndGenerate = (updatedSettings: NonNullable<typeof providerSettings>) => {
-    onProviderSettingsChange?.(updatedSettings);
-    setAiModalOpen(false);
-    if (onGenerate && !isGenerating) {
-      onGenerate();
-    }
+  const handleOpenManualPrompt = () => {
+    if (isGenerating || !hasJob) return;
+    flushAll();
+    openManualPromptModal();
   };
 
   return (
@@ -150,7 +129,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
           maxWidth: 1200,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2.5,
+          gap: 2,
         }}
       >
         {/* Hidden File Input for .txt / .md files */}
@@ -178,14 +157,18 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
           </Typography>
         </Box>
 
-        {/* 3. Target Metadata & Metric Inputs Bar */}
-        <TargetJobMetadataBar
+        {/* 3. Subtle Non-Blocking Auto-Detected Company & Role Chips */}
+        <TargetJobDetectedMetaChips
           companyName={localCompany}
-          onCompanyChange={handleCompanyChange}
-          onCompanyBlur={() => onCompanyChange(localCompany)}
+          onCompanyChange={(val) => {
+            handleCompanyChange(val);
+            onCompanyChange(val);
+          }}
           targetRole={localRole}
-          onRoleChange={handleRoleChange}
-          onRoleBlur={() => onRoleChange(localRole)}
+          onRoleChange={(val) => {
+            handleRoleChange(val);
+            onRoleChange(val);
+          }}
           wordCount={wordCount}
         />
 
@@ -345,7 +328,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               position: 'relative',
               p: 0,
               display: 'flex',
-              minHeight: 280,
+              minHeight: 320,
             }}
           >
             <LiveJobDescriptionEditor
@@ -364,10 +347,6 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
 
         {/* 5. Navigation & Direct Action Footer */}
         <TargetJobFooterActions
-          onBack={() => {
-            flushAll();
-            if (onPrevStep) onPrevStep();
-          }}
           onViewExisting={
             onNextStep
               ? () => {
@@ -377,35 +356,17 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               : undefined
           }
           onTailorNow={handleTailorAndProceed}
-          onOpenManualPrompt={
-            isManual
-              ? undefined
-              : () => {
-                  flushAll();
-                  openManualPromptModal();
-                }
-          }
+          onOpenManualPrompt={handleOpenManualPrompt}
           isGenerating={isGenerating}
           generationStep={generationStep}
           hasJob={hasJob}
           hasGeneratedCv={hasGeneratedCv}
+          hasConfiguredApiKey={hasConfiguredApiKey}
         />
 
         {/* Dedicated End-of-Scroll Safe Spacer */}
         <Box sx={{ height: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 36px)', sm: 20 }, flexShrink: 0 }} />
       </Box>
-
-      {/* Contextual AI Setup Modal (opens on click if key is missing) */}
-      {providerSettings && (
-        <React.Suspense fallback={null}>
-          <ContextualAiModal
-            open={aiModalOpen}
-            onClose={() => setAiModalOpen(false)}
-            settings={providerSettings}
-            onSaveAndGenerate={handleSaveModalAndGenerate}
-          />
-        </React.Suspense>
-      )}
 
       {/* Real-time Skill Addition Feedback Toast */}
       <Snackbar

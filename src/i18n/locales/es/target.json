@@ -19,7 +19,11 @@
     "role": "Puesto Objetivo / Título del Rol",
     "rolePlaceholder": "ej. Senior Frontend Engineer",
     "vacancyLength": "Longitud de la Vacante",
-    "words": "palabras"
+    "words": "palabras",
+    "detectedCompanyHint": "Empresa detectada automáticamente de la oferta. Haz clic para editar.",
+    "detectedRoleHint": "Cargo detectado automáticamente de la oferta. Haz clic para editar.",
+    "editMeta": "Editar empresa o cargo",
+    "editMetaTitle": "Editar Información de la Vacante"
   },
   "editor": {
     "editText": "Editar Texto",

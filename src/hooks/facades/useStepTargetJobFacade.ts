@@ -58,8 +58,7 @@ export function useStepTargetJobFacade({
 }: UseStepTargetJobFacadeProps) {
   const { t } = useTranslation(['target', 'common']);
 
-  // Modal and toast state
-  const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
+  // Toast state
   const [skillToast, setSkillToast] = useState<string | null>(null);
 
   // Local state buffers
@@ -129,20 +128,16 @@ export function useStepTargetJobFacade({
         contentTimerRef.current = null;
       }, 500);
 
-      // Automated field extraction if fields are empty
-      if (!localCompany) {
-        const autoCompany = extractTargetCompany(newContent);
-        if (autoCompany) {
-          setLocalCompany(autoCompany);
-          onCompanyChange(autoCompany);
-        }
+      // Automated field extraction (non-blocking)
+      const autoCompany = extractTargetCompany(newContent);
+      if (autoCompany && autoCompany !== localCompany) {
+        setLocalCompany(autoCompany);
+        onCompanyChange(autoCompany);
       }
-      if (!localRole) {
-        const autoRole = extractTargetRole(newContent);
-        if (autoRole) {
-          setLocalRole(autoRole);
-          onRoleChange(autoRole);
-        }
+      const autoRole = extractTargetRole(newContent);
+      if (autoRole && autoRole !== localRole) {
+        setLocalRole(autoRole);
+        onRoleChange(autoRole);
       }
     },
     [localCompany, localRole, onChange, onCompanyChange, onRoleChange]
@@ -197,13 +192,11 @@ export function useStepTargetJobFacade({
       localContent,
       localCompany,
       localRole,
-      aiModalOpen,
       skillToast,
       quickMatchResult,
       masterData,
     },
     actions: {
-      setAiModalOpen,
       setSkillToast,
       handleContentChange,
       handleCompanyChange,

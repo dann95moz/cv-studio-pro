@@ -19,7 +19,11 @@
     "role": "Zielposition / Berufsbezeichnung",
     "rolePlaceholder": "z.B. Senior Frontend Engineer",
     "vacancyLength": "Textlänge",
-    "words": "Wörter"
+    "words": "Wörter",
+    "detectedCompanyHint": "Unternehmen automatisch aus der Stellenbeschreibung erkannt. Zum Bearbeiten klicken.",
+    "detectedRoleHint": "Rolle automatisch aus der Stellenbeschreibung erkannt. Zum Bearbeiten klicken.",
+    "editMeta": "Unternehmen oder Rolle bearbeiten",
+    "editMetaTitle": "Stelleninformationen bearbeiten"
   },
   "editor": {
     "editText": "Text bearbeiten",

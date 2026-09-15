@@ -4,29 +4,32 @@ import {
   Paper,
   Button,
   CircularProgress,
-  Typography,
   useTheme,
-  alpha,
 } from '@mui/material';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { useTranslation } from 'react-i18next';
 import { StepFooterStatus } from '../../atoms/StepFooterStatus';
 
 export interface TargetJobFooterActionsProps {
-  onBack: () => void;
   onViewExisting?: () => void;
   onTailorNow: () => void;
-  onOpenManualPrompt?: () => void;
+  onOpenManualPrompt: () => void;
   isGenerating?: boolean;
   generationStep?: string;
   hasJob: boolean;
   hasGeneratedCv?: boolean;
+  hasConfiguredApiKey?: boolean;
 }
 
+/**
+ * TargetJobFooterActions
+ * Cleaned footer for Step 2:
+ * - Omits redundant "Back to Profile" (handled by top stepper & native back).
+ * - Automatic BYOK: If no API key configured, presents "Copy Prompt (My Own AI)" as the primary 1-click action.
+ * - If API key configured, provides "Tailor Resume Now" as primary with prompt copying as secondary option.
+ */
 export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = React.memo(({
-  onBack,
   onViewExisting,
   onTailorNow,
   onOpenManualPrompt,
@@ -34,6 +37,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
   generationStep,
   hasJob,
   hasGeneratedCv = false,
+  hasConfiguredApiKey = false,
 }) => {
   const { t } = useTranslation(['target', 'common']);
   const theme = useTheme();
@@ -44,9 +48,8 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
       sx={{
         p: { xs: 2, sm: 2 },
         px: { xs: 2, sm: 2.5 },
-        pb: { xs: 2.5, sm: 2 },
         display: 'flex',
-        flexDirection: { xs: 'column-reverse', sm: 'row' },
+        flexDirection: { xs: 'column', sm: 'row' },
         alignItems: { xs: 'stretch', sm: 'center' },
         justifyContent: 'space-between',
         border: `1px solid ${theme.palette.divider}`,
@@ -56,28 +59,8 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
         boxShadow: 2,
       }}
     >
-      <Button
-        variant="outlined"
-        startIcon={<ArrowBackRoundedIcon />}
-        onClick={onBack}
-        disabled={isGenerating}
-        sx={{
-          fontWeight: 600,
-          width: { xs: '100%', sm: 'auto' },
-        }}
-      >
-        {t('target:actions.backToProfile', 'Back to Profile')}
-      </Button>
-
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'center' },
-          gap: 1.5,
-          width: { xs: '100%', sm: 'auto' },
-        }}
-      >
+      {/* Status indicator */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <StepFooterStatus
           status={isGenerating ? 'generating' : hasJob ? 'ready' : 'missing'}
           label={
@@ -88,7 +71,18 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               : t('target:status.missing', 'Paste a job description to tailor')
           }
         />
+      </Box>
 
+      {/* Action Buttons */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+        }}
+      >
+        {/* View existing CV button (if previous version exists) */}
         {hasGeneratedCv && !isGenerating && onViewExisting && (
           <Button
             variant="outlined"
@@ -103,41 +97,67 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
           </Button>
         )}
 
-        {onOpenManualPrompt && (
+        {/* CASE A: User HAS configured an API Key */}
+        {hasConfiguredApiKey ? (
+          <>
+            {/* Secondary: Copy Prompt */}
+            <Button
+              variant="outlined"
+              color="inherit"
+              startIcon={<AutoAwesomeRoundedIcon />}
+              onClick={onOpenManualPrompt}
+              disabled={isGenerating || !hasJob}
+              sx={{
+                fontWeight: 600,
+                textTransform: 'none',
+                width: { xs: '100%', sm: 'auto' },
+              }}
+            >
+              {t('target:actions.byoAiPrompt', 'Copy Prompt (My Own AI)')}
+            </Button>
+
+            {/* Primary: Direct AI Tailor */}
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              startIcon={isGenerating ? <CircularProgress size={18} color="inherit" /> : <BoltRoundedIcon />}
+              onClick={onTailorNow}
+              disabled={isGenerating || !hasJob}
+              sx={{
+                fontWeight: 700,
+                px: 3.5,
+                py: 1.2,
+                width: { xs: '100%', sm: 'auto' },
+              }}
+            >
+              {isGenerating
+                ? t('target:actions.tailoring', 'Tailoring Resume...')
+                : t('target:actions.tailorNow', 'Tailor Resume Now')}
+            </Button>
+          </>
+        ) : (
+          /* CASE B: User does NOT have an API Key (Automatic Free BYOK Mode) */
           <Button
-            variant="outlined"
-            color="success"
-            startIcon={<AutoAwesomeRoundedIcon />}
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={isGenerating ? <CircularProgress size={18} color="inherit" /> : <AutoAwesomeRoundedIcon />}
             onClick={onOpenManualPrompt}
             disabled={isGenerating || !hasJob}
             sx={{
               fontWeight: 700,
-              textTransform: 'none',
+              px: 3.5,
+              py: 1.2,
               width: { xs: '100%', sm: 'auto' },
             }}
           >
             {t('target:actions.byoAiPrompt', 'Copy Prompt (My Own AI)')}
           </Button>
         )}
-
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={isGenerating ? <CircularProgress size={18} color="inherit" /> : <BoltRoundedIcon />}
-          onClick={onTailorNow}
-          disabled={isGenerating || !hasJob}
-          sx={{
-            fontWeight: 700,
-            px: 3.5,
-            py: 1.2,
-            width: { xs: '100%', sm: 'auto' },
-          }}
-        >
-          {isGenerating ? t('target:actions.tailoring', 'Tailoring Resume...') : t('target:actions.tailorNow', 'Tailor Resume Now')}
-        </Button>
       </Box>
     </Paper>
-
   );
 });
+
+TargetJobFooterActions.displayName = 'TargetJobFooterActions';

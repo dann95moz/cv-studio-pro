@@ -19,7 +19,11 @@
     "role": "Poste / Rôle Cible",
     "rolePlaceholder": "ex. Senior Frontend Engineer",
     "vacancyLength": "Longueur de l'Offre",
-    "words": "mots"
+    "words": "mots",
+    "detectedCompanyHint": "Entreprise détectée automatiquement à partir de l'offre. Cliquez pour modifier.",
+    "detectedRoleHint": "Poste détecté automatiquement à partir de l'offre. Cliquez pour modifier.",
+    "editMeta": "Modifier l'entreprise ou le poste",
+    "editMetaTitle": "Modifier les informations de l'offre"
   },
   "editor": {
     "editText": "Modifier le Texte",
