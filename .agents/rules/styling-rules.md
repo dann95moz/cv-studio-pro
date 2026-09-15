@@ -111,6 +111,11 @@ Buttons are the primary interactive instruments of the studio. To guarantee visu
 - **Progressive Disclosure**: Global settings (theme, app language, sync QR, GitHub) and secondary exports must reside in the `•••` overflow menu on mobile.
 - **Thumb Zone Ergonomics**: Bottom Navigation (`Estudio`, `Postulaciones`) and Floating Action Button (FAB) triggers for slide-up Bottom Sheets (`Plantillas`, `Diseño`, `LinkedIn`, `Comparar`) must sit at the bottom within thumb reach.
 - **Maximum Canvas Focus**: The candidate's CV canvas must occupy ≥ 80% of the mobile viewport height without vertical toolbar crowding.
+- **Safe-Area Inset Enforcement (`env(safe-area-inset-*)`)**:
+  - Drawer and dialog headers must use `pt: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 24px)'` to prevent notch/island overlap.
+  - Full workspace views alongside `MobileBottomNav` (height 64px) must enforce `padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 80px), 104px)`.
+  - Drawers/bottom sheets must enforce `pb: max(calc(env(safe-area-inset-bottom, 0px) + 32px), 48px)`.
+  - SVG charts and data visualizations must use `maxWidth: '100%'`, `boxSizing: 'border-box'`, and contain all labels inside the viewBox to guarantee zero horizontal page overflow.
 
 ---
 
@@ -131,3 +136,4 @@ Before committing any component edit:
 3. [ ] Are Buttons and Chips using standard variants without inline `borderRadius` overrides?
 4. [ ] Are z-indexes using standard MUI layers rather than arbitrary magic numbers?
 5. [ ] Is the layout mobile-friendly without overflowing or button wrapping on `xs` viewports?
+6. [ ] Are safe areas (`env(safe-area-inset-*)`) respected for top headers, bottom navigation clearances, and drawer overlays?

@@ -193,7 +193,61 @@ In CV Studio mobile interfaces, Fitts's Law dictates 3 strict rules:
 
 ---
 
-## 5. Responsive Verification Checklist for Agents
+## 5. Safe-Area Inset Mandates for Report, Drawer & Diagnostic Zones (Zone Immunity)
+
+On modern edge-to-edge mobile devices (iOS Dynamic Island, camera punch-holes, rounded corners, Android gesture navigation pills), diagnostic views and audit drawers must strictly respect hardware safe zones:
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│ [● Camera Cutout / Notch]                               │
+│ ─────────────────────────────────────────────────────── │ ◄── Top Safe Inset: pt = max(env(safe-area-inset-top) + 8px, 24px)
+│                                                         │
+│                   DIAGNOSTIC / REPORT VIEW              │
+│                   - Audit Gauges & Radar                │
+│                   - Gap Strategy Narrative              │
+│                   - Applications Kanban / Grid          │
+│                                                         │
+│ ─────────────────────────────────────────────────────── │
+│ ✦ Fixed MobileBottomNav (Height 64px)                 │ ◄── Bottom View Clearance: pb = max(env(safe-area-inset-bottom) + 80px, 104px)
+│ ══════════════════ [Gesture Pill] ═════════════════════ │
+└─────────────────────────────────────────────────────────┘
+```
+
+1. **Top Safe-Area Clearance in Drawers & Modals**:
+   - Drawer top bar and modal headers on mobile (`xs`) must enforce:
+     ```tsx
+     pt: { xs: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 24px)', md: 1 }
+     ```
+   - Horizontal bounds must always respect display cutouts:
+     ```tsx
+     pl: { xs: 'max(calc(env(safe-area-inset-left, 0px) + 12px), 12px)', sm: 2 }
+     pr: { xs: 'max(calc(env(safe-area-inset-right, 0px) + 12px), 12px)', sm: 2 }
+     ```
+2. **Bottom Clearance in Views vs. Slide-Up Sheets**:
+   - **Main Views with `MobileBottomNav`** (`QualityAuditView`, `GapAnalysisView`, `ApplicationsHistoryView`):
+     Because `MobileBottomNav` is docked at the bottom (height 64px + safe-area inset), views must enforce:
+     ```css
+     padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 80px), 104px);
+     ```
+     *(Failing to enforce this leaves the bottommost cards and CTAs trapped beneath the navigation bar).*
+   - **Slide-up Bottom Sheets & Fullscreen Drawers**:
+     Internal scrollable content must enforce:
+     ```tsx
+     pb: { xs: 'max(calc(env(safe-area-inset-bottom, 0px) + 32px), 48px)', sm: 4 }
+     ```
+     to maintain comfortable thumb clearance above the OS home indicator gesture bar.
+3. **Single Scroll Container Standard (Zero Double Scrollbars)**:
+   - In mobile drawers, the outer container / Paper must have `overflow: 'hidden'`.
+   - Scrolling belongs exclusively to the content body (`overflowY: 'auto'`). Never allow nested double scrollbars that trap touch scrolling.
+4. **Multidimensional Charts & Radar Visualizations (Zero Horizontal Overflow)**:
+   - SVG charts (such as `HexagonRadarChart`) must enforce `maxWidth: '100%'`, `boxSizing: 'border-box'`, and contain all vertex labels within their SVG viewBox using internal padding (`const svgPadding = 55;`).
+   - Containers must never use rigid pixel widths (`maxWidth: size + 80`). Always use responsive constraints: `maxWidth: { xs: '100%', sm: size + 60 }`.
+5. **Diagnostic Metric Rows & Card Headers**:
+   - Metric cards (`.card-top-row`, `.pillar-action`, `.card-header`) must use `flex-wrap: wrap` and flexible gaps so badges, scores, and buttons never clip or force horizontal scrollbars on narrow screens (360px–390px).
+
+---
+
+## 6. Responsive Verification Checklist for Agents
 
 Before completing any task affecting UI or layout:
 1. [ ] Is the top header on `xs` clean and single-row with Settings (⚙) icon?
@@ -203,6 +257,8 @@ Before completing any task affecting UI or layout:
 5. [ ] Is the bottom navigation (`Estudio`, `Postulaciones`) anchored at the bottom with proper safe-area padding?
 6. [ ] **Fitts's Law Check**: Are primary CTAs full-width with height $\ge 48\text{px}$–$52\text{px}$?
 7. [ ] **Hoober Thumb Zone Check**: Is the bottom CTA elevated out of the "Cramp Zone" ($\ge 42\text{px}$ clearance above gesture bar)?
-8. [ ] **Notch Clearance Check**: Are top actions (`Skip`, `Back`) cleared by $\ge 26\text{px}$ from the top edge?
-9. [ ] **Void Check**: Are paginator dots and CTAs clustered without an artificial 100px+ empty void?
-10. [ ] **Zero Floating Menus Check**: Are all dropdowns, submenus, overflow options, and format pickers implemented as slide-up Bottom Sheets (`Drawer anchor="bottom"`) with 0 `<Menu>` or `<Popover>` components?
+8. [ ] **Notch Clearance Check**: Are top actions (`Skip`, `Back`, drawer header) cleared by $\ge 24\text{px}$–$26\text{px}$ from the top edge with `env(safe-area-inset-top)`?
+9. [ ] **Bottom Nav Clearance Check**: Do workspace views enforce $\ge 104\text{px}$ (`max(calc(env(safe-area-inset-bottom) + 80px), 104px)`) so content is never occluded behind `MobileBottomNav`?
+10. [ ] **Void Check**: Are paginator dots and CTAs clustered without an artificial 100px+ empty void?
+11. [ ] **Zero Floating Menus Check**: Are all dropdowns, submenus, overflow options, and format pickers implemented as slide-up Bottom Sheets (`Drawer anchor="bottom"`) with 0 `<Menu>` or `<Popover>` components?
+12. [ ] **Zero Chart Overflow Check**: Do SVG visualizations (`HexagonRadarChart`) scale inside `maxWidth: '100%'` without horizontal page overflow?
