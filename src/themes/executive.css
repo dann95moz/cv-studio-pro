@@ -68,7 +68,7 @@
 /* 2. Asymmetric 2-Column Body Layout */
 .theme-executive .banner-body-grid {
   display: grid;
-  grid-template-columns: 58% 1fr;
+  grid-template-columns: calc(100% - var(--cv-sidebar-width, 38%)) var(--cv-sidebar-width, 38%);
   gap: 26px;
   padding: 20px 28px 24px 28px;
   box-sizing: border-box;

@@ -20,7 +20,7 @@
 
 .theme-academic-research .dualtone-grid-layout {
   display: grid;
-  grid-template-columns: 34% 66%;
+  grid-template-columns: var(--cv-sidebar-width, 34%) calc(100% - var(--cv-sidebar-width, 34%));
   min-height: var(--cv-page-min-height);
 }
 

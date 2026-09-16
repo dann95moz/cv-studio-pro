@@ -40,6 +40,7 @@ export const CVRenderer: React.FC<CVRendererProps> = ({
   fontFamily = 'inter',
   spacingDensity = 'standard',
   photo,
+  sidebarWidth,
 }) => {
   const TemplateComponent = getTemplate(theme);
   const effectiveData: CVData = {
@@ -66,6 +67,7 @@ export const CVRenderer: React.FC<CVRendererProps> = ({
     '--cv-line-height': density.lineHeight,
     '--cv-section-gap': density.sectionGap,
     '--cv-item-gap': density.itemGap,
+    ...(sidebarWidth ? { '--cv-sidebar-width': `${sidebarWidth}%` } : {}),
     fontFamily: fontFam,
     fontSize: density.fontSize,
     lineHeight: density.lineHeight,

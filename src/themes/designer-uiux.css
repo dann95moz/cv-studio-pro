@@ -21,7 +21,7 @@
 /* 1. Top Region */
 .theme-designer-uiux .pastel-top-grid {
   display: grid;
-  grid-template-columns: 32% 1fr;
+  grid-template-columns: var(--cv-sidebar-width, 32%) 1fr;
   gap: 24px;
   padding: 24px 28px 12px 28px;
   align-items: start;
@@ -92,7 +92,7 @@
 /* 2. Lower Region */
 .theme-designer-uiux .pastel-bottom-grid {
   display: grid;
-  grid-template-columns: 32% 1fr;
+  grid-template-columns: var(--cv-sidebar-width, 32%) 1fr;
   gap: 24px;
   padding: 0 28px 24px 28px;
   box-sizing: border-box;

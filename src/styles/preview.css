@@ -404,7 +404,8 @@
   .cv-ai-hover-actions,
   .cv-ai-sparkle-btn,
   .cv-undo-button,
-  .cv-selection-bubble {
+  .cv-selection-bubble,
+  .cv-column-resizer {
     display: none !important;
     visibility: hidden !important;
   }

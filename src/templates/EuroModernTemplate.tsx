@@ -25,7 +25,7 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
       {/* 1. LEFT SIDEBAR (Personal Info, Photo, Languages, Skills, Education) */}
       <aside
         style={{
-          width: '34%',
+          width: 'var(--cv-sidebar-width, 34%)',
           backgroundColor: '#f8fafc',
           borderRight: '1px solid #e2e8f0',
           padding: '24px 18px',
