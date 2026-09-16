@@ -48,6 +48,8 @@ export interface StepPreviewSidePanelsProps {
   onPhotoToggle: (enabled: boolean) => void;
   theme: ThemeId;
   onSelectTheme: (theme: ThemeId) => void;
+  sidebarWidth?: number;
+  onSidebarWidthChange?: (width?: number) => void;
   // LinkedIn props
   parsedCv: CVData;
   companyName: string;
@@ -80,6 +82,8 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
   onPhotoToggle,
   theme,
   onSelectTheme,
+  sidebarWidth,
+  onSidebarWidthChange,
   parsedCv,
   companyName,
   targetRole,
@@ -126,6 +130,8 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
           activeTheme={theme}
           theme={theme}
           onSelectTheme={onSelectTheme}
+          sidebarWidth={sidebarWidth}
+          onSidebarWidthChange={onSidebarWidthChange}
           initialTab={activeSidePanel === 'templates' ? 'templates' : 'formatting'}
           onClose={onCloseSidePanel}
         />

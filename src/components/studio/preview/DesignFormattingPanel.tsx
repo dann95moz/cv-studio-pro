@@ -37,6 +37,7 @@ import { ProfilePhotoDisplay } from '../photo/ProfilePhotoDisplay';
 import { PhotoCropperModal } from '../photo/PhotoCropperModal';
 import { usePhotoUpload } from '../../../hooks/usePhotoUpload';
 import { TemplatesPanel } from './TemplatesPanel';
+import { TWO_COLUMN_CONFIGS } from './ColumnResizeDivider';
 
 export type { DesignFormattingPanelProps };
 
@@ -61,6 +62,8 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
   activeTheme = 'modern-tech',
   theme,
   onSelectTheme,
+  sidebarWidth,
+  onSidebarWidthChange,
   initialTab = 'templates',
   onClose,
 }) => {
@@ -406,6 +409,45 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
           {t('preview:panels.design.sizeLarge', 'Spacious')}
         </ToggleButton>
       </ToggleButtonGroup>
+
+      {/* Optional: Column / Sidebar Width Slider for 2-column templates */}
+      {TWO_COLUMN_CONFIGS[currentTheme] && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+              {t('preview:resizer.columnLabel', 'Ancho de Columna')}
+            </Typography>
+            {sidebarWidth !== undefined && (
+              <Chip
+                label={t('preview:resizer.reset', 'Restablecer')}
+                size="small"
+                variant="outlined"
+                onClick={() => onSidebarWidthChange?.(undefined)}
+                sx={{ fontSize: '0.68rem', height: 22, cursor: 'pointer' }}
+              />
+            )}
+          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.2, lineHeight: 1.4 }}>
+            {t('preview:resizer.dragHint', 'Ajusta la proporción de la columna o arrastra la cortina en el lienzo.')}
+          </Typography>
+          <Box sx={{ px: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Slider
+              value={sidebarWidth ?? TWO_COLUMN_CONFIGS[currentTheme]?.defaultWidth ?? 34}
+              min={TWO_COLUMN_CONFIGS[currentTheme]?.minWidth ?? 24}
+              max={TWO_COLUMN_CONFIGS[currentTheme]?.maxWidth ?? 46}
+              step={1}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(val) => `${val}%`}
+              onChange={(_, val) => onSidebarWidthChange?.(val as number)}
+              size="small"
+            />
+            <Typography variant="caption" sx={{ fontWeight: 800, minWidth: 32 }}>
+              {sidebarWidth ?? TWO_COLUMN_CONFIGS[currentTheme]?.defaultWidth ?? 34}%
+            </Typography>
+          </Box>
+        </>
+      )}
 
       <Divider sx={{ my: 2 }} />
 

@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { CVRenderer } from '../../CVRenderer';
 import { CvLiveEditProvider } from './CvLiveEditContext';
+import { ColumnResizeDivider } from './ColumnResizeDivider';
 import { ErrorBoundary } from '../../common/ErrorBoundary';
 import { StudioSkeleton } from '../StudioSkeleton';
 import {
@@ -36,6 +37,8 @@ export interface StepPreviewCanvasProps {
   customColor?: string;
   fontFamily: FontFamilyId;
   spacingDensity: SpacingDensity;
+  sidebarWidth?: number;
+  onSidebarWidthChange?: (width?: number) => void;
   photo?: ProfilePhotoConfig | null;
   companyName: string;
   targetRole: string;
@@ -61,6 +64,8 @@ export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = ({
   customColor,
   fontFamily,
   spacingDensity,
+  sidebarWidth,
+  onSidebarWidthChange,
   photo,
   companyName,
   targetRole,
@@ -193,10 +198,21 @@ export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = ({
                       customColor={palette === 'custom' ? customColor : undefined}
                       fontFamily={fontFamily}
                       spacingDensity={spacingDensity}
+                      sidebarWidth={sidebarWidth}
                       photo={photo}
                     />
                   </ErrorBoundary>
                 </CvLiveEditProvider>
+
+                {/* Column Resize Divider (Curtain) on 2-column layouts */}
+                {onSidebarWidthChange && (
+                  <ColumnResizeDivider
+                    theme={theme}
+                    paperRef={paperRef}
+                    sidebarWidth={sidebarWidth}
+                    onSidebarWidthChange={onSidebarWidthChange}
+                  />
+                )}
               </div>
 
               {/* Visual Page Break Marker only on actual overflow */}

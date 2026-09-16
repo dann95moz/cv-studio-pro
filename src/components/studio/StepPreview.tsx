@@ -68,6 +68,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     setFontFamily,
     spacingDensity,
     setSpacingDensity,
+    sidebarWidth,
+    setSidebarWidth,
     pageFormat,
     setPageFormat,
     photo,
@@ -303,6 +305,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           onPhotoToggle={setProfilePhotoEnabled}
           theme={theme}
           onSelectTheme={setTheme}
+          sidebarWidth={sidebarWidth}
+          onSidebarWidthChange={setSidebarWidth}
           parsedCv={parsedCv}
           companyName={companyName}
           targetRole={targetRole}
@@ -328,6 +332,8 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           customColor={customColor}
           fontFamily={fontFamily}
           spacingDensity={spacingDensity}
+          sidebarWidth={sidebarWidth}
+          onSidebarWidthChange={setSidebarWidth}
           photo={photo}
           companyName={companyName}
           targetRole={targetRole}

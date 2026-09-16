@@ -61,6 +61,8 @@ export const useStepPreviewWorkflow = () => {
   const setFontFamily = useResumeStore((s) => s.setFontFamily);
   const spacingDensity = useResumeStore((s) => s.spacingDensity);
   const setSpacingDensity = useResumeStore((s) => s.setSpacingDensity);
+  const sidebarWidth = useResumeStore((s) => s.sidebarWidth);
+  const setSidebarWidth = useResumeStore((s) => s.setSidebarWidth);
   const pageFormat = useResumeStore((s) => s.pageFormat);
   const setPageFormat = useResumeStore((s) => s.setPageFormat);
   const photo = useResumeStore((s) => s.photo);
@@ -595,6 +597,8 @@ export const useStepPreviewWorkflow = () => {
     setFontFamily,
     spacingDensity,
     setSpacingDensity,
+    sidebarWidth,
+    setSidebarWidth,
     pageFormat,
     setPageFormat,
     photo,
