@@ -82,6 +82,7 @@ export interface CVRendererProps {
   fontFamily?: FontFamilyId;
   spacingDensity?: SpacingDensity;
   density?: SpacingDensity;
+  sidebarWidth?: number;
   containerId?: string;
   photo?: ProfilePhotoConfig | null;
 }
@@ -368,6 +369,8 @@ export interface DesignFormattingPanelProps {
   activeTheme?: ThemeId;
   theme?: ThemeId;
   onSelectTheme?: (theme: ThemeId) => void;
+  sidebarWidth?: number;
+  onSidebarWidthChange?: (width?: number) => void;
   initialTab?: 'templates' | 'formatting';
 }
 

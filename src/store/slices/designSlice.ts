@@ -11,6 +11,7 @@ export const createDesignSlice: StateCreator<ResumeStore, [], [], DesignSlice> =
   fontFamily: 'inter',
   spacingDensity: 'standard',
   photo: null,
+  sidebarWidth: undefined,
 
   setPageBudget: (pageBudget: 1 | 2) => set({ pageBudget }),
   setPageFormat: (pageFormat: PageFormat) => set({ pageFormat }),
@@ -19,6 +20,7 @@ export const createDesignSlice: StateCreator<ResumeStore, [], [], DesignSlice> =
   setCustomColor: (customColor: string) => set({ customColor }),
   setFontFamily: (fontFamily: FontFamilyId) => set({ fontFamily }),
   setSpacingDensity: (spacingDensity: SpacingDensity) => set({ spacingDensity }),
+  setSidebarWidth: (sidebarWidth?: number) => set({ sidebarWidth }),
   setProfilePhoto: (photo: ProfilePhotoConfig | null) => set({ photo }),
   setProfilePhotoEnabled: (enabled: boolean) =>
     set((state) => ({

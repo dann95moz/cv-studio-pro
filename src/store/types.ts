@@ -92,6 +92,7 @@ export interface DesignSlice {
   fontFamily: FontFamilyId;
   spacingDensity: SpacingDensity;
   photo: ProfilePhotoConfig | null;
+  sidebarWidth?: number;
   setPageBudget: (val: 1 | 2) => void;
   setPageFormat: (val: PageFormat) => void;
   setTheme: (val: ThemeId) => void;
@@ -99,6 +100,7 @@ export interface DesignSlice {
   setCustomColor: (val: string) => void;
   setFontFamily: (val: FontFamilyId) => void;
   setSpacingDensity: (val: SpacingDensity) => void;
+  setSidebarWidth: (val?: number) => void;
   setProfilePhoto: (photo: ProfilePhotoConfig | null) => void;
   setProfilePhotoEnabled: (enabled: boolean) => void;
   updateProfilePhotoCrop: (crop: ProfilePhotoCrop) => void;
