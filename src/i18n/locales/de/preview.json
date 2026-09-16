@@ -295,5 +295,12 @@
     "generateAction": "Neue Anpassung generieren",
     "generateDesc": "Erstellt eine unabhängige KI-angepasste Version",
     "pasteTip": "Beim Einfügen werden Unternehmen und Position automatisch erkannt."
+  },
+  "resizer": {
+    "columnWidth": "Spaltenbreite: {{width}}%",
+    "dragHint": "Ziehen zum Anpassen der Spaltenbreite",
+    "doubleClickReset": "Doppelklick zum Zurücksetzen",
+    "reset": "Verhältnis zurücksetzen",
+    "columnLabel": "Seitenleistenbreite"
   }
 }

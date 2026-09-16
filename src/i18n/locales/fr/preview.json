@@ -296,5 +296,12 @@
     "generateAction": "Générer une nouvelle adaptation",
     "generateDesc": "Crée une version indépendante adaptée par l'IA",
     "pasteTip": "En collant l'offre, l'entreprise et le poste seront détectés automatiquement."
+  },
+  "resizer": {
+    "columnWidth": "Largeur de colonne : {{width}}%",
+    "dragHint": "Glisser pour ajuster la largeur",
+    "doubleClickReset": "Double-clic pour réinitialiser",
+    "reset": "Réinitialiser la proportion",
+    "columnLabel": "Largeur de colonne latérale"
   }
 }

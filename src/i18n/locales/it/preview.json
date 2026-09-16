@@ -296,5 +296,12 @@
     "generateAction": "Genera Nuovo Adattamento",
     "generateDesc": "Crea una versione indipendente adattata con IA",
     "pasteTip": "Incollando il testo, l'azienda e il ruolo verranno rilevati automaticamente."
+  },
+  "resizer": {
+    "columnWidth": "Larghezza colonna: {{width}}%",
+    "dragHint": "Trascina per regolare la larghezza",
+    "doubleClickReset": "Doppio clic per ripristinare",
+    "reset": "Ripristina proporzione",
+    "columnLabel": "Larghezza colonna laterale"
   }
 }

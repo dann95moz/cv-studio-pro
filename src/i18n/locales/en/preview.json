@@ -295,5 +295,12 @@
     "generateAction": "Generate New Adaptation",
     "generateDesc": "Creates an independent tailored version with AI",
     "pasteTip": "Pasting the job text will automatically detect company and role."
+  },
+  "resizer": {
+    "columnWidth": "Column width: {{width}}%",
+    "dragHint": "Drag to adjust column width",
+    "doubleClickReset": "Double-click to reset",
+    "reset": "Reset ratio",
+    "columnLabel": "Sidebar Column Width"
   }
 }

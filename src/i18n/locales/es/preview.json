@@ -296,5 +296,12 @@
     "generateAction": "Generar Adaptación Nueva",
     "generateDesc": "Crea una versión independiente adaptada con IA",
     "pasteTip": "Al pegar la oferta, intentaremos detectar automáticamente la empresa y el cargo."
+  },
+  "resizer": {
+    "columnWidth": "Ancho de columna: {{width}}%",
+    "dragHint": "Arrastra para ajustar el ancho",
+    "doubleClickReset": "Doble clic para restaurar",
+    "reset": "Restablecer proporción",
+    "columnLabel": "Ancho de Columna Lateral"
   }
 }
