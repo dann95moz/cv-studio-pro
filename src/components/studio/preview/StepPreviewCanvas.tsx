@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { CVRenderer } from '../../CVRenderer';
 import { CvLiveEditProvider } from './CvLiveEditContext';
-import { ColumnResizeDivider } from './ColumnResizeDivider';
+import { ColumnResizeDivider, TWO_COLUMN_CONFIGS } from './ColumnResizeDivider';
 import { ErrorBoundary } from '../../common/ErrorBoundary';
 import { StudioSkeleton } from '../StudioSkeleton';
 import {
@@ -47,7 +47,7 @@ export interface StepPreviewCanvasProps {
   isHudMinimized: boolean;
 }
 
-export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = ({
+export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = React.memo(({
   previewDocType,
   canvasContainerRef,
   paperRef,
@@ -192,6 +192,7 @@ export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = ({
                 <CvLiveEditProvider parsedCv={parsedCv} isEditable={true}>
                   <ErrorBoundary isIsolatedModule fallbackTitle="Error al renderizar la plantilla del CV">
                     <CVRenderer
+                      key={theme}
                       data={parsedCv}
                       theme={theme}
                       palette={palette}
@@ -205,14 +206,15 @@ export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = ({
                 </CvLiveEditProvider>
 
                 {/* Column Resize Divider (Curtain) on 2-column layouts */}
-                {onSidebarWidthChange && (
+                {onSidebarWidthChange && TWO_COLUMN_CONFIGS[theme] ? (
                   <ColumnResizeDivider
+                    key={theme}
                     theme={theme}
                     paperRef={paperRef}
                     sidebarWidth={sidebarWidth}
                     onSidebarWidthChange={onSidebarWidthChange}
                   />
-                )}
+                ) : null}
               </div>
 
               {/* Visual Page Break Marker only on actual overflow */}
@@ -232,4 +234,6 @@ export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = ({
       )}
     </div>
   );
-};
+});
+
+StepPreviewCanvas.displayName = 'StepPreviewCanvas';

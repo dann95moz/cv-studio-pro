@@ -44,13 +44,6 @@ export const ColumnResizeDivider: React.FC<ColumnResizeDividerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
 
   const config = TWO_COLUMN_CONFIGS[activeThemeId];
-  if (!config) return null;
-
-  const currentWidth = sidebarWidth ?? config.defaultWidth;
-  const isDefault = sidebarWidth === undefined || sidebarWidth === config.defaultWidth;
-
-  // Position from left edge of paper sheet
-  const positionPercent = config.side === 'left' ? currentWidth : 100 - currentWidth;
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -65,7 +58,7 @@ export const ColumnResizeDivider: React.FC<ColumnResizeDividerProps> = ({
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!isDragging || !paperRef.current) return;
+      if (!isDragging || !paperRef.current || !config) return;
       const rect = paperRef.current.getBoundingClientRect();
       if (!rect || rect.width <= 0) return;
 
@@ -96,6 +89,15 @@ export const ColumnResizeDivider: React.FC<ColumnResizeDividerProps> = ({
     e.stopPropagation();
     onSidebarWidthChange(undefined);
   };
+
+  // Safe early return strictly AFTER all hooks have executed to preserve React Hook rules
+  if (!config) return null;
+
+  const currentWidth = sidebarWidth ?? config.defaultWidth;
+  const isDefault = sidebarWidth === undefined || sidebarWidth === config.defaultWidth;
+
+  // Position from left edge of paper sheet
+  const positionPercent = config.side === 'left' ? currentWidth : 100 - currentWidth;
 
   const tooltipTitle = isDefault
     ? t('preview:resizer.dragHint', 'Arrastra para ajustar el ancho de la columna')
