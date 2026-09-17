@@ -53,7 +53,7 @@ export function useVersionDiffWorkflow() {
         customColor: undefined,
         fontFamily: 'inter' as FontFamilyId,
         spacingDensity: 'standard' as SpacingDensity,
-        matchScore: 58,
+        matchScore: 0,
       };
     }
 
@@ -68,7 +68,7 @@ export function useVersionDiffWorkflow() {
         customColor: currentCustomColor,
         fontFamily: currentFontFamily,
         spacingDensity: currentSpacingDensity,
-        matchScore: currentMatchScore || 85,
+        matchScore: currentMatchScore ?? 0,
       };
     }
 
@@ -86,7 +86,7 @@ export function useVersionDiffWorkflow() {
         customColor: undefined,
         fontFamily: currentFontFamily,
         spacingDensity: currentSpacingDensity,
-        matchScore: found.matchScore || 85,
+        matchScore: found.matchScore ?? 0,
       };
     }
 

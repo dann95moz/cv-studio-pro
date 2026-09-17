@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CVData, ExperienceItem, SkillCategory, CustomSection } from '../../../types/cv';
+import { CVData, ExperienceItem, SkillCategory, CustomSection, ContactType } from '../../../types/cv';
 import { ProfileSectionKey } from './ProfileNavRail';
 import { PersonalInfoSection } from './PersonalInfoSection';
 import { SummarySection } from './SummarySection';
@@ -25,7 +25,7 @@ export interface GuidedProfileActiveSectionProps {
   isLastSection: boolean;
   onNameChange: (name: string) => void;
   onTitleChange: (title: string) => void;
-  onContactChange: (type: any, label: string, url?: string) => void;
+  onContactChange: (type: ContactType, label: string, url?: string) => void;
   onSummaryChange: (summary: string) => void;
   onSkillCategoryChange: (index: number, newCategory: string) => void;
   onSkillsChange: (index: number, skillsStr: string) => void;

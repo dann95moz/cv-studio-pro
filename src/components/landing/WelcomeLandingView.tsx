@@ -97,7 +97,7 @@ export const WelcomeLandingView: React.FC<WelcomeLandingViewProps> = ({
           sx={{
             position: 'fixed',
             inset: 16,
-            zIndex: 9999,
+            zIndex: theme.zIndex.modal + 1,
             bgcolor: alpha(theme.palette.primary.main, 0.12),
             backdropFilter: 'blur(12px)',
             border: `2px dashed ${theme.palette.primary.main}`,

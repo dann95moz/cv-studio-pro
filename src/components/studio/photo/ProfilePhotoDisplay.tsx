@@ -340,7 +340,7 @@ export const ProfilePhotoDisplay: React.FC<ProfilePhotoDisplayProps> = ({
             <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.74rem' }}>
               {t('preview:panels.design.photoSize', 'Live Display Size')}
             </Typography>
-            <ButtonGroup size="small" variant="outlined" sx={{ borderRadius: 2, height: 24 }}>
+            <ButtonGroup size="small" variant="outlined" sx={{ height: 24 }}>
               <IconButton
                 size="small"
                 onClick={() => handleLiveSizeChange(clampedSize - 4)}
