@@ -1,141 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
-import { StepPreviewToolbar } from './preview/StepPreviewToolbar';
-import { StepPreviewCanvas } from './preview/StepPreviewCanvas';
-import { StepPreviewSidePanels } from './preview/StepPreviewSidePanels';
-import { StepPreviewModals } from './preview/StepPreviewModals';
 import { StepPreviewProps } from '../../types';
-import { useStepPreviewWorkflow } from '../../hooks/useStepPreviewWorkflow';
-import {
-  MobileDocumentBar,
-  MobileDiagnosticBar,
-  MobileStudioFab,
-  MobileToolsBottomSheet,
-} from './mobile';
+import { useStepPreviewFacade } from '../../hooks/facades/useStepPreviewFacade';
 import { backButtonRegistry } from '../../core/backButtonRegistry';
 import { useCanvasTouchGestures } from '../../hooks/useCanvasTouchGestures';
-import { CanvasZoomFloatingCapsule } from './preview/CanvasZoomFloatingCapsule';
-
-const PreviewAuditGapDrawer = React.lazy(() =>
-  import('./preview/PreviewAuditGapDrawer').then((m) => ({ default: m.PreviewAuditGapDrawer }))
-);
+import { StepPreviewDesktopToolbar } from './preview/StepPreviewDesktopToolbar';
+import { StepPreviewMobileHeader } from './preview/StepPreviewMobileHeader';
+import { StepPreviewSidePanels } from './preview/StepPreviewSidePanels';
+import { StepPreviewCanvas } from './preview/StepPreviewCanvas';
+import { StepPreviewAuditDrawer } from './preview/StepPreviewAuditDrawer';
+import { StepPreviewMobileControls } from './preview/StepPreviewMobileControls';
+import { StepPreviewModalsContainer } from './preview/StepPreviewModalsContainer';
 
 export type { StepPreviewProps };
 
+/**
+ * StepPreview: Top-level Preview Studio Container.
+ * Orchestrates preview layout across:
+ * - Desktop toolbar (StepPreviewDesktopToolbar)
+ * - Mobile headers (StepPreviewMobileHeader)
+ * - Main workspace (SidePanels, Canvas, AuditDrawer)
+ * - Mobile bottom controls & gestures (StepPreviewMobileControls)
+ * - Studio dialogs & modals (StepPreviewModalsContainer)
+ * Strictly follows SOLID (SRP) and the <200 line component rule.
+ */
 export const StepPreview: React.FC<StepPreviewProps> = () => {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
-
-  const {
-    paperRef,
-    canvasContainerRef,
-    previewDocType,
-    setPreviewDocType,
-    isDiffModalOpen,
-    setIsDiffModalOpen,
-    isTrackModalOpen,
-    setIsTrackModalOpen,
-    savedSuccess,
-    trackSuccess,
-    setTrackSuccess,
-    isSavingVersion,
-    activeSidePanel,
-    setActiveSidePanel,
-    isAuditGapOpen,
-    setIsAuditGapOpen,
-    auditGapTab,
-    setAuditGapTab,
-    isHudMinimized,
-    setIsHudMinimized,
-    handleToggleSidePanel,
-    handleOpenFullAudit,
-    setMobileZoomMode,
-    canvasScale,
-    sheetHeight,
-    targetPagePx,
-    targetPageWidthPx,
-    isOverflowing,
-    estimatedPages,
-    overflowPercentage,
-    activeTemplateMeta,
-    theme,
-    setTheme,
-    palette,
-    setPalette,
-    customColor,
-    setCustomColor,
-    fontFamily,
-    setFontFamily,
-    spacingDensity,
-    setSpacingDensity,
-    sidebarWidth,
-    setSidebarWidth,
-    pageFormat,
-    setPageFormat,
-    photo,
-    setProfilePhoto,
-    setProfilePhotoEnabled,
-    handleGenerate,
-    isGenerating,
-    handleDownloadCvMarkdown,
-    setWizardStep,
-    companyName,
-    targetRole,
-    targetJob,
-    providerSettings,
-    applications,
-    kanbanColumns,
-    savedVersions,
-    activeVersionId,
-    gapMarkdown,
-    parsedCv,
-    auditReport,
-    gapInfo,
-    isTracked,
-    handleSaveToHistory,
-    handleSaveAsGeneric,
-    handleLoadVersion,
-    handlePinAsGeneric,
-    handleUnpinGeneric,
-    diffInitialVersionAId,
-    diffInitialVersionBId,
-    handleCompareAgainstGeneric,
-    handleCloseDiffModal,
-    handleTrackApplication,
-    handleConfirmTrackApplication,
-    handleMagicAutoFit,
-    onTriggerDirectDownloadPdf,
-    onTriggerSharePdf,
-    onTriggerDownloadPlainText,
-    onTriggerDownloadDocx,
-    onTriggerCopyPlainText,
-    isExportingPdf,
-    isPromptOpen,
-    dismissPrompt,
-    openGitHubAndDismiss,
-    activeLanguage,
-    setActiveLanguage,
-    currentBaseLanguage,
-    translations,
-    isLanguageOutdated,
-    outdatedSectionsCount,
-    isTranslateModalOpen,
-    isTranslating,
-    activeModelName,
-    handleOpenTranslateModal,
-    handleCloseTranslateModal,
-    handleTranslateFull,
-    handleTranslateIncremental,
-    handleQuickSyncOutdated,
-    cvMarkdown,
-    isAdaptModalOpen,
-    handleOpenAdaptModal,
-    handleCloseAdaptModal,
-    handleUseCurrentCvForNewOffer,
-    handleAdaptNewOfferWithAi,
-  } = useStepPreviewWorkflow();
-
-  const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false);
+  const facade = useStepPreviewFacade();
 
   // 0ms Touch Gestures for mobile A4 canvas (Pinch-to-zoom & 2-finger pan)
   const {
@@ -143,39 +35,26 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
     isZoomed: isCanvasZoomed,
     resetToFit: handleResetFitZoom,
   } = useCanvasTouchGestures({
-    containerRef: canvasContainerRef,
-    baseScale: canvasScale,
-    onResetFit: () => setMobileZoomMode('fit'),
+    containerRef: facade.canvas.canvasContainerRef,
+    baseScale: facade.canvas.canvasScale,
+    onResetFit: () => facade.canvas.setMobileZoomMode('fit'),
   });
 
-  const effectiveCanvasScale = isMobile ? dynamicCanvasScale : canvasScale;
+  const effectiveCanvasScale = isMobile ? dynamicCanvasScale : facade.canvas.canvasScale;
 
-  // Register mobile tools bottom sheet and audit drawer in the back button stack
+  // Register audit drawer in Android/mobile back button stack
   useEffect(() => {
-    if (isMobileToolsOpen) {
-      return backButtonRegistry.register({
-        id: 'preview-mobile-tools',
-        priority: 50,
-        handler: () => {
-          setIsMobileToolsOpen(false);
-          return true;
-        },
-      });
-    }
-  }, [isMobileToolsOpen]);
-
-  useEffect(() => {
-    if (isAuditGapOpen) {
+    if (facade.modals.isAuditGapOpen) {
       return backButtonRegistry.register({
         id: 'preview-audit-drawer',
         priority: 60,
         handler: () => {
-          setIsAuditGapOpen(false);
+          facade.modals.setIsAuditGapOpen(false);
           return true;
         },
       });
     }
-  }, [isAuditGapOpen, setIsAuditGapOpen]);
+  }, [facade.modals.isAuditGapOpen, facade.modals.setIsAuditGapOpen]);
 
   return (
     <div
@@ -189,85 +68,10 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
       }}
     >
       {/* Top Studio Control Bar: Desktop Toolbar */}
-      <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
-        <StepPreviewToolbar
-          onSelectWizardStep={setWizardStep}
-          previewDocType={previewDocType}
-          onPreviewDocTypeChange={setPreviewDocType}
-          activeTemplateName={activeTemplateMeta.name}
-          onOpenTemplates={() => {
-            setActiveSidePanel('design');
-            setIsAuditGapOpen(false);
-          }}
-          onSaveVersion={handleSaveToHistory}
-          savedSuccess={savedSuccess}
-          isSavingVersion={isSavingVersion}
-          onReTailor={handleGenerate}
-          isGenerating={isGenerating}
-          onDownloadPdf={onTriggerDirectDownloadPdf}
-          onDownloadMarkdown={handleDownloadCvMarkdown}
-          onDownloadPlainText={onTriggerDownloadPlainText}
-          onDownloadDocx={onTriggerDownloadDocx}
-          onCopyPlainText={onTriggerCopyPlainText}
-          isExportingPdf={isExportingPdf}
-          pageFormat={pageFormat}
-          onPageFormatChange={setPageFormat}
-          isOverflowing={isOverflowing}
-          onAutoFit={handleMagicAutoFit}
-          onTrackApplication={handleTrackApplication}
-          isTracked={isTracked}
-          activeLanguage={activeLanguage}
-          baseLanguage={currentBaseLanguage}
-          translations={translations}
-          onLanguageChange={setActiveLanguage}
-          onOpenTranslateModal={handleOpenTranslateModal}
-          isLanguageOutdated={isLanguageOutdated}
-          outdatedSectionsCount={outdatedSectionsCount}
-          onQuickSyncOutdated={handleQuickSyncOutdated}
-          isTranslating={isTranslating}
-          savedVersions={savedVersions}
-          activeVersionId={activeVersionId}
-          companyName={companyName}
-          targetRole={targetRole}
-          matchScore={
-            gapInfo.matchScore ||
-            (auditReport.overallScore ? Math.round(auditReport.overallScore * 10) : 0)
-          }
-          onSelectVersion={handleLoadVersion}
-          onPinAsGeneric={handlePinAsGeneric}
-          onUnpinGeneric={handleUnpinGeneric}
-          onSaveAsGeneric={handleSaveAsGeneric}
-          onCompareAgainstGeneric={handleCompareAgainstGeneric}
-          onOpenAdaptModal={handleOpenAdaptModal}
-        />
-      </Box>
+      <StepPreviewDesktopToolbar facade={facade} />
 
-      {/* Mobile-First Secondary Document Bar: Document Switcher & Language Selector */}
-      <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
-        <MobileDocumentBar
-          previewDocType={previewDocType}
-          onPreviewDocTypeChange={setPreviewDocType}
-          activeLanguage={activeLanguage}
-          baseLanguage={currentBaseLanguage}
-          translations={translations}
-          onLanguageChange={setActiveLanguage}
-          onOpenTranslateModal={handleOpenTranslateModal}
-          isLanguageOutdated={isLanguageOutdated}
-        />
-      </Box>
-
-      {/* Mobile-First Tertiary Diagnostic Bar */}
-      <Box sx={{ display: { xs: 'block', md: 'none' }, flexShrink: 0 }}>
-        <MobileDiagnosticBar
-          auditScore={auditReport?.overallScore ?? 0}
-          matchScore={gapInfo?.matchScore ?? 0}
-          onSelectTab={(tab) => {
-            setIsAuditGapOpen(true);
-            setAuditGapTab(tab);
-            setActiveSidePanel(null);
-          }}
-        />
-      </Box>
+      {/* Mobile Secondary Document & Diagnostic Bars */}
+      <StepPreviewMobileHeader facade={facade} />
 
       {/* Main Studio Body */}
       <Box
@@ -283,174 +87,80 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
         {/* Left Side Panels (NavRail & Expandable Drawer) */}
         <StepPreviewSidePanels
           isMobile={isMobile}
-          activeSidePanel={activeSidePanel}
-          onToggleSidePanel={handleToggleSidePanel}
-          onCloseSidePanel={() => setActiveSidePanel(null)}
-          customColor={customColor}
-          onCustomColorChange={setCustomColor}
-          palette={palette}
-          onSelectPalette={setPalette}
-          fontFamily={fontFamily}
-          onFontFamilyChange={setFontFamily}
-          spacingDensity={spacingDensity}
-          onSpacingDensityChange={setSpacingDensity}
-          pageFormat={pageFormat}
-          onPageFormatChange={setPageFormat}
-          onAutoFit={handleMagicAutoFit}
-          sheetHeight={sheetHeight}
-          a4PagePx={targetPagePx}
-          estimatedPages={estimatedPages}
-          photo={photo}
-          onPhotoChange={setProfilePhoto}
-          onPhotoToggle={setProfilePhotoEnabled}
-          theme={theme}
-          onSelectTheme={setTheme}
-          sidebarWidth={sidebarWidth}
-          onSidebarWidthChange={setSidebarWidth}
-          parsedCv={parsedCv}
-          companyName={companyName}
-          targetRole={targetRole}
-          targetJob={targetJob}
-          providerSettings={providerSettings}
+          activeSidePanel={facade.modals.activeSidePanel}
+          onToggleSidePanel={facade.modals.handleToggleSidePanel}
+          onCloseSidePanel={() => facade.modals.setActiveSidePanel(null)}
+          customColor={facade.design.customColor}
+          onCustomColorChange={facade.design.setCustomColor}
+          palette={facade.design.palette}
+          onSelectPalette={facade.design.setPalette}
+          fontFamily={facade.design.fontFamily}
+          onFontFamilyChange={facade.design.setFontFamily}
+          spacingDensity={facade.design.spacingDensity}
+          onSpacingDensityChange={facade.design.setSpacingDensity}
+          sidebarWidth={facade.design.sidebarWidth}
+          onSidebarWidthChange={facade.design.setSidebarWidth}
+          pageFormat={facade.design.pageFormat}
+          onPageFormatChange={facade.design.setPageFormat}
+          onAutoFit={facade.canvas.handleMagicAutoFit}
+          sheetHeight={facade.canvas.sheetHeight}
+          a4PagePx={facade.canvas.targetPagePx}
+          estimatedPages={facade.canvas.estimatedPages}
+          photo={facade.design.photo}
+          onPhotoChange={facade.design.setProfilePhoto}
+          onPhotoToggle={facade.design.setProfilePhotoEnabled}
+          theme={facade.design.theme}
+          onSelectTheme={facade.design.setTheme}
+          parsedCv={facade.meta.parsedCv}
+          companyName={facade.meta.companyName}
+          targetRole={facade.meta.targetRole}
+          targetJob={facade.meta.targetJob}
+          providerSettings={facade.meta.providerSettings}
         />
 
         {/* Center Canvas: A4 Sheet / Cover Letter */}
         <StepPreviewCanvas
-          previewDocType={previewDocType}
-          canvasContainerRef={canvasContainerRef}
-          paperRef={paperRef}
+          previewDocType={facade.docType.previewDocType}
+          canvasContainerRef={facade.canvas.canvasContainerRef}
+          paperRef={facade.canvas.paperRef}
           effectiveCanvasScale={effectiveCanvasScale}
-          targetPageWidthPx={targetPageWidthPx}
-          targetPagePx={targetPagePx}
-          sheetHeight={sheetHeight}
-          overflowPercentage={overflowPercentage}
-          isOverflowing={isOverflowing}
-          pageFormat={pageFormat}
-          parsedCv={parsedCv}
-          theme={theme}
-          palette={palette}
-          customColor={customColor}
-          fontFamily={fontFamily}
-          spacingDensity={spacingDensity}
-          sidebarWidth={sidebarWidth}
-          onSidebarWidthChange={setSidebarWidth}
-          photo={photo}
-          companyName={companyName}
-          targetRole={targetRole}
-          onTriggerDirectDownloadPdf={onTriggerDirectDownloadPdf}
-          isAuditGapOpen={isAuditGapOpen}
-          isHudMinimized={isHudMinimized}
+          targetPageWidthPx={facade.canvas.targetPageWidthPx}
+          targetPagePx={facade.canvas.targetPagePx}
+          sheetHeight={facade.canvas.sheetHeight}
+          overflowPercentage={facade.canvas.overflowPercentage}
+          isOverflowing={facade.canvas.isOverflowing}
+          pageFormat={facade.design.pageFormat}
+          parsedCv={facade.meta.parsedCv}
+          theme={facade.design.theme}
+          palette={facade.design.palette}
+          customColor={facade.design.customColor}
+          fontFamily={facade.design.fontFamily}
+          spacingDensity={facade.design.spacingDensity}
+          sidebarWidth={facade.design.sidebarWidth}
+          onSidebarWidthChange={facade.design.setSidebarWidth}
+          photo={facade.design.photo}
+          companyName={facade.meta.companyName}
+          targetRole={facade.meta.targetRole}
+          onTriggerDirectDownloadPdf={facade.exports.onTriggerDirectDownloadPdf}
+          isAuditGapOpen={facade.modals.isAuditGapOpen}
+          isHudMinimized={facade.modals.isHudMinimized}
         />
 
         {/* Right-Side Audit & Gap Drawer */}
-        <Box
-          sx={{
-            order: 3,
-            display: { xs: isAuditGapOpen ? 'block' : 'none', md: 'flex' },
-            width: isAuditGapOpen ? { xs: '100%', sm: 380, md: 380 } : 0,
-            height: { xs: 'auto', md: '100%' },
-            position: isAuditGapOpen ? 'relative' : 'static',
-            flexShrink: 0,
-          }}
-        >
-          <React.Suspense fallback={null}>
-            <PreviewAuditGapDrawer
-              auditReport={auditReport}
-              gapInfo={gapInfo}
-              gapMarkdown={gapMarkdown}
-              companyName={companyName}
-              targetRole={targetRole}
-              cvData={parsedCv}
-              isOpen={isAuditGapOpen}
-              activeTab={auditGapTab}
-              onToggleTab={(tab) => {
-                setIsAuditGapOpen(true);
-                setAuditGapTab(tab);
-                setActiveSidePanel(null);
-              }}
-              onClose={() => setIsAuditGapOpen(false)}
-              onOpenFullAudit={handleOpenFullAudit}
-              isHudMinimized={isHudMinimized}
-              onToggleHudMinimized={setIsHudMinimized}
-            />
-          </React.Suspense>
-        </Box>
+        <StepPreviewAuditDrawer facade={facade} />
       </Box>
 
-      {/* Mobile-First FAB, Zoom Indicator, and Tools Bottom Sheet */}
-      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-        <CanvasZoomFloatingCapsule
-          scale={effectiveCanvasScale}
-          isZoomed={isCanvasZoomed}
-          onResetFit={handleResetFitZoom}
-        />
-        <MobileStudioFab onClick={() => setIsMobileToolsOpen(true)} />
-        <MobileToolsBottomSheet
-          open={isMobileToolsOpen}
-          onClose={() => setIsMobileToolsOpen(false)}
-          onSelectTool={(tool) => {
-            setIsMobileToolsOpen(false);
-            handleToggleSidePanel(tool);
-          }}
-          onOpenDiff={() => {
-            setIsMobileToolsOpen(false);
-            handleCompareAgainstGeneric();
-          }}
-          onOpenAuditGap={(tab = 'gap') => {
-            setIsMobileToolsOpen(false);
-            setIsAuditGapOpen(true);
-            setAuditGapTab(tab);
-            setActiveSidePanel(null);
-          }}
-          onDownloadPdf={onTriggerDirectDownloadPdf}
-          onSharePdf={onTriggerSharePdf}
-          onDownloadDocx={onTriggerDownloadDocx}
-          onDownloadPlainText={onTriggerDownloadPlainText}
-          onCopyPlainText={onTriggerCopyPlainText}
-          onDownloadMarkdown={handleDownloadCvMarkdown}
-          onSaveVersion={handleSaveToHistory}
-          onReTailor={handleGenerate}
-          onOpenAdaptModal={handleOpenAdaptModal}
-          isExportingPdf={isExportingPdf}
-          isSavingVersion={isSavingVersion}
-        />
-      </Box>
-
-      {/* Preview Dialogs, Modals, and Feedback */}
-      <StepPreviewModals
-        isTrackModalOpen={isTrackModalOpen}
-        onCloseTrackModal={() => setIsTrackModalOpen(false)}
-        onConfirmTrackApplication={handleConfirmTrackApplication}
-        companyName={companyName}
-        targetRole={targetRole}
-        savedVersions={savedVersions}
-        applications={applications}
-        kanbanColumns={kanbanColumns}
-        isDiffModalOpen={isDiffModalOpen}
-        onCloseDiffModal={handleCloseDiffModal}
-        diffInitialVersionAId={diffInitialVersionAId}
-        diffInitialVersionBId={diffInitialVersionBId}
-        isTranslateModalOpen={isTranslateModalOpen}
-        onCloseTranslateModal={handleCloseTranslateModal}
-        currentBaseLanguage={currentBaseLanguage}
-        translations={translations}
-        providerSettings={providerSettings}
-        activeModelName={activeModelName}
-        isTranslating={isTranslating}
-        onTranslateFull={handleTranslateFull}
-        onTranslateIncremental={handleTranslateIncremental}
-        isAdaptModalOpen={isAdaptModalOpen}
-        onCloseAdaptModal={handleCloseAdaptModal}
-        cvMarkdown={cvMarkdown}
-        onUseCurrentCvForNewOffer={handleUseCurrentCvForNewOffer}
-        onAdaptNewOfferWithAi={handleAdaptNewOfferWithAi}
-        isGenerating={isGenerating}
-        isPromptOpen={isPromptOpen}
-        onDismissPrompt={dismissPrompt}
-        onStarClick={openGitHubAndDismiss}
-        trackSuccess={trackSuccess}
-        onCloseTrackSuccess={() => setTrackSuccess(false)}
+      {/* Mobile Floating Action Button (FAB) & Bottom Sheet Tools */}
+      <StepPreviewMobileControls
+        facade={facade}
+        isMobile={isMobile}
+        isCanvasZoomed={isCanvasZoomed}
+        effectiveCanvasScale={effectiveCanvasScale}
+        handleResetFitZoom={handleResetFitZoom}
       />
+
+      {/* All Studio Dialogs, Modals & Alerts */}
+      <StepPreviewModalsContainer facade={facade} />
     </div>
   );
 };

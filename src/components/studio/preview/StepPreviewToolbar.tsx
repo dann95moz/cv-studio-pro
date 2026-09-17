@@ -18,7 +18,7 @@ export type { StepPreviewToolbarProps };
  * - Micro actions: Auto-fit, Compare, Track (PreviewToolbarActions)
  * - Primary Export, PDF generation & Save version (PreviewExportActions)
  */
-export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
+export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = React.memo(({
   onSelectWizardStep,
   previewDocType = 'cv',
   onPreviewDocTypeChange,
@@ -154,4 +154,6 @@ export const StepPreviewToolbar: React.FC<StepPreviewToolbarProps> = ({
       />
     </Paper>
   );
-};
+});
+
+StepPreviewToolbar.displayName = 'StepPreviewToolbar';
