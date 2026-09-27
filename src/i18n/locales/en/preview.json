@@ -302,5 +302,15 @@
     "doubleClickReset": "Double-click to reset",
     "reset": "Reset ratio",
     "columnLabel": "Sidebar Column Width"
+  },
+  "swissLegal": {
+    "title": "🇨🇭 Swiss Legal Status & Work Permit",
+    "workPermit": "Work Permit / Status",
+    "nationality": "Nationality (Origin)",
+    "civilStatus": "Civil Status",
+    "availability": "Availability / Mobility",
+    "dateOfBirth": "Date of Birth",
+    "drivingLicense": "Driving License",
+    "references": "Professional References"
   }
 }

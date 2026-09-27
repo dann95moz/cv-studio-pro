@@ -178,7 +178,7 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
       )}
 
       {/* 0.1 Swiss Legal Status & Work Permit Card (swiss-modern) */}
-      {activeTheme === 'swiss-modern' && (
+      {activeTheme === 'swiss-modern' && (parsedCv.workPermit || parsedCv.nationality || parsedCv.civilStatus || parsedCv.availability || parsedCv.dateOfBirth || parsedCv.drivingLicense) && (
         <Box>
           <Typography
             variant="overline"
@@ -191,61 +191,93 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
               display: 'block',
             }}
           >
-            🇨🇭 Statut Légal & Permis de Travail (Suisse)
+            {t('preview:swissLegal.title', '🇨🇭 Statut Légal & Permis de Travail (Suisse)')}
           </Typography>
 
           <Card variant="outlined" sx={{ bgcolor: 'background.paper', p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
-                PERMIS DE TRAVAIL / STATUT
-              </Typography>
-              <EditableText
-                tagName="div"
-                value={parsedCv.workPermit || 'Citoyen suisse – Aucun permis requis – Disponibilité immédiate'}
-                onSave={(val: string) => liveEdit?.updatePersonalDetail('workPermit', val)}
-                placeholder="Permis de travail (B, C, G ou Citoyen suisse)"
-                style={{ fontSize: '0.85rem', fontWeight: 600 }}
-              />
-            </Box>
+            {parsedCv.workPermit && (
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                  {t('preview:swissLegal.workPermit', 'PERMIS DE TRAVAIL / STATUT')}
+                </Typography>
+                <EditableText
+                  tagName="div"
+                  value={parsedCv.workPermit}
+                  onSave={(val: string) => liveEdit?.updatePersonalDetail('workPermit', val)}
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                />
+              </Box>
+            )}
 
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
-                NATIONALITÉ (ORIGINE)
-              </Typography>
-              <EditableText
-                tagName="div"
-                value={parsedCv.nationality || 'Suisse (Origine : Frutigen, BE)'}
-                onSave={(val: string) => liveEdit?.updatePersonalDetail('nationality', val)}
-                placeholder="Nationalité"
-                style={{ fontSize: '0.85rem', fontWeight: 600 }}
-              />
-            </Box>
+            {parsedCv.nationality && (
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                  {t('preview:swissLegal.nationality', 'NATIONALITÉ (ORIGINE)')}
+                </Typography>
+                <EditableText
+                  tagName="div"
+                  value={parsedCv.nationality}
+                  onSave={(val: string) => liveEdit?.updatePersonalDetail('nationality', val)}
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                />
+              </Box>
+            )}
 
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
-                ÉTAT CIVIL
-              </Typography>
-              <EditableText
-                tagName="div"
-                value={parsedCv.civilStatus || 'Célibataire'}
-                onSave={(val: string) => liveEdit?.updatePersonalDetail('civilStatus', val)}
-                placeholder="État civil (Célibataire, Marié...)"
-                style={{ fontSize: '0.85rem', fontWeight: 600 }}
-              />
-            </Box>
+            {parsedCv.civilStatus && (
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                  {t('preview:swissLegal.civilStatus', 'ÉTAT CIVIL')}
+                </Typography>
+                <EditableText
+                  tagName="div"
+                  value={parsedCv.civilStatus}
+                  onSave={(val: string) => liveEdit?.updatePersonalDetail('civilStatus', val)}
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                />
+              </Box>
+            )}
 
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
-                DISPONIBILITÉ / MOBILITÉ CANTONALE
-              </Typography>
-              <EditableText
-                tagName="div"
-                value={parsedCv.availability || 'Immédiate (Mobilité Suisse Romande)'}
-                onSave={(val: string) => liveEdit?.updatePersonalDetail('availability', val)}
-                placeholder="Disponibilité"
-                style={{ fontSize: '0.85rem', fontWeight: 600 }}
-              />
-            </Box>
+            {parsedCv.availability && (
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                  {t('preview:swissLegal.availability', 'DISPONIBILITÉ / MOBILITÉ CANTONALE')}
+                </Typography>
+                <EditableText
+                  tagName="div"
+                  value={parsedCv.availability}
+                  onSave={(val: string) => liveEdit?.updatePersonalDetail('availability', val)}
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                />
+              </Box>
+            )}
+
+            {parsedCv.dateOfBirth && (
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                  {t('preview:swissLegal.dateOfBirth', 'DATE DE NAISSANCE')}
+                </Typography>
+                <EditableText
+                  tagName="div"
+                  value={parsedCv.dateOfBirth}
+                  onSave={(val: string) => liveEdit?.updatePersonalDetail('dateOfBirth', val)}
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                />
+              </Box>
+            )}
+
+            {parsedCv.drivingLicense && (
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                  {t('preview:swissLegal.drivingLicense', 'PERMIS DE CONDUIRE')}
+                </Typography>
+                <EditableText
+                  tagName="div"
+                  value={parsedCv.drivingLicense}
+                  onSave={(val: string) => liveEdit?.updatePersonalDetail('drivingLicense', val)}
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                />
+              </Box>
+            )}
           </Card>
         </Box>
       )}

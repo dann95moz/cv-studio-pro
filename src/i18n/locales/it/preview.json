@@ -303,5 +303,15 @@
     "doubleClickReset": "Doppio clic per ripristinare",
     "reset": "Ripristina proporzione",
     "columnLabel": "Larghezza colonna laterale"
+  },
+  "swissLegal": {
+    "title": "🇨🇭 Stato Legale e Permesso di Lavoro (Svizzera)",
+    "workPermit": "Permesso di lavoro / Stato",
+    "nationality": "Nazionalità (Origine)",
+    "civilStatus": "Stato civile",
+    "availability": "Disponibilità / Mobilità",
+    "dateOfBirth": "Data di nascita",
+    "drivingLicense": "Patente di guida",
+    "references": "Referenze professionali"
   }
 }

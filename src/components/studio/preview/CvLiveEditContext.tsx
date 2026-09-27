@@ -64,7 +64,7 @@ export interface CvLiveEditContextValue {
   updateLanguageItem: (itemIndex: number, value: string) => void;
   updateSectionTitle: (type: SectionType | string, newTitle: string) => void;
   updatePersonalDetail: (
-    field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense',
+    field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references',
     value: string
   ) => void;
 }
@@ -262,7 +262,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
 
   const updatePersonalDetail = useCallback(
     (
-      field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense',
+      field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references',
       value: string
     ) => {
       applyCvUpdate((prev) => ({
