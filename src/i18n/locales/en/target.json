@@ -12,7 +12,9 @@
     "tailoring": "Tailoring Resume...",
     "byoAiPrompt": "Copy Prompt (My Own AI)",
     "copyPrompt": "Copy Prompt",
-    "viewExisting": "View Existing CV"
+    "viewExisting": "View Existing CV",
+    "skipToGeneric": "Continue without offer (Generic CV)",
+    "skipToGenericShort": "Skip offer & view base CV"
   },
   "fields": {
     "company": "Target Company / Employer",
@@ -62,7 +64,8 @@
   },
   "status": {
     "ready": "Job details ready",
-    "missing": "Paste a job description to tailor"
+    "missing": "Paste a job description to tailor",
+    "missingOrSkip": "Paste a job offer or continue with your base CV"
   },
   "modal": {
     "title": "Configure AI Provider",

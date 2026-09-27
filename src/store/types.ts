@@ -81,6 +81,7 @@ export interface CvDataSlice {
   handleStartBlank: () => void;
   handleResetWorkspace: () => void;
   handleDownloadCvMarkdown: () => void;
+  handleUseMasterDataAsCv: () => void;
 }
 
 export interface DesignSlice {

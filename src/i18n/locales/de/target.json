@@ -12,7 +12,9 @@
     "tailoring": "Lebenslauf wird angepasst...",
     "byoAiPrompt": "Prompt kopieren (Eigene KI)",
     "copyPrompt": "Prompt kopieren",
-    "viewExisting": "Vorhandenen Lebenslauf ansehen"
+    "viewExisting": "Vorhandenen Lebenslauf ansehen",
+    "skipToGeneric": "Ohne Angebot fortfahren (Basis-CV)",
+    "skipToGenericShort": "Angebot überspringen & Basis-CV anzeigen"
   },
   "fields": {
     "company": "Zielunternehmen / Arbeitgeber",
@@ -62,7 +64,8 @@
   },
   "status": {
     "ready": "Stellendaten bereit",
-    "missing": "Stellenbeschreibung zum Anpassen einfügen"
+    "missing": "Stellenbeschreibung zum Anpassen einfügen",
+    "missingOrSkip": "Stellenanzeige einfügen oder mit Basis-CV fortfahren"
   },
   "modal": {
     "title": "KI-Anbieter konfigurieren",

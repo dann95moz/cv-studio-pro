@@ -17,6 +17,7 @@ import {
   QualityAuditReport,
   GapAnalysisInfo,
 } from '../../../types';
+import { useResumeStore } from '../../../store';
 
 // Code-split dynamic views
 const StepMasterData = lazy(() =>
@@ -109,6 +110,7 @@ export const AppWorkspaceViews: React.FC<AppWorkspaceViewsProps> = ({
   onRefreshAudit,
 }) => {
   const { t } = useTranslation(['audit', 'gap', 'target']);
+  const handleUseMasterDataAsCv = useResumeStore((s) => s.handleUseMasterDataAsCv);
 
   return (
     <Box
@@ -183,6 +185,7 @@ export const AppWorkspaceViews: React.FC<AppWorkspaceViewsProps> = ({
               }}
               onPrevStep={() => onSelectWizardStep('profile')}
               onNextStep={() => onSelectWizardStep('preview')}
+              onSkipToGeneric={handleUseMasterDataAsCv}
               onGenerate={onGenerate}
               isGenerating={isGenerating}
               generationStep={generationStep}

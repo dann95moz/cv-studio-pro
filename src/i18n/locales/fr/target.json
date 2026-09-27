@@ -12,7 +12,9 @@
     "tailoring": "Adaptation du CV...",
     "byoAiPrompt": "Copier le prompt (Ma propre IA)",
     "copyPrompt": "Copier le prompt",
-    "viewExisting": "Voir le CV Existant"
+    "viewExisting": "Voir le CV Existant",
+    "skipToGeneric": "Continuer sans offre (CV générique)",
+    "skipToGenericShort": "Ignorer l'offre et voir le CV de base"
   },
   "fields": {
     "company": "Entreprise / Employeur Cible",
@@ -62,7 +64,8 @@
   },
   "status": {
     "ready": "Détails de l'offre prêts",
-    "missing": "Collez une description de poste à adapter"
+    "missing": "Collez une description de poste à adapter",
+    "missingOrSkip": "Collez une offre ou continuez avec votre CV de base"
   },
   "modal": {
     "title": "Configurer le Fournisseur IA",

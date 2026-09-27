@@ -149,6 +149,7 @@ export interface StepTargetJobProps {
   onLoadSample: () => void;
   onPrevStep: () => void;
   onNextStep: () => void;
+  onSkipToGeneric?: () => void;
   pageBudget?: 1 | 2;
   onPageBudgetChange?: (budget: 1 | 2) => void;
   onGenerate?: () => Promise<void> | void;

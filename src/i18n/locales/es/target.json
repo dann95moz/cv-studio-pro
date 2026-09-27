@@ -12,7 +12,9 @@
     "tailoring": "Adaptando Currículum...",
     "byoAiPrompt": "Copiar Prompt (Mi Propia IA)",
     "copyPrompt": "Copiar Prompt",
-    "viewExisting": "Ver CV Existente"
+    "viewExisting": "Ver CV Existente",
+    "skipToGeneric": "Continuar sin oferta (CV genérico)",
+    "skipToGenericShort": "Omitir oferta y ver CV base"
   },
   "fields": {
     "company": "Empresa Objetivo / Empleador",
@@ -62,7 +64,8 @@
   },
   "status": {
     "ready": "Detalles de la oferta listos",
-    "missing": "Pega una oferta de trabajo para adaptar"
+    "missing": "Pega una oferta de trabajo para adaptar",
+    "missingOrSkip": "Pega una oferta o continúa con tu CV base"
   },
   "modal": {
     "title": "Configurar Proveedor de IA",

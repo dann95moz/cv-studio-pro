@@ -12,7 +12,9 @@
     "tailoring": "Adattamento IA in corso",
     "byoAiPrompt": "Copia prompt (La mia IA)",
     "copyPrompt": "Copia prompt",
-    "viewExisting": "Vedi CV Esistente"
+    "viewExisting": "Vedi CV Esistente",
+    "skipToGeneric": "Continua senza offerta (CV generico)",
+    "skipToGenericShort": "Salta offerta e vedi CV base"
   },
   "fields": {
     "company": "Azienda / Datore di Lavoro",
@@ -62,7 +64,8 @@
   },
   "status": {
     "ready": "Dati offerta pronti",
-    "missing": "Incolla una descrizione di lavoro per personalizzare"
+    "missing": "Incolla una descrizione di lavoro per personalizzare",
+    "missingOrSkip": "Incolla un'offerta o continua con il tuo CV base"
   },
   "modal": {
     "title": "Configura Provider IA",

@@ -13,6 +13,7 @@ import { StepFooterStatus } from '../../atoms/StepFooterStatus';
 
 export interface TargetJobFooterActionsProps {
   onViewExisting?: () => void;
+  onSkipToGeneric?: () => void;
   onTailorNow: () => void;
   onOpenManualPrompt: () => void;
   isGenerating?: boolean;
@@ -28,9 +29,11 @@ export interface TargetJobFooterActionsProps {
  * - Omits redundant "Back to Profile" (handled by top stepper & native back).
  * - Automatic BYOK: If no API key configured, presents "Copy Prompt (My Own AI)" as the primary 1-click action.
  * - If API key configured, provides "Tailor Resume Now" as primary with prompt copying as secondary option.
+ * - Allows continuing directly with base/generic CV when user doesn't have an offer.
  */
 export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = React.memo(({
   onViewExisting,
+  onSkipToGeneric,
   onTailorNow,
   onOpenManualPrompt,
   isGenerating = false,
@@ -68,7 +71,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               ? isGenerating
                 ? generationStep || t('target:actions.tailoring', 'Tailoring Resume...')
                 : t('target:status.ready', 'Job details ready')
-              : t('target:status.missing', 'Paste a job description to tailor')
+              : t('target:status.missingOrSkip', 'Paste a job offer or continue with your base CV')
           }
         />
       </Box>
@@ -94,6 +97,21 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
             }}
           >
             {t('target:actions.viewExisting', 'View Existing CV')}
+          </Button>
+        )}
+
+        {/* Continue with generic CV without offer (when no generated CV yet) */}
+        {!hasGeneratedCv && !isGenerating && onSkipToGeneric && (
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={onSkipToGeneric}
+            sx={{
+              fontWeight: 600,
+              width: { xs: '100%', sm: 'auto' },
+            }}
+          >
+            {t('target:actions.skipToGeneric', 'Continue without offer (Generic CV)')}
           </Button>
         )}
 

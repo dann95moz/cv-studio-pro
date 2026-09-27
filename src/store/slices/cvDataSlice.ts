@@ -392,4 +392,18 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     downloadTextFile(content, fileName);
     get().recordBackup();
   },
+
+  handleUseMasterDataAsCv: () => {
+    const { masterData, cvMarkdown } = get();
+    // If cvMarkdown is empty, initialize it from masterData
+    if (!cvMarkdown || cvMarkdown.trim().length <= 30) {
+      const parsed = parseMarkdownToCvData(masterData);
+      set({
+        cvMarkdown: masterData,
+        activeCvData: parsed,
+        unsavedChangesCount: get().unsavedChangesCount + 1,
+      });
+    }
+    set({ wizardStep: 'preview' });
+  },
 });

@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import AttachFileRoundedIcon from '@mui/icons-material/AttachFileRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useFileUploader } from '../../hooks/useFileUploader';
 import { useTranslation } from 'react-i18next';
 import { StepTargetJobProps } from '../../types';
@@ -33,6 +34,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   onRoleChange,
   onLoadSample,
   onNextStep,
+  onSkipToGeneric,
   onGenerate,
   isGenerating = false,
   generationStep,
@@ -268,8 +270,34 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               )}
             </Box>
 
-            {/* Clustered Input Sources: Load Sample & Attach File */}
+            {/* Clustered Input Sources: Load Sample, Attach File & Skip without offer */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {onSkipToGeneric && !hasJob && (
+                <Button
+                  size="small"
+                  variant="text"
+                  color="primary"
+                  startIcon={<ArrowForwardRoundedIcon sx={{ fontSize: 16 }} />}
+                  onClick={() => {
+                    flushAll();
+                    onSkipToGeneric();
+                  }}
+                  sx={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    py: 0.25,
+                    px: 1,
+                    color: 'primary.main',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    },
+                  }}
+                >
+                  {t('target:actions.skipToGenericShort', 'Skip offer & view base CV')}
+                </Button>
+              )}
+
               {onLoadSample && (
                 <Button
                   size="small"
@@ -351,6 +379,14 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
               ? () => {
                   flushAll();
                   onNextStep();
+                }
+              : undefined
+          }
+          onSkipToGeneric={
+            onSkipToGeneric
+              ? () => {
+                  flushAll();
+                  onSkipToGeneric();
                 }
               : undefined
           }
