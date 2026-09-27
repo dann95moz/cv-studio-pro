@@ -1,465 +1,33 @@
-import { CVData, CVSection, ContactItem, SkillCategory, ExperienceItem, ContactType } from '../../types/cv';
-import { extractCandidateName, cleanHumanText, extractTargetRole } from './metadataExtractor';
+import { CVData, CVSection, ContactItem, ExperienceItem, SkillCategory } from '../../types/cv';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
+import { extractCandidateName, extractTargetRole, cleanHumanText } from './metadataExtractor';
 import { parseJsonToCvData } from './jsonToCvData';
-import { APP_LINKS } from '../../constants/links';
-import { cleanTrackingAndSearchUrl } from '../../utils/sanitize';
+import { parseContactsLine, isLikelyContactLine } from './contactParser';
+import { parseExperienceBlocks } from './experienceParser';
+import { parseLegalMetadata, LegalMetadataResult } from './legalMetadataParser';
+import { inferDocumentLanguage, normalizeSkillCategory } from './skillNormalizer';
+import {
+  cleanCvData,
+  cleanSummary,
+  cleanBulletText,
+  cleanSkillItem,
+  cleanSkillCategory,
+  cleanEducationItem,
+  cleanLanguageItem,
+} from './cvSanitizers';
 
-/**
- * Autonomously infers the primary natural language of the document.
- */
-export function inferDocumentLanguage(text: string): SupportedLanguage {
-  const lower = text.toLowerCase();
-  let esScore = 0;
-  let deScore = 0;
-  let frScore = 0;
-  let itScore = 0;
-  let enScore = 0;
-
-  // Domain-specific keyword indicators
-  if (/(\bexperiencia\b|\bhabilidades\b|\beducaci[oó]n\b|\bidiomas\b|\bresumen\b|\bdesarrollador\b|\bproyectos\b|\bcertificaciones\b|\blaboral\b)/i.test(lower)) esScore += 4;
-  if (/(\bberufserfahrung\b|\bausbildung\b|\bsprachen\b|\bkenntnisse\b|\bkurzprofil\b|\bprojekte\b)/i.test(lower)) deScore += 4;
-  if (/(\bexp[ée]rience\b|\bformation\b|\blangues\b|\bcomp[ée]tences\b|\bprofil professionnel\b|\bprojets\b)/i.test(lower)) frScore += 4;
-  if (/(\besperienza\b|\bistruzione\b|\blingue\b|\bcompetenze\b|\bprogetti\b)/i.test(lower)) itScore += 4;
-  if (/(\bexperience\b|\bskills\b|\beducation\b|\blanguages\b|\bsummary\b|\bprojects\b)/i.test(lower)) enScore += 4;
-
-  // Common syntax and grammatical markers
-  if (/\b(de|en|con|para|por|los|las|del|una|un|años|trayectoria)\b/i.test(lower)) esScore += 2;
-  if (/\b(und|der|die|das|mit|für|von|im|jahre)\b/i.test(lower)) deScore += 2;
-  if (/\b(et|dans|pour|avec|des|les|une|ans)\b/i.test(lower)) frScore += 2;
-  if (/\b(e|in|per|con|dei|le|un|anni)\b/i.test(lower)) itScore += 2;
-  if (/\b(the|and|with|for|from|years|track\s*record)\b/i.test(lower)) enScore += 2;
-
-  if (esScore > deScore && esScore > frScore && esScore > itScore && esScore >= enScore) return 'es';
-  if (deScore > esScore && deScore > frScore && deScore > itScore && deScore >= enScore) return 'de';
-  if (frScore > esScore && frScore > deScore && frScore > itScore && frScore >= enScore) return 'fr';
-  if (itScore > esScore && itScore > deScore && itScore > frScore && itScore >= enScore) return 'it';
-  return 'en';
-}
-
-/**
- * Normalizes and localizes standard technical skill category names into the target document language.
- */
-export function normalizeSkillCategory(category: string, lang: SupportedLanguage): string {
-  const clean = category.replace(/[*_`]/g, '').trim();
-  const lower = clean.toLowerCase();
-  const langDef = LANGUAGE_DEFINITIONS[lang] || LANGUAGE_DEFINITIONS.es;
-
-  if (
-    lower.includes('language') ||
-    lower.includes('lenguaje') ||
-    lower.includes('programmiersprache') ||
-    lower.includes('fundamento') ||
-    lower.includes('core web') ||
-    lower.includes('core fundamental') ||
-    lower === 'core skills' ||
-    lower === 'competencias clave' ||
-    lower === 'kernkompetenzen' ||
-    lower === 'compétences clés' ||
-    lower === 'competenze chiave' ||
-    lower === 'core competencies'
-  ) {
-    return langDef.skillsCategories.languages;
-  }
-  if (
-    lower.includes('framework') ||
-    lower.includes('architecture') ||
-    lower.includes('arquitectura') ||
-    lower.includes('ecosystem') ||
-    lower.includes('ecosistema') ||
-    lower.includes('ökosystem') ||
-    lower.includes('écosystème') ||
-    lower.includes('specialt') ||
-    lower.includes('especialidad') ||
-    lower.includes('schwerpunkt') ||
-    lower.includes('specializzazion')
-  ) {
-    return langDef.skillsCategories.frameworks;
-  }
-  if (
-    lower.includes('tool') ||
-    lower.includes('herramienta') ||
-    lower.includes('ci/cd') ||
-    lower.includes('testing') ||
-    lower.includes('werkzeug') ||
-    lower.includes('outil') ||
-    lower.includes('strument')
-  ) {
-    return langDef.skillsCategories.tooling;
-  }
-  if (
-    lower === 'skills' ||
-    lower === 'technical skills' ||
-    lower === 'competencies' ||
-    lower === 'habilidades' ||
-    lower === 'habilidades técnicas'
-  ) {
-    return langDef.sections.skills;
-  }
-
-  return clean;
-}
-
-/**
- * Detects contact type from text or URL
- */
-function inferContactType(text: string, url?: string): ContactType {
-  const combined = `${text} ${url || ''}`.toLowerCase();
-  if (combined.includes('@')) return 'email';
-  if (combined.includes('linkedin.com') || combined.includes('/in/')) return 'linkedin';
-  if (combined.includes('github.com')) return 'github';
-  if (combined.includes('http://') || combined.includes('https://') || combined.includes('www.') || combined.includes('.dev') || combined.includes('.io') || combined.includes('.me')) return 'globe';
-  if (/^[\s+0-9().-]{7,}$/.test(text.trim())) return 'phone';
-  return 'location';
-}
-
-/**
- * Parses raw contacts line (e.g. "San Francisco, CA • [alex@example.com](mailto:...) • +1 415 555 0192 • [LinkedIn](...)")
- */
-function parseContactsLine(line: string): ContactItem[] {
-  const items = line.split(/[•|·]/).map((item) => item.trim()).filter(Boolean);
-  const contacts: ContactItem[] = [];
-
-  for (const item of items) {
-    const linkMatch = item.match(/\[([^\]]+)\]\(([^)]+)\)/);
-    if (linkMatch) {
-      const rawLabel = cleanHumanText(linkMatch[1]);
-      let rawUrl = cleanTrackingAndSearchUrl(linkMatch[2].trim());
-      const type = inferContactType(rawLabel, rawUrl);
-      if (type === 'email' && !rawUrl.startsWith('mailto:')) {
-        rawUrl = `mailto:${rawUrl}`;
-      } else if ((type === 'linkedin' || type === 'github' || type === 'globe') && !rawUrl.startsWith('http')) {
-        rawUrl = `https://${rawUrl}`;
-      }
-      contacts.push({
-        type,
-        label: rawLabel,
-        url: rawUrl,
-      });
-    } else {
-      let clean = cleanTrackingAndSearchUrl(item.replace(/^[–\-*]\s*/, '').trim());
-      // Handle key-value prefixes e.g. "**Email:** user@example.com" or "Email: user@example.com"
-      const kvMatch = clean.match(/^\*{0,2}(Email|E-mail|Correo|Tel[ée]fono|Phone|Mobile|Celular|Ubicaci[oó]n|Location|City|Ciudad|LinkedIn|GitHub|Portfolio|Web)\*{0,2}[:\s]+(.+)$/i);
-      let detectedType: ContactType | undefined;
-      if (kvMatch) {
-        const key = kvMatch[1].toLowerCase();
-        clean = kvMatch[2].replace(/[*_`]/g, '').trim();
-        if (key.includes('email') || key.includes('correo')) detectedType = 'email';
-        else if (key.includes('tel') || key.includes('phone') || key.includes('mobile') || key.includes('celular')) detectedType = 'phone';
-        else if (key.includes('ubic') || key.includes('loc') || key.includes('city') || key.includes('ciudad')) detectedType = 'location';
-        else if (key.includes('linkedin')) detectedType = 'linkedin';
-        else if (key.includes('github')) detectedType = 'github';
-        else if (key.includes('port') || key.includes('web')) detectedType = 'globe';
-      }
-      if (clean) {
-        const type = detectedType || inferContactType(clean);
-        let url: string | undefined = undefined;
-        if (type === 'email') {
-          url = clean.startsWith('mailto:') ? clean : `mailto:${clean}`;
-        } else if (clean.startsWith('http')) {
-          url = clean;
-        } else if (type === 'linkedin' || type === 'github' || type === 'globe') {
-          if (clean.includes('linkedin.com') || clean.includes('github.com') || clean.includes('.') || clean.startsWith('http')) {
-            url = clean.startsWith('http') ? clean : `https://${clean}`;
-          }
-        } else if (type === 'phone') {
-          url = `tel:${clean.replace(/[^\d+]/g, '')}`;
-        }
-        contacts.push({
-          type,
-          label: clean,
-          url,
-        });
-      }
-    }
-  }
-
-  return contacts;
-}
-
-
-/**
- * Strips raw markdown headers (e.g. "## Professional Summary"), label prefixes ("**Summary:**"),
- * dividers, and markdown formatting wrappers from summary text.
- */
-export function cleanSummary(summary: string): string {
-  if (!summary) return '';
-  let clean = summary.trim();
-
-  // Strip markdown headers like "## Summary", "### Resumen Profesional"
-  clean = clean.replace(/^#{1,6}\s+[^\n]*\n+/gm, '').trim();
-
-  // Strip label prefixes like "**Summary:**", "**Summary**:", "**Resumen:**", "Summary:"
-  clean = clean.replace(/^\*{0,2}(?:Resumen(?:\s+Profesional|\s+Ejecutivo)?|Professional\s+Summary|Executive\s+Summary|Perfil(?:\s+Profesional)?|Summary|Profil|Zusammenfassung|Sommario)(?::\*{0,2}|\*{0,2}:)\s*(\r?\n)?/i, '').trim();
-
-  // Strip divider lines "---" or "==="
-  clean = clean.replace(/^[-=_]{3,}\s*$/gm, '').trim();
-
-  // Strip outer and inline markdown bolding, italics, and code markers
-  clean = clean
-    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[\[\]]/g, '');
-
-  // Strip any leftover leading asterisks, bullets, or headers
-  clean = clean.replace(/^[*_`#\s]+/, '').replace(/[*_`\s]+$/, '').trim();
-
-  return clean;
-}
-
-/**
- * Strips leading bullet characters (- , * , • , · , + , or 1. ) and markdown bolding from bullet text.
- */
-export function cleanBulletText(bullet: string): string {
-  if (!bullet) return '';
-  return bullet
-    .replace(/^(?:[-*•·+]|\d+\.)\s+/, '')
-    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[\[\]]/g, '')
-    .trim();
-}
-
-/**
- * Cleans individual skill tag (stripping *, _, `, brackets, leading bullet dashes).
- */
-export function cleanSkillItem(skill: string): string {
-  if (!skill) return '';
-  return skill
-    .replace(/^[-*•·+]\s*/, '')
-    .replace(/[*_`]/g, '')
-    .replace(/[\[\]]/g, '')
-    .trim();
-}
-
-/**
- * Cleans skill category title (stripping *, _, `, #, brackets, leading bullet dashes, trailing colons).
- */
-export function cleanSkillCategory(category: string): string {
-  if (!category) return '';
-  return category
-    .replace(/^[-*•·+]\s*/, '')
-    .replace(/[*_`#]/g, '')
-    .replace(/[\[\]]/g, '')
-    .replace(/[:\s]+$/, '')
-    .trim();
-}
-
-/**
- * Cleans education / certification item string into pure human-readable text.
- */
-export function cleanEducationItem(item: string): string {
-  if (!item) return '';
-  let clean = item.replace(/^(?:[-–—•·+]|\*(?!\*))\s*/, '').trim();
-  clean = clean.replace(/\[([^\]]+)\](?!\()/g, '$1');
-  clean = clean
-    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[\[\]]/g, '')
-    .trim();
-  return clean;
-}
-
-/**
- * Cleans language item string into pure human-readable text (Language: Level).
- */
-export function cleanLanguageItem(item: string): string {
-  if (!item) return '';
-  let clean = item.replace(/^(?:[-–—•·+]|\*(?!\*))\s*/, '').trim();
-  clean = clean.replace(/\[([^\]]+)\](?!\()/g, '$1');
-  clean = clean
-    .replace(/\\([\[\]+*`_~\\-])/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[\[\]]/g, '')
-    .trim();
-  return clean;
-}
-
-/**
- * Parses experience or project blocks under ###
- */
-function parseExperienceBlocks(content: string, contacts: ContactItem[] = []): ExperienceItem[] {
-  const blocks = content.split(/(?=^###\s+)/m).filter((b) => b.trim().length > 0);
-  const items: ExperienceItem[] = [];
-
-  for (const block of blocks) {
-    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
-    if (lines.length === 0) continue;
-
-    let company = '';
-    let location = '';
-    let role = '';
-    let date = '';
-    const bullets: string[] = [];
-
-    // Extract demoUrl and repoUrl BEFORE stripping markdown links from header
-    const fullHeaderRaw = lines[0] + (lines.length > 1 && !lines[1].startsWith('-') && !lines[1].startsWith('*') && !lines[1].startsWith('•') ? ` ${lines[1]}` : '');
-    let demoUrl: string | undefined = undefined;
-    let repoUrl: string | undefined = undefined;
-
-    const demoMatch = fullHeaderRaw.match(/\[([^\]]*(?:demo|sitio|website|app|live|ver\s*demo)[^\]]*)\]\((https?:\/\/[^)]+)\)/i) ||
-                      fullHeaderRaw.match(/\[(?:Live\s*Demo|Demo)\]\(([^)]+)\)/i);
-    if (demoMatch) {
-      demoUrl = (demoMatch[2] || demoMatch[1]).trim();
-    }
-
-    const repoMatch = fullHeaderRaw.match(/\[([^\]]*(?:github|repo|código|code|source)[^\]]*)\]\((https?:\/\/[^)]+)\)/i) ||
-                      fullHeaderRaw.match(/\[(?:GitHub(?:\s*Repository)?|Repo)\]\(([^)]+)\)/i);
-    if (repoMatch) {
-      repoUrl = (repoMatch[2] || repoMatch[1]).trim();
-    }
-
-    if (!repoUrl) {
-      const ghMatch = fullHeaderRaw.match(/https?:\/\/github\.com\/[^\s)\]|•]+/i);
-      if (ghMatch) repoUrl = ghMatch[0];
-    }
-    if (!demoUrl) {
-      const liveMatch = fullHeaderRaw.match(/https?:\/\/(?!github\.com)[^\s)\]|•]+/i);
-      if (liveMatch) demoUrl = liveMatch[0];
-    }
-
-    const compOrHeaderLower = fullHeaderRaw.toLowerCase();
-    if (compOrHeaderLower.includes('cv studio') || compOrHeaderLower.includes('tailor engine')) {
-      if (!demoUrl) demoUrl = APP_LINKS.DEMO_URL;
-      if (!repoUrl) repoUrl = APP_LINKS.GITHUB_REPO;
-    } else if (!repoUrl && /\b(github|repo|repository)\b/i.test(compOrHeaderLower)) {
-      const ghContact = contacts.find((c) => c.type === 'github');
-      if (ghContact?.url) {
-        const firstLineCompany = lines[0].replace(/^###\s+/, '').split('|')[0].replace(/[*_]/g, '').trim();
-        const slug = firstLineCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-        if (slug) repoUrl = `${ghContact.url.replace(/\/+$/, '')}/${slug}`;
-      }
-    }
-
-    // Line 1: Header line (e.g. "### **Company** | Location" or "### Role | Company" or "### Company | Oct 2024 – Present")
-    const headerLine = lines[0].replace(/^###\s+/, '').trim();
-    const headerParts = headerLine.split('|').map((p) => cleanHumanText(p).replace(/\[([^\]]+)\]/g, '$1').trim());
-    const part0 = headerParts[0] || '';
-    const part1 = headerParts.length > 1 ? headerParts[1] : '';
-    const part2 = headerParts.length > 2 ? headerParts.slice(2).join(' | ') : '';
-
-    const roleKeywords = /\b(developer|engineer|architect|consultant|specialist|designer|manager|lead|director|analyst|programmer|intern|assistant|desarrollador|ingeniero|l[ií]der|gerente|arquitecto|analista|consultor|especialista)\b/i;
-    const isDatePattern = (str: string) => /\b(19\d\d|20\d\d|presente|present|actualidad|current)\b/i.test(str);
-
-    if (part1 && roleKeywords.test(part0) && !roleKeywords.test(part1)) {
-      role = part0;
-      if (isDatePattern(part1)) {
-        date = part1;
-        company = part2;
-      } else {
-        company = part1;
-        if (part2) {
-          if (isDatePattern(part2)) date = part2;
-          else location = part2;
-        }
-      }
-    } else {
-      company = part0;
-      if (isDatePattern(part1)) {
-        date = part1;
-        location = part2;
-      } else {
-        location = part1;
-        if (part2 && isDatePattern(part2)) {
-          date = part2;
-        }
-      }
-    }
-
-    // Line 2: Subheader line (e.g. "*Role* | **Date**" or "Role | Date" or "Date")
-    let lineIdx = 1;
-    if (lineIdx < lines.length && !lines[lineIdx].startsWith('-') && !lines[lineIdx].startsWith('* ') && !lines[lineIdx].startsWith('• ')) {
-      const subLine = lines[lineIdx];
-      const isParagraph = subLine.length > 100 && !subLine.includes('|');
-      if (!isParagraph) {
-        const subParts = subLine.split('|').map((p) => cleanHumanText(p).replace(/\[([^\]]+)\]/g, '$1').trim());
-        const sub0 = subParts[0] || '';
-        const sub1 = subParts.length > 1 ? subParts.slice(1).join(' | ') : '';
-
-        const isDateOnly = isDatePattern(sub0) && !roleKeywords.test(sub0);
-
-        if (role && !date && isDateOnly) {
-          date = sub0;
-        } else {
-          if (!role) role = sub0;
-          if (sub1) date = sub1;
-        }
-        lineIdx++;
-      }
-    }
-
-    // Remaining lines: Bullets
-    for (; lineIdx < lines.length; lineIdx++) {
-      const line = lines[lineIdx];
-      if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ') || line.startsWith('+ ')) {
-        const bulletText = line.replace(/^[-*•·+]\s+/, '').trim();
-        if (bulletText) bullets.push(bulletText);
-      } else if (line.startsWith('---') || line.startsWith('===')) {
-        continue;
-      } else {
-        if (bullets.length > 0) {
-          bullets[bullets.length - 1] += ` ${line}`;
-        } else {
-          bullets.push(line);
-        }
-      }
-    }
-
-    let cleanLoc = cleanHumanText(location);
-    if (
-      cleanLoc.includes('Live Demo') ||
-      cleanLoc.includes('GitHub Repository') ||
-      cleanLoc.startsWith('http') ||
-      cleanLoc.includes('github.com') ||
-      cleanLoc === 'Demo' ||
-      cleanLoc === 'Repo'
-    ) {
-      cleanLoc = cleanLoc
-        .replace(/Live\s*Demo/gi, '')
-        .replace(/GitHub(?:\s*Repository)?/gi, '')
-        .replace(/https?:\/\/[^\s]+/g, '')
-        .replace(/[•|·+–—/]/g, '')
-        .trim();
-    }
-    if (/^[•|·+–—/\s]+$/.test(cleanLoc) || cleanLoc === '+' || cleanLoc === '-') {
-      cleanLoc = '';
-    }
-
-    if (company || role || bullets.length > 0) {
-      items.push({
-        company: cleanHumanText(company) || 'Organization',
-        role: cleanHumanText(role) || 'Specialist',
-        date: cleanHumanText(date),
-        location: cleanLoc,
-        demoUrl,
-        repoUrl,
-        bullets: bullets.map(cleanBulletText).filter(Boolean),
-      });
-    }
-  }
-
-  return items;
-}
+// Re-export helpers for backward compatibility across the codebase
+export {
+  inferDocumentLanguage,
+  normalizeSkillCategory,
+  cleanCvData,
+  cleanSummary,
+  cleanBulletText,
+  cleanSkillItem,
+  cleanSkillCategory,
+  cleanEducationItem,
+  cleanLanguageItem,
+};
 
 /**
  * Parses skills categories from markdown bullets with robust regex and localization.
@@ -472,11 +40,6 @@ function parseSkillGroups(content: string, lang: SupportedLanguage): SkillCatego
   for (const line of lines) {
     if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ') || line.startsWith('+ ')) {
       const clean = line.replace(/^[-*•·+]\s+/, '').trim();
-
-      // Robust category match:
-      // "**Languages & Core Fundamentals:** TypeScript, ..."
-      // "**Languages & Core Fundamentals**: TypeScript, ..."
-      // "Languages & Core Fundamentals: TypeScript, ..."
       const catMatch = clean.match(/^\*{0,2}(.*?)(?::\*{0,2}|\*{0,2}:)\s*(.+)$/);
 
       if (catMatch) {
@@ -488,7 +51,6 @@ function parseSkillGroups(content: string, lang: SupportedLanguage): SkillCatego
           .filter(Boolean);
         groups.push({ category, skills });
       } else {
-        // Plain skills bullet: if a group already exists, append to the last group!
         const skill = cleanSkillItem(clean);
         if (skill) {
           if (groups.length > 0) {
@@ -523,29 +85,13 @@ function parseBulletList(content: string): string[] {
     if (isBullet) {
       items.push(line.replace(/^[-*•·+]\s+/, '').trim());
     } else if (isIndented && items.length > 0) {
-      // Sub-bullet attached to previous item (e.g. description under degree)
       items[items.length - 1] += `\n  - ${line.replace(/^[-*•·+]\s+/, '').trim()}`;
     } else if (/^\*\*[^*]+\*\*/.test(line) || /^[A-Za-z0-9]/.test(line)) {
-      // Direct entry without bullet (e.g. "**The art of API Documentation**, Udemy, 2024.")
       items.push(line);
     }
   }
 
   return items.filter(Boolean);
-}
-
-/**
- * Detects whether a markdown line represents contact details (email, phone, location, links)
- */
-function isLikelyContactLine(line: string): boolean {
-  if (line.includes('@')) return true;
-  if (/https?:\/\/|www\.|linkedin\.com|github\.com/i.test(line)) return true;
-  if (/(?:\+|tel[ée]fono|phone|celular|mobile)[\s:]*[0-9]/i.test(line)) return true;
-  if (/^(?:[-*•]\s*)?\*{0,2}(?:Email|Correo|Tel[ée]fono|Phone|Mobile|Celular|Ubicaci[oó]n|Location|City|Ciudad|LinkedIn|GitHub|Portfolio|Web)/i.test(line)) return true;
-  if (/[•|·]/.test(line)) {
-    return /@|https?:\/\/|www\.|linkedin|github|\+?\d{2,}/i.test(line);
-  }
-  return false;
 }
 
 /**
@@ -594,14 +140,8 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
 
   let name = '';
   let title = '';
-  let contacts: ContactItem[] = [];
-  let nationality: string | undefined;
-  let dateOfBirth: string | undefined;
-  let drivingLicense: string | undefined;
-  let workPermit: string | undefined;
-  let civilStatus: string | undefined;
-  let availability: string | undefined;
-  let references: string | undefined;
+  const contacts: ContactItem[] = [];
+  const legalDetails: LegalMetadataResult = {};
 
   // 1. Parse Preamble (before the first ##)
   let preambleEndIndex = lines.findIndex((l) => l.startsWith('## '));
@@ -610,47 +150,9 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   const preambleLines = lines.slice(0, preambleEndIndex).map((l) => l.trim()).filter(Boolean);
 
   for (const pLine of preambleLines) {
-    // Check key-value personal metadata (common in Swiss & European CVs)
-    const cleanMeta = pLine.replace(/^[–\-*•·]\s*/, '').trim();
-    const permitMatch = cleanMeta.match(/^\*{0,2}(?:Permis(?:\s+de\s+travail|\s+de\s+s[ée]jour)?|Work\s+Permit|Aufenthaltsbewilligung|Permiso\s+de\s+trabajo)\*{0,2}[:\s]+(.+)$/i);
-    if (permitMatch) {
-      workPermit = cleanHumanText(permitMatch[1]);
-      continue;
-    }
-
-    const natMatch = cleanMeta.match(/^\*{0,2}(?:Nationalit[ée]|Nationality|Nationalit[äa]t|Nacionalidad|Nazionalit[àa])\*{0,2}[:\s]+(.+)$/i);
-    if (natMatch) {
-      nationality = cleanHumanText(natMatch[1]);
-      continue;
-    }
-
-    const dobMatch = cleanMeta.match(/^\*{0,2}(?:Date\s+de\s+naissance|Date\s+of\s+birth|Geburtsdatum|Fecha\s+de\s+nacimiento|Data\s+di\s+nascita|Birth\s*date|N[ée]\(e\)\s+le)\*{0,2}[:\s]+(.+)$/i);
-    if (dobMatch) {
-      dateOfBirth = cleanHumanText(dobMatch[1]);
-      continue;
-    }
-
-    const driveMatch = cleanMeta.match(/^\*{0,2}(?:Permis\s+de\s+conduire|Driving\s+licen[cs]e|F[üu]hrerschein|Permiso\s+de\s+conducir|Patente)\*{0,2}[:\s]+(.+)$/i);
-    if (driveMatch) {
-      drivingLicense = cleanHumanText(driveMatch[1]);
-      continue;
-    }
-
-    const availMatch = cleanMeta.match(/^\*{0,2}(?:Disponibilit[ée]|Availability|D[ée]lai\s+de\s+cong[ée]|K[üu]ndigungsfrist|Disponibilidad|Disponibilit[àa])\*{0,2}[:\s]+(.+)$/i);
-    if (availMatch) {
-      availability = cleanHumanText(availMatch[1]);
-      continue;
-    }
-
-    const civilMatch = cleanMeta.match(/^\*{0,2}([ÉEe]tat\s+civil|Civil\s+status|Zivilstand|Estado\s+civil|Stato\s+civile)\*{0,2}[:\s]+(.+)$/i);
-    if (civilMatch) {
-      civilStatus = cleanHumanText(civilMatch[1]);
-      continue;
-    }
-
-    const refMatch = cleanMeta.match(/^\*{0,2}(?:R[ée]f[ée]rences?|References?|Referenzen|Referencias)\*{0,2}[:\s]+(.+)$/i);
-    if (refMatch) {
-      references = cleanHumanText(refMatch[1]);
+    const parsedLegal = parseLegalMetadata(pLine);
+    if (parsedLegal) {
+      legalDetails[parsedLegal.key] = parsedLegal.value;
       continue;
     }
 
@@ -742,13 +244,12 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
       languages = parseBulletList(content);
       sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages, rawContent: content });
     } else if (/REFERENCE|REFERENZ|REFERENCIA/.test(cleanHeaderUpper)) {
-      if (!references) {
-        references = content.replace(/^[-*•]\s*/, '').trim();
+      if (!legalDetails.references) {
+        legalDetails.references = content.replace(/^[-*•]\s*/, '').trim();
       }
       const secId = `custom_references`;
       sections.push({ id: secId, type: 'custom', title: headerLine, rawContent: content });
     } else if (/CONTACT|PERSONAL/.test(cleanHeaderUpper)) {
-      // Parse any contact lines found in this section without creating a rogue custom section
       const contactLines = content.split('\n').map((l) => l.trim()).filter(Boolean);
       for (const cLine of contactLines) {
         if (isLikelyContactLine(cLine)) {
@@ -788,122 +289,6 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     education: education.length > 0 ? education : undefined,
     certifications: certifications.length > 0 ? certifications : undefined,
     languages: languages.length > 0 ? languages : undefined,
-    nationality,
-    dateOfBirth,
-    drivingLicense,
-    workPermit,
-    civilStatus,
-    availability,
-    references,
+    ...legalDetails,
   });
-}
-
-/**
- * Normalizes all fields of CVData to ensure clean human-readable text
- * with no rogue underscores, clean monograms, and consistent structure.
- */
-export function cleanCvData(data: CVData): CVData {
-  if (!data) return data;
-  return {
-    ...data,
-    name: cleanHumanText(data.name || ''),
-    title: cleanHumanText(data.title || ''),
-    summary: cleanSummary(data.summary || ''),
-    contacts: data.contacts?.map((c) => {
-      let resolvedUrl = c.url?.trim();
-      const rawLbl = (c.label || '').trim();
-      if (!resolvedUrl) {
-        if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
-          if (rawLbl.includes('.') || rawLbl.startsWith('http')) {
-            resolvedUrl = rawLbl.startsWith('http') ? rawLbl : `https://${rawLbl.replace(/^https?:\/\//, '')}`;
-          }
-        } else if (c.type === 'email' && rawLbl.includes('@')) {
-          resolvedUrl = rawLbl.startsWith('mailto:') ? rawLbl : `mailto:${rawLbl.replace(/^mailto:/i, '')}`;
-        }
-      } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !resolvedUrl.startsWith('http')) {
-        resolvedUrl = `https://${resolvedUrl}`;
-      }
-      return {
-        ...c,
-        label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
-          ? cleanHumanText(c.label || '')
-          : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
-        url: resolvedUrl,
-      };
-    }),
-    skillGroups: data.skillGroups?.map((group) => ({
-      ...group,
-      category: cleanSkillCategory(group.category),
-      skills: (group.skills || []).map(cleanSkillItem).filter(Boolean),
-    })),
-    experience: data.experience?.map((exp) => ({
-      ...exp,
-      company: cleanHumanText(exp.company || ''),
-      role: cleanHumanText(exp.role || ''),
-      location: exp.location ? cleanHumanText(exp.location) : exp.location,
-      date: exp.date ? cleanHumanText(exp.date) : exp.date,
-      bullets: (exp.bullets || []).map(cleanBulletText).filter(Boolean),
-    })),
-    projects: data.projects?.map((proj) => {
-      let demoUrl = proj.demoUrl?.trim();
-      let repoUrl = proj.repoUrl?.trim();
-
-      if (!demoUrl && proj.location) {
-        const demoM = proj.location.match(/\[(?:Live\s*Demo|Demo|Sitio|Web)[^\]]*\]\(([^)]+)\)/i) ||
-                      proj.location.match(/https?:\/\/(?!github\.com)[^\s)\]•|]+/i);
-        if (demoM) demoUrl = (demoM[1] || demoM[0]).trim();
-      }
-      if (!repoUrl && proj.location) {
-        const repoM = proj.location.match(/\[(?:GitHub(?:\s*Repository)?|Repo|Source)[^\]]*\]\(([^)]+)\)/i) ||
-                      proj.location.match(/https?:\/\/github\.com\/[^\s)\]•|]+/i);
-        if (repoM) repoUrl = (repoM[1] || repoM[0]).trim();
-      }
-
-      const compLower = (proj.company || '').toLowerCase();
-      if (compLower.includes('cv studio') || compLower.includes('tailor engine')) {
-        if (!demoUrl) demoUrl = APP_LINKS.DEMO_URL;
-        if (!repoUrl) repoUrl = APP_LINKS.GITHUB_REPO;
-      }
-
-      let cleanLoc = proj.location ? cleanHumanText(proj.location) : '';
-      if (
-        cleanLoc.includes('Live Demo') ||
-        cleanLoc.includes('GitHub Repository') ||
-        cleanLoc.startsWith('http') ||
-        cleanLoc.includes('github.com') ||
-        cleanLoc === 'Demo' ||
-        cleanLoc === 'Repo'
-      ) {
-        cleanLoc = cleanLoc
-          .replace(/\[([^\]]+)\]\([^)]+\)/g, '')
-          .replace(/Live\s*Demo/gi, '')
-          .replace(/GitHub(?:\s*Repository)?/gi, '')
-          .replace(/https?:\/\/[^\s]+/g, '')
-          .replace(/[•|·+–—/]/g, '')
-          .trim();
-      }
-      if (/^[•|·+–—/\s]+$/.test(cleanLoc) || cleanLoc === '+' || cleanLoc === '-') {
-        cleanLoc = '';
-      }
-
-      return {
-        ...proj,
-        company: cleanHumanText(proj.company || ''),
-        role: cleanHumanText(proj.role || ''),
-        location: cleanLoc || undefined,
-        date: proj.date ? cleanHumanText(proj.date) : proj.date,
-        demoUrl: demoUrl || undefined,
-        repoUrl: repoUrl || undefined,
-        bullets: (proj.bullets || []).map(cleanBulletText).filter(Boolean),
-      };
-    }),
-    education: data.education?.map(cleanEducationItem).filter(Boolean),
-    certifications: data.certifications?.map(cleanEducationItem).filter(Boolean),
-    languages: data.languages?.map(cleanLanguageItem).filter(Boolean),
-    customSections: data.customSections?.map((sec) => ({
-      ...sec,
-      title: cleanHumanText(sec.title),
-      items: (sec.items || []).map(cleanBulletText).filter(Boolean),
-    })),
-  };
 }
