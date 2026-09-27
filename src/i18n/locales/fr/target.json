@@ -10,11 +10,15 @@
     "backToProfile": "Retour au Profil",
     "tailorNow": "Adapter le CV Maintenant",
     "tailoring": "Adaptation du CV...",
+    "tailorGenericNow": "Organiser le CV générique avec l'IA",
+    "tailoringGeneric": "Organisation du CV générique avec l'IA...",
     "byoAiPrompt": "Copier le prompt (Ma propre IA)",
     "copyPrompt": "Copier le prompt",
+    "copyGenericPrompt": "Copier le prompt (CV générique)",
     "viewExisting": "Voir le CV Existant",
     "skipToGeneric": "Continuer sans offre (CV générique)",
-    "skipToGenericShort": "Ignorer l'offre et voir le CV de base"
+    "skipToGenericShort": "Ignorer l'offre et voir le CV de base",
+    "continueDirect": "Continuer directement (sans IA)"
   },
   "fields": {
     "company": "Entreprise / Employeur Cible",
@@ -65,7 +69,9 @@
   "status": {
     "ready": "Détails de l'offre prêts",
     "missing": "Collez une description de poste à adapter",
-    "missingOrSkip": "Collez une offre ou continuez avec votre CV de base"
+    "missingOrSkip": "Collez une offre ou continuez avec votre CV de base",
+    "genericMode": "Mode CV Générique : Organisez avec l'IA ou continuez directement",
+    "tailoringGeneric": "Organisation du CV de base avec l'IA..."
   },
   "modal": {
     "title": "Configurer le Fournisseur IA",

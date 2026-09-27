@@ -10,11 +10,15 @@
     "backToProfile": "Zurück zum Profil",
     "tailorNow": "Lebenslauf jetzt anpassen",
     "tailoring": "Lebenslauf wird angepasst...",
+    "tailorGenericNow": "Generischen Lebenslauf mit KI strukturieren",
+    "tailoringGeneric": "Generischen Lebenslauf mit KI wird strukturiert...",
     "byoAiPrompt": "Prompt kopieren (Eigene KI)",
     "copyPrompt": "Prompt kopieren",
+    "copyGenericPrompt": "Prompt kopieren (Generischer CV)",
     "viewExisting": "Vorhandenen Lebenslauf ansehen",
     "skipToGeneric": "Ohne Angebot fortfahren (Basis-CV)",
-    "skipToGenericShort": "Angebot überspringen & Basis-CV anzeigen"
+    "skipToGenericShort": "Angebot überspringen & Basis-CV anzeigen",
+    "continueDirect": "Direkt fortfahren (ohne KI)"
   },
   "fields": {
     "company": "Zielunternehmen / Arbeitgeber",
@@ -65,7 +69,9 @@
   "status": {
     "ready": "Stellendaten bereit",
     "missing": "Stellenbeschreibung zum Anpassen einfügen",
-    "missingOrSkip": "Stellenanzeige einfügen oder mit Basis-CV fortfahren"
+    "missingOrSkip": "Stellenanzeige einfügen oder mit Basis-CV fortfahren",
+    "genericMode": "Generischer CV-Modus: Mit KI strukturieren oder direkt fortfahren",
+    "tailoringGeneric": "Basis-Lebenslauf wird mit KI strukturiert..."
   },
   "modal": {
     "title": "KI-Anbieter konfigurieren",

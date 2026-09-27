@@ -10,11 +10,15 @@
     "backToProfile": "Torna al Profilo",
     "tailorNow": "Adatta Curriculum Ora",
     "tailoring": "Adattamento IA in corso",
+    "tailorGenericNow": "Organizza CV generico con IA",
+    "tailoringGeneric": "Organizzazione CV generico con IA...",
     "byoAiPrompt": "Copia prompt (La mia IA)",
     "copyPrompt": "Copia prompt",
+    "copyGenericPrompt": "Copia prompt (CV generico)",
     "viewExisting": "Vedi CV Esistente",
     "skipToGeneric": "Continua senza offerta (CV generico)",
-    "skipToGenericShort": "Salta offerta e vedi CV base"
+    "skipToGenericShort": "Salta offerta e vedi CV base",
+    "continueDirect": "Continua direttamente (senza IA)"
   },
   "fields": {
     "company": "Azienda / Datore di Lavoro",
@@ -65,7 +69,9 @@
   "status": {
     "ready": "Dati offerta pronti",
     "missing": "Incolla una descrizione di lavoro per personalizzare",
-    "missingOrSkip": "Incolla un'offerta o continua con il tuo CV base"
+    "missingOrSkip": "Incolla un'offerta o continua con il tuo CV base",
+    "genericMode": "Modalità CV Generico: Organizza con IA o continua direttamente",
+    "tailoringGeneric": "Organizzazione del CV di base con IA..."
   },
   "modal": {
     "title": "Configura Provider IA",

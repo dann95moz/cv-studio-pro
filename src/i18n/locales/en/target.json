@@ -10,11 +10,15 @@
     "backToProfile": "Back to Profile",
     "tailorNow": "Tailor Resume Now",
     "tailoring": "Tailoring Resume...",
+    "tailorGenericNow": "Organize Generic CV with AI",
+    "tailoringGeneric": "Organizing Generic CV with AI...",
     "byoAiPrompt": "Copy Prompt (My Own AI)",
     "copyPrompt": "Copy Prompt",
+    "copyGenericPrompt": "Copy Prompt (Generic CV)",
     "viewExisting": "View Existing CV",
     "skipToGeneric": "Continue without offer (Generic CV)",
-    "skipToGenericShort": "Skip offer & view base CV"
+    "skipToGenericShort": "Skip offer & view base CV",
+    "continueDirect": "Continue directly (without AI)"
   },
   "fields": {
     "company": "Target Company / Employer",
@@ -65,7 +69,9 @@
   "status": {
     "ready": "Job details ready",
     "missing": "Paste a job description to tailor",
-    "missingOrSkip": "Paste a job offer or continue with your base CV"
+    "missingOrSkip": "Paste a job offer or continue with your base CV",
+    "genericMode": "Generic CV Mode: Organize with AI or continue directly",
+    "tailoringGeneric": "Organizing base CV with AI..."
   },
   "modal": {
     "title": "Configure AI Provider",

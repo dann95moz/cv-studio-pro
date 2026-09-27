@@ -65,13 +65,16 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
       {/* Status indicator */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <StepFooterStatus
-          status={isGenerating ? 'generating' : hasJob ? 'ready' : 'missing'}
+          status={isGenerating ? 'generating' : hasJob ? 'ready' : 'info'}
           label={
-            hasJob
-              ? isGenerating
-                ? generationStep || t('target:actions.tailoring', 'Tailoring Resume...')
-                : t('target:status.ready', 'Job details ready')
-              : t('target:status.missingOrSkip', 'Paste a job offer or continue with your base CV')
+            isGenerating
+              ? generationStep ||
+                (hasJob
+                  ? t('target:actions.tailoring', 'Tailoring Resume...')
+                  : t('target:status.tailoringGeneric', 'Organizing base CV with AI...'))
+              : hasJob
+                ? t('target:status.ready', 'Job details ready')
+                : t('target:status.genericMode', 'Generic CV Mode: Organize with AI or continue directly')
           }
         />
       </Box>
@@ -100,8 +103,8 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
           </Button>
         )}
 
-        {/* Continue with generic CV without offer (when no generated CV yet) */}
-        {!hasGeneratedCv && !isGenerating && onSkipToGeneric && (
+        {/* Continue directly with base CV without AI (when no offer loaded) */}
+        {!hasJob && !isGenerating && onSkipToGeneric && (
           <Button
             variant="outlined"
             color="inherit"
@@ -111,7 +114,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               width: { xs: '100%', sm: 'auto' },
             }}
           >
-            {t('target:actions.skipToGeneric', 'Continue without offer (Generic CV)')}
+            {t('target:actions.continueDirect', 'Continue directly (without AI)')}
           </Button>
         )}
 
@@ -124,24 +127,26 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               color="inherit"
               startIcon={<AutoAwesomeRoundedIcon />}
               onClick={onOpenManualPrompt}
-              disabled={isGenerating || !hasJob}
+              disabled={isGenerating}
               sx={{
                 fontWeight: 600,
                 textTransform: 'none',
                 width: { xs: '100%', sm: 'auto' },
               }}
             >
-              {t('target:actions.copyPrompt', 'Copy Prompt')}
+              {hasJob
+                ? t('target:actions.copyPrompt', 'Copy Prompt')
+                : t('target:actions.copyGenericPrompt', 'Copy Generic Prompt')}
             </Button>
 
-            {/* Primary: Direct AI Tailor */}
+            {/* Primary: Direct AI Tailor / Organize */}
             <Button
               variant="contained"
               color="primary"
               size="large"
               startIcon={isGenerating ? <CircularProgress size={18} color="inherit" /> : <BoltRoundedIcon />}
               onClick={onTailorNow}
-              disabled={isGenerating || !hasJob}
+              disabled={isGenerating}
               sx={{
                 fontWeight: 700,
                 px: 3.5,
@@ -150,8 +155,12 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               }}
             >
               {isGenerating
-                ? t('target:actions.tailoring', 'Tailoring Resume...')
-                : t('target:actions.tailorNow', 'Tailor Resume Now')}
+                ? hasJob
+                  ? t('target:actions.tailoring', 'Tailoring Resume...')
+                  : t('target:actions.tailoringGeneric', 'Organizing Base CV with AI...')
+                : hasJob
+                  ? t('target:actions.tailorNow', 'Tailor Resume Now')
+                  : t('target:actions.tailorGenericNow', 'Organize Generic CV with AI')}
             </Button>
           </>
         ) : (
@@ -162,7 +171,7 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
             size="large"
             startIcon={isGenerating ? <CircularProgress size={18} color="inherit" /> : <AutoAwesomeRoundedIcon />}
             onClick={onOpenManualPrompt}
-            disabled={isGenerating || !hasJob}
+            disabled={isGenerating}
             sx={{
               fontWeight: 700,
               px: 3.5,
@@ -170,7 +179,9 @@ export const TargetJobFooterActions: React.FC<TargetJobFooterActionsProps> = Rea
               width: { xs: '100%', sm: 'auto' },
             }}
           >
-            {t('target:actions.copyPrompt', 'Copy Prompt')}
+            {hasJob
+              ? t('target:actions.copyPrompt', 'Copy Prompt')
+              : t('target:actions.copyGenericPrompt', 'Copy Generic Prompt')}
           </Button>
         )}
       </Box>

@@ -87,21 +87,44 @@ export interface PromptBundle {
  * Pure function: Builds system and user prompts adhering strictly to rules.md and SSOT.
  */
 export function buildPrompts(req: TailorRequest): PromptBundle {
-  const company = req.companyName || extractTargetCompany(req.targetJob, 'Target Company');
-  const targetRole = req.targetRole || extractTargetRole(req.targetJob, req.masterData, 'Frontend Engineer');
+  const isGeneric =
+    !req.targetJob ||
+    req.targetJob.trim().length < 20 ||
+    req.targetJob.includes('[Paste the raw job description');
+
+  const company = req.companyName || (isGeneric ? 'General Profile' : extractTargetCompany(req.targetJob, 'Target Company'));
+  const targetRole = req.targetRole || (isGeneric
+    ? extractTargetRole('', req.masterData, 'Professional Profile')
+    : extractTargetRole(req.targetJob, req.masterData, 'Frontend Engineer'));
   const rules = req.rules || DEFAULT_RULES;
 
-  const systemInstruction = `You are an Executive Tech Headhunter, Career Consultant, and Expert ATS Resume Synthesizer.
-Your mission is to analyze the candidate's comprehensive master knowledge base (MASTER-DATA.MD), cross-reference it with the target job posting (TARGET-JOB.MD), and rigorously apply all guidelines defined in RULES.MD to generate a high-impact, 100% tailored CV and matching strategy report.
+  const missionDirective = isGeneric
+    ? `Your mission is to analyze the candidate's master knowledge base (MASTER-DATA.MD) and transform it into a polished, high-impact, professional Master/Generic CV adhering strictly to the Google XYZ achievement formula and ATS best practices.
+Since this is a master baseline CV (no target job vacancy provided), synthesize a versatile, comprehensive CV that showcases the candidate's core strengths, technical stack, leadership, and measurable achievements with authentic excellence.`
+    : `Your mission is to analyze the candidate's comprehensive master knowledge base (MASTER-DATA.MD), cross-reference it with the target job posting (TARGET-JOB.MD), and rigorously apply all guidelines defined in RULES.MD to generate a high-impact, 100% tailored CV and matching strategy report.`;
 
-=== 🌐 CRITICAL VACANCY NATURAL LANGUAGE DIRECTIVE (MANDATORY AUTONOMOUS DETECTION) ===
+  const languageDirective = isGeneric
+    ? `=== 🌐 CRITICAL DOCUMENT NATURAL LANGUAGE DIRECTIVE (MANDATORY AUTONOMOUS DETECTION) ===
+1. Analyze the candidate's master data (MASTER-DATA.MD) to identify its primary natural language (e.g. Spanish, English, German, French, Italian).
+2. You MUST synthesize the CV 100% in that EXACT SAME language.
+3. ❌ STRICTLY PROHIBITED: Do NOT translate into English if the master data is written in Spanish, German, French, or Italian. Technical keywords (e.g. React, Docker, TypeScript, AWS, CI/CD, GraphQL, Agile, Scrum) are universal industry loanwords and must NEVER cause you to switch the document language to English.
+4. SPANISH CV MANDATORY RULE: If the master data is in Spanish, ALL experience and project bullet points MUST begin with action verbs in the **INFINITIVE** form (e.g., Diseñar, Desarrollar, Implementar, Optimizar, Liderar, Refactorizar, Reducir, Coordinar). ❌ NEVER use past tense / pretérito (e.g. Diseñó, Desarrollé, Implementó, Optimizó).
+5. Translate and localize all section titles, summaries, achievement bullets, action verbs, and project summaries directly in the detected language.
+6. Preserve ONLY canonical industry-standard proper nouns, brand names, and programming tools in their standard technical spelling.
+7. In your JSON response, set the "detectedLanguage" field to the matching 2-letter ISO code: "es", "en", "de", "fr", or "it".`
+    : `=== 🌐 CRITICAL VACANCY NATURAL LANGUAGE DIRECTIVE (MANDATORY AUTONOMOUS DETECTION) ===
 1. Analyze the target job posting (TARGET-JOB.MD) to identify its primary natural language (e.g. Spanish, English, German, French, Italian).
 2. You MUST synthesize BOTH PART 1 (Gap Analysis) and PART 2 (Tailored CV) 100% in that EXACT SAME language.
 3. ❌ STRICTLY PROHIBITED: Do NOT translate into English if the vacancy is written in Spanish, German, French, or Italian. Technical keywords (e.g. React, Docker, TypeScript, AWS, CI/CD, GraphQL, Agile, Scrum) are universal industry loanwords and must NEVER cause you to switch the document language to English.
 4. SPANISH VACANCY MANDATORY RULE: If the vacancy is in Spanish, ALL experience and project bullet points MUST begin with action verbs in the **INFINITIVE** form (e.g., Diseñar, Desarrollar, Implementar, Optimizar, Liderar, Refactorizar, Reducir, Coordinar). ❌ NEVER use past tense / pretérito (e.g. Diseñó, Desarrollé, Implementó, Optimizó).
 5. Translate and localize all section titles, summaries, achievement bullets, action verbs, project summaries, and gap analysis directly in the detected vacancy language.
 6. Preserve ONLY canonical industry-standard proper nouns, brand names, and programming tools in their standard technical spelling.
-7. In your JSON response, set the "detectedLanguage" field to the matching 2-letter ISO code: "es", "en", "de", "fr", or "it".
+7. In your JSON response, set the "detectedLanguage" field to the matching 2-letter ISO code: "es", "en", "de", "fr", or "it".`;
+
+  const systemInstruction = `You are an Executive Tech Headhunter, Career Consultant, and Expert ATS Resume Synthesizer.
+${missionDirective}
+
+${languageDirective}
 
 === 🛑 CRITICAL ZERO-HALLUCINATION & FACTUAL FIDELITY CONSTRAINT (NON-NEGOTIABLE) ===
 1. MASTER-DATA.MD is the ABSOLUTE SINGLE SOURCE OF TRUTH (SSOT).
@@ -256,7 +279,16 @@ Deliver your entire response as a single, valid JSON object (optionally inside a
 \`\`\`
 `;
 
-  const userPrompt = `Synthesize a tailored CV and Gap Analysis for target company: "${company}" and target role: "${targetRole}".
+  const userPrompt = isGeneric
+    ? `Synthesize a polished, structured Generic Master CV adhering to ATS standards and the Google XYZ formula.
+Organize all sections, extract high-impact Google XYZ achievements, structure 3 categorized skill groups, and format perfectly in JSON adhering to ATS best practices.
+
+CRITICAL LANGUAGE REQUIREMENT: Autonomously identify the primary natural language of MASTER-DATA. Output all content, summaries, and bullet points 100% in that exact language (e.g. Spanish if in Spanish, English if in English, French if in French, German if in German, Italian if in Italian). Set "detectedLanguage" accordingly in the JSON response.
+
+=== CANDIDATE KNOWLEDGE BASE (MASTER-DATA - ABSOLUTE SSOT - PLAIN TEXT COMPATIBLE) ===
+${req.masterData}
+`
+    : `Synthesize a tailored CV and Gap Analysis for target company: "${company}" and target role: "${targetRole}".
 
 CRITICAL LANGUAGE REQUIREMENT: Autonomously identify the primary natural language of TARGET-JOB.MD. Output all content, summaries, bullet points, and narratives 100% in that exact language (e.g. Spanish if the vacancy is in Spanish, German if in German, French if in French, English if in English). Set "detectedLanguage" accordingly in the JSON response.
 

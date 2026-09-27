@@ -92,7 +92,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   );
 
   const handleTailorAndProceed = () => {
-    if (isGenerating || !hasJob) return;
+    if (isGenerating) return;
     flushAll();
 
     const now = Date.now();
@@ -107,7 +107,7 @@ export const StepTargetJob: React.FC<StepTargetJobProps> = ({
   };
 
   const handleOpenManualPrompt = () => {
-    if (isGenerating || !hasJob) return;
+    if (isGenerating) return;
     handleCopyPromptAndOpenModal();
   };
 

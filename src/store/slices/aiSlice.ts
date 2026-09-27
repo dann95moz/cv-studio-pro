@@ -102,8 +102,9 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
     }
 
     const { masterData, targetJob, companyName, targetRole, pageBudget, theme, palette, savedVersions } = get();
-    const comp = companyName || extractTargetCompany(targetJob, 'Target Company');
-    const role = targetRole || extractTargetRole(targetJob, masterData, '') || '';
+    const isGeneric = !targetJob || targetJob.trim().length < 20 || targetJob.includes('[Paste the raw job description');
+    const comp = companyName || (isGeneric ? 'General Profile' : extractTargetCompany(targetJob, 'Target Company'));
+    const role = targetRole || (isGeneric ? extractTargetRole('', masterData, 'Professional Profile') : extractTargetRole(targetJob, masterData, '') || '');
 
     const extracted = extractCvAndGap(responseRaw, masterData, comp, role);
     const tailoredCv = extracted.cvMarkdown || get().cvMarkdown;
@@ -202,13 +203,16 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
     activeAbortController = new AbortController();
 
     const currentModel = get().providerSettings.model || 'AI Model';
+    const isGenericMode = !get().targetJob || get().targetJob.trim().length < 20 || get().targetJob.includes('[Paste the raw job description');
 
     set({
       isGenerating: true,
       generationError: null,
       generationStage: 1,
       generationProgress: 15,
-      generationStep: 'Analyzing employer requirements & extracting ATS keywords...',
+      generationStep: isGenericMode
+        ? 'Organizing Master CV & structuring Google XYZ achievements...'
+        : 'Analyzing employer requirements & extracting ATS keywords...',
       streamedWords: 0,
       streamedSnippet: '',
       activeModelName: currentModel,
@@ -282,8 +286,9 @@ export const createAiSlice: StateCreator<ResumeStore, [], [], AiSlice> = (set, g
       const candName = (response.cvData?.name && !response.cvData.name.includes('[') && response.cvData.name.toLowerCase() !== 'candidate')
         ? response.cvData.name.replace(/_/g, ' ').trim()
         : extractCandidateName(masterData, 'Candidate');
-      const comp = companyName || extractTargetCompany(targetJob, 'Target Company');
-      const role = targetRole || extractTargetRole(targetJob, masterData, '') || '';
+      const isGeneric = !targetJob || targetJob.trim().length < 20 || targetJob.includes('[Paste the raw job description');
+      const comp = companyName || (isGeneric ? 'General Profile' : extractTargetCompany(targetJob, 'Target Company'));
+      const role = targetRole || (isGeneric ? (response.cvData?.title || extractTargetRole('', masterData, 'Professional Profile')) : (extractTargetRole(targetJob, masterData, '') || ''));
 
       // Check if an identical version exists in savedVersions
       const existingDuplicate = savedVersions.find(
