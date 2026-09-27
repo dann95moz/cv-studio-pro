@@ -9,6 +9,10 @@ export interface HeaderSlotData {
   nationality?: string;
   dateOfBirth?: string;
   drivingLicense?: string;
+  workPermit?: string;
+  civilStatus?: string;
+  availability?: string;
+  references?: string;
 }
 
 export interface SummarySlotData {

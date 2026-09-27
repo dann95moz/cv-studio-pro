@@ -33,7 +33,8 @@ function isStandardDefaultSectionTitle(clean: string): boolean {
     /^(?:(?:FEATURED\s+)?PROJECTS(?:\s*&\s*EXTRAS)?|PROJECTS|PROYECTOS(?:\s+DESTACADOS)?|PROJEKTE|PROJETS|PROGETTI)$/i.test(clean) ||
     /^(?:EDUCATION(?:\s*&\s*CERTIFICATIONS)?|ACADEMIC\s+BACKGROUND|EDUCACIÓN(?:\s*Y\s*CERTIFICACIONES)?|AUSBILDUNG|FORMATION|ISTRUZIONE)$/i.test(clean) ||
     /^(?:LANGUAGES?|IDIOMAS?|SPRACHEN?|LANGUES?|LINGUE?)$/i.test(clean) ||
-    /^(?:WEBSITES(?:,\s*PORTFOLIOS)?(?:,\s*PROFILES)?|SITIOS\s+WEB(?:\s+Y\s+PERFILES)?|PORTFOLIOS?|PROFILES?)$/i.test(clean)
+    /^(?:WEBSITES(?:,\s*PORTFOLIOS)?(?:,\s*PROFILES)?|SITIOS\s+WEB(?:\s+Y\s+PERFILES)?|PORTFOLIOS?|PROFILES?)$/i.test(clean) ||
+    /^(?:REFERENCES?|R[ÉE]F[ÉE]RENCES?|REFERENZEN|REFERENCIAS)$/i.test(clean)
   );
 }
 
@@ -127,6 +128,10 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
     nationality: data.nationality,
     dateOfBirth: data.dateOfBirth,
     drivingLicense: data.drivingLicense,
+    workPermit: data.workPermit,
+    civilStatus: data.civilStatus,
+    availability: data.availability,
+    references: data.references,
   };
 
   let summary: SummarySlotData | undefined;

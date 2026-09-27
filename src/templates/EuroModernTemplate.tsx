@@ -83,7 +83,10 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
               marginBottom: '8px',
             }}
           >
-            Contact & Details
+            {slots.language === 'fr' ? 'Contact & Informations' :
+             slots.language === 'de' ? 'Kontakt & Personalien' :
+             slots.language === 'es' ? 'Contacto y Datos' :
+             slots.language === 'it' ? 'Contatti e Dati' : 'Contact & Details'}
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', color: '#475569' }}>
@@ -112,24 +115,63 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
               );
             })}
 
+            {header.workPermit && (
+              <div>
+                <span style={{ fontWeight: 700, color: '#334155' }}>
+                  {slots.language === 'fr' ? 'Permis de travail : ' :
+                   slots.language === 'de' ? 'Bewilligung : ' :
+                   slots.language === 'es' ? 'Permiso de trabajo : ' :
+                   slots.language === 'it' ? 'Permesso di lavoro : ' : 'Work permit: '}
+                </span>
+                <span style={{ fontWeight: 700, color: 'var(--cv-primary, #0284c7)' }}>{header.workPermit}</span>
+              </div>
+            )}
+
             {header.nationality && (
               <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Nationality: </span>
+                <span style={{ fontWeight: 700, color: '#334155' }}>
+                  {slots.language === 'fr' ? 'Nationalité : ' :
+                   slots.language === 'de' ? 'Nationalität: ' :
+                   slots.language === 'es' ? 'Nacionalidad: ' :
+                   slots.language === 'it' ? 'Nazionalità: ' : 'Nationality: '}
+                </span>
                 <span>{header.nationality}</span>
               </div>
             )}
 
             {header.dateOfBirth && (
               <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Birth date: </span>
+                <span style={{ fontWeight: 700, color: '#334155' }}>
+                  {slots.language === 'fr' ? 'Date de naissance : ' :
+                   slots.language === 'de' ? 'Geburtsdatum: ' :
+                   slots.language === 'es' ? 'Fecha de nacimiento: ' :
+                   slots.language === 'it' ? 'Data di nascita: ' : 'Birth date: '}
+                </span>
                 <span>{header.dateOfBirth}</span>
               </div>
             )}
 
             {header.drivingLicense && (
               <div>
-                <span style={{ fontWeight: 700, color: '#334155' }}>Driving licence: </span>
+                <span style={{ fontWeight: 700, color: '#334155' }}>
+                  {slots.language === 'fr' ? 'Permis de conduire : ' :
+                   slots.language === 'de' ? 'Führerschein: ' :
+                   slots.language === 'es' ? 'Permiso de conducir: ' :
+                   slots.language === 'it' ? 'Patente: ' : 'Driving licence: '}
+                </span>
                 <span>{header.drivingLicense}</span>
+              </div>
+            )}
+
+            {header.availability && (
+              <div>
+                <span style={{ fontWeight: 700, color: '#334155' }}>
+                  {slots.language === 'fr' ? 'Disponibilité : ' :
+                   slots.language === 'de' ? 'Verfügbarkeit: ' :
+                   slots.language === 'es' ? 'Disponibilidad: ' :
+                   slots.language === 'it' ? 'Disponibilità: ' : 'Availability: '}
+                </span>
+                <span>{header.availability}</span>
               </div>
             )}
           </div>

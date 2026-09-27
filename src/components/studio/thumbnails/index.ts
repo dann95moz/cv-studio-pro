@@ -9,6 +9,7 @@ import { DesignerUiuxMiniature } from './DesignerUiuxMiniature';
 import { AcademicResearchMiniature } from './AcademicResearchMiniature';
 import { EuropassMiniature } from './EuropassMiniature';
 import { EuroModernMiniature } from './EuroModernMiniature';
+import { SwissModernMiniature } from './SwissModernMiniature';
 import { MiniatureLayoutProps } from './types';
 
 export * from './types';
@@ -22,6 +23,7 @@ export {
   AcademicResearchMiniature,
   EuropassMiniature,
   EuroModernMiniature,
+  SwissModernMiniature,
 };
 
 export const MINIATURE_REGISTRY: Record<string, React.FC<MiniatureLayoutProps>> = {
@@ -34,6 +36,7 @@ export const MINIATURE_REGISTRY: Record<string, React.FC<MiniatureLayoutProps>> 
   'academic-research': AcademicResearchMiniature,
   'europass': EuropassMiniature,
   'euro-modern': EuroModernMiniature,
+  'swiss-modern': SwissModernMiniature,
 };
 
 export const getLayoutBadge = (themeId: ThemeId): string => {
@@ -56,6 +59,8 @@ export const getLayoutBadge = (themeId: ThemeId): string => {
       return 'Europass · EU';
     case 'euro-modern':
       return 'DACH · 2 Col';
+    case 'swiss-modern':
+      return 'Suisse · 2 Col';
     default:
       return '1 Col';
   }

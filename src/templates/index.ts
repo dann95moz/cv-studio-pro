@@ -10,5 +10,6 @@ export * from './FormalLegalTemplate';
 export * from './AcademicResearchTemplate';
 export * from './EuropassTemplate';
 export * from './EuroModernTemplate';
+export * from './SwissModernTemplate';
 export * from './SingleColumnLayout';
 

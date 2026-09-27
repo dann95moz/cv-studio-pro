@@ -10,6 +10,7 @@ import { FormalLegalTemplate } from './FormalLegalTemplate';
 import { AcademicResearchTemplate } from './AcademicResearchTemplate';
 import { EuropassTemplate } from './EuropassTemplate';
 import { EuroModernTemplate } from './EuroModernTemplate';
+import { SwissModernTemplate } from './SwissModernTemplate';
 
 const TEMPLATE_REGISTRY: Record<ThemeId, React.FC<CVTemplateProps>> = {
   'modern-tech': ModernTechTemplate,
@@ -21,9 +22,21 @@ const TEMPLATE_REGISTRY: Record<ThemeId, React.FC<CVTemplateProps>> = {
   'academic-research': AcademicResearchTemplate,
   'europass': EuropassTemplate,
   'euro-modern': EuroModernTemplate,
+  'swiss-modern': SwissModernTemplate,
 };
 
 const TEMPLATE_METADATA: Record<ThemeId, TemplateMetadata> = {
+  'swiss-modern': {
+    id: 'swiss-modern',
+    name: 'Swiss Standard (Romandie / DACH)',
+    category: 'European & International',
+    recommendedFor: 'Suisse Romande (Genève, Lausanne), Zurich, DACH, Multinationales & PME helvétiques',
+    description: 'Format suisse avec permis de travail (B/C/G), statut de séjour, langues CECR, références et photo',
+    layout: 'two-column',
+    defaultMaxPages: 2,
+    supportsPhoto: true,
+    icon: '🇨🇭'
+  },
   'europass': {
     id: 'europass',
     name: 'Europass Official (EU)',
@@ -129,6 +142,7 @@ const TEMPLATE_METADATA: Record<ThemeId, TemplateMetadata> = {
  * List of theme identifiers that support user profile headshot / photo rendering
  */
 export const PHOTO_SUPPORTED_THEMES: readonly ThemeId[] = [
+  'swiss-modern',
   'europass',
   'euro-modern',
   'executive',

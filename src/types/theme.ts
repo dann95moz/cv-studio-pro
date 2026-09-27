@@ -14,7 +14,8 @@ export type ThemeId =
   | 'formal-legal'
   | 'academic-research'
   | 'europass'
-  | 'euro-modern';
+  | 'euro-modern'
+  | 'swiss-modern';
 
 export type PaletteId = 
   | 'corporate-blue' 
