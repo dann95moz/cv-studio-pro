@@ -55,6 +55,13 @@ export interface RawJsonCvInput {
   certificates?: unknown;
   languages?: unknown;
   languageSkills?: unknown;
+  nationality?: string;
+  workPermit?: string;
+  dateOfBirth?: string;
+  drivingLicense?: string;
+  availability?: string;
+  civilStatus?: string;
+  references?: string;
   cvData?: RawJsonCvInput;
   cv?: RawJsonCvInput;
   resume?: RawJsonCvInput;
@@ -717,6 +724,44 @@ export function parseJsonToCvData(
     }
   }
 
+  // Extract Swiss / European personal details
+  const rawWorkPermit = root.workPermit || (root as Record<string, unknown>).permit || (root as Record<string, unknown>).visa;
+  let workPermit = typeof rawWorkPermit === 'string' && rawWorkPermit.trim() ? cleanHumanText(rawWorkPermit) : undefined;
+
+  const rawNationality = root.nationality || (root as Record<string, unknown>).citizenship;
+  let nationality = typeof rawNationality === 'string' && rawNationality.trim() ? cleanHumanText(rawNationality) : undefined;
+
+  const rawDob = root.dateOfBirth || (root as Record<string, unknown>).birthDate || (root as Record<string, unknown>).dob;
+  let dateOfBirth = typeof rawDob === 'string' && rawDob.trim() ? cleanHumanText(rawDob) : undefined;
+
+  const rawDriving = root.drivingLicense || (root as Record<string, unknown>).license || (root as Record<string, unknown>).driverLicense;
+  let drivingLicense = typeof rawDriving === 'string' && rawDriving.trim() ? cleanHumanText(rawDriving) : undefined;
+
+  const rawAvailability = root.availability || (root as Record<string, unknown>).noticePeriod;
+  let availability = typeof rawAvailability === 'string' && rawAvailability.trim() ? cleanHumanText(rawAvailability) : undefined;
+
+  const rawCivil = root.civilStatus || (root as Record<string, unknown>).maritalStatus;
+  let civilStatus = typeof rawCivil === 'string' && rawCivil.trim() ? cleanHumanText(rawCivil) : undefined;
+
+  const rawRef = root.references || (root as Record<string, unknown>).reference;
+  let references = typeof rawRef === 'string' && rawRef.trim() ? cleanHumanText(rawRef) : undefined;
+
+  // Enrich missing personal metadata from fallbackMasterData
+  if (fallbackMasterData && fallbackMasterData.trim()) {
+    try {
+      const fallbackCv = parseMarkdownToCvData(fallbackMasterData);
+      if (!nationality && fallbackCv.nationality) nationality = fallbackCv.nationality;
+      if (!workPermit && fallbackCv.workPermit) workPermit = fallbackCv.workPermit;
+      if (!dateOfBirth && fallbackCv.dateOfBirth) dateOfBirth = fallbackCv.dateOfBirth;
+      if (!drivingLicense && fallbackCv.drivingLicense) drivingLicense = fallbackCv.drivingLicense;
+      if (!availability && fallbackCv.availability) availability = fallbackCv.availability;
+      if (!civilStatus && fallbackCv.civilStatus) civilStatus = fallbackCv.civilStatus;
+      if (!references && fallbackCv.references) references = fallbackCv.references;
+    } catch {
+      // Non-critical fallback
+    }
+  }
+
   // 11. Assemble sections
   const sections: CVSection[] = [];
   if (summary) sections.push({ id: 'summary', type: 'summary', title: langDef.sections.summary });
@@ -750,6 +795,13 @@ export function parseJsonToCvData(
     education,
     certifications,
     languages,
+    nationality,
+    dateOfBirth,
+    drivingLicense,
+    workPermit,
+    civilStatus,
+    availability,
+    references,
   };
 
   return cleanCvData(rawCvData);

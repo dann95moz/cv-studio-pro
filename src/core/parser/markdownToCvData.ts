@@ -585,6 +585,13 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   let name = '';
   let title = '';
   let contacts: ContactItem[] = [];
+  let nationality: string | undefined;
+  let dateOfBirth: string | undefined;
+  let drivingLicense: string | undefined;
+  let workPermit: string | undefined;
+  let civilStatus: string | undefined;
+  let availability: string | undefined;
+  let references: string | undefined;
 
   // 1. Parse Preamble (before the first ##)
   let preambleEndIndex = lines.findIndex((l) => l.startsWith('## '));
@@ -593,6 +600,50 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   const preambleLines = lines.slice(0, preambleEndIndex).map((l) => l.trim()).filter(Boolean);
 
   for (const pLine of preambleLines) {
+    // Check key-value personal metadata (common in Swiss & European CVs)
+    const cleanMeta = pLine.replace(/^[–\-*•·]\s*/, '').trim();
+    const permitMatch = cleanMeta.match(/^\*{0,2}(?:Permis(?:\s+de\s+travail|\s+de\s+s[ée]jour)?|Work\s+Permit|Aufenthaltsbewilligung|Permiso\s+de\s+trabajo)\*{0,2}[:\s]+(.+)$/i);
+    if (permitMatch) {
+      workPermit = cleanHumanText(permitMatch[1]);
+      continue;
+    }
+
+    const natMatch = cleanMeta.match(/^\*{0,2}(?:Nationalit[ée]|Nationality|Nationalit[äa]t|Nacionalidad|Nazionalit[àa])\*{0,2}[:\s]+(.+)$/i);
+    if (natMatch) {
+      nationality = cleanHumanText(natMatch[1]);
+      continue;
+    }
+
+    const dobMatch = cleanMeta.match(/^\*{0,2}(?:Date\s+de\s+naissance|Date\s+of\s+birth|Geburtsdatum|Fecha\s+de\s+nacimiento|Data\s+di\s+nascita|Birth\s*date|N[ée]\(e\)\s+le)\*{0,2}[:\s]+(.+)$/i);
+    if (dobMatch) {
+      dateOfBirth = cleanHumanText(dobMatch[1]);
+      continue;
+    }
+
+    const driveMatch = cleanMeta.match(/^\*{0,2}(?:Permis\s+de\s+conduire|Driving\s+licen[cs]e|F[üu]hrerschein|Permiso\s+de\s+conducir|Patente)\*{0,2}[:\s]+(.+)$/i);
+    if (driveMatch) {
+      drivingLicense = cleanHumanText(driveMatch[1]);
+      continue;
+    }
+
+    const availMatch = cleanMeta.match(/^\*{0,2}(?:Disponibilit[ée]|Availability|D[ée]lai\s+de\s+cong[ée]|K[üu]ndigungsfrist|Disponibilidad|Disponibilit[àa])\*{0,2}[:\s]+(.+)$/i);
+    if (availMatch) {
+      availability = cleanHumanText(availMatch[1]);
+      continue;
+    }
+
+    const civilMatch = cleanMeta.match(/^\*{0,2}([ÉEe]tat\s+civil|Civil\s+status|Zivilstand|Estado\s+civil|Stato\s+civile)\*{0,2}[:\s]+(.+)$/i);
+    if (civilMatch) {
+      civilStatus = cleanHumanText(civilMatch[1]);
+      continue;
+    }
+
+    const refMatch = cleanMeta.match(/^\*{0,2}(?:R[ée]f[ée]rences?|References?|Referenzen|Referencias)\*{0,2}[:\s]+(.+)$/i);
+    if (refMatch) {
+      references = cleanHumanText(refMatch[1]);
+      continue;
+    }
+
     if (pLine.startsWith('# ')) {
       const candidateHeader = cleanHumanText(pLine.replace(/^#\s+/, ''));
       if (
@@ -676,6 +727,12 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     } else if (/LANGUAGE|IDIOMA|SPRACH|LANGUE|LINGU/.test(cleanHeaderUpper)) {
       languages = parseBulletList(content);
       sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages, rawContent: content });
+    } else if (/REFERENCE|REFERENZ|REFERENCIA/.test(cleanHeaderUpper)) {
+      if (!references) {
+        references = content.replace(/^[-*•]\s*/, '').trim();
+      }
+      const secId = `custom_references`;
+      sections.push({ id: secId, type: 'custom', title: headerLine, rawContent: content });
     } else if (/CONTACT|PERSONAL/.test(cleanHeaderUpper)) {
       // Parse any contact lines found in this section without creating a rogue custom section
       const contactLines = content.split('\n').map((l) => l.trim()).filter(Boolean);
@@ -717,6 +774,13 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     education: education.length > 0 ? education : undefined,
     certifications: certifications.length > 0 ? certifications : undefined,
     languages: languages.length > 0 ? languages : undefined,
+    nationality,
+    dateOfBirth,
+    drivingLicense,
+    workPermit,
+    civilStatus,
+    availability,
+    references,
   });
 }
 

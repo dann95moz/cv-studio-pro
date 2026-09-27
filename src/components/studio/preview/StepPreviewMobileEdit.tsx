@@ -24,6 +24,7 @@ import { themeSupportsPhoto } from '../../../templates';
 import { useCvLiveEdit } from './CvLiveEditContext';
 import { AiRegeneratePopover } from './AiRegeneratePopover';
 import { ProfilePhotoDisplay } from '../photo/ProfilePhotoDisplay';
+import { EditableText } from './EditableText';
 
 export interface StepPreviewMobileEditProps {
   parsedCv: CVData;
@@ -163,7 +164,7 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
               </Box>
 
               <ProfilePhotoDisplay
-                maskShape={activeTheme === 'academic-research' ? 'circle' : activeTheme === 'designer-uiux' ? 'squircle' : 'rounded'}
+                maskShape={activeTheme === 'academic-research' || activeTheme === 'swiss-modern' ? 'circle' : activeTheme === 'designer-uiux' ? 'squircle' : 'rounded'}
                 size={54}
                 border={`2px solid ${theme.palette.primary.main}`}
                 fallbackInitials={initials}
@@ -172,6 +173,79 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                 editable={true}
               />
             </CardContent>
+          </Card>
+        </Box>
+      )}
+
+      {/* 0.1 Swiss Legal Status & Work Permit Card (swiss-modern) */}
+      {activeTheme === 'swiss-modern' && (
+        <Box>
+          <Typography
+            variant="overline"
+            sx={{
+              fontWeight: 800,
+              fontSize: '0.75rem',
+              letterSpacing: '0.08em',
+              color: 'text.secondary',
+              mb: 1,
+              display: 'block',
+            }}
+          >
+            🇨🇭 Statut Légal & Permis de Travail (Suisse)
+          </Typography>
+
+          <Card variant="outlined" sx={{ bgcolor: 'background.paper', p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                PERMIS DE TRAVAIL / STATUT
+              </Typography>
+              <EditableText
+                tagName="div"
+                value={parsedCv.workPermit || 'Citoyen suisse – Aucun permis requis – Disponibilité immédiate'}
+                onSave={(val: string) => liveEdit?.updatePersonalDetail('workPermit', val)}
+                placeholder="Permis de travail (B, C, G ou Citoyen suisse)"
+                style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                NATIONALITÉ (ORIGINE)
+              </Typography>
+              <EditableText
+                tagName="div"
+                value={parsedCv.nationality || 'Suisse (Origine : Frutigen, BE)'}
+                onSave={(val: string) => liveEdit?.updatePersonalDetail('nationality', val)}
+                placeholder="Nationalité"
+                style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                ÉTAT CIVIL
+              </Typography>
+              <EditableText
+                tagName="div"
+                value={parsedCv.civilStatus || 'Célibataire'}
+                onSave={(val: string) => liveEdit?.updatePersonalDetail('civilStatus', val)}
+                placeholder="État civil (Célibataire, Marié...)"
+                style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '0.72rem', display: 'block', mb: 0.5 }}>
+                DISPONIBILITÉ / MOBILITÉ CANTONALE
+              </Typography>
+              <EditableText
+                tagName="div"
+                value={parsedCv.availability || 'Immédiate (Mobilité Suisse Romande)'}
+                onSave={(val: string) => liveEdit?.updatePersonalDetail('availability', val)}
+                placeholder="Disponibilité"
+                style={{ fontSize: '0.85rem', fontWeight: 600 }}
+              />
+            </Box>
           </Card>
         </Box>
       )}

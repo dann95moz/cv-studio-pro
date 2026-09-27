@@ -69,6 +69,18 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push(contactStrings.filter(Boolean).join(' • '));
   }
 
+  // Personal legal details (Swiss & European context)
+  const personalDetails: string[] = [];
+  if (data.workPermit) personalDetails.push(`Permis : ${data.workPermit}`);
+  if (data.nationality) personalDetails.push(`Nationalité : ${data.nationality}`);
+  if (data.dateOfBirth) personalDetails.push(`Date de naissance : ${data.dateOfBirth}`);
+  if (data.drivingLicense) personalDetails.push(`Permis de conduire : ${data.drivingLicense}`);
+  if (data.availability) personalDetails.push(`Disponibilité : ${data.availability}`);
+  if (data.civilStatus) personalDetails.push(`État civil : ${data.civilStatus}`);
+  if (personalDetails.length > 0) {
+    parts.push(personalDetails.join(' • '));
+  }
+
 
   // Helper to get formatted section title preserving user's edit without emojis
   const getSectionTitle = (type: string) => {
@@ -209,6 +221,14 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
         }
       }
     }
+  }
+
+  // References (Swiss & European standard)
+  if (data.references && !data.customSections?.some(c => /reference|r[ée]f[ée]rence/i.test(c.title))) {
+    parts.push('\n---\n');
+    const refTitle = lang === 'fr' ? 'RÉFÉRENCES' : lang === 'de' ? 'REFERENZEN' : lang === 'es' ? 'REFERENCIAS' : 'REFERENCES';
+    parts.push(`## ${refTitle}`);
+    parts.push(`- ${data.references}`);
   }
 
   return parts.join('\n') + '\n';

@@ -63,6 +63,10 @@ export interface CvLiveEditContextValue {
   updateEducationItem: (itemIndex: number, value: string) => void;
   updateLanguageItem: (itemIndex: number, value: string) => void;
   updateSectionTitle: (type: SectionType | string, newTitle: string) => void;
+  updatePersonalDetail: (
+    field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense',
+    value: string
+  ) => void;
 }
 
 const CvLiveEditContext = createContext<CvLiveEditContextValue | null>(null);
@@ -256,6 +260,19 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     });
   }, [applyCvUpdate]);
 
+  const updatePersonalDetail = useCallback(
+    (
+      field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense',
+      value: string
+    ) => {
+      applyCvUpdate((prev) => ({
+        ...prev,
+        [field]: value.trim() || undefined,
+      }));
+    },
+    [applyCvUpdate]
+  );
+
   const undoItem = useCallback((fieldKey: string, onRevert: (previousValue: string) => void) => {
 
     const previousValue = undoMap[fieldKey];
@@ -385,6 +402,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     updateEducationItem,
     updateLanguageItem,
     updateSectionTitle,
+    updatePersonalDetail,
   }), [
     isLiveEditing,
     setLiveEditing,
@@ -407,6 +425,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     updateEducationItem,
     updateLanguageItem,
     updateSectionTitle,
+    updatePersonalDetail,
   ]);
 
 

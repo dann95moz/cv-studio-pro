@@ -6,11 +6,10 @@ This document defines the strict styling, formatting, content, and ATS optimizat
 
 ## 1. 🚫 What NOT To Do (Strict Constraints)
 
-- **No Sensitive Personal Information:**
-  - ❌ Do NOT include headshots or photos (unless legally and explicitly mandated in specific regional jurisdictions).
-  - ❌ Do NOT include birth date, age, marital status, gender, nationality, or religion.
-  - ❌ Do NOT include national ID or passport numbers (National ID, SSN, Passport Number).
-  - ❌ Do NOT include full residential street addresses. Use only `City, Country`.
+- **No Sensitive Personal Information (US/UK ATS Standard vs. Swiss/European Standard):**
+  - Standard US/UK ATS: ❌ Do NOT include headshots, birth date, age, marital status, gender, nationality, or religion.
+  - **🇨🇭 Swiss & Continental European Regional Requirement (Critical Hiring Factor):** In Switzerland (Geneva, Lausanne, Zurich, Basel, etc.) and European markets, omitting legal status is the #1 candidate rejection filter. Recruiters require: **nationality (e.g. \`Suisse (Origine : Frutigen, BE)\`), work permit status (e.g. \`Citoyen suisse – Aucun permis requis – Disponibilité immédiate\`, or Permis B/C/G), civil status (\`État civil : Célibataire\`), cantonal location/mobility (e.g. \`Genève / Lausanne, Suisse (Mobilité Suisse Romande)\`), phone with Swiss prefix (+41), availability (\`Disponibilité : Immédiate\`), and references**. Always preserve or provide these fields when targeting Switzerland or when present in \`master-data.md\`.
+  - ❌ NEVER include full national ID/passport numbers or residential street addresses (use `City, Canton/Country`).
 - **No Empty Clichés or Buzzword Fluff:**
   - ❌ Avoid unsupported adjectives: *"passionate worker"*, *"results-driven team player"*, *"dynamic out-of-the-box thinker"*, *"adaptive developer"*.
   - ❌ Replace all subjective claims with concrete engineering achievements, percentages, and metrics.
@@ -21,8 +20,9 @@ This document defines the strict styling, formatting, content, and ATS optimizat
 - **No Emojis in Document Headings or Content (Professional Executive Standard):**
   - ❌ NEVER include emojis or informal pictograms (🎯, 🛠️, 💼, 🚀, 🎓, 🌐, etc.) in section titles, bullet points, or role headers.
   - ✅ All section headings must be clean, professional text adhering to ATS and executive standards (e.g. `## PROFESSIONAL SUMMARY`, `## TECHNICAL SKILLS`, `## PROFESSIONAL EXPERIENCE`, `## EDUCATION & CERTIFICATIONS`, `## LANGUAGES`).
-- **No Redundant Sections:**
-  - ❌ Do NOT include *"References available upon request"*.
+- **No Redundant Sections (US vs. Swiss Standard):**
+  - For US/UK ATS: ❌ Do NOT include *"References available upon request"*.
+  - For Swiss (Romandie / DACH) applications: ✅ Include *"Références disponibles sur demande"* or reference contacts, as reference checks are an essential legal custom under Swiss employment practice (art. 330a CO).
   - ❌ Do NOT list high schools or secondary education if higher university education exists.
 - **No Over-Padded Role Bullets (Strict 3–4 Limit, NEVER 5+):**
   - ❌ NEVER generate 5 or more bullets under any single role. Outputting 5+ bullets causes visual clutter, dilutes achievement impact, and violates the single-page budget.

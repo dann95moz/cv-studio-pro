@@ -38,7 +38,8 @@ This document defines the strict styling, formatting, content, and ATS optimizat
 
 6. ATS-FRIENDLY STANDARDS & ZERO DUMMY URLS:
    - Clean single/two column parseable Markdown.
-   - No photos, no age, no sensitive personal data.
+   - Standard ATS (US/UK): No photos, no age, no sensitive personal data.
+   - REGIONAL EXCEPTION (SWITZERLAND / DACH / CONTINENTAL EUROPE): When targeting Swiss (Geneva, Lausanne, Zurich, Vaud) or European vacancies, or when present in MASTER-DATA.MD, do NOT strip professional headshot/photo, nationality, date of birth, driving license, or work permit status (e.g. Permis B, Permis C, Permis G frontalier, Citoyen UE/AELE). In Switzerland, work permit and nationality are mandatory legal hiring filters. Include 'Références disponibles sur demande' and notice period / availability when applicable.
    - ❌ NEVER invent dummy URLs (such as "https://github.com/candidate-profile" or placeholders). Only include contact links (LinkedIn, GitHub, Portfolio) that explicitly exist in MASTER-DATA.MD; omit if absent.
    - ❌ NEVER print raw/naked long URLs as visible text. Always use short, descriptive Markdown hyperlink labels, exactly as done for [LinkedIn](url) and [GitHub](url) (e.g. [Live Demo](url), [GitHub](url), [Repository](url), [Portfolio](url)).
    6b. NATURAL KEYWORD INTEGRATION (NO VERBATIM COPYING):
@@ -132,6 +133,12 @@ Your mission is to analyze the candidate's comprehensive master knowledge base (
 - Seamlessly integrate keywords, methodologies, and technical requirements from TARGET-JOB.MD into the candidate's achievements.
 - ❌ NEVER copy sentences, phrases, or bullet points verbatim from the job posting into the CV — this flags as low-effort or automated keyword-stuffing.
 - ✅ Rephrase requirements using the candidate's authentic voice and verifiable data from MASTER-DATA.MD.
+
+=== 🇨🇭 SWISS & CONTINENTAL EUROPE VACANCY DIRECTIVE ===
+- If TARGET-JOB.MD is in Switzerland (e.g. Geneva, Lausanne, Zurich, Vaud) or Europe, or if MASTER-DATA.MD contains Swiss/European metadata:
+  1. DO NOT discard: nationality, work permit status (e.g. Permis B, Permis C, Permis G frontalier, Citoyen UE/AELE), date of birth, driving license, availability / notice period, or references.
+  2. These fields are legal and practical prerequisites in Switzerland and must be preserved authentically from MASTER-DATA.MD.
+  3. Include "references": "Références disponibles sur demande" (or vacancy language equivalent) when references are mentioned or expected.
 
 === CORE GUIDELINES & CONSTRAINTS (RULES.MD) ===
 ${rules}
@@ -236,7 +243,14 @@ Deliver your entire response as a single, valid JSON object (optionally inside a
     "languages": [
       "**Language 1:** Native",
       "**Language 2:** [CEFR Level] (e.g. B2 – Upper Intermediate)"
-    ]
+    ],
+    "nationality": "Candidate nationality from MASTER-DATA (e.g. Suisse, Française - omit if absent)",
+    "workPermit": "Work permit from MASTER-DATA (e.g. Citoyen suisse – Aucun permis requis – Disponibilité immédiate, Permis B, Permis C, Permis G frontalier - omit if absent)",
+    "civilStatus": "Civil/marital status from MASTER-DATA (e.g. Célibataire, Marié(e) - omit if absent)",
+    "dateOfBirth": "Date of birth from MASTER-DATA (omit if absent)",
+    "drivingLicense": "Driving license from MASTER-DATA (e.g. Permis B - omit if absent)",
+    "availability": "Notice period or cantonal availability from MASTER-DATA (e.g. Immédiate (Mobilité Suisse Romande) - omit if absent)",
+    "references": "References mention (e.g. Références disponibles sur demande - omit if absent)"
   }
 }
 \`\`\`

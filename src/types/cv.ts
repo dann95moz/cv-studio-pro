@@ -110,6 +110,10 @@ export interface CVData {
   nationality?: string;
   dateOfBirth?: string;
   drivingLicense?: string;
+  workPermit?: string;
+  civilStatus?: string;
+  availability?: string;
+  references?: string;
 }
 
 

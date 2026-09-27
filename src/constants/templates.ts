@@ -25,9 +25,9 @@ export const DEMO_CV_DATA: CVData = {
   name: 'ALEX MORGAN',
   title: 'Senior Frontend Engineer – Core Payments Platform',
   contacts: [
-    { type: 'location', label: 'San Francisco, CA' },
+    { type: 'location', label: 'Genève / Lausanne, Suisse (Mobilité Suisse Romande)' },
     { type: 'email', label: 'alex.morgan@example.com', url: 'mailto:alex.morgan@example.com' },
-    { type: 'phone', label: '+1 415 555 0192' },
+    { type: 'phone', label: '+41 22 555 0192' },
     { type: 'linkedin', label: 'LinkedIn', url: 'https://linkedin.com/in/alexmorgan-eng' },
     { type: 'github', label: 'GitHub', url: 'https://github.com/alexmorgan-eng' },
     { type: 'globe', label: 'Portfolio', url: 'https://alexmorgan.dev' },
@@ -89,11 +89,17 @@ export const DEMO_CV_DATA: CVData = {
     { id: 'education', type: 'education', title: 'Education & Certifications' },
     { id: 'languages', type: 'languages', title: 'Languages' },
   ],
+  nationality: 'Suisse (Origine : Frutigen, BE)',
+  workPermit: 'Citoyen suisse – Aucun permis requis – Disponibilité immédiate',
+  civilStatus: 'Célibataire',
+  availability: 'Immédiate (Mobilité Suisse Romande)',
+  drivingLicense: 'Permis B (véhicule léger)',
 };
 
 export const DEMO_MASTER_DATA = `# ALEX MORGAN
 **Senior Frontend Engineer | UI Architecture & High-Scale Systems**  
-San Francisco, CA • alex.morgan@example.com • +1 415 555 0192  
+Genève / Lausanne, Suisse (Mobilité Suisse Romande) • alex.morgan@example.com • +41 22 555 0192  
+Permis de travail : Citoyen suisse – Aucun permis requis – Disponibilité immédiate • Nationalité : Suisse (Origine : Frutigen, BE) • État civil : Célibataire • Disponibilité : Immédiate
 [LinkedIn](https://linkedin.com/in/alexmorgan-eng) • [GitHub](https://github.com/alexmorgan-eng) • [Portfolio](https://alexmorgan.dev)
 
 ---

@@ -42,8 +42,8 @@ Your mission is to take my comprehensive master background database (`master-dat
 - **Strict Date Fidelity:** Copy exact start and end dates from `master-data.md` (e.g., `Oct 2024 – Apr 2026`). Never assume "Present" if an explicit end month/year is provided.
 - **Strict Bullet Count Limit & Cross-Role Redundancy:** Generate **strictly 3 bullets per role (maximum 4, never 5+)**. Cross-check bullets across all included roles: if two bullets from different roles emphasize the same technical theme (e.g. both about CI/CD pipeline optimization), keep only the strongest/most quantified instance and select a different achievement angle for the other role.
 - **Natural Keyword Integration (Anti-Stuffing / No Verbatim Copying):** Integrate keywords naturally into the candidate's achievements. ❌ NEVER copy phrases verbatim from the job posting into the CV.
-- ATS formatting standards: No photos, no age, no sensitive personal data.
-- Strict length: 1 page (<6 years experience) or max 2 pages (Lead/Senior).
+- ATS formatting standards: Clean single/two column format. For US/UK: no photos or sensitive data. For Switzerland (Romandie / DACH) & Europe: ALWAYS include and preserve photo, nationality (e.g. Suisse / Origine), work permit (e.g. Citoyen suisse – Aucun permis requis or Permis B/C/G), civil status (État civil : Célibataire), cantonal location/mobility (Genève / Lausanne, Suisse), Swiss phone (+41), availability, and references.
+- Strict length: 1 page (<6 years experience) or max 2 pages (Lead/Senior, standard in Switzerland).
 
 ---
 
