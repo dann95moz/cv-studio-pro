@@ -1,7 +1,10 @@
-import { AIProviderSettings } from '../../types/cv';
+import { AIProviderSettings, CVData } from '../../types/cv';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 import { getAIStrategy } from './strategies';
 import { PromptBundle } from './prompt-builder';
+import { parseJsonToCvData } from '../parser/jsonToCvData';
+import { serializeCvDataToMarkdown, parseMarkdownToCvData } from '../parser';
+import { cleanTrackingAndSearchUrl } from '../../utils/sanitize';
 
 export interface CvSectionBlock {
   rawHeader: string; // e.g. "## EXPERIENCIA LABORAL"
@@ -138,31 +141,108 @@ export function sanitizeLlmOutput(rawText: string): string {
   return text.trim();
 }
 
+export interface TranslatedCvResult {
+  cvData: CVData;
+  cvMarkdown: string;
+}
+
 /**
- * System guidelines for CV translation with strict technical term protection.
+ * System guidelines for CV translation with strict technical term protection and JSON schema enforcement.
  */
 export function buildTranslationSystemPrompt(targetLangName: string, targetLangCode?: string): string {
   const isSpanish = targetLangCode === 'es' || /spanish|español/i.test(targetLangName);
 
   return `You are an elite, ATS-specialized multilingual CV translator and executive resume editor.
-Your mission is to translate a professional CV/Resume into ${targetLangName} with native executive polish, maintaining high ATS compatibility.
+Your mission is to translate a professional CV/Resume into ${targetLangName} with native executive polish, maintaining 100% structured data integrity.
 
 CRITICAL INTEGRITY & NON-LITERAL TRANSLATION RULES:
 1. TECHNICAL JOB TITLES & ROLES:
    - DO NOT literally translate established tech industry job titles (e.g. keep "Frontend Engineer", "Tech Lead Angular", "DevOps Engineer", "Cloud Architect", "Fullstack Developer", "Product Owner", "Scrum Master", "Site Reliability Engineer", "Data Scientist", "Mobile Developer").
-   - Only translate universally localized traditional roles if standard in the target language (e.g., "Software Engineer" can remain "Software Engineer" or appropriate native equivalent, but NEVER invent clumsy literal translations like "Ingeniero del Frente" or "Líder Técnico de Angular").
+   - Only translate universally localized traditional roles if standard in the target language.
 2. TECH STACK & TOOLS:
    - NEVER translate technology names, frameworks, tools, libraries, or protocols (e.g. React, Next.js, Node.js, TypeScript, Docker, Kubernetes, AWS, GCP, Azure, CI/CD, SQL, REST APIs, GraphQL, Microservices, Git).
 3. PROPER NOUNS & ENTITIES:
    - NEVER translate company names, university names, personal names, project brand names, URLs, or email addresses.
-4. METRICS & FORMATTING:
-   - Preserve all metrics, numbers, percentages, dates, and currency values.
-   - Maintain the exact same Markdown syntax: headings (#, ##, ###), bold text (**word**), bullet points (-), and clean spacing.
-5. NATURAL NARRATIVE & VERB TENSES:
-   - For bullet points and summaries, translate the action verbs and business impact narratives using strong, natural executive phrasing in ${targetLangName} following the Google XYZ formula.
-${isSpanish ? '   - **CRITICAL SPANISH VERB STANDARD (MANDATORY INFINITIVE):** In Spanish, ALL experience and project bullet points MUST begin with action verbs in the **INFINITIVE** form (e.g., Diseñar, Desarrollar, Implementar, Optimizar, Liderar, Refactorizar, Reducir, Coordinar). ❌ NEVER translate action verbs into past tense / pretérito (e.g. Diseñó, Desarrollé, Implementó, Optimizó).\n' : ''}6. OUTPUT FORMAT:
-   - Return ONLY the translated Markdown text.
-   - Do NOT include conversational greetings, explanations, or commentary.`;
+4. CONTACT LINKS & URLS INTEGRITY:
+   - Keep all URLs (LinkedIn, GitHub, Portfolio, demo, repo) EXACTLY as in the source.
+   - ❌ NEVER prepend "https://www.google.com/search?q=" to emails, phone numbers, or links.
+   - ❌ NEVER append tracking query parameters like "?utm_source=gemini".
+   - Keep clean "mailto:...", "tel:...", "https://...".
+5. SWISS & REGIONAL LEGAL FIELDS:
+   - Accurately translate regional details when present in the CV:
+     - Nationality (e.g. "Suisse", "Schweizer", "Suiza", "Swiss")
+     - Work permit status (e.g. "Permis de travail : Citoyen suisse – Aucun permis requis", "Permis B", "Permis C", "Permis G frontalier")
+     - Civil status (e.g. "Célibataire", "Ledig", "Soltero", "Single")
+     - Availability / Cantonal mobility (e.g. "Disponibilité : Immédiate (Mobilité Suisse Romande)")
+     - References (e.g. "Références disponibles sur demande")
+6. NATURAL NARRATIVE & VERB TENSES:
+   - For bullet points and summaries, translate action verbs and business impact narratives using strong, natural executive phrasing in ${targetLangName} following the Google XYZ formula.
+${isSpanish ? '   - **CRITICAL SPANISH VERB STANDARD (MANDATORY INFINITIVE):** In Spanish, ALL experience and project bullet points MUST begin with action verbs in the **INFINITIVE** form (e.g., Diseñar, Desarrollar, Implementar, Optimizar, Liderar, Refactorizar, Reducir, Coordinar). ❌ NEVER translate action verbs into past tense / pretérito (e.g. Diseñó, Desarrollé, Implementó, Optimizó).\n' : ''}
+=== STRICT OUTPUT FORMAT (JSON SCHEMA) ===
+CRITICAL: You MUST return a single, strictly valid JSON object (optionally inside a \`\`\`json ... \`\`\` code block) adhering strictly to this schema. ❌ NEVER return raw unstructured text.
+
+\`\`\`json
+{
+  "detectedLanguage": "${targetLangCode || 'en'}",
+  "cvData": {
+    "name": "Candidate authentic full name (never translate personal names)",
+    "title": "Target Role / Professional Title in ${targetLangName}",
+    "contacts": [
+      { "type": "location", "label": "Candidate Location (e.g. Bogotá, Colombie)" },
+      { "type": "email", "label": "real candidate email" },
+      { "type": "phone", "label": "real candidate phone" },
+      { "type": "linkedin", "label": "LinkedIn", "url": "real LinkedIn URL" },
+      { "type": "github", "label": "GitHub", "url": "real GitHub URL" },
+      { "type": "globe", "label": "Portfolio", "url": "real portfolio URL" }
+    ],
+    "summary": "3-4 lines dynamic summary translated into ${targetLangName} without bolding technology names, ending with **bold mandatory closing impact metrics**",
+    "skills": [
+      { "category": "Languages & Core Fundamentals", "skills": ["Skill 1", "Skill 2"] },
+      { "category": "Frameworks, Architecture & Ecosystem", "skills": ["Skill 3", "Skill 4"] },
+      { "category": "Tooling, Testing, CI/CD & AI Integrations", "skills": ["Skill 5", "Skill 6"] }
+    ],
+    "experience": [
+      {
+        "company": "Company Name",
+        "location": "Company Location",
+        "role": "Job Title",
+        "date": "Localized dates (e.g. Oct 2024 – Avr 2026)",
+        "bullets": [
+          "Action verb with **bold technologies** and **bold quantified metrics** in ${targetLangName}"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "company": "Project Name",
+        "role": "Role / Scope / Stack",
+        "demoUrl": "https://...",
+        "repoUrl": "https://...",
+        "bullets": [
+          "Project impact with **bold technologies** and **metrics** in ${targetLangName}"
+        ]
+      }
+    ],
+    "education": [
+      "**Degree / Major** – Institution, Year"
+    ],
+    "certifications": [
+      "**Certification Name** – Issuer, Year"
+    ],
+    "languages": [
+      "**Language 1:** Native",
+      "**Language 2:** [CEFR Level] in ${targetLangName}"
+    ],
+    "nationality": "Candidate nationality in ${targetLangName} (omit if absent)",
+    "workPermit": "Work permit in ${targetLangName} (omit if absent)",
+    "civilStatus": "Civil status in ${targetLangName} (omit if absent)",
+    "dateOfBirth": "Date of birth (omit if absent)",
+    "drivingLicense": "Driving license in ${targetLangName} (omit if absent)",
+    "availability": "Availability in ${targetLangName} (omit if absent)",
+    "references": "References in ${targetLangName} (omit if absent)"
+  }
+}
+\`\`\``;
 }
 
 export interface TranslateCvParams {
@@ -172,20 +252,22 @@ export interface TranslateCvParams {
 }
 
 /**
- * Builds prompt bundle for full CV translation.
+ * Builds prompt bundle for full CV translation with strict JSON schema instructions.
  */
 export function buildFullCvTranslationPrompts(cvMarkdown: string, targetLanguage: SupportedLanguage): PromptBundle {
   const langDef = LANGUAGE_DEFINITIONS[targetLanguage] || LANGUAGE_DEFINITIONS.en;
   const targetLangName = langDef.name;
 
   const systemPrompt = buildTranslationSystemPrompt(targetLangName, langDef.code);
-  const userPrompt = `Translate the following complete CV into ${targetLangName}. Follow all technical preservation rules strictly:
+  const userPrompt = `Translate the following complete CV into ${targetLangName}.
+CRITICAL INSTRUCTION: Deliver your response as a single, strictly valid JSON object conforming to the cvData schema defined in the system prompt. Do NOT return plain text or unstructured markdown.
 
+=== SOURCE CV TO TRANSLATE INTO ${targetLangName.toUpperCase()} ===
 \`\`\`markdown
 ${cvMarkdown}
 \`\`\`
 
-Return ONLY the translated Markdown text.`;
+Return ONLY the JSON object.`;
 
   return {
     systemInstruction: systemPrompt,
@@ -195,14 +277,47 @@ Return ONLY the translated Markdown text.`;
 }
 
 /**
- * Translates the entire CV into the target language using the configured AI provider.
+ * Parses and extracts structured CVData and valid Markdown from the translation LLM response.
  */
-export async function translateFullCv(params: TranslateCvParams): Promise<string> {
+export function extractTranslatedCv(
+  rawLlmText: string,
+  fallbackMarkdown: string,
+  targetLanguage: SupportedLanguage
+): TranslatedCvResult {
+  const sanitized = sanitizeLlmOutput(rawLlmText);
+
+  // 1. Primary: parse structured JSON
+  const parsedData = parseJsonToCvData(sanitized, fallbackMarkdown, '');
+  if (parsedData && (parsedData.name || parsedData.summary || parsedData.experience?.length || parsedData.skillGroups?.length)) {
+    const cvData: CVData = {
+      ...parsedData,
+      language: targetLanguage,
+    };
+    const cvMarkdown = serializeCvDataToMarkdown(cvData, targetLanguage);
+    return { cvData, cvMarkdown };
+  }
+
+  // 2. Fallback: parse markdown or text with resilience to missing headers
+  const cleanedText = cleanTrackingAndSearchUrl(sanitized);
+  const parsedMarkdownData = parseMarkdownToCvData(cleanedText, targetLanguage);
+  const cvData: CVData = {
+    ...parsedMarkdownData,
+    language: targetLanguage,
+  };
+  const cvMarkdown = serializeCvDataToMarkdown(cvData, targetLanguage) || cleanedText;
+  return { cvData, cvMarkdown };
+}
+
+/**
+ * Translates the entire CV into the target language using the configured AI provider,
+ * returning both strongly-typed CVData and ATS-compliant Markdown.
+ */
+export async function translateFullCv(params: TranslateCvParams): Promise<TranslatedCvResult> {
   const prompts = buildFullCvTranslationPrompts(params.cvMarkdown, params.targetLanguage);
   const strategy = getAIStrategy(params.providerSettings.provider);
   const result = await strategy.execute(prompts, params.providerSettings);
 
-  return sanitizeLlmOutput(result.text);
+  return extractTranslatedCv(result.text, params.cvMarkdown, params.targetLanguage);
 }
 
 export interface TranslateSectionParams {

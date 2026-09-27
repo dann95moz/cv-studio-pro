@@ -14,6 +14,7 @@ import {
   parseMarkdownToCvData
 } from './markdownToCvData';
 import { APP_LINKS } from '../../constants/links';
+import { cleanTrackingAndSearchUrl } from '../../utils/sanitize';
 
 export interface RawJsonCvInput {
   name?: string;
@@ -274,13 +275,14 @@ export function parseJsonToCvData(
   const rawContacts = root.contacts || root.contact;
 
   const normalizeUrl = (type: ContactType, val: string, existingUrl?: string): string | undefined => {
-    if (existingUrl && existingUrl.trim()) {
-      const u = existingUrl.trim();
+    const rawU = existingUrl?.trim() || '';
+    if (rawU) {
+      let u = cleanTrackingAndSearchUrl(rawU);
       if (type === 'email' && !u.startsWith('mailto:')) return `mailto:${u}`;
       if ((type === 'linkedin' || type === 'github' || type === 'globe') && !u.startsWith('http')) return `https://${u}`;
       return u;
     }
-    const clean = val.trim();
+    const clean = cleanTrackingAndSearchUrl(val.trim());
     if (!clean) return undefined;
     if (type === 'email') return `mailto:${clean.replace(/^mailto:/i, '')}`;
     if (type === 'linkedin' || type === 'github' || type === 'globe') {

@@ -48,11 +48,44 @@ export interface ResolvedContactDisplay {
 }
 
 /**
+ * Strips Google search redirection wrappers (e.g. google.com/search?q=mailto%3A...)
+ * and tracking query parameters (e.g. utm_source=gemini) from URLs.
+ */
+export function cleanTrackingAndSearchUrl(rawUrl: string): string {
+  if (!rawUrl) return '';
+  let url = rawUrl.trim();
+
+  // 1. Unwrap Google search redirection e.g. https://www.google.com/search?q=mailto%3A...
+  if (url.includes('google.com/search?q=') || (url.includes('google.') && url.includes('/search?q='))) {
+    const match = url.match(/[?&]q=([^&]+)/);
+    if (match) {
+      try {
+        let decoded = decodeURIComponent(match[1]);
+        if (decoded.includes('%')) {
+          decoded = decodeURIComponent(decoded);
+        }
+        url = decoded;
+      } catch {
+        // fallback
+      }
+    }
+  }
+
+  // 2. Strip tracking query parameters (e.g. ?utm_source=gemini or &utm_source=...)
+  if (url.includes('utm_')) {
+    url = url.replace(/([?&])utm_[^&]+/gi, '$1');
+    url = url.replace(/[?&]$/, '').replace(/\?&/, '?');
+  }
+
+  return url;
+}
+
+/**
  * Strips protocol, www, and trailing slashes for clean, elegant domain/handle display.
  */
 function cleanWebUrlForDisplay(rawUrl: string): string {
-  return rawUrl
-    .trim()
+  const cleaned = cleanTrackingAndSearchUrl(rawUrl);
+  return cleaned
     .replace(/^https?:\/\//i, '')
     .replace(/^www\./i, '')
     .replace(/\/+$/, '');
@@ -74,10 +107,10 @@ export function resolveContactDisplay(
 
   const type = (contact.type || '').toLowerCase();
   const rawLabel = (contact.label || '').trim();
-  const rawUrl = (contact.url || '').trim();
+  const rawUrl = cleanTrackingAndSearchUrl(contact.url || '');
 
   let url: string | undefined = rawUrl || undefined;
-  let displayLabel = rawLabel;
+  let displayLabel = cleanTrackingAndSearchUrl(rawLabel);
 
   if (type === 'email') {
     const email = (rawUrl || rawLabel).replace(/^mailto:/i, '').trim();

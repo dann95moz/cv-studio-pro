@@ -3,6 +3,7 @@ import { extractCandidateName, cleanHumanText, extractTargetRole } from './metad
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 import { parseJsonToCvData } from './jsonToCvData';
 import { APP_LINKS } from '../../constants/links';
+import { cleanTrackingAndSearchUrl } from '../../utils/sanitize';
 
 /**
  * Autonomously infers the primary natural language of the document.
@@ -123,7 +124,7 @@ function parseContactsLine(line: string): ContactItem[] {
     const linkMatch = item.match(/\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
       const rawLabel = cleanHumanText(linkMatch[1]);
-      let rawUrl = linkMatch[2].trim();
+      let rawUrl = cleanTrackingAndSearchUrl(linkMatch[2].trim());
       const type = inferContactType(rawLabel, rawUrl);
       if (type === 'email' && !rawUrl.startsWith('mailto:')) {
         rawUrl = `mailto:${rawUrl}`;
@@ -136,7 +137,7 @@ function parseContactsLine(line: string): ContactItem[] {
         url: rawUrl,
       });
     } else {
-      let clean = item.replace(/^[–\-*]\s*/, '').trim();
+      let clean = cleanTrackingAndSearchUrl(item.replace(/^[–\-*]\s*/, '').trim());
       // Handle key-value prefixes e.g. "**Email:** user@example.com" or "Email: user@example.com"
       const kvMatch = clean.match(/^\*{0,2}(Email|E-mail|Correo|Tel[ée]fono|Phone|Mobile|Celular|Ubicaci[oó]n|Location|City|Ciudad|LinkedIn|GitHub|Portfolio|Web)\*{0,2}[:\s]+(.+)$/i);
       let detectedType: ContactType | undefined;
@@ -576,7 +577,16 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     }
   }
 
-  const normalized = markdown.replace(/\r\n/g, '\n');
+  const rawNormalized = markdown.replace(/\r\n/g, '\n');
+
+  // If document omits ## on known section titles (e.g. LLM returns "PROFIL PROFESSIONNEL" directly), prefix with ##
+  const hashCount = (rawNormalized.match(/^##\s+/gm) || []).length;
+  const normalized = hashCount < 2
+    ? rawNormalized.replace(
+        /(^|\n)(?:[#*_\s]*)(PROFIL\s+PROFESSIONNEL|R[ÉE]SUM[ÉE]\s+PROFESSIONNEL|PROFESSIONAL\s+SUMMARY|SUMMARY|RESUMEN\s+PROFESIONAL|ZUSAMMENFASSUNG|SOMMARIO\s+PROFESSIONALE|COMP[ÉE]TENCES\s+TECHNIQUES|COMP[ÉE]TENCES(?:\s+CL[ÉE]S)?|TECHNICAL\s+SKILLS|SKILLS|COMPETENCIES|CORE\s+SKILLS|HABILIDADES\s+T[ÉE]CNICAS|HABILIDADES|KENNTNISSE|COMPETENZE\s+TECNICHE|COMPETENZE|EXP[ÉE]RIENCE\s+PROFESSIONNELLE|EXP[ÉE]RIENCE|WORK\s+EXPERIENCE|PROFESSIONAL\s+EXPERIENCE|EXPERIENCE|CAREER\s+HISTORY|EXPERIENCIA\s+LABORAL|EXPERIENCIA\s+PROFESIONAL|EXPERIENCIA|BERUFSERFAHRUNG|ESPERIENZA\s+PROFESSIONALE|ESPERIENZA|PROJETS\s+NOTABLES|PROJETS|FEATURED\s+PROJECTS|PROJECTS|PROYECTOS\s+DESTACADOS|PROYECTOS|PROJEKTE|PROGETTI\s+PRINCIPALI|PROGETTI|FORMATION\s*&\s*CERTIFICATIONS|FORMATION\s*&\s*DIPL[ÔO]MES|FORMATION|EDUCATION\s*&\s*CERTIFICATIONS|EDUCATION|ACADEMIC\s+BACKGROUND|EDUCACI[OÓ]N\s*Y\s*CERTIFICACIONES|EDUCACI[OÓ]N|AUSBILDUNG|ISTRUZIONE\s*&\s*CERTIFICAZIONI|ISTRUZIONE|LANGUES|LANGUAGES|IDIOMAS|SPRACHEN|LINGUE|R[ÉE]F[ÉE]RENCES|REFERENCES|REFERENCIAS|REFERENZEN|REFERENZE)(?:[:*_\s]*)(?=\n|$)/gi,
+        '$1## $2\n'
+      )
+    : rawNormalized;
 
   const lines = normalized.split('\n');
   const lang: SupportedLanguage = language || inferDocumentLanguage(markdown);
@@ -659,15 +669,19 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
           contacts.push(item);
         }
       }
-    } else if (!title && !pLine.startsWith('---') && !pLine.startsWith('===') && !pLine.startsWith('>')) {
+    } else if (!pLine.startsWith('---') && !pLine.startsWith('===') && !pLine.startsWith('>')) {
       const cleanLine = cleanHumanText(pLine);
       if (
         cleanLine &&
-        cleanLine.length < 90 &&
+        cleanLine.length < 100 &&
         !cleanLine.toLowerCase().includes('http') &&
         !cleanLine.toLowerCase().includes('@')
       ) {
-        title = cleanLine;
+        if (!name) {
+          name = cleanLine;
+        } else if (!title) {
+          title = cleanLine;
+        }
       }
     }
   }

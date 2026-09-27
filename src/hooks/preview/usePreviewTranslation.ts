@@ -10,7 +10,9 @@ import {
   buildFullCvTranslationPrompts,
   buildSectionTranslationPrompts,
   sanitizeLlmOutput,
+  extractTranslatedCv,
 } from '../../core/ai/cv-translator';
+import { parseMarkdownToCvData } from '../../core/parser';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 
 export interface UsePreviewTranslationProps {
@@ -61,12 +63,13 @@ export function usePreviewTranslation({
       const prompts = buildFullCvTranslationPrompts(cvMarkdown, targetLang);
       const bundle = `${prompts.systemInstruction}\n\n---\n\n${prompts.userPrompt}`;
       openManualPromptModal(bundle, `Translate CV to ${langDef.name}`, (response) => {
-        const translated = sanitizeLlmOutput(response);
-        if (translated) {
+        const translatedResult = extractTranslatedCv(response, cvMarkdown, targetLang);
+        if (translatedResult) {
           const variant: CvTranslationVariant = {
             language: targetLang,
             languageLabel: langDef.nativeName,
-            cvMarkdown: translated,
+            cvMarkdown: translatedResult.cvMarkdown,
+            cvData: translatedResult.cvData,
             updatedAt: new Date().toISOString(),
             isOutdated: false,
             baseMarkdownHash: computeContentHash(cvMarkdown),
@@ -81,7 +84,7 @@ export function usePreviewTranslation({
 
     setIsTranslating(true);
     try {
-      const translated = await translateFullCv({
+      const translatedResult = await translateFullCv({
         cvMarkdown,
         targetLanguage: targetLang,
         providerSettings,
@@ -90,7 +93,8 @@ export function usePreviewTranslation({
       const variant: CvTranslationVariant = {
         language: targetLang,
         languageLabel: langDef.nativeName,
-        cvMarkdown: translated,
+        cvMarkdown: translatedResult.cvMarkdown,
+        cvData: translatedResult.cvData,
         updatedAt: new Date().toISOString(),
         isOutdated: false,
         baseMarkdownHash: computeContentHash(cvMarkdown),
@@ -140,6 +144,7 @@ export function usePreviewTranslation({
             language: targetLang,
             languageLabel: existing?.languageLabel || langDef.nativeName,
             cvMarkdown: currentTranslatedText,
+            cvData: parseMarkdownToCvData(currentTranslatedText, targetLang),
             updatedAt: new Date().toISOString(),
             isOutdated: false,
             baseMarkdownHash: computeContentHash(cvMarkdown),
@@ -176,6 +181,7 @@ export function usePreviewTranslation({
         language: targetLang,
         languageLabel: existing?.languageLabel || langDef.nativeName,
         cvMarkdown: currentTranslatedText,
+        cvData: parseMarkdownToCvData(currentTranslatedText, targetLang),
         updatedAt: new Date().toISOString(),
         isOutdated: false,
         baseMarkdownHash: computeContentHash(cvMarkdown),
