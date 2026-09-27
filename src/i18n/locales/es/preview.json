@@ -144,7 +144,7 @@
       "sizeHero": "Prominente",
       "photoChangeAction": "Cambiar Imagen",
       "photoDeleteAction": "Eliminar",
-      "photoNotSupported": "Las fotos son compatibles con las plantillas Executive, Two-Column, Designer, Academic, Europass y Euro Modern. Los diseños ATS de una columna (Modern Tech, Minimal ATS, Formal Legal) omiten fotos para un 100% de compatibilidad con filtros ATS.",
+      "photoNotSupported": "Las fotos son compatibles con las plantillas Estándar Suizo, Executive, Two-Column, Designer, Academic, Europass y Euro Modern. Los diseños ATS de una columna (Modern Tech, Minimal ATS, Formal Legal) omiten fotos para un 100% de compatibilidad con filtros ATS.",
       "photoFileTooLarge": "El archivo de imagen es demasiado grande (máximo 5MB). Por favor sube una imagen más pequeña."
     },
 

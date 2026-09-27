@@ -51,7 +51,7 @@ export const PhotoCropperModal: React.FC<PhotoCropperModalProps> = ({
 
   // Derive mask shape strictly from active template identity
   const maskShape: 'circle' | 'rounded' | 'squircle' =
-    activeTheme === 'academic-research'
+    activeTheme === 'academic-research' || activeTheme === 'swiss-modern'
       ? 'circle'
       : activeTheme === 'designer-uiux'
       ? 'squircle'

@@ -144,7 +144,7 @@
       "sizeHero": "In Evidenza",
       "photoChangeAction": "Cambia Immagine",
       "photoDeleteAction": "Rimuovi",
-      "photoNotSupported": "Le foto sono supportate nei modelli Executive, Two-Column, Designer, Academic, Europass ed Euro Modern. I layout ATS a colonna singola (Modern Tech, Minimal ATS, Formal Legal) omettono le foto per una conformità del 100% con i sistemi ATS.",
+      "photoNotSupported": "Le foto sono supportate nei modelli Standard Svizzero, Executive, Two-Column, Designer, Academic, Europass ed Euro Modern. I layout ATS a colonna singola (Modern Tech, Minimal ATS, Formal Legal) omettono le foto per una conformità del 100% con i sistemi ATS.",
       "photoFileTooLarge": "La dimensione del file della foto è eccessiva (massimo 5 MB). Carica un'immagine più piccola."
     },
 

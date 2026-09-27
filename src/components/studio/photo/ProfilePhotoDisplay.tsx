@@ -37,6 +37,9 @@ export interface ProfilePhotoDisplayProps {
   boxShadow?: string;
   fallbackInitials?: string;
   fallbackIcon?: 'diamond' | 'monogram' | 'none';
+  fallbackBgColor?: string;
+  fallbackTextColor?: string;
+  hideOnPrintIfEmpty?: boolean;
   editable?: boolean;
   activeTheme?: ThemeId;
   onPhotoChange?: (updated: ProfilePhotoConfig | null) => void;
@@ -54,6 +57,9 @@ export const ProfilePhotoDisplay: React.FC<ProfilePhotoDisplayProps> = ({
   boxShadow,
   fallbackInitials,
   fallbackIcon = 'monogram',
+  fallbackBgColor,
+  fallbackTextColor,
+  hideOnPrintIfEmpty = false,
   editable = true,
   activeTheme,
   onPhotoChange,
@@ -130,7 +136,7 @@ export const ProfilePhotoDisplay: React.FC<ProfilePhotoDisplayProps> = ({
       <Tooltip title={editable && !isPopoverOpen ? tooltipTitle : ''} arrow placement="top">
         <Box
           onClick={handleContainerClick}
-          className={`cv-profile-photo-container ${className || ''}`}
+          className={`cv-profile-photo-container ${!hasActivePhoto && hideOnPrintIfEmpty ? 'no-print ' : ''}${className || ''}`}
           sx={{
             width: finalWidth,
             height: finalHeight,
@@ -200,7 +206,7 @@ export const ProfilePhotoDisplay: React.FC<ProfilePhotoDisplayProps> = ({
               sx={{
                 width: '100%',
                 height: '100%',
-                bgcolor: alpha(muiTheme.palette.common.white, 0.12),
+                bgcolor: fallbackBgColor || alpha(muiTheme.palette.common.white, 0.12),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -211,7 +217,7 @@ export const ProfilePhotoDisplay: React.FC<ProfilePhotoDisplayProps> = ({
                   fontWeight: 800,
                   fontSize: typeof finalWidth === 'number' ? Math.round(finalWidth * 0.38) : '1.1rem',
                   lineHeight: 1,
-                  color: 'common.white',
+                  color: fallbackTextColor || 'common.white',
                 }}
               >
                 {fallbackInitials}

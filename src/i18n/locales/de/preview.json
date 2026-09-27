@@ -144,7 +144,7 @@
       "sizeHero": "Prominent",
       "photoChangeAction": "Bild ändern",
       "photoDeleteAction": "Entfernen",
-      "photoNotSupported": "Fotos werden in den Vorlagen Executive, Two-Column, Designer, Academic, Europass und Euro Modern unterstützt. Einspaltige ATS-Designs (Modern Tech, Minimal ATS, Formal Legal) verzichten auf Fotos für eine 100%ige ATS-Kompatibilität.",
+      "photoNotSupported": "Fotos werden in den Vorlagen Schweizer Standard, Executive, Two-Column, Designer, Academic, Europass und Euro Modern unterstützt. Einspaltige ATS-Designs (Modern Tech, Minimal ATS, Formal Legal) verzichten auf Fotos für eine 100%ige ATS-Kompatibilität.",
       "photoFileTooLarge": "Die Bilddatei ist zu groß (maximal 5 MB). Bitte laden Sie ein kleineres Bild hoch."
     },
 

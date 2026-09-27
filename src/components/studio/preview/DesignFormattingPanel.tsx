@@ -226,7 +226,7 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
           >
             {t(
               'preview:panels.design.photoNotSupported',
-              'Photos are supported on Executive, Two-Column, Designer, Academic, Europass, and Euro Modern templates. Single-column ATS designs (Modern Tech, Minimal ATS, Formal Legal) omit photos for 100% parser compliance.'
+              'Photos are supported on Swiss Standard, Executive, Two-Column, Designer, Academic, Europass, and Euro Modern templates. Single-column ATS designs (Modern Tech, Minimal ATS, Formal Legal) omit photos for 100% parser compliance.'
             )}
           </Alert>
         ) : photo && photo.url ? (
@@ -246,7 +246,7 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <ProfilePhotoDisplay
                   photo={photo}
-                  maskShape={activeTheme === 'academic-research' ? 'circle' : activeTheme === 'designer-uiux' ? 'squircle' : 'rounded'}
+                  maskShape={activeTheme === 'academic-research' || activeTheme === 'swiss-modern' ? 'circle' : activeTheme === 'designer-uiux' ? 'squircle' : 'rounded'}
                   size={48}
                   border={`1.5px solid ${muiTheme.palette.primary.main}`}
                 />
