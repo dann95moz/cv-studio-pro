@@ -202,6 +202,7 @@ export function parseJsonExperience(rawExp: unknown): ExperienceItem[] {
       highlights?: unknown;
       tasks?: unknown;
       description?: string;
+      disabledBullets?: unknown;
     };
 
     const company = cleanHumanText(
@@ -233,7 +234,11 @@ export function parseJsonExperience(rawExp: unknown): ExperienceItem[] {
         .filter(Boolean);
     }
 
-    experience.push({ company, role, date, location, bullets });
+    const disabledBullets = Array.isArray(expObj.disabledBullets)
+      ? (expObj.disabledBullets as number[]).filter((n) => typeof n === 'number')
+      : undefined;
+
+    experience.push({ company, role, date, location, bullets, disabledBullets });
   }
 
   return experience;
@@ -269,6 +274,7 @@ export function parseJsonProjects(rawProjects: unknown, fallbackCv?: CVData | nu
         highlights?: unknown;
         tasks?: unknown;
         description?: string;
+        disabledBullets?: unknown;
       };
 
       const company = cleanHumanText(projObj.company || projObj.name || projObj.title || 'Project');
@@ -313,7 +319,11 @@ export function parseJsonProjects(rawProjects: unknown, fallbackCv?: CVData | nu
           .filter(Boolean);
       }
 
-      projects.push({ company, role, demoUrl, repoUrl, date, location, bullets });
+      const disabledBullets = Array.isArray(projObj.disabledBullets)
+        ? (projObj.disabledBullets as number[]).filter((n) => typeof n === 'number')
+        : undefined;
+
+      projects.push({ company, role, demoUrl, repoUrl, date, location, bullets, disabledBullets });
     }
   }
 

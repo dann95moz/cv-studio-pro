@@ -43,6 +43,7 @@ export interface ExperienceItem {
   role?: string;
   date?: string;
   bullets: string[];
+  disabledBullets?: number[];
   demoUrl?: string;
   repoUrl?: string;
 }
@@ -114,6 +115,9 @@ export interface CVData {
   civilStatus?: string;
   availability?: string;
   references?: string;
+  sectionPlacement?: Record<string, 'sidebar' | 'main'>;
+  sidebarSectionOrder?: string[];
+  mainSectionOrder?: string[];
 }
 
 

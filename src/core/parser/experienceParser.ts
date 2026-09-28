@@ -119,18 +119,29 @@ export function parseExperienceBlocks(content: string, contacts: ContactItem[] =
     }
 
     // Remaining lines: Bullets
+    const disabledBullets: number[] = [];
     for (; lineIdx < lines.length; lineIdx++) {
       const line = lines[lineIdx];
-      if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ') || line.startsWith('+ ')) {
-        const bulletText = line.replace(/^[-*•·+]\s+/, '').trim();
-        if (bulletText) bullets.push(bulletText);
+      const isDisabled = /^<!--\s*disabled\s*-->/i.test(line);
+      const cleanLine = line.replace(/^<!--\s*disabled\s*-->\s*/i, '');
+      if (cleanLine.startsWith('- ') || cleanLine.startsWith('* ') || cleanLine.startsWith('• ') || cleanLine.startsWith('+ ')) {
+        const bulletText = cleanLine.replace(/^[-*•·+]\s+/, '').trim();
+        if (bulletText) {
+          if (isDisabled) {
+            disabledBullets.push(bullets.length);
+          }
+          bullets.push(bulletText);
+        }
       } else if (line.startsWith('---') || line.startsWith('===')) {
         continue;
       } else {
         if (bullets.length > 0) {
-          bullets[bullets.length - 1] += ` ${line}`;
+          bullets[bullets.length - 1] += ` ${cleanLine}`;
         } else {
-          bullets.push(line);
+          if (isDisabled) {
+            disabledBullets.push(bullets.length);
+          }
+          bullets.push(cleanLine);
         }
       }
     }
@@ -164,6 +175,7 @@ export function parseExperienceBlocks(content: string, contacts: ContactItem[] =
         demoUrl,
         repoUrl,
         bullets: bullets.map(cleanBulletText).filter(Boolean),
+        disabledBullets: disabledBullets.length > 0 ? disabledBullets : undefined,
       });
     }
   }

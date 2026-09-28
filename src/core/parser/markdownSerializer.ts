@@ -133,7 +133,11 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
       const location = (exp.location || '').replace(/\*\*/g, '').trim();
       const headerLine = `### **${company}**${location ? ` | ${location}` : ''}`;
       const subHeaderLine = `*${role}*${date ? ` | **${date}**` : ''}`;
-      const bullets = (exp.bullets || []).map(b => (b.startsWith('- ') ? b : `- ${b}`)).join('\n');
+      const bullets = (exp.bullets || []).map((b, bIdx) => {
+        const isDisabled = exp.disabledBullets?.includes(bIdx);
+        const clean = b.replace(/^<!--\s*disabled\s*-->\s*/i, '').replace(/^[-*•·+]\s+/, '');
+        return isDisabled ? `<!-- disabled --> - ${clean}` : `- ${clean}`;
+      }).join('\n');
       return `${headerLine}\n${subHeaderLine}\n${bullets}`;
     });
     parts.push(expItemsFormatted.join('\n\n---\n\n'));
@@ -168,7 +172,11 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
       const subHeaderLine = `*${role}*${date ? ` | **${date}**` : ''}`;
       const bullets = (proj.bullets || [])
         .filter(b => Boolean(b && b.trim()))
-        .map(b => (b.startsWith('- ') ? b : `- ${b}`))
+        .map((b, bIdx) => {
+          const isDisabled = proj.disabledBullets?.includes(bIdx);
+          const clean = b.replace(/^<!--\s*disabled\s*-->\s*/i, '').replace(/^[-*•·+]\s+/, '');
+          return isDisabled ? `<!-- disabled --> - ${clean}` : `- ${clean}`;
+        })
         .join('\n');
       return `${headerLine}\n${subHeaderLine}${bullets ? `\n${bullets}` : ''}`;
     });
