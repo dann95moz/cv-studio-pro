@@ -109,6 +109,7 @@ export interface CVData {
   photo?: ProfilePhotoConfig | null;
 
   nationality?: string;
+  placeOfOrigin?: string;
   dateOfBirth?: string;
   drivingLicense?: string;
   workPermit?: string;

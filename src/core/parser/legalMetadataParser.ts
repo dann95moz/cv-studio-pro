@@ -3,6 +3,7 @@ import { cleanHumanText } from './metadataExtractor';
 export interface LegalMetadataResult {
   workPermit?: string;
   nationality?: string;
+  placeOfOrigin?: string;
   dateOfBirth?: string;
   drivingLicense?: string;
   availability?: string;
@@ -36,8 +37,10 @@ export function parseLegalMetadata(pLine: string): { key: keyof LegalMetadataRes
   );
   if (originMatch) {
     const rawVal = cleanHumanText(originMatch[1]);
-    const val = cleanMeta.toLowerCase().startsWith('originaire') ? cleanHumanText(cleanMeta) : `Originaire de ${rawVal}`;
-    return { key: 'nationality', value: val };
+    const val = rawVal.toLowerCase().startsWith('originaire')
+      ? rawVal
+      : (cleanMeta.toLowerCase().startsWith('originaire') ? cleanHumanText(cleanMeta) : `Originaire de ${rawVal}`);
+    return { key: 'placeOfOrigin', value: val };
   }
 
   const dobMatch = cleanMeta.match(

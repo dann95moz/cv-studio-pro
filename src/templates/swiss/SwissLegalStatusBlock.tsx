@@ -18,6 +18,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const hasPersonalDetails = Boolean(
     header.workPermit ||
     header.nationality ||
+    header.placeOfOrigin ||
     header.dateOfBirth ||
     header.drivingLicense ||
     header.availability ||
@@ -31,44 +32,47 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const rawNat = (header.nationality || '').replace(/[*_]/g, '').trim();
   const rawPermit = (header.workPermit || '').replace(/[*_]/g, '').trim();
 
-  // Extract place of origin if present in nationality or permit (e.g. "Originaire de Frutigen (BE)")
+  // 1. Resolve place of origin: prefer first-class placeOfOrigin property, fallback to regex
   const originRegex = /(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Lugar\s+de\s+origen)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i;
-  let origin = '';
-  const originMatch = rawNat.match(originRegex) || rawPermit.match(originRegex);
-  if (originMatch) {
-    origin = originMatch[0].trim();
-  }
-
-  // Clean nationality string without origin suffix/prefix
-  let cleanNat = rawNat;
-  if (originMatch && rawNat.includes(originMatch[0])) {
-    cleanNat = cleanNat.replace(originMatch[0], '').replace(/[•·/–—,\s]+$/, '').replace(/^[•·/–—,\s]+/, '').trim();
-  }
-
-  // Extract inline availability if accidentally bundled into nationality (e.g. "• Disponibilité : From december 2026")
-  let extractedAvailability = '';
-  const availRegex = /[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]\s*([^•·\n]+)/i;
-  const availMatch = cleanNat.match(availRegex) || rawPermit.match(availRegex);
-  if (availMatch) {
-    extractedAvailability = availMatch[1].trim();
-    cleanNat = cleanNat.replace(availMatch[0], '').trim();
+  const legacyOriginMatch = rawNat.match(originRegex) || rawPermit.match(originRegex);
+  let origin = (header.placeOfOrigin || '').trim();
+  if (!origin && legacyOriginMatch) {
+    origin = legacyOriginMatch[0].trim();
   }
 
   // Extract Swiss canton origin if enclosed in parentheses (e.g. "(Frutigen - BE)")
   if (!origin) {
     const swissCantonOriginRegex = /\(([A-Za-zÀ-ÿ\s–-]+(?:-[A-Z]{2}|\s*-\s*[A-Z]{2}|\([A-Z]{2}\)))\)/i;
-    const cantonMatch = cleanNat.match(swissCantonOriginRegex) || rawPermit.match(swissCantonOriginRegex);
+    const cantonMatch = rawNat.match(swissCantonOriginRegex) || rawPermit.match(swissCantonOriginRegex);
     if (cantonMatch) {
       const cantonClean = cantonMatch[1].trim().replace(/\s*-\s*([A-Z]{2})$/, ' ($1)');
       origin = `Originaire de ${cantonClean}`;
-      cleanNat = cleanNat.replace(cantonMatch[0], '').replace(/\s{2,}/g, ' ').trim();
     }
+  }
+
+  // 2. Clean nationality string: strip out origin if it was bundled in rawNat
+  let cleanNat = rawNat;
+  if (legacyOriginMatch && cleanNat.includes(legacyOriginMatch[0])) {
+    cleanNat = cleanNat.replace(legacyOriginMatch[0], '').trim();
+  }
+  if (origin && cleanNat.includes(origin)) {
+    cleanNat = cleanNat.replace(origin, '').trim();
+  }
+
+  // 3. Resolve availability: prefer first-class availability property, fallback to regex
+  const availRegex = /[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]\s*([^•·\n]+)/i;
+  const legacyAvailMatch = cleanNat.match(availRegex) || rawPermit.match(availRegex);
+  let legacyAvailability = '';
+  if (legacyAvailMatch) {
+    legacyAvailability = legacyAvailMatch[1].trim();
+    cleanNat = cleanNat.replace(legacyAvailMatch[0], '').trim();
   }
 
   cleanNat = cleanNat.replace(/[•·/–—,\s]+$/, '').replace(/^[•·/–—,\s]+/, '').trim();
 
   const isSwissCitizen =
     /(suisse|swiss|schweiz|svizzera)/i.test(cleanNat) ||
+    Boolean(origin) ||
     /(suisse|swiss|schweiz|svizzera|citoyen|citizen)/i.test(rawPermit);
 
   const noPermitNeeded =
@@ -86,7 +90,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   }
 
   // Clean availability: strip modality clutter like "Remote / Hybrid / On-site"
-  let cleanAvailability = (header.availability || extractedAvailability || '').replace(/[*_]/g, '').trim();
+  let cleanAvailability = (header.availability || legacyAvailability || '').replace(/[*_]/g, '').trim();
   if (cleanAvailability.includes('|')) {
     cleanAvailability = cleanAvailability.split('|')[0].trim();
   }
@@ -171,7 +175,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
               <EditableText
                 tagName="span"
                 value={origin}
-                onSave={(val) => liveEdit?.updatePersonalDetail('nationality', `${displayNationality} • ${val}`)}
+                onSave={(val) => liveEdit?.updatePersonalDetail('placeOfOrigin', val)}
               />
             </span>
           </div>

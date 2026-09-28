@@ -73,6 +73,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   const personalDetails: string[] = [];
   if (data.workPermit) personalDetails.push(`Permis : ${data.workPermit}`);
   if (data.nationality) personalDetails.push(`Nationalité : ${data.nationality}`);
+  if (data.placeOfOrigin) personalDetails.push(`Lieu d'origine : ${data.placeOfOrigin}`);
   if (data.dateOfBirth) personalDetails.push(`Date de naissance : ${data.dateOfBirth}`);
   if (data.drivingLicense) personalDetails.push(`Permis de conduire : ${data.drivingLicense}`);
   if (data.availability) personalDetails.push(`Disponibilité : ${data.availability}`);

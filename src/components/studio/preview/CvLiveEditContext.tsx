@@ -64,7 +64,7 @@ export interface CvLiveEditContextValue {
   updateLanguageItem: (itemIndex: number, value: string) => void;
   updateSectionTitle: (type: SectionType | string, newTitle: string) => void;
   updatePersonalDetail: (
-    field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references',
+    field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references' | 'placeOfOrigin',
     value: string
   ) => void;
   toggleBulletVisibility: (
@@ -292,7 +292,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
 
   const updatePersonalDetail = useCallback(
     (
-      field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references',
+      field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references' | 'placeOfOrigin',
       value: string
     ) => {
       applyCvUpdate((prev) => ({

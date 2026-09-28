@@ -163,6 +163,7 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
       .map(cleanContactDisplayLabel),
     photo: data.photo,
     nationality: data.nationality,
+    placeOfOrigin: data.placeOfOrigin,
     dateOfBirth: data.dateOfBirth,
     drivingLicense: data.drivingLicense,
     workPermit: data.workPermit,

@@ -272,6 +272,32 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     }
   }
 
+  // Cleanly disentangle placeOfOrigin and availability if bundled inside nationality string
+  if (legalDetails.nationality) {
+    if (!legalDetails.placeOfOrigin) {
+      const originMatch = legalDetails.nationality.match(/(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Luogo\s+d['’]origine)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i);
+      if (originMatch) {
+        legalDetails.placeOfOrigin = originMatch[0].trim();
+        legalDetails.nationality = legalDetails.nationality.replace(originMatch[0], '').trim();
+      } else {
+        const cantonMatch = legalDetails.nationality.match(/\(([A-Za-zÀ-ÿ\s–-]+(?:-[A-Z]{2}|\s*-\s*[A-Z]{2}|\([A-Z]{2}\)))\)/i);
+        if (cantonMatch) {
+          const cantonClean = cantonMatch[1].trim().replace(/\s*-\s*([A-Z]{2})$/, ' ($1)');
+          legalDetails.placeOfOrigin = `Originaire de ${cantonClean}`;
+          legalDetails.nationality = legalDetails.nationality.replace(cantonMatch[0], '').trim();
+        }
+      }
+    }
+    if (!legalDetails.availability) {
+      const availMatch = legalDetails.nationality.match(/[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]\s*([^•·\n]+)/i);
+      if (availMatch) {
+        legalDetails.availability = availMatch[1].trim();
+        legalDetails.nationality = legalDetails.nationality.replace(availMatch[0], '').trim();
+      }
+    }
+    legalDetails.nationality = legalDetails.nationality.replace(/[•·/–—,\s]+$/, '').replace(/^[•·/–—,\s]+/, '').trim();
+  }
+
   return cleanCvData({
     name,
     title,
