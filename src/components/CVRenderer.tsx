@@ -53,7 +53,10 @@ export const CVRenderer: React.FC<CVRendererProps> = ({
   const fontFam = FONT_FAMILY_CSS_MAP[fontFamily] || FONT_FAMILY_CSS_MAP.inter;
 
   const styleVariables: React.CSSProperties = {
+    '--cv-primary': palConfig.primaryColor,
     '--cv-primary-color': palConfig.primaryColor,
+    '--cv-primary-light': palConfig.badgeBg || palConfig.accentLight,
+    '--cv-primary-dark': palConfig.badgeText || palConfig.primaryColor,
     '--cv-accent-color': palConfig.accentColor,
     '--cv-accent-light': palConfig.accentLight,
     '--cv-accent-border': palConfig.accentBorder,
