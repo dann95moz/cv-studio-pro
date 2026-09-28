@@ -312,5 +312,17 @@
     "dateOfBirth": "Date of Birth",
     "drivingLicense": "Driving License",
     "references": "Professional References"
+  },
+  "bullets": {
+    "show": "Show bullet",
+    "hide": "Hide bullet",
+    "toggleTooltip": "Show or hide bullet to adjust vertical space",
+    "activate": "Activate bullet",
+    "deactivate": "Deactivate bullet (save space)"
+  },
+  "sections": {
+    "moveToMain": "Move to main page",
+    "moveToSidebar": "Move to sidebar",
+    "dragHint": "Drag section to another column"
   }
 }

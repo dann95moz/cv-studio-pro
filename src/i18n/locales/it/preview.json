@@ -313,5 +313,17 @@
     "dateOfBirth": "Data di nascita",
     "drivingLicense": "Patente di guida",
     "references": "Referenze professionali"
+  },
+  "bullets": {
+    "show": "Mostra punto elenco",
+    "hide": "Nascondi punto elenco",
+    "toggleTooltip": "Mostra o nascondi punto elenco per regolare lo spazio verticale",
+    "activate": "Attiva punto elenco",
+    "deactivate": "Disattiva punto elenco (risparmia spazio)"
+  },
+  "sections": {
+    "moveToMain": "Sposta sul foglio principale",
+    "moveToSidebar": "Sposta nella barra laterale",
+    "dragHint": "Trascina sezione in un'altra colonna"
   }
 }

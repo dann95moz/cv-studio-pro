@@ -312,5 +312,17 @@
     "dateOfBirth": "Geburtsdatum",
     "drivingLicense": "Führerschein",
     "references": "Referenzen"
+  },
+  "bullets": {
+    "show": "Aufzählungspunkt anzeigen",
+    "hide": "Aufzählungspunkt ausblenden",
+    "toggleTooltip": "Aufzählungspunkt ein- oder ausblenden, um Platz zu sparen",
+    "activate": "Aufzählungspunkt aktivieren",
+    "deactivate": "Aufzählungspunkt deaktivieren (Platz sparen)"
+  },
+  "sections": {
+    "moveToMain": "Auf Hauptseite verschieben",
+    "moveToSidebar": "In Seitenleiste verschieben",
+    "dragHint": "Abschnitt in andere Spalte ziehen"
   }
 }

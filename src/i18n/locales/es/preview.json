@@ -313,5 +313,17 @@
     "dateOfBirth": "Fecha de nacimiento",
     "drivingLicense": "Permiso de conducir",
     "references": "Referencias profesionales"
+  },
+  "bullets": {
+    "show": "Mostrar viñeta",
+    "hide": "Ocultar viñeta",
+    "toggleTooltip": "Activar o desactivar viñeta para ahorrar espacio vertical",
+    "activate": "Activar viñeta",
+    "deactivate": "Desactivar viñeta (ahorrar espacio)"
+  },
+  "sections": {
+    "moveToMain": "Mover a hoja principal",
+    "moveToSidebar": "Mover a barra lateral",
+    "dragHint": "Arrastrar bloque a otra columna"
   }
 }

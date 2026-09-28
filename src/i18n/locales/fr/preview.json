@@ -313,5 +313,17 @@
     "dateOfBirth": "Date de naissance",
     "drivingLicense": "Permis de conduire",
     "references": "Références professionnelles"
+  },
+  "bullets": {
+    "show": "Afficher la puce",
+    "hide": "Masquer la puce",
+    "toggleTooltip": "Activer ou masquer la puce pour ajuster l'espace vertical",
+    "activate": "Activer la puce",
+    "deactivate": "Désactiver la puce (gagner de l'espace)"
+  },
+  "sections": {
+    "moveToMain": "Déplacer vers la feuille principale",
+    "moveToSidebar": "Déplacer vers la barre latérale",
+    "dragHint": "Glisser la section vers une autre colonne"
   }
 }
