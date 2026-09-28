@@ -57,8 +57,8 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
             <span
               style={{
                 fontWeight: 800,
-                backgroundColor: '#e0f2fe',
-                color: '#0369a1',
+                backgroundColor: 'var(--cv-primary-light, #e0f2fe)',
+                color: 'var(--cv-primary-dark, #0369a1)',
                 padding: '3px 8px',
                 borderRadius: '4px',
                 display: 'inline-block',
@@ -85,8 +85,8 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
             <span
               style={{
                 fontWeight: 800,
-                backgroundColor: '#e0f2fe',
-                color: '#0369a1',
+                backgroundColor: 'var(--cv-primary-light, #e0f2fe)',
+                color: 'var(--cv-primary-dark, #0369a1)',
                 padding: '3px 8px',
                 borderRadius: '4px',
                 display: 'inline-block',
