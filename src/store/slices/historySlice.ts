@@ -5,6 +5,7 @@ import {
   extractCandidateName,
   extractTargetCompany,
   extractTargetRole,
+  parseMarkdownToCvData,
 } from '../../core/parser';
 import { auditCvContent } from '../../core/audit-engine';
 import { extractGapInfo } from '../../utils/sanitize';
@@ -186,9 +187,18 @@ export const createHistorySlice: StateCreator<ResumeStore, [], [], HistorySlice>
     if (found) {
       const baseLang = found.baseLanguage || 'es';
       const activeLang = found.activeLanguage || baseLang;
+      let loadedActiveCvData = found.cvData || null;
+
+      if (activeLang !== baseLang && found.translations?.[activeLang]) {
+        const variant = found.translations[activeLang];
+        loadedActiveCvData = variant.cvData || (variant.cvMarkdown && variant.cvMarkdown.trim().length > 30
+          ? parseMarkdownToCvData(variant.cvMarkdown, activeLang as any)
+          : loadedActiveCvData);
+      }
+
       set({
         cvMarkdown: found.cvMarkdown,
-        activeCvData: found.cvData || null,
+        activeCvData: loadedActiveCvData,
         ...(found.gapMarkdown ? { gapMarkdown: found.gapMarkdown } : {}),
         ...(found.companyName ? { companyName: found.companyName } : {}),
         ...(found.targetRole ? { targetRole: found.targetRole } : {}),

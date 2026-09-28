@@ -189,7 +189,7 @@ export const StepPreviewCanvas: React.FC<StepPreviewCanvasProps> = React.memo(({
                   margin: '0 auto',
                 }}
               >
-                <CvLiveEditProvider parsedCv={parsedCv} isEditable={true}>
+                <CvLiveEditProvider key={`live-edit-${parsedCv.language || 'default'}`} parsedCv={parsedCv} isEditable={true}>
                   <ErrorBoundary isIsolatedModule fallbackTitle="Error al renderizar la plantilla del CV">
                     <CVRenderer
                       key={`${theme}-${parsedCv.language || 'default'}`}

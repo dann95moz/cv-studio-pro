@@ -38,15 +38,19 @@ export const useParsedCv = (): CVData => {
       ? rawLang
       : 'es') as SupportedLanguage;
 
-    // 1. Language variant cvData
+    // 1. Language variant cvData (must have real candidate content)
+    const variantData = activeLanguage && currentBaseLanguage && activeLanguage !== currentBaseLanguage
+      ? translations[activeLanguage]?.cvData
+      : undefined;
     if (
-      activeLanguage &&
-      currentBaseLanguage &&
-      activeLanguage !== currentBaseLanguage &&
-      translations[activeLanguage]?.cvData
+      variantData &&
+      (variantData.name ||
+        variantData.summary ||
+        variantData.experience?.length ||
+        variantData.skillGroups?.length)
     ) {
       return {
-        ...translations[activeLanguage].cvData!,
+        ...variantData,
         language: effectiveLang,
       };
     }

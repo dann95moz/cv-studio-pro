@@ -200,11 +200,14 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     if (isEditingVariant && translations[activeLanguage]) {
       const currentVariantText = translations[activeLanguage].cvMarkdown;
       const nextVariantText = typeof val === 'function' ? val(currentVariantText) : val;
-      const currentActiveCvData = get().activeCvData;
+      const parsedData = parseMarkdownToCvData(nextVariantText, activeLanguage as any);
+      const hasParsedContent = Boolean(
+        parsedData && (parsedData.name || parsedData.summary || parsedData.experience?.length || parsedData.skillGroups?.length)
+      );
       const updatedVariant: CvTranslationVariant = {
         ...translations[activeLanguage],
         cvMarkdown: nextVariantText,
-        cvData: currentActiveCvData || translations[activeLanguage].cvData,
+        cvData: hasParsedContent ? parsedData : translations[activeLanguage].cvData,
         updatedAt: new Date().toISOString(),
       };
       set({
@@ -212,6 +215,7 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
           ...translations,
           [activeLanguage]: updatedVariant,
         },
+        activeCvData: updatedVariant.cvData || null,
         unsavedChangesCount: get().unsavedChangesCount + 1,
       });
       return;
@@ -282,6 +286,7 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
           ...translations,
           [activeLanguage]: updatedVariant,
         },
+        activeCvData: data ? { ...data, language: activeLanguage as any } : null,
       });
       return;
     }
@@ -324,15 +329,21 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   },
 
   setActiveLanguage: (activeLanguage: string) => {
-    const { currentBaseLanguage, cvMarkdown, activeCvData } = get();
+    const { currentBaseLanguage, cvMarkdown, translations } = get();
     if (activeLanguage === currentBaseLanguage) {
-      if (activeCvData && activeCvData.language && activeCvData.language !== currentBaseLanguage) {
-        const healedBase = cvMarkdown && cvMarkdown.trim().length > 30
-          ? parseMarkdownToCvData(cvMarkdown, (currentBaseLanguage || 'es') as any)
-          : null;
-        set({ activeLanguage, activeCvData: healedBase });
-        return;
-      }
+      const healedBase = cvMarkdown && cvMarkdown.trim().length > 30
+        ? parseMarkdownToCvData(cvMarkdown, (currentBaseLanguage || 'es') as any)
+        : null;
+      set({ activeLanguage, activeCvData: healedBase });
+      return;
+    }
+    const variant = translations[activeLanguage];
+    if (variant) {
+      const variantData = variant.cvData || (variant.cvMarkdown && variant.cvMarkdown.trim().length > 30
+        ? parseMarkdownToCvData(variant.cvMarkdown, activeLanguage as any)
+        : null);
+      set({ activeLanguage, activeCvData: variantData });
+      return;
     }
     set({ activeLanguage });
   },
@@ -353,15 +364,22 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
         [variant.language]: variant,
       },
       activeLanguage: variant.language,
+      activeCvData: variant.cvData || null,
     });
   },
 
   deleteTranslationVariant: (language: string) => {
-    const next = { ...get().translations };
+    const { translations, activeLanguage, currentBaseLanguage, cvMarkdown } = get();
+    const next = { ...translations };
     delete next[language];
+    const isDeletingActive = activeLanguage === language;
+    const targetLang = isDeletingActive ? currentBaseLanguage : activeLanguage;
+    const healedBase = isDeletingActive && cvMarkdown && cvMarkdown.trim().length > 30
+      ? parseMarkdownToCvData(cvMarkdown, (currentBaseLanguage || 'es') as any)
+      : null;
     set({
       translations: next,
-      ...(get().activeLanguage === language ? { activeLanguage: get().currentBaseLanguage } : {}),
+      ...(isDeletingActive ? { activeLanguage: targetLang, activeCvData: healedBase } : {}),
     });
   },
 

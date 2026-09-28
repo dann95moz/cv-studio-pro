@@ -124,8 +124,20 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
   }, [activeFormatter]);
 
   const applyCvUpdate = useCallback((updater: (prev: CVData) => CVData) => {
+    const activeLanguage = useResumeStore.getState().activeLanguage;
+    const currentBaseLanguage = useResumeStore.getState().currentBaseLanguage;
+    const effectiveParsedLang = parsedCv.language || currentBaseLanguage || 'es';
+    const effectiveActiveLang = activeLanguage || currentBaseLanguage || 'es';
+
+    // Guard against cross-language race condition:
+    // If the language of this live-edit container doesn't match the current active language,
+    // reject the mutation to prevent overwriting the newly selected language with stale data!
+    if (effectiveParsedLang !== effectiveActiveLang) {
+      return;
+    }
+
     const updated = updater(parsedCv);
-    const serialized = serializeCvDataToMarkdown(updated);
+    const serialized = serializeCvDataToMarkdown(updated, effectiveActiveLang as any);
     setActiveCvData(updated);
     setCvMarkdown(serialized);
   }, [parsedCv, setCvMarkdown, setActiveCvData]);

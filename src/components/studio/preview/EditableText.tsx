@@ -61,12 +61,15 @@ export const EditableText: React.FC<EditableTextProps> = ({
   const [aiPopoverAnchor, setAiPopoverAnchor] = useState<HTMLElement | null>(null);
   const [auditPopoverAnchor, setAuditPopoverAnchor] = useState<HTMLElement | null>(null);
 
+  const isDirtyRef = useRef(false);
+  const initialValueRef = useRef(value || '');
+
   const {
     bubblePosition,
     setBubblePosition,
     isBoldActive,
     isItalicActive,
-    handleFormatCommand,
+    handleFormatCommand: baseFormatCommand,
     updateSelectionState,
   } = useInlineTextFormatting({
     isEditingEnabled,
@@ -79,6 +82,11 @@ export const EditableText: React.FC<EditableTextProps> = ({
       }
     },
   });
+
+  const handleFormatCommand = (command: 'bold' | 'italic' | 'highlight') => {
+    isDirtyRef.current = true;
+    baseFormatCommand(command);
+  };
 
   const bulletAuditIssue = React.useMemo(() => {
     if (tagName !== 'li') return null;
@@ -110,9 +118,15 @@ export const EditableText: React.FC<EditableTextProps> = ({
 
   const handleFocus = () => {
     isFocusedRef.current = true;
+    isDirtyRef.current = false;
+    initialValueRef.current = value || '';
     if (liveEdit) {
       liveEdit.setActiveFormatter({ executeFormat: handleFormatCommand });
     }
+  };
+
+  const handleInput = () => {
+    isDirtyRef.current = true;
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
@@ -123,9 +137,16 @@ export const EditableText: React.FC<EditableTextProps> = ({
       }
     }, 250);
 
+    // Only save if the user actually typed or formatted while focused.
+    // This avoids accidental saves when switching languages or clicking outside.
+    if (!isDirtyRef.current) {
+      return;
+    }
+    isDirtyRef.current = false;
+
     const currentHtml = e.currentTarget.innerHTML;
     const cleanMd = htmlToMarkdown(currentHtml);
-    if (cleanMd !== value) {
+    if (cleanMd !== initialValueRef.current && cleanMd !== value) {
       onSave(cleanMd);
     }
   };
@@ -294,6 +315,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
           className="cv-editable-field"
           data-placeholder={placeholder}
           onFocus={handleFocus}
+          onInput={handleInput}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
@@ -374,6 +396,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
           className={`cv-editable-field ${className}`}
           data-placeholder={placeholder}
           onFocus={handleFocus}
+          onInput={handleInput}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
@@ -426,6 +449,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
         style={style}
         data-placeholder={placeholder}
         onFocus={handleFocus}
+        onInput={handleInput}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
