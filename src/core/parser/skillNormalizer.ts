@@ -38,56 +38,69 @@ export function inferDocumentLanguage(text: string): SupportedLanguage {
 export function normalizeSkillCategory(category: string, lang: SupportedLanguage): string {
   const clean = category.replace(/[*_`]/g, '').trim();
   const lower = clean.toLowerCase();
+  const unaccented = lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const langDef = LANGUAGE_DEFINITIONS[lang] || LANGUAGE_DEFINITIONS.es;
 
+  // 1. Core Competencies / Languages & Fundamentals
   if (
-    lower.includes('language') ||
-    lower.includes('lenguaje') ||
-    lower.includes('programmiersprache') ||
-    lower.includes('fundamento') ||
-    lower.includes('core web') ||
-    lower.includes('core fundamental') ||
-    lower === 'core skills' ||
-    lower === 'competencias clave' ||
-    lower === 'kernkompetenzen' ||
-    lower === 'compétences clés' ||
-    lower === 'competenze chiave' ||
-    lower === 'core competencies'
+    unaccented.includes('language') ||
+    unaccented.includes('lenguaje') ||
+    unaccented.includes('programmiersprache') ||
+    unaccented.includes('fundamento') ||
+    unaccented.includes('core web') ||
+    unaccented.includes('core fundamental') ||
+    unaccented === 'core skills' ||
+    unaccented === 'competencias clave' ||
+    unaccented === 'competencias principales' ||
+    unaccented === 'kernkompetenzen' ||
+    unaccented === 'competences cles' ||
+    unaccented === 'competences principales' ||
+    unaccented === 'competenze chiave' ||
+    unaccented === 'competenze principali' ||
+    unaccented === 'core competencies' ||
+    unaccented === 'hauptkompetenzen'
   ) {
     return langDef.skillsCategories.languages;
   }
+
+  // 2. Frameworks & Architecture / Specialties
   if (
-    lower.includes('framework') ||
-    lower.includes('architecture') ||
-    lower.includes('arquitectura') ||
-    lower.includes('ecosystem') ||
-    lower.includes('ecosistema') ||
-    lower.includes('ökosystem') ||
-    lower.includes('écosystème') ||
-    lower.includes('specialt') ||
-    lower.includes('especialidad') ||
-    lower.includes('schwerpunkt') ||
-    lower.includes('specializzazion')
+    unaccented.includes('framework') ||
+    unaccented.includes('architecture') ||
+    unaccented.includes('arquitectura') ||
+    unaccented.includes('ecosystem') ||
+    unaccented.includes('ecosistema') ||
+    unaccented.includes('okosystem') ||
+    unaccented.includes('specialt') ||
+    unaccented.includes('specialit') ||
+    unaccented.includes('especialidad') ||
+    unaccented.includes('schwerpunkt') ||
+    unaccented.includes('specializzazion')
   ) {
     return langDef.skillsCategories.frameworks;
   }
+
+  // 3. Tools & Software / Tooling
   if (
-    lower.includes('tool') ||
-    lower.includes('herramienta') ||
-    lower.includes('ci/cd') ||
-    lower.includes('testing') ||
-    lower.includes('werkzeug') ||
-    lower.includes('outil') ||
-    lower.includes('strument')
+    unaccented.includes('tool') ||
+    unaccented.includes('herramienta') ||
+    unaccented.includes('ci/cd') ||
+    unaccented.includes('testing') ||
+    unaccented.includes('werkzeug') ||
+    unaccented.includes('outil') ||
+    unaccented.includes('strument')
   ) {
     return langDef.skillsCategories.tooling;
   }
+
   if (
-    lower === 'skills' ||
-    lower === 'technical skills' ||
-    lower === 'competencies' ||
-    lower === 'habilidades' ||
-    lower === 'habilidades técnicas'
+    unaccented === 'skills' ||
+    unaccented === 'technical skills' ||
+    unaccented === 'competencies' ||
+    unaccented === 'competences' ||
+    unaccented === 'habilidades' ||
+    unaccented === 'habilidades tecnicas' ||
+    unaccented === 'competencias'
   ) {
     return langDef.sections.skills;
   }

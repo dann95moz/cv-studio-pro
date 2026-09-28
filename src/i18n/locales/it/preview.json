@@ -138,7 +138,13 @@
         "configureValueTitle": "Configura {{field}}",
         "editPrompt": "Inserisci o modifica il valore da visualizzare nel tuo CV:",
         "valuePlaceholder": "Inserisci il testo per questo campo...",
-        "standardOptions": "Opzioni standard suggerite:"
+        "standardOptions": "Opzioni standard suggerite:",
+        "countCategories": "{{count}} categorie",
+        "countRoles": "{{count}} ruoli",
+        "countProjects": "{{count}} progetti",
+        "countDegrees": "{{count}} titoli",
+        "countLanguages": "{{count}} lingue",
+        "countItems": "{{count}} elementi"
       },
       "fontFamily": "Carattere",
       "fontSize": "Dimensione Carattere Base",

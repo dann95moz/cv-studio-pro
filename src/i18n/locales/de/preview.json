@@ -138,7 +138,13 @@
         "configureValueTitle": "{{field}} konfigurieren",
         "editPrompt": "Geben Sie den Wert ein, der in Ihrem Lebenslauf angezeigt werden soll:",
         "valuePlaceholder": "Geben Sie den Text für dieses Feld ein...",
-        "standardOptions": "Vorgeschlagene Standardoptionen:"
+        "standardOptions": "Vorgeschlagene Standardoptionen:",
+        "countCategories": "{{count}} Kategorien",
+        "countRoles": "{{count}} Positionen",
+        "countProjects": "{{count}} Projekte",
+        "countDegrees": "{{count}} Abschlüsse",
+        "countLanguages": "{{count}} Sprachen",
+        "countItems": "{{count}} Einträge"
       },
       "fontFamily": "Schriftfamilie",
       "fontSize": "Basis-Schriftgröße",

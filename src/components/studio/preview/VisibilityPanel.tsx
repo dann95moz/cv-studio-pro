@@ -38,6 +38,7 @@ import {
   LegalPresetOption,
 } from '../../../constants/legalPresets';
 import { SupportedLanguage } from '../../../constants/languages';
+import { isStandardDefaultSectionTitle } from '../../../templates/slot-mapper';
 
 export interface VisibilityPanelProps {
   parsedCv?: CVData;
@@ -352,6 +353,14 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     },
   ];
 
+  const getSectionTitle = (key: string, i18nKey: string, fallback: string): string => {
+    const raw = parsedCv?.sectionTitles?.[key];
+    if (raw && raw.trim() && !isStandardDefaultSectionTitle(raw.trim())) {
+      return raw.trim();
+    }
+    return t(i18nKey, fallback);
+  };
+
   // Group 2: Document Sections
   const sectionRows: Array<{
     key: string;
@@ -364,7 +373,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
   }> = [
     {
       key: 'summary',
-      title: parsedCv?.sectionTitles?.summary || t('preview:panels.design.visibility.summary', 'Resumen Profesional'),
+      title: getSectionTitle('summary', 'preview:panels.design.visibility.summary', 'Resumen Profesional'),
       subtitle: parsedCv?.summary ? `${parsedCv.summary.slice(0, 42)}...` : undefined,
       checked: !hiddenSectionsSet.has('summary'),
       onToggle: () => onToggleHiddenSection?.('summary'),
@@ -372,47 +381,57 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     },
     {
       key: 'skills',
-      title: parsedCv?.sectionTitles?.skills || t('preview:panels.design.visibility.skills', 'Competencias y Habilidades'),
-      subtitle: parsedCv?.skillGroups?.length ? `${parsedCv.skillGroups.length} categorías` : undefined,
+      title: getSectionTitle('skills', 'preview:panels.design.visibility.skills', 'Competencias y Habilidades'),
+      subtitle: parsedCv?.skillGroups?.length
+        ? t('preview:panels.design.visibility.countCategories', '{{count}} categorías', { count: parsedCv.skillGroups.length })
+        : undefined,
       checked: !hiddenSectionsSet.has('skills'),
       onToggle: () => onToggleHiddenSection?.('skills'),
       available: Boolean(parsedCv?.skillGroups?.length),
     },
     {
       key: 'experience',
-      title: parsedCv?.sectionTitles?.experience || t('preview:panels.design.visibility.experience', 'Experiencia Laboral'),
-      subtitle: parsedCv?.experience?.length ? `${parsedCv.experience.length} cargos` : undefined,
+      title: getSectionTitle('experience', 'preview:panels.design.visibility.experience', 'Experiencia Laboral'),
+      subtitle: parsedCv?.experience?.length
+        ? t('preview:panels.design.visibility.countRoles', '{{count}} cargos', { count: parsedCv.experience.length })
+        : undefined,
       checked: !hiddenSectionsSet.has('experience'),
       onToggle: () => onToggleHiddenSection?.('experience'),
       available: Boolean(parsedCv?.experience?.length),
     },
     {
       key: 'projects',
-      title: parsedCv?.sectionTitles?.projects || t('preview:panels.design.visibility.projects', 'Proyectos Destacados'),
-      subtitle: parsedCv?.projects?.length ? `${parsedCv.projects.length} proyectos` : undefined,
+      title: getSectionTitle('projects', 'preview:panels.design.visibility.projects', 'Proyectos Destacados'),
+      subtitle: parsedCv?.projects?.length
+        ? t('preview:panels.design.visibility.countProjects', '{{count}} proyectos', { count: parsedCv.projects.length })
+        : undefined,
       checked: !hiddenSectionsSet.has('projects'),
       onToggle: () => onToggleHiddenSection?.('projects'),
       available: Boolean(parsedCv?.projects?.length),
     },
     {
       key: 'education',
-      title: parsedCv?.sectionTitles?.education || t('preview:panels.design.visibility.education', 'Educación y Formación'),
-      subtitle: parsedCv?.education?.length ? `${parsedCv.education.length} títulos` : undefined,
+      title: getSectionTitle('education', 'preview:panels.design.visibility.education', 'Educación y Formación'),
+      subtitle: parsedCv?.education?.length
+        ? t('preview:panels.design.visibility.countDegrees', '{{count}} títulos', { count: parsedCv.education.length })
+        : undefined,
       checked: !hiddenSectionsSet.has('education'),
       onToggle: () => onToggleHiddenSection?.('education'),
       available: Boolean(parsedCv?.education?.length),
     },
     {
       key: 'languages',
-      title: parsedCv?.sectionTitles?.languages || t('preview:panels.design.visibility.languages', 'Idiomas'),
-      subtitle: parsedCv?.languages?.length ? `${parsedCv.languages.length} idiomas` : undefined,
+      title: getSectionTitle('languages', 'preview:panels.design.visibility.languages', 'Idiomas'),
+      subtitle: parsedCv?.languages?.length
+        ? t('preview:panels.design.visibility.countLanguages', '{{count}} idiomas', { count: parsedCv.languages.length })
+        : undefined,
       checked: !hiddenSectionsSet.has('languages'),
       onToggle: () => onToggleHiddenSection?.('languages'),
       available: Boolean(parsedCv?.languages?.length),
     },
     {
       key: 'references',
-      title: t('preview:panels.design.visibility.references', 'Referencias'),
+      title: getSectionTitle('references', 'preview:panels.design.visibility.references', 'Referencias'),
       subtitle: parsedCv?.references
         ? getLocalizedReferences(parsedCv.references, docLang)
         : t('preview:panels.design.visibility.notSet', 'No configurado'),
@@ -431,7 +450,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
         ? () =>
             handleOpenEdit(
               'references',
-              t('preview:panels.design.visibility.references', 'Referencias'),
+              getSectionTitle('references', 'preview:panels.design.visibility.references', 'Referencias'),
               parsedCv?.references ? getLocalizedReferences(parsedCv.references, docLang) : '',
               'Ej: References available upon request'
             )
@@ -443,7 +462,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
   const customSectionRows = (parsedCv?.customSections || []).map((custom) => ({
     key: custom.id,
     title: custom.title,
-    subtitle: `${custom.items?.length || 0} elementos`,
+    subtitle: t('preview:panels.design.visibility.countItems', '{{count}} elementos', { count: custom.items?.length || 0 }),
     checked: !hiddenSectionsSet.has(custom.id),
     onToggle: () => onToggleHiddenSection?.(custom.id),
     available: true,
