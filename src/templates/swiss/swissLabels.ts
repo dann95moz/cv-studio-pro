@@ -15,6 +15,8 @@ export interface SwissLabels {
   experience: string;
   projects: string;
   references: string;
+  noPermitRequired: string;
+  immediate: string;
 }
 
 export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
@@ -33,6 +35,8 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     experience: 'Expérience professionnelle',
     projects: 'Projets & Réalisations',
     references: 'Références',
+    noPermitRequired: 'aucun permis requis',
+    immediate: 'immédiate',
   },
   de: {
     contactTitle: 'Kontakt & Personalien',
@@ -49,6 +53,8 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     experience: 'Berufliche Erfahrung',
     projects: 'Projekte & Erfolge',
     references: 'Referenzen',
+    noPermitRequired: 'keine Bewilligung erforderlich',
+    immediate: 'sofort',
   },
   en: {
     contactTitle: 'Contact & Details',
@@ -65,6 +71,8 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     experience: 'Work Experience',
     projects: 'Projects & Achievements',
     references: 'References',
+    noPermitRequired: 'no permit required',
+    immediate: 'immediate',
   },
   es: {
     contactTitle: 'Contacto y Datos',
@@ -81,6 +89,8 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     experience: 'Experiencia laboral',
     projects: 'Proyectos destacados',
     references: 'Referencias',
+    noPermitRequired: 'sin permiso requerido',
+    immediate: 'inmediata',
   },
   it: {
     contactTitle: 'Contatti e Dati',
@@ -97,5 +107,7 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     experience: 'Esperienza professionale',
     projects: 'Progetti principali',
     references: 'Referenze',
+    noPermitRequired: 'nessun permesso richiesto',
+    immediate: 'immediata',
   },
 };

@@ -32,11 +32,11 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const rawPermit = (header.workPermit || '').replace(/[*_]/g, '').trim();
 
   // Extract place of origin if present in nationality or permit (e.g. "Originaire de Frutigen (BE)")
-  const originRegex = /(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i;
+  const originRegex = /(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Lugar\s+de\s+origen)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i;
   let origin = '';
   const originMatch = rawNat.match(originRegex) || rawPermit.match(originRegex);
   if (originMatch) {
-    origin = originMatch[0].trim().replace(/^(?:Lieu\s+d['’]origine|Heimatort)\s*[:\s]*/i, 'Originaire de ');
+    origin = originMatch[0].trim();
   }
 
   // Clean nationality string without origin suffix/prefix
@@ -51,19 +51,16 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
 
   const noPermitNeeded =
     isSwissCitizen ||
-    /(aucun permis|no permit|sans permis|permis non requis|don['’]?t require|not require|keine bewilligung)/i.test(cleanNat) ||
-    /(aucun permis|no permit|sans permis|permis non requis|don['’]?t require|not require|keine bewilligung)/i.test(rawPermit);
+    /(aucun permis|no permit|sans permis|permis non requis|don['’]?t require|not require|keine bewilligung|sin permiso|nessun permesso)/i.test(cleanNat) ||
+    /(aucun permis|no permit|sans permis|permis non requis|don['’]?t require|not require|keine bewilligung|sin permiso|nessun permesso)/i.test(rawPermit);
 
   const isNationalityPrimary = Boolean(cleanNat && (noPermitNeeded || !header.workPermit));
 
-  // Determine elegant display for Swiss / dual citizens
+  // Determine dynamic display for Swiss / dual citizens or candidates requiring no work permit
   let displayNationality = cleanNat;
-  if (isSwissCitizen) {
-    if (/(colomb|colombia|colombienne)/i.test(cleanNat)) {
-      displayNationality = 'Suisse et colombienne, aucun permis requis';
-    } else if (!/(aucun permis|no permit|sans permis|permis non requis)/i.test(displayNationality)) {
-      displayNationality = `${displayNationality}, aucun permis requis`;
-    }
+  const alreadyMentionsNoPermit = /(aucun permis|no permit|sans permis|permis non requis|keine bewilligung|sin permiso|nessun permesso)/i.test(cleanNat);
+  if (cleanNat && noPermitNeeded && !alreadyMentionsNoPermit) {
+    displayNationality = `${cleanNat}, ${labels.noPermitRequired}`;
   }
 
   // Clean availability: strip modality clutter like "Remote / Hybrid / On-site"
@@ -71,8 +68,8 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   if (cleanAvailability.includes('|')) {
     cleanAvailability = cleanAvailability.split('|')[0].trim();
   }
-  if (/^immediate$/i.test(cleanAvailability)) {
-    cleanAvailability = 'immédiate';
+  if (/^(immediate|inmediata|immediata|sofort|immédiate)$/i.test(cleanAvailability)) {
+    cleanAvailability = labels.immediate;
   }
 
   // Check if work permit is redundant with citizenship
