@@ -102,8 +102,7 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
             sx={{
               fontWeight: 700,
               fontSize: '0.8125rem',
-              color: checked ? 'text.primary' : 'text.disabled',
-              transition: 'color 0.15s ease',
+              color: 'text.primary',
             }}
           >
             {title}
@@ -125,7 +124,7 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
                 sx={{
                   p: 0.25,
                   color: isNotConfigured ? 'primary.main' : 'text.secondary',
-                  opacity: isNotConfigured ? 0.9 : 0.6,
+                  opacity: 0.85,
                   '&:hover': { opacity: 1, color: 'primary.main' },
                 }}
               >
@@ -152,12 +151,22 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
           </Typography>
         )}
       </Box>
-      <Switch
-        size="small"
-        checked={checked}
-        onChange={onToggle}
-        sx={{ flexShrink: 0 }}
-      />
+      <Tooltip
+        title={
+          isNotConfigured
+            ? t('preview:panels.design.visibility.clickToConfigure', 'Clic para configurar')
+            : checked
+            ? t('preview:panels.design.visibility.visibleOnCv', 'Visible en el CV (clic para ocultar)')
+            : t('preview:panels.design.visibility.hiddenOnCv', 'Oculto en el CV (clic para mostrar)')
+        }
+      >
+        <Switch
+          size="small"
+          checked={checked}
+          onChange={onToggle}
+          sx={{ flexShrink: 0 }}
+        />
+      </Tooltip>
     </Box>
   );
 };
