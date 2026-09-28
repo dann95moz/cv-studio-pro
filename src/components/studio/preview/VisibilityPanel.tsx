@@ -1,17 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   Switch,
   Paper,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  TextField,
+  Button,
+  IconButton,
+  Tooltip,
   useTheme,
   alpha,
 } from '@mui/material';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
 import LayersRoundedIcon from '@mui/icons-material/LayersRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { useTranslation } from 'react-i18next';
 import { CVData, ProfilePhotoConfig } from '../../../types';
+import { RADIUS_TOKENS } from '../../../theme/dimensions';
 
 export interface VisibilityPanelProps {
   parsedCv?: CVData;
@@ -21,6 +32,7 @@ export interface VisibilityPanelProps {
   onToggleHiddenSection?: (sectionKey: string) => void;
   photo?: ProfilePhotoConfig | null;
   onPhotoToggle?: (enabled: boolean) => void;
+  onUpdatePersonalDetail?: (field: string, value: string) => void;
 }
 
 interface VisibilityRowProps {
@@ -28,6 +40,7 @@ interface VisibilityRowProps {
   subtitle?: string;
   checked: boolean;
   onToggle: () => void;
+  onEdit?: () => void;
 }
 
 const VisibilityRow: React.FC<VisibilityRowProps> = ({
@@ -35,7 +48,12 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
   subtitle,
   checked,
   onToggle,
+  onEdit,
 }) => {
+  const { t } = useTranslation(['preview']);
+  const notSetLabel = t('preview:panels.design.visibility.notSet', 'No configurado');
+  const isNotConfigured = !subtitle || subtitle === notSetLabel;
+
   return (
     <Box
       sx={{
@@ -51,18 +69,53 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
         },
       }}
     >
-      <Box sx={{ minWidth: 0, pr: 1.5 }}>
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 700,
-            fontSize: '0.8125rem',
-            color: checked ? 'text.primary' : 'text.disabled',
-            transition: 'color 0.15s ease',
-          }}
-        >
-          {title}
-        </Typography>
+      <Box
+        onClick={onEdit}
+        sx={{
+          minWidth: 0,
+          pr: 1.5,
+          flex: 1,
+          cursor: onEdit ? 'pointer' : 'default',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 700,
+              fontSize: '0.8125rem',
+              color: checked ? 'text.primary' : 'text.disabled',
+              transition: 'color 0.15s ease',
+            }}
+          >
+            {title}
+          </Typography>
+          {onEdit && (
+            <Tooltip
+              title={
+                isNotConfigured
+                  ? t('preview:panels.design.visibility.configureValue', 'Configurar valor')
+                  : t('preview:panels.design.visibility.editValue', 'Editar valor')
+              }
+            >
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                sx={{
+                  p: 0.25,
+                  color: isNotConfigured ? 'primary.main' : 'text.secondary',
+                  opacity: isNotConfigured ? 0.9 : 0.6,
+                  '&:hover': { opacity: 1, color: 'primary.main' },
+                }}
+              >
+                <EditRoundedIcon sx={{ fontSize: 13 }} />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
         {subtitle && (
           <Typography
             variant="caption"
@@ -70,11 +123,14 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
             sx={{
               display: 'block',
               fontSize: '0.72rem',
-              color: 'text.secondary',
+              color: isNotConfigured ? 'primary.main' : 'text.secondary',
+              fontWeight: isNotConfigured ? 600 : 400,
               maxWidth: 220,
             }}
           >
-            {subtitle}
+            {isNotConfigured
+              ? `✏️ ${subtitle} — ${t('preview:panels.design.visibility.configureValue', 'Configurar')}`
+              : subtitle}
           </Typography>
         )}
       </Box>
@@ -96,9 +152,30 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
   onToggleHiddenSection,
   photo,
   onPhotoToggle,
+  onUpdatePersonalDetail,
 }) => {
-  const { t } = useTranslation(['preview']);
+  const { t } = useTranslation(['preview', 'common']);
   const theme = useTheme();
+
+  const [editingField, setEditingField] = useState<{
+    key: string;
+    title: string;
+    currentValue: string;
+    placeholder?: string;
+  } | null>(null);
+  const [editInputVal, setEditInputVal] = useState<string>('');
+
+  const handleOpenEdit = (key: string, title: string, currentValue: string, placeholder?: string) => {
+    setEditingField({ key, title, currentValue, placeholder });
+    setEditInputVal(currentValue);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingField && onUpdatePersonalDetail) {
+      onUpdatePersonalDetail(editingField.key, editInputVal);
+    }
+    setEditingField(null);
+  };
 
   const hiddenDetailsSet = new Set(hiddenDetails);
   const hiddenSectionsSet = new Set(hiddenSections);
@@ -111,6 +188,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     checked: boolean;
     onToggle: () => void;
     available: boolean;
+    onEdit?: () => void;
   }> = [
     {
       key: 'availability',
@@ -119,6 +197,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('availability'),
       onToggle: () => onToggleHiddenDetail?.('availability'),
       available: Boolean(parsedCv?.availability),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'availability',
+              t('preview:panels.design.visibility.availability', 'Disponibilidad'),
+              parsedCv?.availability || '',
+              'Ej: Immédiate, Décembre 2026, 1 mes'
+            )
+        : undefined,
     },
     {
       key: 'placeOfOrigin',
@@ -127,6 +214,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('placeOfOrigin'),
       onToggle: () => onToggleHiddenDetail?.('placeOfOrigin'),
       available: Boolean(parsedCv?.placeOfOrigin),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'placeOfOrigin',
+              t('preview:panels.design.visibility.placeOfOrigin', 'Lugar de origen / Cantón'),
+              parsedCv?.placeOfOrigin || '',
+              'Ej: Frutigen (BE), Bern (BE)'
+            )
+        : undefined,
     },
     {
       key: 'nationality',
@@ -135,6 +231,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('nationality'),
       onToggle: () => onToggleHiddenDetail?.('nationality'),
       available: Boolean(parsedCv?.nationality),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'nationality',
+              t('preview:panels.design.visibility.nationality', 'Nacionalidad'),
+              parsedCv?.nationality || '',
+              'Ej: Suisse / Colombienne, Española'
+            )
+        : undefined,
     },
     {
       key: 'workPermit',
@@ -143,6 +248,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('workPermit'),
       onToggle: () => onToggleHiddenDetail?.('workPermit'),
       available: Boolean(parsedCv?.workPermit),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'workPermit',
+              t('preview:panels.design.visibility.workPermit', 'Permiso de trabajo'),
+              parsedCv?.workPermit || '',
+              'Ej: Permis C, Citoyen suisse, Permis B'
+            )
+        : undefined,
     },
     {
       key: 'dateOfBirth',
@@ -151,6 +265,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('dateOfBirth'),
       onToggle: () => onToggleHiddenDetail?.('dateOfBirth'),
       available: Boolean(parsedCv?.dateOfBirth),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'dateOfBirth',
+              t('preview:panels.design.visibility.dateOfBirth', 'Fecha de nacimiento'),
+              parsedCv?.dateOfBirth || '',
+              'Ej: 15.05.1990'
+            )
+        : undefined,
     },
     {
       key: 'drivingLicense',
@@ -159,6 +282,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('drivingLicense'),
       onToggle: () => onToggleHiddenDetail?.('drivingLicense'),
       available: Boolean(parsedCv?.drivingLicense),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'drivingLicense',
+              t('preview:panels.design.visibility.drivingLicense', 'Permiso de conducir'),
+              parsedCv?.drivingLicense || '',
+              'Ej: Catégorie B, Tipo B'
+            )
+        : undefined,
     },
     {
       key: 'civilStatus',
@@ -167,6 +299,15 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       checked: !hiddenDetailsSet.has('civilStatus'),
       onToggle: () => onToggleHiddenDetail?.('civilStatus'),
       available: Boolean(parsedCv?.civilStatus),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'civilStatus',
+              t('preview:panels.design.visibility.civilStatus', 'Estado civil'),
+              parsedCv?.civilStatus || '',
+              'Ej: Célibataire, Soltero/a'
+            )
+        : undefined,
     },
     {
       key: 'photo',
@@ -301,6 +442,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
               subtitle={row.subtitle}
               checked={row.checked}
               onToggle={row.onToggle}
+              onEdit={row.onEdit}
             />
           ))}
         </Box>
@@ -343,6 +485,65 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
           ))}
         </Box>
       </Paper>
+
+      {/* Direct Edit Modal for Personal / Legal Details */}
+      <Dialog
+        open={Boolean(editingField)}
+        onClose={() => setEditingField(null)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: RADIUS_TOKENS.xl,
+              p: 1,
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>
+          {editingField?.currentValue
+            ? t('preview:panels.design.visibility.editValueTitle', 'Editar {{field}}', {
+                field: editingField?.title,
+              })
+            : t('preview:panels.design.visibility.configureValueTitle', 'Configurar {{field}}', {
+                field: editingField?.title,
+              })}
+        </DialogTitle>
+        <DialogContent sx={{ pb: 1 }}>
+          <DialogContentText sx={{ fontSize: '0.85rem', mb: 2 }}>
+            {t(
+              'preview:panels.design.visibility.editPrompt',
+              'Ingresa o modifica la información que se mostrará en esta sección de tu CV:'
+            )}
+          </DialogContentText>
+          <TextField
+            autoFocus
+            fullWidth
+            size="small"
+            value={editInputVal}
+            onChange={(e) => setEditInputVal(e.target.value)}
+            placeholder={
+              editingField?.placeholder ||
+              t('preview:panels.design.visibility.valuePlaceholder', 'Ingresa el texto para este campo...')
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSaveEdit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="text" onClick={() => setEditingField(null)}>
+            {t('common:actions.cancel', 'Cancelar')}
+          </Button>
+          <Button variant="contained" onClick={handleSaveEdit}>
+            {t('common:actions.save', 'Guardar')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

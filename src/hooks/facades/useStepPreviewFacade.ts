@@ -178,6 +178,21 @@ export function useStepPreviewFacade() {
     setCvMarkdown(serialized);
   }, [parsedCv, setActiveCvData, setCvMarkdown]);
 
+  const updatePersonalDetail = useCallback((field: string, value: string) => {
+    const trimmed = value.trim();
+    const newCvData: CVData = {
+      ...parsedCv,
+      [field]: trimmed || undefined,
+    };
+    // If setting a non-empty value, make sure it is not hidden
+    if (trimmed && newCvData.hiddenDetails?.includes(field)) {
+      newCvData.hiddenDetails = newCvData.hiddenDetails.filter((k) => k !== field);
+    }
+    setActiveCvData(newCvData);
+    const serialized = serializeCvDataToMarkdown(newCvData, (newCvData.language || 'es') as any);
+    setCvMarkdown(serialized);
+  }, [parsedCv, setActiveCvData, setCvMarkdown]);
+
   return {
     docType: {
       previewDocType,
@@ -206,6 +221,7 @@ export function useStepPreviewFacade() {
       toggleHiddenDetail,
       hiddenSections: parsedCv.hiddenSections,
       toggleHiddenSection,
+      updatePersonalDetail,
     },
     exports,
     modals,

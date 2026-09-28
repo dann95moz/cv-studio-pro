@@ -60,6 +60,7 @@ export interface StepPreviewSidePanelsProps {
   onToggleHiddenDetail?: (detailKey: string) => void;
   hiddenSections?: string[];
   onToggleHiddenSection?: (sectionKey: string) => void;
+  onUpdatePersonalDetail?: (field: string, value: string) => void;
   // LinkedIn props
   parsedCv: CVData;
   companyName: string;
@@ -98,6 +99,7 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
   onToggleHiddenDetail,
   hiddenSections,
   onToggleHiddenSection,
+  onUpdatePersonalDetail,
   parsedCv,
   companyName,
   targetRole,
@@ -207,6 +209,7 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
               onToggleHiddenSection={onToggleHiddenSection}
               photo={photo}
               onPhotoToggle={onPhotoToggle}
+              onUpdatePersonalDetail={onUpdatePersonalDetail}
             />
           </Box>
         </Box>

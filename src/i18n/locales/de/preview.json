@@ -131,7 +131,13 @@
         "references": "Referenzen",
         "notSet": "Nicht festgelegt",
         "photoAttached": "Foto geladen",
-        "noPhoto": "Kein Foto"
+        "noPhoto": "Kein Foto",
+        "editValue": "Wert bearbeiten",
+        "configureValue": "Wert konfigurieren",
+        "editValueTitle": "{{field}} bearbeiten",
+        "configureValueTitle": "{{field}} konfigurieren",
+        "editPrompt": "Geben Sie den Wert ein, der in Ihrem Lebenslauf angezeigt werden soll:",
+        "valuePlaceholder": "Geben Sie den Text für dieses Feld ein..."
       },
       "fontFamily": "Schriftfamilie",
       "fontSize": "Basis-Schriftgröße",

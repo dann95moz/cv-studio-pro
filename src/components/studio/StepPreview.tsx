@@ -116,6 +116,7 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           onToggleHiddenDetail={facade.design.toggleHiddenDetail}
           hiddenSections={facade.design.hiddenSections}
           onToggleHiddenSection={facade.design.toggleHiddenSection}
+          onUpdatePersonalDetail={facade.design.updatePersonalDetail}
           companyName={facade.meta.companyName}
           targetRole={facade.meta.targetRole}
           targetJob={facade.meta.targetJob}

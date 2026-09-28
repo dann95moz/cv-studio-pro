@@ -131,7 +131,13 @@
         "references": "Referencias",
         "notSet": "No configurado",
         "photoAttached": "Foto cargada",
-        "noPhoto": "Sin foto"
+        "noPhoto": "Sin foto",
+        "editValue": "Editar valor",
+        "configureValue": "Configurar valor",
+        "editValueTitle": "Editar {{field}}",
+        "configureValueTitle": "Configurar {{field}}",
+        "editPrompt": "Ingresa o modifica el valor que aparecerá en tu CV:",
+        "valuePlaceholder": "Ingresa el texto para este campo..."
       },
       "fontFamily": "Familia Tipográfica",
       "fontSize": "Tamaño de Fuente Base",
