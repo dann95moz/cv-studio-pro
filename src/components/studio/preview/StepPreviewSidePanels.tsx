@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { Box, Drawer, useTheme } from '@mui/material';
+import { Box, Drawer, useTheme, Typography, IconButton } from '@mui/material';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import { useTranslation } from 'react-i18next';
 import { StepPreviewNavRail } from './StepPreviewNavRail';
 import { StudioSkeleton } from '../StudioSkeleton';
 import { backButtonRegistry } from '../../../core/backButtonRegistry';
@@ -21,6 +23,9 @@ const DesignFormattingPanel = React.lazy(() =>
 );
 const LinkedInPanel = React.lazy(() =>
   import('./LinkedInPanel').then((m) => ({ default: m.LinkedInPanel }))
+);
+const VisibilityPanel = React.lazy(() =>
+  import('./VisibilityPanel').then((m) => ({ default: m.VisibilityPanel }))
 );
 
 export interface StepPreviewSidePanelsProps {
@@ -99,6 +104,7 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
   targetJob,
   providerSettings,
 }) => {
+  const { t } = useTranslation(['preview', 'common']);
   const muiTheme = useTheme();
 
   // Register in back button stack
@@ -160,6 +166,50 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
           providerSettings={providerSettings}
           onClose={onCloseSidePanel}
         />
+      )}
+
+      {activeSidePanel === 'visibility' && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2.5,
+              pb: 1.5,
+              borderBottom: `1px solid ${muiTheme.palette.divider}`,
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
+              {t('preview:panels.design.visibility.title', 'Control de Visibilidad')}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={onCloseSidePanel}
+              aria-label={t('common:actions.close', 'Cerrar')}
+            >
+              <CloseRoundedIcon />
+            </IconButton>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: 'auto',
+              p: 2.5,
+              pb: 'calc(env(safe-area-inset-bottom, 0px) + 36px)',
+            }}
+          >
+            <VisibilityPanel
+              parsedCv={parsedCv}
+              hiddenDetails={hiddenDetails}
+              onToggleHiddenDetail={onToggleHiddenDetail}
+              hiddenSections={hiddenSections}
+              onToggleHiddenSection={onToggleHiddenSection}
+              photo={photo}
+              onPhotoToggle={onPhotoToggle}
+            />
+          </Box>
+        </Box>
       )}
     </React.Suspense>
   );

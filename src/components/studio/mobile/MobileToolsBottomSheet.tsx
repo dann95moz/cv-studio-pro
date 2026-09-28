@@ -17,6 +17,7 @@ import {
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
 import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
@@ -123,6 +124,15 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
         onOpenDiff();
       },
     }] : []),
+    {
+      id: 'visibility' as PreviewSidePanelType,
+      label: t('preview:navRail.visibility', 'Control de Visibilidad'),
+      icon: <VisibilityRoundedIcon sx={{ fontSize: 22, color: 'text.primary' }} />,
+      action: () => {
+        handleClose();
+        onSelectTool('visibility');
+      },
+    },
     {
       id: 'linkedin' as PreviewSidePanelType,
       label: t('preview:navRail.linkedin', 'Publicación para LinkedIn'),

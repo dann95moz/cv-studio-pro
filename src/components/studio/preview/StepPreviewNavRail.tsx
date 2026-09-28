@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, useTheme, alpha } from '@mui/material';
 import FormatPaintRoundedIcon from '@mui/icons-material/FormatPaintRounded';
 import DifferenceRoundedIcon from '@mui/icons-material/DifferenceRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { useTranslation } from 'react-i18next';
 import { PreviewSidePanelType, StepPreviewNavRailProps } from '../../../types';
 
@@ -181,6 +182,54 @@ export const StepPreviewNavRail: React.FC<StepPreviewNavRailProps> = ({
           }}
         >
           {t('preview:navRail.compare', 'Compare')}
+        </Typography>
+      </Box>
+
+      {/* Visibility Settings Rail Button */}
+      <Box
+        onClick={() => onToggleSidePanel('visibility')}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          cursor: 'pointer',
+          flex: { xs: 1, md: 'none' },
+          width: { xs: 'auto', md: '100%' },
+          px: 0.25,
+          gap: 0.25,
+          color: activeSidePanel === 'visibility' ? 'primary.main' : 'text.secondary',
+          transition: 'all 0.15s ease',
+          '&:hover': { color: 'text.primary' },
+        }}
+      >
+        <Box
+          sx={{
+            width: { xs: 36, md: 44 },
+            height: { xs: 36, md: 44 },
+            borderRadius: { xs: '10px', md: '14px' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: activeSidePanel === 'visibility'
+              ? alpha(theme.palette.primary.main, isDark ? 0.25 : 0.12)
+              : 'transparent',
+            color: activeSidePanel === 'visibility' ? 'primary.main' : 'inherit',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <VisibilityRoundedIcon sx={{ fontSize: { xs: 20, md: 22 } }} />
+        </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            fontSize: { xs: '0.65rem', md: '0.68rem' },
+            fontWeight: activeSidePanel === 'visibility' ? 700 : 500,
+            textAlign: 'center',
+            lineHeight: 1.15,
+            px: 0.25,
+          }}
+        >
+          {t('preview:navRail.visibility', 'Visibilidad')}
         </Typography>
       </Box>
     </Box>

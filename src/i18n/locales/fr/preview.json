@@ -87,7 +87,8 @@
     "design": "Design & Format",
     "audit": "Qualité & Écarts",
     "compare": "Comparer",
-    "linkedin": "LinkedIn"
+    "linkedin": "LinkedIn",
+    "visibility": "Visibilité"
   },
   "panels": {
     "templates": {
