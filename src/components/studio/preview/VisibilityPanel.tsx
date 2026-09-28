@@ -14,6 +14,11 @@ import {
   Button,
   IconButton,
   Tooltip,
+  Chip,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -23,6 +28,14 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { useTranslation } from 'react-i18next';
 import { CVData, ProfilePhotoConfig } from '../../../types';
 import { RADIUS_TOKENS } from '../../../theme/dimensions';
+import {
+  WORK_PERMIT_PRESETS,
+  AVAILABILITY_PRESETS,
+  DRIVING_LICENSE_PRESETS,
+  CIVIL_STATUS_PRESETS,
+  LegalPresetOption,
+} from '../../../constants/legalPresets';
+import { SupportedLanguage } from '../../../constants/languages';
 
 export interface VisibilityPanelProps {
   parsedCv?: CVData;
@@ -176,6 +189,23 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     }
     setEditingField(null);
   };
+
+  const docLang: SupportedLanguage = (
+    parsedCv?.language && parsedCv.language in WORK_PERMIT_PRESETS
+      ? parsedCv.language
+      : 'es'
+  ) as SupportedLanguage;
+
+  const getFieldPresets = (key?: string): LegalPresetOption[] => {
+    if (!key) return [];
+    if (key === 'workPermit') return WORK_PERMIT_PRESETS[docLang] || [];
+    if (key === 'availability') return AVAILABILITY_PRESETS[docLang] || [];
+    if (key === 'drivingLicense') return DRIVING_LICENSE_PRESETS[docLang] || [];
+    if (key === 'civilStatus') return CIVIL_STATUS_PRESETS[docLang] || [];
+    return [];
+  };
+
+  const activePresets = getFieldPresets(editingField?.key);
 
   const hiddenDetailsSet = new Set(hiddenDetails);
   const hiddenSectionsSet = new Set(hiddenSections);
@@ -517,6 +547,66 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
               'Ingresa o modifica la información que se mostrará en esta sección de tu CV:'
             )}
           </DialogContentText>
+
+          {activePresets.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  display: 'block',
+                  mb: 1,
+                  fontSize: '0.75rem',
+                }}
+              >
+                {t('preview:panels.design.visibility.standardOptions', 'Opciones estándar sugeridas:')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel id="preset-select-label">
+                    {t('preview:panels.design.visibility.standardOptions', 'Opciones estándar sugeridas:')}
+                  </InputLabel>
+                  <Select
+                    labelId="preset-select-label"
+                    label={t('preview:panels.design.visibility.standardOptions', 'Opciones estándar sugeridas:')}
+                    value={activePresets.some((p) => p.value.toLowerCase() === editInputVal.toLowerCase()) ? editInputVal : ''}
+                    onChange={(e) => setEditInputVal(e.target.value)}
+                    sx={{ borderRadius: RADIUS_TOKENS.md }}
+                  >
+                    {activePresets.map((preset) => (
+                      <MenuItem key={preset.value} value={preset.value}>
+                        {preset.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Quick selectable chips for instant 1-tap fill */}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.25 }}>
+                  {activePresets.map((preset) => {
+                    const isSelected = editInputVal.toLowerCase() === preset.value.toLowerCase();
+                    return (
+                      <Chip
+                        key={preset.value}
+                        label={preset.label}
+                        size="small"
+                        color={isSelected ? 'primary' : 'default'}
+                        variant={isSelected ? 'filled' : 'outlined'}
+                        onClick={() => setEditInputVal(preset.value)}
+                        sx={{
+                          fontSize: '0.72rem',
+                          cursor: 'pointer',
+                          fontWeight: isSelected ? 700 : 500,
+                        }}
+                      />
+                    );
+                  })}
+                </Box>
+              </Box>
+            </Box>
+          )}
+
           <TextField
             autoFocus
             fullWidth

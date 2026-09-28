@@ -137,7 +137,8 @@
         "editValueTitle": "Modifica {{field}}",
         "configureValueTitle": "Configura {{field}}",
         "editPrompt": "Inserisci o modifica il valore da visualizzare nel tuo CV:",
-        "valuePlaceholder": "Inserisci il testo per questo campo..."
+        "valuePlaceholder": "Inserisci il testo per questo campo...",
+        "standardOptions": "Opzioni standard suggerite:"
       },
       "fontFamily": "Carattere",
       "fontSize": "Dimensione Carattere Base",
