@@ -372,7 +372,12 @@ export interface DesignFormattingPanelProps {
   onSelectTheme?: (theme: ThemeId) => void;
   sidebarWidth?: number;
   onSidebarWidthChange?: (width?: number) => void;
-  initialTab?: 'templates' | 'formatting';
+  initialTab?: 'templates' | 'formatting' | 'visibility';
+  parsedCv?: CVData;
+  hiddenDetails?: string[];
+  onToggleHiddenDetail?: (detailKey: string) => void;
+  hiddenSections?: string[];
+  onToggleHiddenSection?: (sectionKey: string) => void;
 }
 
 export interface PreviewComparisonViewProps {

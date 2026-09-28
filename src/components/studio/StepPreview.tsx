@@ -112,6 +112,10 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
           theme={facade.design.theme}
           onSelectTheme={facade.design.setTheme}
           parsedCv={facade.meta.parsedCv}
+          hiddenDetails={facade.design.hiddenDetails}
+          onToggleHiddenDetail={facade.design.toggleHiddenDetail}
+          hiddenSections={facade.design.hiddenSections}
+          onToggleHiddenSection={facade.design.toggleHiddenSection}
           companyName={facade.meta.companyName}
           targetRole={facade.meta.targetRole}
           targetJob={facade.meta.targetJob}

@@ -14,6 +14,7 @@ export interface HeaderSlotData {
   civilStatus?: string;
   availability?: string;
   references?: string;
+  hiddenDetails?: string[];
 }
 
 export interface SummarySlotData {
@@ -57,6 +58,7 @@ export interface CVSlotMap {
   photo?: ProfilePhotoConfig | null;
   websitesTitle?: string;
   language?: SupportedLanguage;
+  hiddenSections?: string[];
 }
 
 export interface CVTemplateProps {

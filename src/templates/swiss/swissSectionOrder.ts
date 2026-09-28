@@ -29,12 +29,16 @@ export function resolveSwissSectionOrder(
     ...(data?.sectionPlacement || {}),
   };
 
+  const hidden = new Set(data?.hiddenSections || []);
+
   const rawSidebar = data?.sidebarSectionOrder && data.sidebarSectionOrder.length > 0
     ? data.sidebarSectionOrder
     : defaultSidebar;
-  const activeSidebarIds: string[] = Array.from(new Set(rawSidebar.filter((id) => placement[id] === 'sidebar')));
+  const activeSidebarIds: string[] = Array.from(
+    new Set(rawSidebar.filter((id) => placement[id] === 'sidebar' && !hidden.has(id)))
+  );
   Object.entries(placement).forEach(([id, col]) => {
-    if (col === 'sidebar' && !activeSidebarIds.includes(id)) {
+    if (col === 'sidebar' && !activeSidebarIds.includes(id) && !hidden.has(id)) {
       activeSidebarIds.push(id);
     }
   });
@@ -42,9 +46,11 @@ export function resolveSwissSectionOrder(
   const rawMain = data?.mainSectionOrder && data.mainSectionOrder.length > 0
     ? data.mainSectionOrder
     : defaultMain;
-  const activeMainIds: string[] = Array.from(new Set(rawMain.filter((id) => placement[id] === 'main')));
+  const activeMainIds: string[] = Array.from(
+    new Set(rawMain.filter((id) => placement[id] === 'main' && !hidden.has(id)))
+  );
   Object.entries(placement).forEach(([id, col]) => {
-    if (col === 'main' && !activeMainIds.includes(id)) {
+    if (col === 'main' && !activeMainIds.includes(id) && !hidden.has(id)) {
       activeMainIds.push(id);
     }
   });

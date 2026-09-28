@@ -15,19 +15,14 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   labels,
   liveEdit,
 }) => {
-  const hasPersonalDetails = Boolean(
-    header.workPermit ||
-    header.nationality ||
-    header.placeOfOrigin ||
-    header.dateOfBirth ||
-    header.drivingLicense ||
-    header.availability ||
-    header.civilStatus
-  );
-
-  if (!hasPersonalDetails) {
-    return null;
-  }
+  const hidden = new Set(header.hiddenDetails || []);
+  const showNationality = !hidden.has('nationality');
+  const showOrigin = !hidden.has('placeOfOrigin');
+  const showWorkPermit = !hidden.has('workPermit');
+  const showAvailability = !hidden.has('availability');
+  const showCivilStatus = !hidden.has('civilStatus');
+  const showBirthDate = !hidden.has('dateOfBirth');
+  const showDrivingLicense = !hidden.has('drivingLicense');
 
   const rawNat = (header.nationality || '').replace(/[*_]/g, '').trim();
   const rawPermit = (header.workPermit || '').replace(/[*_]/g, '').trim();
@@ -40,27 +35,28 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
     origin = legacyOriginMatch[0].trim();
   }
 
-  // Extract Swiss canton origin if enclosed in parentheses (e.g. "(Frutigen - BE)")
-  if (!origin) {
-    const swissCantonOriginRegex = /\(([A-Za-zÀ-ÿ\s–-]+(?:-[A-Z]{2}|\s*-\s*[A-Z]{2}|\([A-Z]{2}\)))\)/i;
-    const cantonMatch = rawNat.match(swissCantonOriginRegex) || rawPermit.match(swissCantonOriginRegex);
-    if (cantonMatch) {
-      const cantonClean = cantonMatch[1].trim().replace(/\s*-\s*([A-Z]{2})$/, ' ($1)');
-      origin = `Originaire de ${cantonClean}`;
-    }
+  // Extract Swiss canton origin if enclosed in parentheses (e.g. "(Frutigen BE)" or "(Frutigen - BE)")
+  const swissCantonOriginRegex = /\(([A-Za-zÀ-ÿ\s–-]+?(?:[,\s–-]+[A-Z]{2}|\([A-Z]{2}\)))\)/i;
+  const cantonMatch = rawNat.match(swissCantonOriginRegex) || rawPermit.match(swissCantonOriginRegex);
+  if (!origin && cantonMatch) {
+    const cantonClean = cantonMatch[1].trim().replace(/[,\s–-]+([A-Z]{2})$/, ' ($1)');
+    origin = `Originaire de ${cantonClean}`;
   }
 
-  // 2. Clean nationality string: strip out origin if it was bundled in rawNat
+  // 2. Clean nationality string: unconditionally strip origin, canton, and availability if bundled in rawNat
   let cleanNat = rawNat;
   if (legacyOriginMatch && cleanNat.includes(legacyOriginMatch[0])) {
     cleanNat = cleanNat.replace(legacyOriginMatch[0], '').trim();
+  }
+  if (cantonMatch && cleanNat.includes(cantonMatch[0])) {
+    cleanNat = cleanNat.replace(cantonMatch[0], '').trim();
   }
   if (origin && cleanNat.includes(origin)) {
     cleanNat = cleanNat.replace(origin, '').trim();
   }
 
-  // 3. Resolve availability: prefer first-class availability property, fallback to regex
-  const availRegex = /[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]\s*([^•·\n]+)/i;
+  // 3. Resolve availability: ALWAYS strip availability from cleanNat so it never leaks into nationality badge
+  const availRegex = /[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]?\s*([^•·\n]+)/i;
   const legacyAvailMatch = cleanNat.match(availRegex) || rawPermit.match(availRegex);
   let legacyAvailability = '';
   if (legacyAvailMatch) {
@@ -101,6 +97,19 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   // Check if work permit is redundant with citizenship
   const isPermitRedundant = isSwissCitizen && /(citoyen|citizen|suisse|swiss|don['’]?t require|aucun permis|no permit)/i.test(rawPermit);
 
+  const hasVisibleDetails =
+    (showNationality && isNationalityPrimary) ||
+    (showWorkPermit && header.workPermit) ||
+    (showOrigin && origin) ||
+    (showAvailability && cleanAvailability) ||
+    (showCivilStatus && header.civilStatus) ||
+    (showBirthDate && header.dateOfBirth) ||
+    (showDrivingLicense && header.drivingLicense);
+
+  if (!hasVisibleDetails) {
+    return null;
+  }
+
   return (
     <section
       style={{
@@ -112,7 +121,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', fontSize: '10.5px', color: '#334155' }}>
         {/* Primary Highlight Badge (Nationality or Work Permit) */}
-        {isNationalityPrimary && (
+        {showNationality && isNationalityPrimary && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontWeight: 800, color: 'var(--cv-primary, #0284c7)', textTransform: 'uppercase', fontSize: '9.5px', letterSpacing: '0.5px' }}>
               {labels.nationality}
@@ -140,7 +149,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
           </div>
         )}
 
-        {!isNationalityPrimary && header.workPermit && (
+        {showWorkPermit && !isNationalityPrimary && header.workPermit && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontWeight: 800, color: 'var(--cv-primary, #0284c7)', textTransform: 'uppercase', fontSize: '9.5px', letterSpacing: '0.5px' }}>
               {labels.workPermit}
@@ -169,7 +178,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Place of origin for Swiss citizens */}
-        {origin && (
+        {showOrigin && origin && (
           <div>
             <span style={{ fontWeight: 700, color: '#334155' }}>
               <EditableText
@@ -182,7 +191,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Secondary: Work Permit if Nationality was primary and permit is genuinely distinct */}
-        {isNationalityPrimary && header.workPermit && !isPermitRedundant && (
+        {showWorkPermit && isNationalityPrimary && header.workPermit && !isPermitRedundant && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.workPermit} : </span>
             <span style={{ fontWeight: 600 }}>
@@ -196,7 +205,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Secondary: Nationality if Work Permit was primary */}
-        {!isNationalityPrimary && cleanNat && (
+        {showNationality && !isNationalityPrimary && cleanNat && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.nationality} : </span>
             <span style={{ fontWeight: 600 }}>
@@ -210,7 +219,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Disponibilité (Clean date/status without modality clutter) */}
-        {cleanAvailability && (
+        {showAvailability && cleanAvailability && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.availability} : </span>
             <span style={{ fontWeight: 600, color: '#0f172a' }}>
@@ -224,7 +233,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* État civil */}
-        {header.civilStatus && (
+        {showCivilStatus && header.civilStatus && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.civilStatus} : </span>
             <span style={{ fontWeight: 600 }}>
@@ -238,7 +247,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Date de naissance */}
-        {header.dateOfBirth && (
+        {showBirthDate && header.dateOfBirth && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.birthDate} : </span>
             <span>
@@ -252,7 +261,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Permis de conduire */}
-        {header.drivingLicense && (
+        {showDrivingLicense && header.drivingLicense && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.drivingLicense} : </span>
             <span>

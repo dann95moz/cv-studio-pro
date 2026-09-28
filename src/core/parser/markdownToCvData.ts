@@ -272,27 +272,46 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     }
   }
 
+  // Parse metadata config comments for hidden details and sections
+  let hiddenDetails: string[] | undefined;
+  const hiddenDetailsMatch = markdown.match(/<!--\s*config:hiddenDetails=([^\s>]+)\s*-->/i);
+  if (hiddenDetailsMatch) {
+    hiddenDetails = hiddenDetailsMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
+  let hiddenSections: string[] | undefined;
+  const hiddenSectionsMatch = markdown.match(/<!--\s*config:hiddenSections=([^\s>]+)\s*-->/i);
+  if (hiddenSectionsMatch) {
+    hiddenSections = hiddenSectionsMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
   // Cleanly disentangle placeOfOrigin and availability if bundled inside nationality string
   if (legalDetails.nationality) {
-    if (!legalDetails.placeOfOrigin) {
-      const originMatch = legalDetails.nationality.match(/(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Luogo\s+d['’]origine)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i);
-      if (originMatch) {
-        legalDetails.placeOfOrigin = originMatch[0].trim();
-        legalDetails.nationality = legalDetails.nationality.replace(originMatch[0], '').trim();
-      } else {
-        const cantonMatch = legalDetails.nationality.match(/\(([A-Za-zÀ-ÿ\s–-]+(?:-[A-Z]{2}|\s*-\s*[A-Z]{2}|\([A-Z]{2}\)))\)/i);
-        if (cantonMatch) {
-          const cantonClean = cantonMatch[1].trim().replace(/\s*-\s*([A-Z]{2})$/, ' ($1)');
-          legalDetails.placeOfOrigin = `Originaire de ${cantonClean}`;
-          legalDetails.nationality = legalDetails.nationality.replace(cantonMatch[0], '').trim();
-        }
-      }
-    }
-    if (!legalDetails.availability) {
-      const availMatch = legalDetails.nationality.match(/[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]\s*([^•·\n]+)/i);
-      if (availMatch) {
+    // 1. Availability: ALWAYS extract and remove from nationality whether availability was already set or not
+    const availMatch = legalDetails.nationality.match(/[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]?\s*([^•·\n]+)/i);
+    if (availMatch) {
+      if (!legalDetails.availability) {
         legalDetails.availability = availMatch[1].trim();
-        legalDetails.nationality = legalDetails.nationality.replace(availMatch[0], '').trim();
+      }
+      legalDetails.nationality = legalDetails.nationality.replace(availMatch[0], '').trim();
+    }
+
+    // 2. Place of origin: ALWAYS extract and remove from nationality
+    const originMatch = legalDetails.nationality.match(/(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Luogo\s+d['’]origine)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i);
+    if (originMatch) {
+      if (!legalDetails.placeOfOrigin) {
+        legalDetails.placeOfOrigin = originMatch[0].trim();
+      }
+      legalDetails.nationality = legalDetails.nationality.replace(originMatch[0], '').trim();
+    } else {
+      // Canton with space, hyphen or parens, e.g. (Frutigen BE) or (Frutigen - BE) or (Frutigen (BE))
+      const cantonMatch = legalDetails.nationality.match(/\(([A-Za-zÀ-ÿ\s–-]+?(?:[,\s–-]+[A-Z]{2}|\([A-Z]{2}\)))\)/i);
+      if (cantonMatch) {
+        if (!legalDetails.placeOfOrigin) {
+          const cantonClean = cantonMatch[1].trim().replace(/[,\s–-]+([A-Z]{2})$/, ' ($1)');
+          legalDetails.placeOfOrigin = `Originaire de ${cantonClean}`;
+        }
+        legalDetails.nationality = legalDetails.nationality.replace(cantonMatch[0], '').trim();
       }
     }
     legalDetails.nationality = legalDetails.nationality.replace(/[•·/–—,\s]+$/, '').replace(/^[•·/–—,\s]+/, '').trim();
@@ -320,6 +339,8 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     education: education.length > 0 ? education : undefined,
     certifications: certifications.length > 0 ? certifications : undefined,
     languages: languages.length > 0 ? languages : undefined,
+    hiddenDetails,
+    hiddenSections,
     ...legalDetails,
   });
 }

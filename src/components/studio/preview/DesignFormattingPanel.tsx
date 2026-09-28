@@ -25,6 +25,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded';
 import FormatPaintRoundedIcon from '@mui/icons-material/FormatPaintRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { useTranslation } from 'react-i18next';
 import {
   FontFamilyId,
@@ -37,6 +38,7 @@ import { ProfilePhotoDisplay } from '../photo/ProfilePhotoDisplay';
 import { PhotoCropperModal } from '../photo/PhotoCropperModal';
 import { usePhotoUpload } from '../../../hooks/usePhotoUpload';
 import { TemplatesPanel } from './TemplatesPanel';
+import { VisibilityPanel } from './VisibilityPanel';
 import { TWO_COLUMN_CONFIGS } from './ColumnResizeDivider';
 
 export type { DesignFormattingPanelProps };
@@ -65,6 +67,11 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
   sidebarWidth,
   onSidebarWidthChange,
   initialTab = 'templates',
+  parsedCv,
+  hiddenDetails,
+  onToggleHiddenDetail,
+  hiddenSections,
+  onToggleHiddenSection,
   onClose,
 }) => {
 
@@ -72,7 +79,7 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
   const muiTheme = useTheme();
   const [cropperOpen, setCropperOpen] = useState<boolean>(false);
   const currentTheme = theme || activeTheme;
-  const [panelTab, setPanelTab] = useState<'templates' | 'formatting'>(initialTab);
+  const [panelTab, setPanelTab] = useState<'templates' | 'formatting' | 'visibility'>(initialTab);
 
   const isPhotoSupported = themeSupportsPhoto(currentTheme);
 
@@ -152,6 +159,25 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
         >
           <FormatPaintRoundedIcon sx={{ fontSize: 16, mr: 0.75 }} />
           {t('preview:panels.design.tabFormatting', 'Formato y Estilos')}
+        </ToggleButton>
+        <ToggleButton
+          value="visibility"
+          sx={{
+            fontWeight: 700,
+            fontSize: '0.76rem',
+            py: 0.6,
+            textTransform: 'none',
+            borderRadius: '6px !important',
+            border: 'none !important',
+            '&.Mui-selected': {
+              bgcolor: 'background.paper',
+              color: 'primary.main',
+              boxShadow: 1,
+            },
+          }}
+        >
+          <VisibilityRoundedIcon sx={{ fontSize: 16, mr: 0.75 }} />
+          {t('preview:panels.design.tabVisibility', 'Visibilidad')}
         </ToggleButton>
       </ToggleButtonGroup>
 
@@ -539,6 +565,19 @@ export const DesignFormattingPanel: React.FC<DesignFormattingPanelProps> = ({
         </Typography>
       </Paper>
       </>
+      )}
+
+      {/* Tab 3: Control de Visibilidad de Secciones y Datos */}
+      {panelTab === 'visibility' && (
+        <VisibilityPanel
+          parsedCv={parsedCv}
+          hiddenDetails={hiddenDetails}
+          onToggleHiddenDetail={onToggleHiddenDetail}
+          hiddenSections={hiddenSections}
+          onToggleHiddenSection={onToggleHiddenSection}
+          photo={photo}
+          onPhotoToggle={onPhotoToggle}
+        />
       )}
 
       {/* Pan & Zoom Photo Cropper Modal */}

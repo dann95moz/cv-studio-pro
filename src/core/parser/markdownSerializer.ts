@@ -240,6 +240,14 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
     parts.push(`- ${data.references}`);
   }
 
+  // Hidden details & sections configuration comments
+  if (data.hiddenDetails && data.hiddenDetails.length > 0) {
+    parts.push(`<!-- config:hiddenDetails=${data.hiddenDetails.join(',')} -->`);
+  }
+  if (data.hiddenSections && data.hiddenSections.length > 0) {
+    parts.push(`<!-- config:hiddenSections=${data.hiddenSections.join(',')} -->`);
+  }
+
   return parts.join('\n') + '\n';
 }
 

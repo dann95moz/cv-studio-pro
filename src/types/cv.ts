@@ -119,6 +119,8 @@ export interface CVData {
   sectionPlacement?: Record<string, 'sidebar' | 'main'>;
   sidebarSectionOrder?: string[];
   mainSectionOrder?: string[];
+  hiddenSections?: string[];
+  hiddenDetails?: string[];
 }
 
 

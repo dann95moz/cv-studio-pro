@@ -170,6 +170,7 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
     civilStatus: data.civilStatus,
     availability: data.availability,
     references: data.references,
+    hiddenDetails: data.hiddenDetails || [],
   };
 
   let summary: SummarySlotData | undefined;
@@ -365,17 +366,20 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
     }
   }
 
+  const hidden = new Set(data.hiddenSections || []);
+
   return {
     header,
-    summary,
-    skills,
-    experience,
-    projects,
-    education,
-    languages,
-    genericSections,
+    summary: hidden.has('summary') ? undefined : summary,
+    skills: hidden.has('skills') ? undefined : skills,
+    experience: hidden.has('experience') ? undefined : experience,
+    projects: hidden.has('projects') ? undefined : projects,
+    education: hidden.has('education') ? undefined : education,
+    languages: hidden.has('languages') ? undefined : languages,
+    genericSections: genericSections.filter(g => !hidden.has(g.id) && !hidden.has(g.title?.toLowerCase())),
     photo: data.photo,
     websitesTitle: data.sectionTitles?.['websites'] || langDef.sections.websites,
     language: lang,
+    hiddenSections: data.hiddenSections || [],
   };
 }

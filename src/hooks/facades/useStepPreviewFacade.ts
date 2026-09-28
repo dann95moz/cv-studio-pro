@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   useResumeStore,
   useParsedCv,
@@ -6,6 +6,8 @@ import {
   useGapInfo,
 } from '../../store';
 import { getTemplateMetadata } from '../../templates';
+import { serializeCvDataToMarkdown } from '../../core/parser';
+import { CVData } from '../../types/cv';
 import { usePreviewCanvasMetrics } from '../preview/usePreviewCanvasMetrics';
 import { usePreviewExports } from '../preview/usePreviewExports';
 import { usePreviewTranslation } from '../preview/usePreviewTranslation';
@@ -46,6 +48,8 @@ export function useStepPreviewFacade() {
 
   // Store Selectors: Workflow & Documents
   const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
+  const setCvMarkdown = useResumeStore((s) => s.setCvMarkdown);
+  const setActiveCvData = useResumeStore((s) => s.setActiveCvData);
   const masterData = useResumeStore((s) => s.masterData);
   const targetJob = useResumeStore((s) => s.targetJob);
   const setTargetJob = useResumeStore((s) => s.setTargetJob);
@@ -144,6 +148,36 @@ export function useStepPreviewFacade() {
     activeModelName,
   });
 
+  const toggleHiddenDetail = useCallback((detailKey: string) => {
+    const current = parsedCv.hiddenDetails || [];
+    const updated = current.includes(detailKey)
+      ? current.filter((k) => k !== detailKey)
+      : [...current, detailKey];
+
+    const newCvData: CVData = {
+      ...parsedCv,
+      hiddenDetails: updated,
+    };
+    setActiveCvData(newCvData);
+    const serialized = serializeCvDataToMarkdown(newCvData, (newCvData.language || 'es') as any);
+    setCvMarkdown(serialized);
+  }, [parsedCv, setActiveCvData, setCvMarkdown]);
+
+  const toggleHiddenSection = useCallback((sectionKey: string) => {
+    const current = parsedCv.hiddenSections || [];
+    const updated = current.includes(sectionKey)
+      ? current.filter((k) => k !== sectionKey)
+      : [...current, sectionKey];
+
+    const newCvData: CVData = {
+      ...parsedCv,
+      hiddenSections: updated,
+    };
+    setActiveCvData(newCvData);
+    const serialized = serializeCvDataToMarkdown(newCvData, (newCvData.language || 'es') as any);
+    setCvMarkdown(serialized);
+  }, [parsedCv, setActiveCvData, setCvMarkdown]);
+
   return {
     docType: {
       previewDocType,
@@ -168,6 +202,10 @@ export function useStepPreviewFacade() {
       photo,
       setProfilePhoto,
       setProfilePhotoEnabled,
+      hiddenDetails: parsedCv.hiddenDetails,
+      toggleHiddenDetail,
+      hiddenSections: parsedCv.hiddenSections,
+      toggleHiddenSection,
     },
     exports,
     modals,

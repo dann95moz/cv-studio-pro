@@ -50,6 +50,11 @@ export interface StepPreviewSidePanelsProps {
   onSelectTheme: (theme: ThemeId) => void;
   sidebarWidth?: number;
   onSidebarWidthChange?: (width?: number) => void;
+  // Visibility toggling props
+  hiddenDetails?: string[];
+  onToggleHiddenDetail?: (detailKey: string) => void;
+  hiddenSections?: string[];
+  onToggleHiddenSection?: (sectionKey: string) => void;
   // LinkedIn props
   parsedCv: CVData;
   companyName: string;
@@ -84,6 +89,10 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
   onSelectTheme,
   sidebarWidth,
   onSidebarWidthChange,
+  hiddenDetails,
+  onToggleHiddenDetail,
+  hiddenSections,
+  onToggleHiddenSection,
   parsedCv,
   companyName,
   targetRole,
@@ -132,6 +141,11 @@ export const StepPreviewSidePanels: React.FC<StepPreviewSidePanelsProps> = ({
           onSelectTheme={onSelectTheme}
           sidebarWidth={sidebarWidth}
           onSidebarWidthChange={onSidebarWidthChange}
+          parsedCv={parsedCv}
+          hiddenDetails={hiddenDetails}
+          onToggleHiddenDetail={onToggleHiddenDetail}
+          hiddenSections={hiddenSections}
+          onToggleHiddenSection={onToggleHiddenSection}
           initialTab={activeSidePanel === 'templates' ? 'templates' : 'formatting'}
           onClose={onCloseSidePanel}
         />
