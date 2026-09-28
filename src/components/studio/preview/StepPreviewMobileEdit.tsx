@@ -15,10 +15,8 @@ import {
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
-import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
-import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import { useTranslation } from 'react-i18next';
-import { safeMarkdown, safeMarkdownInline } from '../../../utils/sanitize';
+import { safeMarkdown } from '../../../utils/sanitize';
 import { CVData } from '../../../types/cv';
 import { ThemeId } from '../../../types/theme';
 import { extractCandidateInitials } from '../../../core/parser';
@@ -27,6 +25,7 @@ import { useCvLiveEdit } from './CvLiveEditContext';
 import { AiRegeneratePopover } from './AiRegeneratePopover';
 import { ProfilePhotoDisplay } from '../photo/ProfilePhotoDisplay';
 import { EditableText } from './EditableText';
+import { MobileBulletCard } from './MobileBulletCard';
 
 export interface StepPreviewMobileEditProps {
   parsedCv: CVData;
@@ -401,101 +400,42 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                 const isBulletDisabled = liveEdit?.isBulletDisabled('experience', idx, bIdx) ?? false;
 
                 return (
-                  <Card
+                  <MobileBulletCard
                     key={bIdx}
-                    variant="outlined"
-                    sx={{
-                      bgcolor: 'background.paper',
-                      opacity: isBulletDisabled ? 0.6 : 1,
-                      borderStyle: isBulletDisabled ? 'dashed' : 'solid',
-                      transition: 'opacity 0.2s ease',
-                    }}
-                  >
-                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                      <Box
-                        sx={{
-                          fontSize: '0.86rem',
-                          lineHeight: 1.5,
-                          color: 'text.primary',
-                          textDecoration: isBulletDisabled ? 'line-through' : 'none',
-                          mb: 1.75,
-                          '& strong': { fontWeight: 700, color: 'text.primary' },
-                        }}
-                        dangerouslySetInnerHTML={{ __html: safeMarkdownInline(bullet) }}
-                      />
-
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap' }}>
-                        <Button
-                          size="medium"
-                          variant={isBulletDisabled ? 'contained' : 'outlined'}
-                          color={isBulletDisabled ? 'inherit' : 'primary'}
-                          onClick={() => liveEdit?.toggleBulletVisibility('experience', idx, bIdx)}
-                          startIcon={isBulletDisabled ? <VisibilityRoundedIcon sx={{ fontSize: 16 }} /> : <VisibilityOffRoundedIcon sx={{ fontSize: 16 }} />}
-                          title={t('preview:bullets.toggleTooltip', 'Activar o desactivar viñeta para ahorrar espacio')}
-                        >
-                          {isBulletDisabled ? t('preview:bullets.activate', 'Activar') : t('preview:bullets.deactivate', 'Ocultar')}
-                        </Button>
-
-                        <Button
-                          size="medium"
-                          variant="outlined"
-                          onClick={() =>
-                            handleOpenEdit({
-                              type: 'bullet',
-                              fieldKey,
-                              sectionType: 'experience',
-                              itemIndex: idx,
-                              bulletIndex: bIdx,
-                              company: item.company,
-                              role: item.role,
-                              initialText: bullet,
-                            })
-                          }
-                          startIcon={<EditRoundedIcon sx={{ fontSize: 16 }} />}
-                          sx={{ flex: 1 }}
-                        >
-                          {t('preview:aiRegen.editItem', 'Editar')}
-                        </Button>
-
-                        <Button
-                          size="medium"
-                          variant="contained"
-                          color="primary"
-                          onClick={() =>
-                            handleOpenAiRegenerate({
-                              type: 'bullet',
-                              fieldKey,
-                              sectionType: 'experience',
-                              itemIndex: idx,
-                              bulletIndex: bIdx,
-                              company: item.company,
-                              role: item.role,
-                              initialText: bullet,
-                            })
-                          }
-                          startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-                          sx={{ flex: 1 }}
-                        >
-                          {t('preview:aiRegen.button', 'Regenerar')}
-                        </Button>
-
-                        {hasUndo && (
-                          <Button
-                            size="medium"
-                            variant="outlined"
-                            onClick={() =>
-                              handleUndo(fieldKey, (val) =>
-                                liveEdit?.updateExperienceBullet('experience', idx, bIdx, val)
-                              )
-                            }
-                            startIcon={<UndoRoundedIcon sx={{ fontSize: 16 }} />}
-                          >
-                            {t('preview:aiRegen.undo', 'Deshacer')}
-                          </Button>
-                        )}
-                      </Box>
-                    </CardContent>
-                  </Card>
+                    bullet={bullet}
+                    isBulletDisabled={isBulletDisabled}
+                    hasUndo={hasUndo}
+                    onToggleVisibility={() => liveEdit?.toggleBulletVisibility('experience', idx, bIdx)}
+                    onOpenEdit={() =>
+                      handleOpenEdit({
+                        type: 'bullet',
+                        fieldKey,
+                        sectionType: 'experience',
+                        itemIndex: idx,
+                        bulletIndex: bIdx,
+                        company: item.company,
+                        role: item.role,
+                        initialText: bullet,
+                      })
+                    }
+                    onOpenAiRegenerate={() =>
+                      handleOpenAiRegenerate({
+                        type: 'bullet',
+                        fieldKey,
+                        sectionType: 'experience',
+                        itemIndex: idx,
+                        bulletIndex: bIdx,
+                        company: item.company,
+                        role: item.role,
+                        initialText: bullet,
+                      })
+                    }
+                    onUndo={() =>
+                      handleUndo(fieldKey, (val) =>
+                        liveEdit?.updateExperienceBullet('experience', idx, bIdx, val)
+                      )
+                    }
+                  />
                 );
               })}
             </Box>
@@ -532,101 +472,42 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                 const isBulletDisabled = liveEdit?.isBulletDisabled('projects', idx, bIdx) ?? false;
 
                 return (
-                  <Card
+                  <MobileBulletCard
                     key={bIdx}
-                    variant="outlined"
-                    sx={{
-                      bgcolor: 'background.paper',
-                      opacity: isBulletDisabled ? 0.6 : 1,
-                      borderStyle: isBulletDisabled ? 'dashed' : 'solid',
-                      transition: 'opacity 0.2s ease',
-                    }}
-                  >
-                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                      <Box
-                        sx={{
-                          fontSize: '0.88rem',
-                          lineHeight: 1.55,
-                          color: 'text.primary',
-                          textDecoration: isBulletDisabled ? 'line-through' : 'none',
-                          mb: 1.75,
-                          '& strong': { fontWeight: 700, color: 'text.primary' },
-                        }}
-                        dangerouslySetInnerHTML={{ __html: safeMarkdownInline(bullet) }}
-                      />
-
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap' }}>
-                        <Button
-                          size="medium"
-                          variant={isBulletDisabled ? 'contained' : 'outlined'}
-                          color={isBulletDisabled ? 'inherit' : 'primary'}
-                          onClick={() => liveEdit?.toggleBulletVisibility('projects', idx, bIdx)}
-                          startIcon={isBulletDisabled ? <VisibilityRoundedIcon sx={{ fontSize: 16 }} /> : <VisibilityOffRoundedIcon sx={{ fontSize: 16 }} />}
-                          title={t('preview:bullets.toggleTooltip', 'Activar o desactivar viñeta para ahorrar espacio')}
-                        >
-                          {isBulletDisabled ? t('preview:bullets.activate', 'Activar') : t('preview:bullets.deactivate', 'Ocultar')}
-                        </Button>
-
-                        <Button
-                          size="medium"
-                          variant="outlined"
-                          onClick={() =>
-                            handleOpenEdit({
-                              type: 'bullet',
-                              fieldKey,
-                              sectionType: 'projects',
-                              itemIndex: idx,
-                              bulletIndex: bIdx,
-                              company: item.company,
-                              role: item.role,
-                              initialText: bullet,
-                            })
-                          }
-                          startIcon={<EditRoundedIcon sx={{ fontSize: 16 }} />}
-                          sx={{ flex: 1 }}
-                        >
-                          {t('preview:aiRegen.editItem', 'Editar')}
-                        </Button>
-
-                        <Button
-                          size="medium"
-                          variant="contained"
-                          color="primary"
-                          onClick={() =>
-                            handleOpenAiRegenerate({
-                              type: 'bullet',
-                              fieldKey,
-                              sectionType: 'projects',
-                              itemIndex: idx,
-                              bulletIndex: bIdx,
-                              company: item.company,
-                              role: item.role,
-                              initialText: bullet,
-                            })
-                          }
-                          startIcon={<AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />}
-                          sx={{ flex: 1 }}
-                        >
-                          {t('preview:aiRegen.button', 'Regenerar')}
-                        </Button>
-
-                        {hasUndo && (
-                          <Button
-                            size="medium"
-                            variant="outlined"
-                            onClick={() =>
-                              handleUndo(fieldKey, (val) =>
-                                liveEdit?.updateExperienceBullet('projects', idx, bIdx, val)
-                              )
-                            }
-                            startIcon={<UndoRoundedIcon sx={{ fontSize: 16 }} />}
-                          >
-                            {t('preview:aiRegen.undo', 'Deshacer')}
-                          </Button>
-                        )}
-                      </Box>
-                    </CardContent>
-                  </Card>
+                    bullet={bullet}
+                    isBulletDisabled={isBulletDisabled}
+                    hasUndo={hasUndo}
+                    onToggleVisibility={() => liveEdit?.toggleBulletVisibility('projects', idx, bIdx)}
+                    onOpenEdit={() =>
+                      handleOpenEdit({
+                        type: 'bullet',
+                        fieldKey,
+                        sectionType: 'projects',
+                        itemIndex: idx,
+                        bulletIndex: bIdx,
+                        company: item.company,
+                        role: item.role,
+                        initialText: bullet,
+                      })
+                    }
+                    onOpenAiRegenerate={() =>
+                      handleOpenAiRegenerate({
+                        type: 'bullet',
+                        fieldKey,
+                        sectionType: 'projects',
+                        itemIndex: idx,
+                        bulletIndex: bIdx,
+                        company: item.company,
+                        role: item.role,
+                        initialText: bullet,
+                      })
+                    }
+                    onUndo={() =>
+                      handleUndo(fieldKey, (val) =>
+                        liveEdit?.updateExperienceBullet('projects', idx, bIdx, val)
+                      )
+                    }
+                  />
                 );
               })}
             </Box>
