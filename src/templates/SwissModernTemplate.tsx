@@ -53,7 +53,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
         onDrop={(e) => {
           e.preventDefault();
           setIsDragOverAside(false);
-          const sectionId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('cv-section-id');
+          const sectionId = e.dataTransfer.getData('cv-section-id');
           if (sectionId) {
             liveEdit?.reorderSection(sectionId, 'sidebar');
           }
@@ -141,7 +141,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
         onDrop={(e) => {
           e.preventDefault();
           setIsDragOverMain(false);
-          const sectionId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('cv-section-id');
+          const sectionId = e.dataTransfer.getData('cv-section-id');
           if (sectionId) {
             liveEdit?.reorderSection(sectionId, 'main');
           }

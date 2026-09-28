@@ -236,6 +236,9 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
         break;
 
       default:
+        if (/reference|r[ée]f[ée]rence/i.test(section.id) || /reference|r[ée]f[ée]rence/i.test(sectionTitle)) {
+          break;
+        }
         genericSections.push({
           id: section.id,
           title: sectionTitle,

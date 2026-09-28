@@ -77,7 +77,7 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
         const finalDropPos = dropPosition;
         setDropPosition(null);
         setIsHovered(false);
-        const sourceId = e.dataTransfer.getData('cv-section-id') || e.dataTransfer.getData('text/plain');
+        const sourceId = e.dataTransfer.getData('cv-section-id');
         if (sourceId && sourceId !== sectionId) {
           onReorder(sourceId, column, undefined, sectionId, finalDropPos || 'after');
         }

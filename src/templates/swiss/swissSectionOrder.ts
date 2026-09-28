@@ -9,8 +9,13 @@ export function resolveSwissSectionOrder(
   genericSections: GenericSlotData[],
   data?: CVTemplateProps['data']
 ): SwissSectionOrderResult {
+  const knownBaseIds = ['summary', 'skills', 'experience', 'projects', 'education', 'languages', 'references'];
+  const customIds = genericSections
+    .map((g) => g.id)
+    .filter((id) => !knownBaseIds.includes(id));
+
   const defaultSidebar = ['languages', 'skills', 'education'];
-  const defaultMain = ['summary', 'experience', 'projects', 'references', ...genericSections.map((g) => g.id)];
+  const defaultMain = ['summary', 'experience', 'projects', 'references', ...customIds];
 
   const placement: Record<string, 'sidebar' | 'main'> = {
     languages: 'sidebar',
@@ -20,14 +25,14 @@ export function resolveSwissSectionOrder(
     experience: 'main',
     projects: 'main',
     references: 'main',
-    ...Object.fromEntries(genericSections.map((g) => [g.id, 'main'])),
+    ...Object.fromEntries(customIds.map((id) => [id, 'main'])),
     ...(data?.sectionPlacement || {}),
   };
 
   const rawSidebar = data?.sidebarSectionOrder && data.sidebarSectionOrder.length > 0
     ? data.sidebarSectionOrder
     : defaultSidebar;
-  const activeSidebarIds: string[] = rawSidebar.filter((id) => placement[id] === 'sidebar');
+  const activeSidebarIds: string[] = Array.from(new Set(rawSidebar.filter((id) => placement[id] === 'sidebar')));
   Object.entries(placement).forEach(([id, col]) => {
     if (col === 'sidebar' && !activeSidebarIds.includes(id)) {
       activeSidebarIds.push(id);
@@ -37,7 +42,7 @@ export function resolveSwissSectionOrder(
   const rawMain = data?.mainSectionOrder && data.mainSectionOrder.length > 0
     ? data.mainSectionOrder
     : defaultMain;
-  const activeMainIds: string[] = rawMain.filter((id) => placement[id] === 'main');
+  const activeMainIds: string[] = Array.from(new Set(rawMain.filter((id) => placement[id] === 'main')));
   Object.entries(placement).forEach(([id, col]) => {
     if (col === 'main' && !activeMainIds.includes(id)) {
       activeMainIds.push(id);

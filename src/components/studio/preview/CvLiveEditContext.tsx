@@ -342,14 +342,19 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
       dropPosition?: 'before' | 'after'
     ) => {
       applyCvUpdate((prev) => {
+        const knownBaseIds = ['summary', 'skills', 'experience', 'projects', 'education', 'languages', 'references'];
+        const customSectionIds = (prev.sections || [])
+          .map((s) => s.id)
+          .filter((id) => !knownBaseIds.includes(id));
+
         const defaultSidebar = ['languages', 'skills', 'education'];
-        const defaultMain = ['summary', 'experience', 'projects', 'references', ...(prev.sections?.map(s => s.id) || [])];
+        const defaultMain = ['summary', 'experience', 'projects', 'references', ...customSectionIds];
 
         const prevSidebar = prev.sidebarSectionOrder && prev.sidebarSectionOrder.length > 0
-          ? [...prev.sidebarSectionOrder]
+          ? Array.from(new Set(prev.sidebarSectionOrder))
           : [...defaultSidebar];
         const prevMain = prev.mainSectionOrder && prev.mainSectionOrder.length > 0
-          ? [...prev.mainSectionOrder]
+          ? Array.from(new Set(prev.mainSectionOrder))
           : [...defaultMain];
 
         const sidebarList = prevSidebar.filter((id) => id !== sourceId);
@@ -371,14 +376,17 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
           targetList.push(sourceId);
         }
 
+        const cleanSidebar = Array.from(new Set(sidebarList));
+        const cleanMain = Array.from(new Set(mainList));
+
         return {
           ...prev,
           sectionPlacement: {
             ...(prev.sectionPlacement || {}),
             [sourceId]: targetColumn,
           },
-          sidebarSectionOrder: sidebarList,
-          mainSectionOrder: mainList,
+          sidebarSectionOrder: cleanSidebar,
+          mainSectionOrder: cleanMain,
         };
       });
     },
