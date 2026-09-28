@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { PageFormat } from '../types/theme';
+import { CVData } from '../types/cv';
 import { getPageFormatConfig } from '../theme/dimensions';
 
 /**
@@ -66,7 +67,8 @@ export const usePrintPdf = () => {
     element: HTMLElement | null,
     fileName?: string,
     pageFormat: PageFormat = 'a4',
-    mode: 'save' | 'share' = 'save'
+    mode: 'save' | 'share' = 'save',
+    cvData?: CVData
   ) => {
     if (!element) return;
     setIsExportingPdf(true);
@@ -79,6 +81,7 @@ export const usePrintPdf = () => {
         pageFormat,
         qualityScale: 2,
         mode,
+        cvData,
         onProgress: (step) => {
           if (step === 'saving') setExportStatus('saving');
           else if (step === 'done') setExportStatus('done');

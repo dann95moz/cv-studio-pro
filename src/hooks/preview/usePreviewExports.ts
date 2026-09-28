@@ -41,11 +41,11 @@ export function usePreviewExports({
   const onTriggerDirectDownloadPdf = useCallback(
     (mode: 'save' | 'share' = 'save') => {
       if (paperRef.current) {
-        handleDirectDownload(paperRef.current, targetPdfName, pageFormat, mode);
+        handleDirectDownload(paperRef.current, targetPdfName, pageFormat, mode, parsedCv);
         triggerPrompt(2000);
       }
     },
-    [paperRef, handleDirectDownload, targetPdfName, pageFormat, triggerPrompt]
+    [paperRef, handleDirectDownload, targetPdfName, pageFormat, triggerPrompt, parsedCv]
   );
 
   const onTriggerSharePdf = useCallback(() => {

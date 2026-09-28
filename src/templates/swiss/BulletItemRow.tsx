@@ -64,7 +64,9 @@ export const BulletItemRow: React.FC<BulletItemRowProps> = ({
 
         {isLiveEditing && (
           <span
-            className="no-print"
+            className="no-print cv-bullet-action"
+            aria-hidden="true"
+            data-no-ats="true"
             onClick={(e) => {
               e.stopPropagation();
               onToggle();

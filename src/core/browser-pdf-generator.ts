@@ -17,11 +17,14 @@ import { sanitizeFileName } from './parser';
 import { DEMO_CV_DATA } from '../constants/templates';
 import { CVRenderer } from '../components/CVRenderer';
 import { useResumeStore } from '../store';
+import { CVData } from '../types/cv';
+import { generatePlainTextCv, stripMarkdownFormatting } from './export/plainTextExporter';
 
 export interface DirectPdfOptions {
   fileName?: string;
   pageFormat?: PageFormat;
   qualityScale?: number;
+  cvData?: CVData;
   markdownPayload?: string;
   mode?: 'save' | 'share';
   onProgress?: (step: 'capturing' | 'rendering' | 'saving' | 'done') => void;
@@ -52,6 +55,8 @@ export async function generateDirectPdf(
     fileName = 'Resume.pdf',
     pageFormat = 'a4',
     qualityScale = 2,
+    cvData,
+    markdownPayload,
     onProgress
   } = options;
 
@@ -94,8 +99,10 @@ export async function generateDirectPdf(
           clonedDoc.body.style.backgroundColor = '#ffffff';
         }
 
-        // Hide all hover actions, bubbles, and interactive toolbars
-        clonedDoc.querySelectorAll('.no-print, .preview-mobile-edit, .cv-ai-hover-actions, .cv-selection-bubble, .cv-ai-sparkle-btn, .cv-undo-button, .photo-upload-placeholder').forEach((el) => {
+        // Hide all hover actions, bubbles, drag handles, and interactive toolbars
+        clonedDoc.querySelectorAll(
+          '.no-print, .preview-mobile-edit, .cv-ai-hover-actions, .cv-selection-bubble, .cv-ai-sparkle-btn, .cv-undo-button, .photo-upload-placeholder, .cv-dnd-handle, .cv-dnd-drop-indicator, .cv-bullet-action, .cv-column-resizer, [data-no-ats="true"], [aria-hidden="true"]'
+        ).forEach((el) => {
           (el as HTMLElement).style.display = 'none';
         });
 
@@ -177,25 +184,6 @@ export async function generateDirectPdf(
 
     // First page
     pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
-
-    // Add invisible selectable text layer for ATS compatibility
-    const rawDomText = element.innerText || '';
-    if (rawDomText) {
-      const textLines = rawDomText.split('\n').map((l) => l.trim()).filter(Boolean);
-      let textY = 15;
-      const step = 6;
-      for (const line of textLines) {
-        if (textY < pdfPageHeight - 15) {
-          try {
-            pdf.text(line.slice(0, 120), 10, textY, { renderingMode: 'invisible' });
-            textY += step;
-          } catch {
-            // Ignore individual line rendering issues
-          }
-        }
-      }
-    }
-
     heightLeft -= pdfPageHeight;
 
     // Add subsequent pages if document exceeds 1 page
@@ -204,6 +192,76 @@ export async function generateDirectPdf(
       pdf.addPage([pdfPageWidth, pdfPageHeight], 'portrait');
       pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
       heightLeft -= pdfPageHeight;
+    }
+
+    // Add invisible selectable text layer for ATS compatibility
+    // STRICT GUARANTEE: Never include interactive UI controls, drag handles, AI actions, or buttons.
+    let textLines: string[] = [];
+
+    if (cvData) {
+      // 1. Pristine structured ATS plain text from data (guaranteed 0 UI artifacts)
+      const plainText = generatePlainTextCv(cvData);
+      textLines = plainText
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith('===') && !l.startsWith('---'));
+    } else if (markdownPayload) {
+      // 2. Clean markdown payload
+      textLines = markdownPayload
+        .split('\n')
+        .map((l) => stripMarkdownFormatting(l).trim())
+        .filter((l) => l && !l.startsWith('===') && !l.startsWith('---'));
+    } else {
+      // 3. Robust fallback from DOM with strict sanitization of all interactive controls
+      const clone = element.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll([
+        '.no-print',
+        '.cv-dnd-handle',
+        '.cv-dnd-drop-indicator',
+        '.cv-bullet-action',
+        '.cv-ai-hover-actions',
+        '.cv-selection-bubble',
+        '.cv-ai-sparkle-btn',
+        '.cv-undo-button',
+        '.photo-upload-placeholder',
+        '.preview-mobile-edit',
+        '.cv-column-resizer',
+        '[aria-hidden="true"]',
+        '[data-no-ats="true"]',
+        'button',
+        '.MuiButton-root',
+        '.MuiIconButton-root',
+      ].join(', ')).forEach((el) => el.remove());
+
+      const rawDomText = clone.innerText || '';
+      const UI_CONTROLS_REGEX = /^(?:⋮⋮|mover|move|ocultar|hide|mejorar con ia|improve with ai|deshacer|undo|aceptar|accept|arrastra para|drag to|click to edit|clic para editar)/i;
+      textLines = rawDomText
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l && !UI_CONTROLS_REGEX.test(l) && !l.includes('⋮⋮'));
+    }
+
+    if (textLines.length > 0) {
+      const totalPages = pdf.getNumberOfPages();
+      const step = 6;
+      const startY = 15;
+      const maxY = pdfPageHeight - 15;
+      let lineIndex = 0;
+
+      for (let p = 1; p <= totalPages; p++) {
+        pdf.setPage(p);
+        let currentY = startY;
+        while (lineIndex < textLines.length && currentY < maxY) {
+          const line = textLines[lineIndex];
+          try {
+            pdf.text(line.slice(0, 120), 10, currentY, { renderingMode: 'invisible' });
+          } catch {
+            // Ignore individual line rendering issues
+          }
+          currentY += step;
+          lineIndex++;
+        }
+      }
     }
 
     // Add clickable PDF link annotations for all <a> tags in the DOM
@@ -312,6 +370,7 @@ export async function generateVersionDirectPdf(
       fileName,
       pageFormat,
       qualityScale: options.qualityScale || 2,
+      cvData,
       markdownPayload: version.cvMarkdown,
     });
   } finally {

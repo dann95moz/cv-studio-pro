@@ -27,6 +27,8 @@ export const AiHoverActionsPill: React.FC<AiHoverActionsPillProps> = ({
   return (
     <span
       className={`no-print cv-ai-hover-actions ${isRecentlyRegenerated ? 'is-recently-regenerated' : ''} ${hasUndo ? 'has-undo' : ''}`}
+      aria-hidden="true"
+      data-no-ats="true"
     >
       <Box
         sx={{

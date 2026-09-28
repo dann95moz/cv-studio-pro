@@ -97,7 +97,9 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
       {/* Drop insertion line indicator (before) */}
       {dropPosition === 'before' && (
         <div
-          className="no-print"
+          className="no-print cv-dnd-drop-indicator"
+          aria-hidden="true"
+          data-no-ats="true"
           style={{
             position: 'absolute',
             top: -4,
@@ -114,7 +116,9 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
 
       {/* Notion-style subtle Drag Grip handle that appears on hover */}
       <div
-        className="no-print"
+        className="no-print cv-dnd-handle"
+        aria-hidden="true"
+        data-no-ats="true"
         draggable={true}
         onDragStart={(e) => {
           e.stopPropagation();
@@ -127,7 +131,7 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
           position: 'absolute',
           top: 0,
           right: 0,
-          display: 'inline-flex',
+          display: isHovered ? 'inline-flex' : 'none',
           alignItems: 'center',
           gap: '2px',
           justifyContent: 'center',
@@ -145,8 +149,8 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
           zIndex: 5,
         }}
       >
-        <span style={{ fontSize: '11px', letterSpacing: '-1px' }}>⋮⋮</span>
-        <span style={{ fontSize: '9px', fontWeight: 600 }}>Mover</span>
+        <span aria-hidden="true" style={{ fontSize: '11px', letterSpacing: '-1px' }}>⋮⋮</span>
+        <span aria-hidden="true" style={{ fontSize: '9px', fontWeight: 600 }}>Mover</span>
       </div>
 
       {children}
@@ -154,7 +158,9 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
       {/* Drop insertion line indicator (after) */}
       {dropPosition === 'after' && (
         <div
-          className="no-print"
+          className="no-print cv-dnd-drop-indicator"
+          aria-hidden="true"
+          data-no-ats="true"
           style={{
             position: 'absolute',
             bottom: -4,
