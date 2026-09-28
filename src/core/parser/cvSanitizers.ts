@@ -125,33 +125,63 @@ export function cleanLanguageItem(item: string): string {
  */
 export function cleanCvData(data: CVData): CVData {
   if (!data) return data;
+
+  // Collect project URLs to prevent project live demos from leaking into candidate personal contacts
+  const projectUrls = new Set<string>();
+  const addProjectUrl = (u?: string) => {
+    if (!u) return;
+    const clean = u.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (clean) projectUrls.add(clean);
+  };
+  for (const proj of data.projects || []) {
+    addProjectUrl(proj.demoUrl);
+    addProjectUrl(proj.repoUrl);
+  }
+  for (const exp of data.experience || []) {
+    addProjectUrl(exp.demoUrl);
+    addProjectUrl(exp.repoUrl);
+  }
+
+  const isProjectUrl = (c: { url?: string; label?: string }): boolean => {
+    const rawUrl = (c.url || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    const rawLabel = (c.label || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (projectUrls.has(rawUrl) || projectUrls.has(rawLabel)) return true;
+    for (const pUrl of projectUrls) {
+      if (rawUrl && (rawUrl === pUrl || rawUrl.includes(pUrl) || pUrl.includes(rawUrl))) return true;
+      if (rawLabel && (rawLabel === pUrl || rawLabel.includes(pUrl) || pUrl.includes(rawLabel))) return true;
+    }
+    return false;
+  };
+
   return {
     ...data,
     name: cleanHumanText(data.name || ''),
     title: cleanHumanText(data.title || ''),
     summary: cleanSummary(data.summary || ''),
-    contacts: data.contacts?.map((c) => {
-      let resolvedUrl = c.url?.trim();
-      const rawLbl = (c.label || '').trim();
-      if (!resolvedUrl) {
-        if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
-          if (rawLbl.includes('.') || rawLbl.startsWith('http')) {
-            resolvedUrl = rawLbl.startsWith('http') ? rawLbl : `https://${rawLbl.replace(/^https?:\/\//, '')}`;
+    contacts: data.contacts
+      ?.filter((c) => !isProjectUrl(c))
+      .map((c) => {
+        let resolvedUrl = c.url?.trim();
+        const rawLbl = (c.label || '').trim();
+        if (!resolvedUrl) {
+          if (c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') {
+            if (rawLbl.includes('.') || rawLbl.startsWith('http')) {
+              resolvedUrl = rawLbl.startsWith('http') ? rawLbl : `https://${rawLbl.replace(/^https?:\/\//, '')}`;
+            }
+          } else if (c.type === 'email' && rawLbl.includes('@')) {
+            resolvedUrl = rawLbl.startsWith('mailto:') ? rawLbl : `mailto:${rawLbl.replace(/^mailto:/i, '')}`;
           }
-        } else if (c.type === 'email' && rawLbl.includes('@')) {
-          resolvedUrl = rawLbl.startsWith('mailto:') ? rawLbl : `mailto:${rawLbl.replace(/^mailto:/i, '')}`;
+        } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !resolvedUrl.startsWith('http')) {
+          resolvedUrl = `https://${resolvedUrl}`;
         }
-      } else if ((c.type === 'linkedin' || c.type === 'github' || c.type === 'globe') && !resolvedUrl.startsWith('http')) {
-        resolvedUrl = `https://${resolvedUrl}`;
-      }
-      return {
-        ...c,
-        label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
-          ? cleanHumanText(c.label || '')
-          : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
-        url: resolvedUrl,
-      };
-    }),
+        return {
+          ...c,
+          label: c.type === 'location' || c.type === 'phone' || c.type === 'text'
+            ? cleanHumanText(c.label || '')
+            : cleanHumanText(c.label || '').replace(/\s+/g, c.type === 'email' ? '' : ' '),
+          url: resolvedUrl,
+        };
+      }),
     skillGroups: data.skillGroups?.map((group) => ({
       ...group,
       category: cleanSkillCategory(group.category),

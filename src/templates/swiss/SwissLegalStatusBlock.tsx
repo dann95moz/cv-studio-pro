@@ -45,6 +45,28 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
     cleanNat = cleanNat.replace(originMatch[0], '').replace(/[•·/–—,\s]+$/, '').replace(/^[•·/–—,\s]+/, '').trim();
   }
 
+  // Extract inline availability if accidentally bundled into nationality (e.g. "• Disponibilité : From december 2026")
+  let extractedAvailability = '';
+  const availRegex = /[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]\s*([^•·\n]+)/i;
+  const availMatch = cleanNat.match(availRegex) || rawPermit.match(availRegex);
+  if (availMatch) {
+    extractedAvailability = availMatch[1].trim();
+    cleanNat = cleanNat.replace(availMatch[0], '').trim();
+  }
+
+  // Extract Swiss canton origin if enclosed in parentheses (e.g. "(Frutigen - BE)")
+  if (!origin) {
+    const swissCantonOriginRegex = /\(([A-Za-zÀ-ÿ\s–-]+(?:-[A-Z]{2}|\s*-\s*[A-Z]{2}|\([A-Z]{2}\)))\)/i;
+    const cantonMatch = cleanNat.match(swissCantonOriginRegex) || rawPermit.match(swissCantonOriginRegex);
+    if (cantonMatch) {
+      const cantonClean = cantonMatch[1].trim().replace(/\s*-\s*([A-Z]{2})$/, ' ($1)');
+      origin = `Originaire de ${cantonClean}`;
+      cleanNat = cleanNat.replace(cantonMatch[0], '').replace(/\s{2,}/g, ' ').trim();
+    }
+  }
+
+  cleanNat = cleanNat.replace(/[•·/–—,\s]+$/, '').replace(/^[•·/–—,\s]+/, '').trim();
+
   const isSwissCitizen =
     /(suisse|swiss|schweiz|svizzera)/i.test(cleanNat) ||
     /(suisse|swiss|schweiz|svizzera|citoyen|citizen)/i.test(rawPermit);
@@ -64,7 +86,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   }
 
   // Clean availability: strip modality clutter like "Remote / Hybrid / On-site"
-  let cleanAvailability = (header.availability || '').replace(/[*_]/g, '').trim();
+  let cleanAvailability = (header.availability || extractedAvailability || '').replace(/[*_]/g, '').trim();
   if (cleanAvailability.includes('|')) {
     cleanAvailability = cleanAvailability.split('|')[0].trim();
   }

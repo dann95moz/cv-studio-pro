@@ -68,7 +68,8 @@ This document defines the strict styling, formatting, content, and ATS optimizat
    - If MASTER-DATA.MD includes personal projects, open-source work, publications, or tools:
    - Selectively include 1–2 most relevant entries under "## FEATURED PROJECTS" if they strengthen alignment with the target vacancy.
    - ❌ NEVER add dates (e.g. "2024") or physical locations to personal projects. Personal projects are not employment positions.
-   - ❌ NEVER leave empty brackets like "[GitHub]()" or invent placeholder URLs. You MUST copy the exact live demo and GitHub repository URLs present in MASTER-DATA.MD (e.g., "[Live Demo](https://cv-studio-olive.vercel.app/) • [GitHub Repository](https://github.com/dann95moz/cv-studio-pro)"). If a link is not in MASTER-DATA.MD, omit that link.
+   - ❌ NEVER leave empty brackets like "[GitHub]()" or invent placeholder URLs. You MUST copy the exact live demo and GitHub repository URLs present in MASTER-DATA.MD. If a link is not in MASTER-DATA.MD, omit that link.
+   - ❌ NEVER put project live demo or repository links in the candidate's personal "contacts" array. Project links belong EXCLUSIVELY in the project entry itself.
    - Format:
      ### **[Project Name]** | [Live Demo](exact_url) • [GitHub Repository](exact_url)
      *[Role / Tech Stack / Scope without any dates or locations]*
@@ -233,7 +234,7 @@ Deliver your entire response as a single, valid JSON object (optionally inside a
       { "type": "phone", "label": "real candidate phone from MASTER-DATA" },
       { "type": "linkedin", "label": "LinkedIn", "url": "real LinkedIn URL from MASTER-DATA" },
       { "type": "github", "label": "GitHub", "url": "real GitHub URL from MASTER-DATA" },
-      { "type": "globe", "label": "Portfolio", "url": "real portfolio URL from MASTER-DATA" }
+      { "type": "globe", "label": "Portfolio", "url": "candidate personal website/portfolio from MASTER-DATA (omit if none; NEVER put project demo links here)" }
     ],
     "summary": "3-4 lines dynamic zero-fluff summary in vacancy language without bolding technology names, ending with **bold mandatory closing impact metrics**",
     "skills": [

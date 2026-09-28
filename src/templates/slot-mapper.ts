@@ -120,10 +120,47 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
   const lang: SupportedLanguage = language || data.language || 'es';
   const langDef = LANGUAGE_DEFINITIONS[lang] || LANGUAGE_DEFINITIONS.es;
 
+  // Collect all project live demos and repository URLs to ensure project links
+  // never leak into the candidate's personal contact column
+  const projectUrls = new Set<string>();
+  const addProjectUrl = (u?: string) => {
+    if (!u) return;
+    const clean = u.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (clean) projectUrls.add(clean);
+  };
+
+  for (const proj of data.projects || []) {
+    addProjectUrl(proj.demoUrl);
+    addProjectUrl(proj.repoUrl);
+  }
+  for (const exp of data.experience || []) {
+    addProjectUrl(exp.demoUrl);
+    addProjectUrl(exp.repoUrl);
+  }
+  for (const sec of data.sections || []) {
+    if (sec.type === 'projects' && sec.rawContent) {
+      const urls = sec.rawContent.match(/https?:\/\/[^\s)\]]+/g) || [];
+      for (const u of urls) addProjectUrl(u);
+    }
+  }
+
+  const isProjectUrl = (c: ContactItem): boolean => {
+    const rawUrl = (c.url || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    const rawLabel = (c.label || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (projectUrls.has(rawUrl) || projectUrls.has(rawLabel)) return true;
+    for (const pUrl of projectUrls) {
+      if (rawUrl && (rawUrl === pUrl || rawUrl.includes(pUrl) || pUrl.includes(rawUrl))) return true;
+      if (rawLabel && (rawLabel === pUrl || rawLabel.includes(pUrl) || pUrl.includes(rawLabel))) return true;
+    }
+    return false;
+  };
+
   const header: HeaderSlotData = {
     name: data.name || 'Candidate',
     title: data.title,
-    contacts: (data.contacts || []).map(cleanContactDisplayLabel),
+    contacts: (data.contacts || [])
+      .filter((c) => !isProjectUrl(c))
+      .map(cleanContactDisplayLabel),
     photo: data.photo,
     nationality: data.nationality,
     dateOfBirth: data.dateOfBirth,

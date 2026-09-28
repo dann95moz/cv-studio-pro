@@ -110,9 +110,46 @@ export function parseJsonContacts(
     });
   }
 
+  // Collect project URLs to ensure project links never pollute candidate contacts
+  const projectUrls = new Set<string>();
+  const addProjectUrl = (u?: unknown) => {
+    if (!u || typeof u !== 'string') return;
+    const clean = u.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (clean) projectUrls.add(clean);
+  };
+  const rawRoot = root as Record<string, unknown>;
+  const rawProjList = root.projects || rawRoot.project || rawRoot.featuredProjects;
+  if (Array.isArray(rawProjList)) {
+    for (const p of rawProjList) {
+      if (p && typeof p === 'object') {
+        const pObj = p as Record<string, unknown>;
+        addProjectUrl(pObj.demoUrl || pObj.website || pObj.liveUrl || pObj.url || pObj.link);
+        addProjectUrl(pObj.repoUrl || pObj.github || pObj.repository || pObj.codeUrl || pObj.sourceUrl);
+      }
+    }
+  }
+  if (fallbackCv?.projects) {
+    for (const fp of fallbackCv.projects) {
+      addProjectUrl(fp.demoUrl);
+      addProjectUrl(fp.repoUrl);
+    }
+  }
+
+  const isProjectUrl = (c: ContactItem): boolean => {
+    const rawUrl = (c.url || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    const rawLabel = (c.label || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (projectUrls.has(rawUrl) || projectUrls.has(rawLabel)) return true;
+    for (const pUrl of projectUrls) {
+      if (rawUrl && (rawUrl === pUrl || rawUrl.includes(pUrl) || pUrl.includes(rawUrl))) return true;
+      if (rawLabel && (rawLabel === pUrl || rawLabel.includes(pUrl) || pUrl.includes(rawLabel))) return true;
+    }
+    return false;
+  };
+
   // Enrich missing contacts from fallbackCv
   if (fallbackCv?.contacts && fallbackCv.contacts.length > 0) {
     for (const fc of fallbackCv.contacts) {
+      if (isProjectUrl(fc)) continue;
       const existing = contacts.find((c) => c.type === fc.type);
       if (!existing) {
         contacts.push(fc);
@@ -122,7 +159,7 @@ export function parseJsonContacts(
     }
   }
 
-  return contacts;
+  return contacts.filter((c) => !isProjectUrl(c));
 }
 
 /**
