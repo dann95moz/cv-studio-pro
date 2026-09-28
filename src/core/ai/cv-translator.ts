@@ -177,7 +177,19 @@ CRITICAL INTEGRITY & NON-LITERAL TRANSLATION RULES:
      - References (e.g. "Références disponibles sur demande")
 6. NATURAL NARRATIVE & VERB TENSES:
    - For bullet points and summaries, translate action verbs and business impact narratives using strong, natural executive phrasing in ${targetLangName} following the Google XYZ formula.
-${isSpanish ? '   - **CRITICAL SPANISH VERB STANDARD (MANDATORY INFINITIVE):** In Spanish, ALL experience and project bullet points MUST begin with action verbs in the **INFINITIVE** form (e.g., Diseñar, Desarrollar, Implementar, Optimizar, Liderar, Refactorizar, Reducir, Coordinar). ❌ NEVER translate action verbs into past tense / pretérito (e.g. Diseñó, Desarrollé, Implementó, Optimizó).\n' : ''}
+${isSpanish ? '   - **CRITICAL SPANISH VERB STANDARD (MANDATORY INFINITIVE):** In Spanish, ALL experience and project bullet points MUST begin with action verbs in the **INFINITIVE** form (e.g., Diseñar, Desarrollar, Implementar, Optimizar, Liderar, Refactorizar, Reducir, Coordinar). ❌ NEVER translate action verbs into past tense / pretérito (e.g. Diseñó, Desarrollé, Implementó, Optimizó).\n' : ''}7. ACADEMIC DEGREES, DIPLOMAS & CERTIFICATIONS (MANDATORY LOCALIZATION):
+   - Academic Degrees and Majors MUST be translated into their natural academic equivalent in ${targetLangName}:
+     - e.g. "B.S. in Environmental Management" ➡️ in French: "Licence en Gestion Environnementale" or "Bachelor en Gestion de l'Environnement" (in German: "Bachelor in Umweltmanagement", in Spanish: "Grado / Pregrado en Gestión Ambiental").
+     - ❌ NEVER leave degree titles in English when translating into French, German, Spanish, or Italian.
+     - Keep the institution or university name intact as an authentic proper noun (e.g. "– Universidad Piloto de Colombia, 2020").
+   - Certifications, Courses & Specializations:
+     - Descriptive course and certification titles MUST be translated into ${targetLangName} while preserving technical framework/tool names (e.g. "Frontend Web Development in React.js" ➡️ in French: "Développement Web Frontend & React.js", in Spanish: "Desarrollo Web Frontend en React.js", in German: "Frontend-Webentwicklung mit React.js").
+     - Keep the issuer/platform name intact (e.g. "– Platzi, 2023", "– Coursera / DeepLearning.AI").
+8. AUTHENTIC TECHNICAL INDUSTRY VOCABULARY (NO AWKWARD FAUX-TRANSLATIONS):
+   - In tech engineering, use standard industry terminology rather than literal or artificial translations:
+     - In French: Use "design system" (❌ NEVER use "stylage" or "habillage" for UI component design systems). For example: "...en migrant le design system de Kendo UI vers Material UI (MUI)...".
+     - In French: Use "gestion d'état" (or "state management"), "composants modulaires / réutilisables", "intégration continue (CI/CD)", "tests unitaires et d'intégration".
+     - In Spanish/German/Italian: Use standard technical engineering idioms ("design system / sistema de diseño", "Design System", etc.).
 === STRICT OUTPUT FORMAT (JSON SCHEMA) ===
 CRITICAL: You MUST return a single, strictly valid JSON object (optionally inside a \`\`\`json ... \`\`\` code block) adhering strictly to this schema. ❌ NEVER return raw unstructured text.
 

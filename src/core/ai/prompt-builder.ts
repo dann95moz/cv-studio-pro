@@ -51,11 +51,14 @@ This document defines the strict styling, formatting, content, and ATS optimizat
    - In EVERY experience bullet, strategically BOLD (**keyword**) 1 to 2 critical matching technical terms (e.g. **TypeScript**, **Angular**, **Webpack Module Federation**) and quantifiable metrics/results (e.g. **50% reduction in CI/CD build times**, **40% drop in runtime errors**).
    - In the PROFESSIONAL SUMMARY, apply bolding ONLY to the final 2-3 quantitative metrics/percentages. ❌ NEVER bold technology names, tools, or buzzwords in the summary (they are already featured in the Technical Skills section below).
 
-8. EDUCATION & CERTIFICATIONS (STRICT 3–5 CERTIFICATION CAP):
+8. EDUCATION & CERTIFICATIONS (STRICT 3–5 CERTIFICATION CAP & DEGREE LOCALIZATION):
    - In "EDUCATION & CERTIFICATIONS", list each university degree and each certification as its OWN individual bullet point on a separate line (one bullet per line, forming a clean vertical column).
    - ❌ NEVER group multiple certifications into a single inline line separated by pipes or commas.
    - ❌ NEVER output 6 or more certifications under any circumstance. Strictly select between 3 and 5 (ideally 4) most relevant certifications to TARGET-JOB.MD.
    - Prioritize high-signal technical credentials and omit basic/introductory courses (e.g. basic Git or generic documentation courses) when higher-signal credentials exist.
+   - MANDATORY DEGREE & CERTIFICATION LOCALIZATION:
+     - When synthesizing the CV in the detected natural language (e.g. French, German, Spanish, Italian), you MUST translate academic degrees and majors to that language (e.g., "B.S. in Environmental Management" ➡️ in French: "Licence en Gestion Environnementale" / "Bachelor en Gestion de l'Environnement", in Spanish: "Pregrado en Gestión Ambiental", in German: "Bachelor in Umweltmanagement"). Keep the university/institution name intact as a proper noun.
+     - Translate descriptive course/certification topics into the target language while retaining technology/framework names (e.g., "Frontend Web Development in React.js" ➡️ in French: "Développement Web Frontend & React.js", in Spanish: "Desarrollo Web Frontend en React.js", in German: "Frontend-Webentwicklung mit React.js"). Keep issuer name intact.
    - ✅ Format each entry as:
      - **[Degree / Major]** – [Institution], [Year]
      - **[Certification Name 1]** – [Issuer], [Year]
@@ -75,6 +78,11 @@ This document defines the strict styling, formatting, content, and ATS optimizat
     - Format:
       - **[Language 1]:** Native
       - **[Language 2]:** [CEFR Level] (e.g. B2 – Upper Intermediate, C1 – Advanced)
+
+11. AUTHENTIC TECHNICAL INDUSTRY VOCABULARY:
+    - Employ standard engineering terminology in the target language.
+    - In French: Use "design system" (❌ NEVER use "stylage" or "habillage" for UI component frameworks, e.g. "...en migrant le design system de Kendo UI vers Material UI (MUI)..."), "gestion d'état" / "state management", "composants modulaires / réutilisables", "intégration continue (CI/CD)".
+    - In Spanish/German/Italian: Use standard technical vocabulary ("design system / sistema de diseño", "Design System", etc.).
 `;
 
 export interface PromptBundle {
