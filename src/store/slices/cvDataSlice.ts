@@ -204,10 +204,18 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       const hasParsedContent = Boolean(
         parsedData && (parsedData.name || parsedData.summary || parsedData.experience?.length || parsedData.skillGroups?.length)
       );
+      const prevVariantCvData = translations[activeLanguage].cvData;
       const updatedVariant: CvTranslationVariant = {
         ...translations[activeLanguage],
         cvMarkdown: nextVariantText,
-        cvData: hasParsedContent ? parsedData : translations[activeLanguage].cvData,
+        cvData: hasParsedContent
+          ? {
+              ...parsedData,
+              sidebarSectionOrder: prevVariantCvData?.sidebarSectionOrder,
+              mainSectionOrder: prevVariantCvData?.mainSectionOrder,
+              sectionPlacement: prevVariantCvData?.sectionPlacement,
+            }
+          : translations[activeLanguage].cvData,
         updatedAt: new Date().toISOString(),
       };
       set({

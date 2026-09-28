@@ -69,17 +69,23 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
       }}
       onDragLeave={(e) => {
         e.stopPropagation();
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          setDropPosition(null);
+        }
+      }}
+      onDragEnd={() => {
+        setIsHovered(false);
         setDropPosition(null);
       }}
       onDrop={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        const finalDropPos = dropPosition;
+        const finalDropPos = dropPosition || 'after';
         setDropPosition(null);
         setIsHovered(false);
-        const sourceId = e.dataTransfer.getData('cv-section-id');
+        const sourceId = e.dataTransfer.getData('cv-section-id') || e.dataTransfer.getData('text/plain');
         if (sourceId && sourceId !== sectionId) {
-          onReorder(sourceId, column, undefined, sectionId, finalDropPos || 'after');
+          onReorder(sourceId, column, undefined, sectionId, finalDropPos);
         }
       }}
       style={{
@@ -126,17 +132,22 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
           e.dataTransfer.setData('text/plain', sectionId);
           e.dataTransfer.effectAllowed = 'move';
         }}
+        onDragEnd={() => {
+          setIsHovered(false);
+          setDropPosition(null);
+        }}
         title="Arrastra para reordenar arriba/abajo o mover a la otra columna"
         style={{
           position: 'absolute',
           top: 0,
           right: 0,
-          display: isHovered ? 'inline-flex' : 'none',
+          display: 'inline-flex',
           alignItems: 'center',
           gap: '2px',
           justifyContent: 'center',
           cursor: 'grab',
           opacity: isHovered ? 0.9 : 0,
+          pointerEvents: isHovered ? 'auto' : 'none',
           transition: 'opacity 0.15s ease, background-color 0.15s ease',
           padding: '2px 6px',
           borderRadius: '4px',
