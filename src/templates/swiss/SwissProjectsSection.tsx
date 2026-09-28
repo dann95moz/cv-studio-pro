@@ -52,40 +52,40 @@ export const SwissProjectsSection: React.FC<SwissProjectsSectionProps> = ({
                 />
               )}
               {proj.demoUrl && (
-                <a
-                  href={proj.demoUrl.startsWith('http') ? proj.demoUrl : `https://${proj.demoUrl}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontSize: '10px',
-                    color: 'var(--cv-primary, #0284c7)',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '2px',
-                  }}
-                >
-                  🔗 {proj.demoUrl.replace(/^https?:\/\//i, '').replace(/\/+$/, '')}
-                </a>
+                <span style={{ fontSize: '10px', color: '#64748b' }}>
+                  [
+                  <a
+                    href={proj.demoUrl.startsWith('http') ? proj.demoUrl : `https://${proj.demoUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: 'var(--cv-primary, #0284c7)',
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {proj.demoUrl.replace(/^https?:\/\//i, '').replace(/\/+$/, '')}
+                  </a>
+                  ]
+                </span>
               )}
               {proj.repoUrl && (
-                <a
-                  href={proj.repoUrl.startsWith('http') ? proj.repoUrl : `https://${proj.repoUrl}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontSize: '10px',
-                    color: 'var(--cv-primary, #0284c7)',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '2px',
-                  }}
-                >
-                  💻 GitHub
-                </a>
+                <span style={{ fontSize: '10px', color: '#64748b' }}>
+                  [
+                  <a
+                    href={proj.repoUrl.startsWith('http') ? proj.repoUrl : `https://${proj.repoUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: 'var(--cv-primary, #0284c7)',
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                    }}
+                  >
+                    GitHub
+                  </a>
+                  ]
+                </span>
               )}
             </div>
             {proj.bullets && (
