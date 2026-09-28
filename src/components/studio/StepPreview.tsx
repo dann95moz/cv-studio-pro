@@ -156,13 +156,15 @@ export const StepPreview: React.FC<StepPreviewProps> = () => {
       </Box>
 
       {/* Mobile Floating Action Button (FAB) & Bottom Sheet Tools */}
-      <StepPreviewMobileControls
-        facade={facade}
-        isMobile={isMobile}
-        isCanvasZoomed={isCanvasZoomed}
-        effectiveCanvasScale={effectiveCanvasScale}
-        handleResetFitZoom={handleResetFitZoom}
-      />
+      {isMobile && (
+        <StepPreviewMobileControls
+          facade={facade}
+          isMobile={isMobile}
+          isCanvasZoomed={isCanvasZoomed}
+          effectiveCanvasScale={effectiveCanvasScale}
+          handleResetFitZoom={handleResetFitZoom}
+        />
+      )}
 
       {/* All Studio Dialogs, Modals & Alerts */}
       <StepPreviewModalsContainer facade={facade} />

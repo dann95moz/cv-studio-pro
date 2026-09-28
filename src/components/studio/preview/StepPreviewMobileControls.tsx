@@ -42,6 +42,11 @@ export const StepPreviewMobileControls: React.FC<StepPreviewMobileControlsProps>
     }
   }, [isMobileToolsOpen]);
 
+  // Guard: Never render mobile controls or overlays on desktop viewports
+  if (!isMobile) {
+    return null;
+  }
+
   return (
     <>
       {/* Mobile Floating Action Button (FAB) Trigger */}

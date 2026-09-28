@@ -24,6 +24,7 @@ export const MobileStudioFab: React.FC<MobileStudioFabProps> = ({ onClick }) => 
       aria-label={t('preview:navRail.templates', 'Herramientas de edición')}
       sx={{
         position: 'fixed',
+        display: { xs: 'flex', md: 'none' },
         bottom: 'calc(env(safe-area-inset-bottom) + 72px)',
         right: 20,
         zIndex: theme.zIndex.speedDial || 1050,

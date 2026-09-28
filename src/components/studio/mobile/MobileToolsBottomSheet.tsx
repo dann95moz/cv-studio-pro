@@ -158,9 +158,13 @@ export const MobileToolsBottomSheet: React.FC<MobileToolsBottomSheetProps> = ({
       anchor="bottom"
       open={open}
       onClose={handleClose}
+      className="no-print"
+      sx={{ display: { xs: 'block', md: 'none' } }}
       slotProps={{
         paper: {
           sx: {
+            display: { xs: 'flex', md: 'none' },
+            flexDirection: 'column',
             borderTopLeftRadius: RADIUS_TOKENS.xl,
             borderTopRightRadius: RADIUS_TOKENS.xl,
             bgcolor: 'background.paper',
