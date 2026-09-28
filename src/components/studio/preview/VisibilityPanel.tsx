@@ -72,8 +72,17 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
   const notSetLabel = t('preview:panels.design.visibility.notSet', 'No configurado');
   const isNotConfigured = !subtitle || subtitle === notSetLabel;
 
+  const handleRowClick = () => {
+    if (isNotConfigured && onEdit) {
+      onEdit();
+    } else {
+      onToggle();
+    }
+  };
+
   return (
     <Box
+      onClick={handleRowClick}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -81,6 +90,8 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
         py: 1,
         px: 1.25,
         borderRadius: 1.5,
+        cursor: 'pointer',
+        userSelect: 'none',
         transition: 'background-color 0.15s ease',
         '&:hover': {
           bgcolor: 'action.hover',
@@ -88,12 +99,10 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
       }}
     >
       <Box
-        onClick={onEdit}
         sx={{
           minWidth: 0,
           pr: 1.5,
           flex: 1,
-          cursor: onEdit ? 'pointer' : 'default',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -114,6 +123,7 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
                   ? t('preview:panels.design.visibility.configureValue', 'Configurar valor')
                   : t('preview:panels.design.visibility.editValue', 'Editar valor')
               }
+              slotProps={{ popper: { sx: { pointerEvents: 'none' } } }}
             >
               <IconButton
                 size="small"
@@ -159,13 +169,20 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
             ? t('preview:panels.design.visibility.visibleOnCv', 'Visible en el CV (clic para ocultar)')
             : t('preview:panels.design.visibility.hiddenOnCv', 'Oculto en el CV (clic para mostrar)')
         }
+        slotProps={{ popper: { sx: { pointerEvents: 'none' } } }}
       >
-        <Switch
-          size="small"
-          checked={checked}
-          onChange={onToggle}
-          sx={{ flexShrink: 0 }}
-        />
+        <Box component="span" sx={{ display: 'inline-flex' }}>
+          <Switch
+            size="small"
+            checked={checked}
+            onChange={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            sx={{ flexShrink: 0 }}
+          />
+        </Box>
       </Tooltip>
     </Box>
   );
