@@ -15,6 +15,8 @@ import {
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import { useTranslation } from 'react-i18next';
 import { safeMarkdown, safeMarkdownInline } from '../../../utils/sanitize';
 import { CVData } from '../../../types/cv';
@@ -396,6 +398,7 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
               {item.bullets && item.bullets.map((bullet, bIdx) => {
                 const fieldKey = `experience-${idx}-${bIdx}`;
                 const hasUndo = liveEdit?.undoMap[fieldKey] !== undefined;
+                const isBulletDisabled = liveEdit?.isBulletDisabled('experience', idx, bIdx) ?? false;
 
                 return (
                   <Card
@@ -403,6 +406,9 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                     variant="outlined"
                     sx={{
                       bgcolor: 'background.paper',
+                      opacity: isBulletDisabled ? 0.6 : 1,
+                      borderStyle: isBulletDisabled ? 'dashed' : 'solid',
+                      transition: 'opacity 0.2s ease',
                     }}
                   >
                     <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -411,6 +417,7 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                           fontSize: '0.86rem',
                           lineHeight: 1.5,
                           color: 'text.primary',
+                          textDecoration: isBulletDisabled ? 'line-through' : 'none',
                           mb: 1.75,
                           '& strong': { fontWeight: 700, color: 'text.primary' },
                         }}
@@ -418,6 +425,17 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                       />
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap' }}>
+                        <Button
+                          size="medium"
+                          variant={isBulletDisabled ? 'contained' : 'outlined'}
+                          color={isBulletDisabled ? 'inherit' : 'primary'}
+                          onClick={() => liveEdit?.toggleBulletVisibility('experience', idx, bIdx)}
+                          startIcon={isBulletDisabled ? <VisibilityRoundedIcon sx={{ fontSize: 16 }} /> : <VisibilityOffRoundedIcon sx={{ fontSize: 16 }} />}
+                          title={t('preview:bullets.toggleTooltip', 'Activar o desactivar viñeta para ahorrar espacio')}
+                        >
+                          {isBulletDisabled ? t('preview:bullets.activate', 'Activar') : t('preview:bullets.deactivate', 'Ocultar')}
+                        </Button>
+
                         <Button
                           size="medium"
                           variant="outlined"
@@ -511,6 +529,7 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
               {item.bullets && item.bullets.map((bullet, bIdx) => {
                 const fieldKey = `projects-${idx}-${bIdx}`;
                 const hasUndo = liveEdit?.undoMap[fieldKey] !== undefined;
+                const isBulletDisabled = liveEdit?.isBulletDisabled('projects', idx, bIdx) ?? false;
 
                 return (
                   <Card
@@ -518,6 +537,9 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                     variant="outlined"
                     sx={{
                       bgcolor: 'background.paper',
+                      opacity: isBulletDisabled ? 0.6 : 1,
+                      borderStyle: isBulletDisabled ? 'dashed' : 'solid',
+                      transition: 'opacity 0.2s ease',
                     }}
                   >
                     <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -526,6 +548,7 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                           fontSize: '0.88rem',
                           lineHeight: 1.55,
                           color: 'text.primary',
+                          textDecoration: isBulletDisabled ? 'line-through' : 'none',
                           mb: 1.75,
                           '& strong': { fontWeight: 700, color: 'text.primary' },
                         }}
@@ -533,6 +556,17 @@ export const StepPreviewMobileEdit: React.FC<StepPreviewMobileEditProps> = ({ pa
                       />
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap' }}>
+                        <Button
+                          size="medium"
+                          variant={isBulletDisabled ? 'contained' : 'outlined'}
+                          color={isBulletDisabled ? 'inherit' : 'primary'}
+                          onClick={() => liveEdit?.toggleBulletVisibility('projects', idx, bIdx)}
+                          startIcon={isBulletDisabled ? <VisibilityRoundedIcon sx={{ fontSize: 16 }} /> : <VisibilityOffRoundedIcon sx={{ fontSize: 16 }} />}
+                          title={t('preview:bullets.toggleTooltip', 'Activar o desactivar viñeta para ahorrar espacio')}
+                        >
+                          {isBulletDisabled ? t('preview:bullets.activate', 'Activar') : t('preview:bullets.deactivate', 'Ocultar')}
+                        </Button>
+
                         <Button
                           size="medium"
                           variant="outlined"
