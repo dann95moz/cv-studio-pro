@@ -79,11 +79,18 @@ export async function generateDirectPdf(
     const canvas = await html2canvas(element, {
       scale: qualityScale,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       backgroundColor: '#ffffff',
       logging: false,
       windowWidth: formatConfig.widthPx,
       onclone: (clonedDoc) => {
+        // Ensure cloned root and body are explicitly visible and unhidden
+        const clonedRoot = clonedDoc.getElementById('root');
+        if (clonedRoot) {
+          clonedRoot.style.display = '';
+          clonedRoot.removeAttribute('aria-hidden');
+        }
+
         // Ensure cloned document is in light mode with crisp styling
         clonedDoc.documentElement.setAttribute('data-theme', 'light');
         clonedDoc.documentElement.style.colorScheme = 'light';
@@ -97,11 +104,12 @@ export async function generateDirectPdf(
 
         if (clonedDoc.body) {
           clonedDoc.body.style.backgroundColor = '#ffffff';
+          clonedDoc.body.style.display = '';
         }
 
-        // Hide all hover actions, bubbles, drag handles, and interactive toolbars
+        // Hide all hover actions, bubbles, drag handles, and interactive toolbars (scoped without rogue aria-hidden)
         clonedDoc.querySelectorAll(
-          '.no-print, .preview-mobile-edit, .cv-ai-hover-actions, .cv-selection-bubble, .cv-ai-sparkle-btn, .cv-undo-button, .photo-upload-placeholder, .cv-dnd-handle, .cv-dnd-drop-indicator, .cv-bullet-action, .cv-column-resizer, [data-no-ats="true"], [aria-hidden="true"]'
+          '.no-print, .preview-mobile-edit, .cv-ai-hover-actions, .cv-selection-bubble, .cv-ai-sparkle-btn, .cv-undo-button, .photo-upload-placeholder, .cv-dnd-handle, .cv-dnd-drop-indicator, .cv-bullet-action, .cv-column-resizer, [data-no-ats="true"]'
         ).forEach((el) => {
           (el as HTMLElement).style.display = 'none';
         });
@@ -142,9 +150,20 @@ export async function generateDirectPdf(
       }
     });
 
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) {
+      throw new Error(`[browser-pdf-generator] Invalid canvas dimensions generated: ${canvas?.width}x${canvas?.height}`);
+    }
+
     if (onProgress) onProgress('rendering');
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.90);
+    let imgData: string;
+    try {
+      imgData = canvas.toDataURL('image/jpeg', 0.90);
+    } catch {
+      // Fallback to PNG if JPEG encoding is blocked or fails
+      imgData = canvas.toDataURL('image/png');
+    }
+
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',

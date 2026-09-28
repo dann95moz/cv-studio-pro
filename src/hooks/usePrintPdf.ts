@@ -75,6 +75,9 @@ export const usePrintPdf = () => {
     setExportStatus('rendering');
 
     try {
+      // Brief tick to let active dropdown menus or toolbars settle before DOM capture
+      await new Promise((resolve) => setTimeout(resolve, 80));
+
       const { generateDirectPdf } = await import('../core/browser-pdf-generator');
       await generateDirectPdf(element, {
         fileName,
@@ -88,7 +91,7 @@ export const usePrintPdf = () => {
         }
       });
     } catch (error) {
-      console.warn('Direct PDF export failed, falling back to browser print:', error);
+      console.error('[usePrintPdf] Direct PDF export failed, falling back to browser print:', error);
       handlePrintPdf(fileName, pageFormat);
     } finally {
       setIsExportingPdf(false);
