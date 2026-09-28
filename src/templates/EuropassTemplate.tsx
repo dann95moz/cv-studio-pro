@@ -111,23 +111,50 @@ export const EuropassTemplate: React.FC<CVTemplateProps> = ({ slots, theme, data
               );
             })}
 
+            {header.workPermit && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontWeight: 700, color: euBlue }}>
+                  {slots.language === 'fr' ? 'Permis de travail :' :
+                   slots.language === 'de' ? 'Bewilligung:' :
+                   slots.language === 'es' ? 'Permiso de trabajo:' :
+                   slots.language === 'it' ? 'Permesso di lavoro:' : 'Work permit:'}
+                </span>
+                <span>{header.workPermit}</span>
+              </div>
+            )}
+
             {header.nationality && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontWeight: 700, color: euBlue }}>Nationality:</span>
+                <span style={{ fontWeight: 700, color: euBlue }}>
+                  {slots.language === 'fr' ? 'Nationalité :' :
+                   slots.language === 'de' ? 'Nationalität:' :
+                   slots.language === 'es' ? 'Nacionalidad:' :
+                   slots.language === 'it' ? 'Nazionalità:' : 'Nationality:'}
+                </span>
                 <span>{header.nationality}</span>
               </div>
             )}
 
             {header.dateOfBirth && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontWeight: 700, color: euBlue }}>Date of birth:</span>
+                <span style={{ fontWeight: 700, color: euBlue }}>
+                  {slots.language === 'fr' ? 'Date de naissance :' :
+                   slots.language === 'de' ? 'Geburtsdatum:' :
+                   slots.language === 'es' ? 'Fecha de nacimiento:' :
+                   slots.language === 'it' ? 'Data di nascita:' : 'Date of birth:'}
+                </span>
                 <span>{header.dateOfBirth}</span>
               </div>
             )}
 
             {header.drivingLicense && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontWeight: 700, color: euBlue }}>Driving licence:</span>
+                <span style={{ fontWeight: 700, color: euBlue }}>
+                  {slots.language === 'fr' ? 'Permis de conduire :' :
+                   slots.language === 'de' ? 'Führerschein:' :
+                   slots.language === 'es' ? 'Permiso de conducir:' :
+                   slots.language === 'it' ? 'Patente:' : 'Driving licence:'}
+                </span>
                 <span>{header.drivingLicense}</span>
               </div>
             )}

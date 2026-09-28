@@ -1,94 +1,10 @@
 /* ==========================================================================
    CV STUDIO PRO - REUSABLE SHARED UI COMPONENTS
-   Single Responsibility: Generic buttons, cards, textareas & overlays
+   Single Responsibility: Textareas, overlays, cards & fullscreen layouts
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Studio Buttons
-   -------------------------------------------------------------------------- */
-.studio-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 8px 20px;
-  border-radius: var(--radius-full);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  text-decoration: none;
-  line-height: 1.2;
-}
-
-.studio-btn-primary {
-  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
-  color: #ffffff;
-  box-shadow: var(--pill-shadow);
-}
-
-.studio-btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px var(--accent-glow);
-}
-
-.studio-btn-tonal {
-  background: var(--primary-container);
-  color: var(--on-primary-container);
-  border: 1px solid var(--outline-variant);
-}
-
-.studio-btn-tonal:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--pill-shadow);
-}
-
-.studio-btn-secondary {
-  background: var(--card-bg);
-  color: var(--text-main);
-  border: 1px solid var(--border);
-}
-
-.studio-btn-secondary:hover {
-  background: var(--card-hover);
-  border-color: var(--border-light);
-  transform: translateY(-1px);
-}
-
-.studio-btn-danger {
-  background: var(--danger-container);
-  color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.studio-btn-danger:hover {
-  background: var(--danger);
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.btn-sm {
-  padding: 4px 14px;
-  font-size: 0.78rem;
-}
-
-.btn-xs {
-  padding: 3px 10px;
-  font-size: 0.72rem;
-}
-
-.btn-lg {
-  padding: 12px 28px;
-  font-size: 0.95rem;
-}
-
-.btn-full {
-  width: 100%;
-}
-
-/* --------------------------------------------------------------------------
-   2. Textarea & Code Inputs
+   1. Textarea & Code Inputs
    -------------------------------------------------------------------------- */
 .studio-textarea {
   width: 100%;
@@ -167,61 +83,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. Synthesis Notification / Error Banner
-   -------------------------------------------------------------------------- */
-.synthesis-error-banner {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  max-width: 480px;
-  background: var(--panel-bg);
-  border: 1.5px solid var(--danger);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  box-shadow: var(--box-shadow);
-  z-index: 1000;
-  animation: slideUpError 0.25s ease-out;
-}
-
-@keyframes slideUpError {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.error-banner-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.error-banner-header h4 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--danger);
-  margin: 0;
-}
-
-.error-banner-content p {
-  font-size: 0.84rem;
-  line-height: 1.45;
-  color: var(--text-muted);
-  margin: 0 0 12px 0;
-}
-
-.error-banner-actions {
-  display: flex;
-  gap: 10px;
-}
-
-/* --------------------------------------------------------------------------
-   8. Fullscreen Workspace Layouts
+   3. Fullscreen Workspace Layouts
    -------------------------------------------------------------------------- */
 .settings-workspace-layout,
 .history-workspace-layout,

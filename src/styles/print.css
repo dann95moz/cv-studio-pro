@@ -139,8 +139,7 @@
   .MuiButton-root,
   .MuiIconButton-root,
   .MuiButtonGroup-root,
-  .MuiTooltip-popper,
-  .synthesis-error-banner {
+  .MuiTooltip-popper {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
