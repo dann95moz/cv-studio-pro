@@ -49,16 +49,8 @@ export function parseExperienceBlocks(content: string, contacts: ContactItem[] =
     }
 
     const compOrHeaderLower = fullHeaderRaw.toLowerCase();
-    if (compOrHeaderLower.includes('cv studio') || compOrHeaderLower.includes('tailor engine')) {
-      if (!demoUrl) demoUrl = APP_LINKS.DEMO_URL;
-      if (!repoUrl) repoUrl = APP_LINKS.GITHUB_REPO;
-    } else if (!repoUrl && /\b(github|repo|repository)\b/i.test(compOrHeaderLower)) {
-      const ghContact = contacts.find((c) => c.type === 'github');
-      if (ghContact?.url) {
-        const firstLineCompany = lines[0].replace(/^###\s+/, '').split('|')[0].replace(/[*_]/g, '').trim();
-        const slug = firstLineCompany.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-        if (slug) repoUrl = `${ghContact.url.replace(/\/+$/, '')}/${slug}`;
-      }
+    if (!demoUrl && (compOrHeaderLower.includes('cv studio') || compOrHeaderLower.includes('tailor engine'))) {
+      demoUrl = APP_LINKS.DEMO_URL;
     }
 
     // Line 1: Header line (e.g. "### **Company** | Location" or "### Role | Company" or "### Company | Oct 2024 – Present")

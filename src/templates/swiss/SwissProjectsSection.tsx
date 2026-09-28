@@ -43,51 +43,48 @@ export const SwissProjectsSection: React.FC<SwissProjectsSectionProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {projects.items.map((proj, pIdx) => (
           <div key={pIdx}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '11.5px' }}>{proj.company}</span>
-              {proj.role && (
-                <span
-                  style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600 }}
-                  dangerouslySetInnerHTML={{ __html: safeMarkdownInline(proj.role) }}
-                />
-              )}
-              {proj.demoUrl && (
-                <span style={{ fontSize: '10px', color: '#64748b' }}>
-                  [
-                  <a
-                    href={proj.demoUrl.startsWith('http') ? proj.demoUrl : `https://${proj.demoUrl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: 'var(--cv-primary, #0284c7)',
-                      textDecoration: 'none',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {proj.demoUrl.replace(/^https?:\/\//i, '').replace(/\/+$/, '')}
-                  </a>
-                  ]
-                </span>
-              )}
-              {proj.repoUrl && (
-                <span style={{ fontSize: '10px', color: '#64748b' }}>
-                  [
-                  <a
-                    href={proj.repoUrl.startsWith('http') ? proj.repoUrl : `https://${proj.repoUrl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: 'var(--cv-primary, #0284c7)',
-                      textDecoration: 'none',
-                      fontWeight: 600,
-                    }}
-                  >
-                    GitHub
-                  </a>
-                  ]
-                </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px' }}>
+              <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '11.5px' }}>{proj.company}</span>
+              {(proj.demoUrl || proj.repoUrl) && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10px', flexShrink: 0 }}>
+                  {proj.demoUrl && (
+                    <a
+                      href={proj.demoUrl.startsWith('http') ? proj.demoUrl : `https://${proj.demoUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: 'var(--cv-primary, #0284c7)',
+                        textDecoration: 'none',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {proj.demoUrl.replace(/^https?:\/\//i, '').replace(/\/+$/, '')}
+                    </a>
+                  )}
+                  {proj.demoUrl && proj.repoUrl && <span style={{ color: '#94a3b8' }}>•</span>}
+                  {proj.repoUrl && (
+                    <a
+                      href={proj.repoUrl.startsWith('http') ? proj.repoUrl : `https://${proj.repoUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: 'var(--cv-primary, #0284c7)',
+                        textDecoration: 'none',
+                        fontWeight: 600,
+                      }}
+                    >
+                      GitHub
+                    </a>
+                  )}
+                </div>
               )}
             </div>
+            {proj.role && (
+              <div
+                style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600, marginTop: '1px' }}
+                dangerouslySetInnerHTML={{ __html: safeMarkdownInline(proj.role) }}
+              />
+            )}
             {proj.bullets && (
               <ul style={{ margin: '2px 0 0 0', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {proj.bullets.map((b, bIdx) => {
