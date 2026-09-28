@@ -68,7 +68,7 @@ export function parseExperienceBlocks(content: string, contacts: ContactItem[] =
     const part1 = headerParts.length > 1 ? headerParts[1] : '';
     const part2 = headerParts.length > 2 ? headerParts.slice(2).join(' | ') : '';
 
-    const roleKeywords = /\b(developer|engineer|architect|consultant|specialist|designer|manager|lead|director|analyst|programmer|intern|assistant|desarrollador|ingeniero|l[ií]der|gerente|arquitecto|analista|consultor|especialista)\b/i;
+    const roleKeywords = /\b(developer|engineer|architect|consultant|specialist|designer|manager|lead|director|analyst|programmer|intern|assistant|desarrollador|ingeniero|l[ií]der|gerente|arquitecto|analista|consultor|especialista|cr[ée]ateur|architecte|d[ée]veloppeur|ing[ée]nieur|responsable|fondateur|auteur|directeur|entwickler|ingenieur|berater|sviluppatore|ingegnere)\b/i;
     const isDatePattern = (str: string) => /\b(19\d\d|20\d\d|presente|present|actualidad|current)\b/i.test(str);
 
     if (part1 && roleKeywords.test(part0) && !roleKeywords.test(part1)) {
@@ -82,6 +82,13 @@ export function parseExperienceBlocks(content: string, contacts: ContactItem[] =
           if (isDatePattern(part2)) date = part2;
           else location = part2;
         }
+      }
+    } else if (part1 && roleKeywords.test(part1)) {
+      company = part0;
+      role = part1;
+      if (part2) {
+        if (isDatePattern(part2)) date = part2;
+        else location = part2;
       }
     } else {
       company = part0;
@@ -124,6 +131,22 @@ export function parseExperienceBlocks(content: string, contacts: ContactItem[] =
       const line = lines[lineIdx];
       const isDisabled = /^<!--\s*disabled\s*-->/i.test(line);
       const cleanLine = line.replace(/^<!--\s*disabled\s*-->\s*/i, '');
+
+      // Check for standalone Demo or Repo url lines (e.g. "Démo : cv-studio-olive.vercel.app")
+      const demoLineMatch = cleanLine.match(/^(?:[-*•·+]\s*)?(?:D[ée]mo|Live\s*Demo|Demo|Sitio|Website)\s*[:：]\s*(https?:\/\/[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i);
+      if (demoLineMatch) {
+        let matchedUrl = demoLineMatch[1].trim();
+        if (!matchedUrl.startsWith('http')) matchedUrl = `https://${matchedUrl}`;
+        demoUrl = demoUrl || matchedUrl;
+      }
+
+      const repoLineMatch = cleanLine.match(/^(?:[-*•·+]\s*)?(?:GitHub(?:\s*Repository)?|Repo(?:sitory)?|Code|C[oó]digo)\s*[:：]\s*(https?:\/\/[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i);
+      if (repoLineMatch) {
+        let matchedUrl = repoLineMatch[1].trim();
+        if (!matchedUrl.startsWith('http')) matchedUrl = `https://${matchedUrl}`;
+        repoUrl = repoUrl || matchedUrl;
+      }
+
       if (cleanLine.startsWith('- ') || cleanLine.startsWith('* ') || cleanLine.startsWith('• ') || cleanLine.startsWith('+ ')) {
         const bulletText = cleanLine.replace(/^[-*•·+]\s+/, '').trim();
         if (bulletText) {

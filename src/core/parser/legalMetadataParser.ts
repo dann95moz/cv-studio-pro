@@ -31,6 +31,15 @@ export function parseLegalMetadata(pLine: string): { key: keyof LegalMetadataRes
     return { key: 'nationality', value: cleanHumanText(natMatch[1]) };
   }
 
+  const originMatch = cleanMeta.match(
+    /^\*{0,2}(?:Lieu\s+d['’]origine|Originaire\s+de|Heimatort|Place\s+of\s+origin|Luogo\s+d['’]origine)\*{0,2}[:\s]+(.+)$/i
+  );
+  if (originMatch) {
+    const rawVal = cleanHumanText(originMatch[1]);
+    const val = cleanMeta.toLowerCase().startsWith('originaire') ? cleanHumanText(cleanMeta) : `Originaire de ${rawVal}`;
+    return { key: 'nationality', value: val };
+  }
+
   const dobMatch = cleanMeta.match(
     /^\*{0,2}(?:Date\s+de\s+naissance|Date\s+of\s+birth|Geburtsdatum|Fecha\s+de\s+nacimiento|Data\s+di\s+nascita|Birth\s*date|N[ée]\(e\)\s+le)\*{0,2}[:\s]+(.+)$/i
   );

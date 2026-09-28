@@ -129,7 +129,7 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   const hashCount = (rawNormalized.match(/^##\s+/gm) || []).length;
   const normalized = hashCount < 2
     ? rawNormalized.replace(
-        /(^|\n)(?:[#*_\s]*)(PROFIL\s+PROFESSIONNEL|R[ÉE]SUM[ÉE]\s+PROFESSIONNEL|PROFESSIONAL\s+SUMMARY|SUMMARY|RESUMEN\s+PROFESIONAL|ZUSAMMENFASSUNG|SOMMARIO\s+PROFESSIONALE|COMP[ÉE]TENCES\s+TECHNIQUES|COMP[ÉE]TENCES(?:\s+CL[ÉE]S)?|TECHNICAL\s+SKILLS|SKILLS|COMPETENCIES|CORE\s+SKILLS|HABILIDADES\s+T[ÉE]CNICAS|HABILIDADES|KENNTNISSE|COMPETENZE\s+TECNICHE|COMPETENZE|EXP[ÉE]RIENCE\s+PROFESSIONNELLE|EXP[ÉE]RIENCE|WORK\s+EXPERIENCE|PROFESSIONAL\s+EXPERIENCE|EXPERIENCE|CAREER\s+HISTORY|EXPERIENCIA\s+LABORAL|EXPERIENCIA\s+PROFESIONAL|EXPERIENCIA|BERUFSERFAHRUNG|ESPERIENZA\s+PROFESSIONALE|ESPERIENZA|PROJETS\s+NOTABLES|PROJETS|FEATURED\s+PROJECTS|PROJECTS|PROYECTOS\s+DESTACADOS|PROYECTOS|PROJEKTE|PROGETTI\s+PRINCIPALI|PROGETTI|FORMATION\s*&\s*CERTIFICATIONS|FORMATION\s*&\s*DIPL[ÔO]MES|FORMATION|EDUCATION\s*&\s*CERTIFICATIONS|EDUCATION|ACADEMIC\s+BACKGROUND|EDUCACI[OÓ]N\s*Y\s*CERTIFICACIONES|EDUCACI[OÓ]N|AUSBILDUNG|ISTRUZIONE\s*&\s*CERTIFICAZIONI|ISTRUZIONE|LANGUES|LANGUAGES|IDIOMAS|SPRACHEN|LINGUE|R[ÉE]F[ÉE]RENCES|REFERENCES|REFERENCIAS|REFERENZEN|REFERENZE)(?:[:*_\s]*)(?=\n|$)/gi,
+        /(^|\n)(?:[#*_\s]*)(PROFIL\s+PROFESSIONNEL|R[ÉE]SUM[ÉE]\s+PROFESSIONNEL|PROFESSIONAL\s+SUMMARY|SUMMARY|RESUMEN\s+PROFESIONAL|ZUSAMMENFASSUNG|SOMMARIO\s+PROFESSIONALE|COMP[ÉE]TENCES\s+TECHNIQUES|COMP[ÉE]TENCES(?:\s+CL[ÉE]S)?|TECHNICAL\s+SKILLS|SKILLS|COMPETENCIES|CORE\s+SKILLS|HABILIDADES\s+T[ÉE]CNICAS|HABILIDADES|KENNTNISSE|COMPETENZE\s+TECNICHE|COMPETENZE|EXP[ÉE]RIENCE\s+PROFESSIONNELLE|EXP[ÉE]RIENCE|WORK\s+EXPERIENCE|PROFESSIONAL\s+EXPERIENCE|EXPERIENCE|CAREER\s+HISTORY|EXPERIENCIA\s+LABORAL|EXPERIENCIA\s+PROFESIONAL|EXPERIENCIA|BERUFSERFAHRUNG|ESPERIENZA\s+PROFESSIONALE|ESPERIENZA|PROJETS?\s+PERSONNELS?|PROJETS?\s+NOTABLES?|PROJETS?|FEATURED\s+PROJECTS|PROJECTS|PROYECTOS?\s+DESTACADOS?|PROYECTOS?\s+PERSONALES?|PROYECTOS?|PROJEKTE?|PROGETTI\s+PRINCIPALI|PROGETTI|FORMATION\s*&\s*CERTIFICATIONS|FORMATION\s*&\s*DIPL[ÔO]MES|FORMATION|EDUCATION\s*&\s*CERTIFICATIONS|EDUCATION|ACADEMIC\s+BACKGROUND|EDUCACI[OÓ]N\s*Y\s*CERTIFICACIONES|EDUCACI[OÓ]N|AUSBILDUNG|ISTRUZIONE\s*&\s*CERTIFICAZIONI|ISTRUZIONE|LANGUES|LANGUAGES|IDIOMAS|SPRACHEN|LINGUE|R[ÉE]F[ÉE]RENCES|REFERENCES|REFERENCIAS|REFERENZEN|REFERENZE)(?:[:*_\s]*)(?=\n|$)/gi,
         '$1## $2\n'
       )
     : rawNormalized;
@@ -152,7 +152,11 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   for (const pLine of preambleLines) {
     const parsedLegal = parseLegalMetadata(pLine);
     if (parsedLegal) {
-      legalDetails[parsedLegal.key] = parsedLegal.value;
+      if (parsedLegal.key === 'nationality' && legalDetails.nationality) {
+        legalDetails.nationality = `${legalDetails.nationality} • ${parsedLegal.value}`;
+      } else {
+        legalDetails[parsedLegal.key] = parsedLegal.value;
+      }
       continue;
     }
 
@@ -231,9 +235,10 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     } else if (/EXPERIENCE|EXPERIENCIA|CAREER|HISTORIAL|LABORAL|WERDEGANG|BERUFSERFAHRUNG|PARCOURS|ESPERIENZA/.test(cleanHeaderUpper)) {
       experience = parseExperienceBlocks(content, contacts);
       sections.push({ id: 'experience', type: 'experience', title: langDef.sections.experience, rawContent: content });
-    } else if (/PROJECT|PROYECTO|PROJEKT|PROGETT/.test(cleanHeaderUpper)) {
+    } else if (/PROJECT|PROYECT|PROJEKT|PROGETT|PROJET/.test(cleanHeaderUpper)) {
       projects = parseExperienceBlocks(content, contacts);
-      sections.push({ id: 'projects', type: 'projects', title: langDef.sections.projects, rawContent: content });
+      const titleCandidate = cleanHumanText(headerLine);
+      sections.push({ id: 'projects', type: 'projects', title: titleCandidate || langDef.sections.projects, rawContent: content });
     } else if (/(?:CERTIFIC|LICEN[CS])/.test(cleanHeaderUpper) && !/(?:EDUCATION|EDUCACI|FORMATION|AUSBILDUNG|STUDIUM|ISTRUZIONE)/.test(cleanHeaderUpper)) {
       certifications = parseBulletList(content);
       sections.push({ id: 'certifications', type: 'education', title: headerLine, rawContent: content });

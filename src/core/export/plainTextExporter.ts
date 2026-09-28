@@ -1,4 +1,84 @@
 import { CVData } from '../../types/cv';
+import { SupportedLanguage } from '../../constants/languages';
+
+/**
+ * Default ATS section titles synchronized across all 5 supported locales.
+ */
+const DEFAULT_SECTION_TITLES: Record<SupportedLanguage, {
+  summary: string;
+  skills: string;
+  experience: string;
+  projects: string;
+  education: string;
+  languages: string;
+}> = {
+  fr: {
+    summary: 'PROFIL PROFESSIONNEL',
+    skills: 'COMPÉTENCES TECHNIQUES',
+    experience: 'EXPÉRIENCE PROFESSIONNELLE',
+    projects: 'PROJETS & RÉALISATIONS',
+    education: 'FORMATION & CERTIFICATIONS',
+    languages: 'LANGUES',
+  },
+  es: {
+    summary: 'PERFIL PROFESIONAL',
+    skills: 'HABILIDADES TÉCNICAS',
+    experience: 'EXPERIENCIA PROFESIONAL',
+    projects: 'PROYECTOS DESTACADOS',
+    education: 'EDUCACIÓN Y CERTIFICACIONES',
+    languages: 'IDIOMAS',
+  },
+  en: {
+    summary: 'PROFESSIONAL SUMMARY',
+    skills: 'CORE SKILLS & TECHNICAL COMPETENCIES',
+    experience: 'PROFESSIONAL EXPERIENCE',
+    projects: 'FEATURED PROJECTS',
+    education: 'EDUCATION & CERTIFICATIONS',
+    languages: 'LANGUAGES',
+  },
+  de: {
+    summary: 'KURZPROFIL',
+    skills: 'FACHLICHE KOMPETENZEN',
+    experience: 'BERUFSERFAHRUNG',
+    projects: 'PROJEKTE & ERFOLGE',
+    education: 'AUSBILDUNG & QUALIFIKATIONEN',
+    languages: 'SPRACHKENNTNISSE',
+  },
+  it: {
+    summary: 'PROFILO PROFESSIONALE',
+    skills: 'COMPETENZE TECNICHE',
+    experience: 'ESPERIENZA PROFESSIONALE',
+    projects: 'PROGETTI PRINCIPALI',
+    education: 'ISTRUZIONE E FORMAZIONE',
+    languages: 'COMPETENZE LINGUISTICHE',
+  },
+};
+
+/**
+ * Resolves the section title for plain-text ATS export respecting user customizations and language.
+ */
+function resolveExportTitle(
+  data: CVData,
+  type: 'summary' | 'skills' | 'experience' | 'projects' | 'education' | 'languages',
+  lang: SupportedLanguage
+): string {
+  const explicit = data.sectionTitles?.[type];
+  if (explicit && explicit.trim()) {
+    return stripMarkdownFormatting(explicit).toUpperCase();
+  }
+
+  const matchingSection = data.sections?.find((s) => s.type === type || s.id === type);
+  if (matchingSection?.title && matchingSection.title.trim()) {
+    const cleanTitle = stripMarkdownFormatting(matchingSection.title).trim();
+    const isEnglishDefault = /^(?:PROFESSIONAL\s*SUMMARY|CORE\s*SKILLS|PROFESSIONAL\s*EXPERIENCE|FEATURED\s*PROJECTS|EDUCATION|LANGUAGES)$/i.test(cleanTitle);
+    if (!isEnglishDefault || lang === 'en') {
+      return cleanTitle.toUpperCase();
+    }
+  }
+
+  const langTitles = DEFAULT_SECTION_TITLES[lang] || DEFAULT_SECTION_TITLES.en;
+  return langTitles[type];
+}
 
 /**
  * Strips inline markdown formatting (**bold**, *italic*, [link](url), `code`) from a string.
@@ -23,12 +103,13 @@ export function stripMarkdownFormatting(text: string): string {
 /**
  * Generates an ATS-compliant Plain Text (.txt) resume representation.
  * Designed for direct copy-pasting into legacy and modern ATS input boxes
- * (Workday, Taleo, Greenhouse, Lever, SAP SuccessFactors).
+ * (Workday, Taleo, Greenhouse, Lever, SAP SuccessFactors) and invisible PDF text layer.
  */
 export function generatePlainTextCv(data: CVData): string {
   const lines: string[] = [];
   const divider = '============================================================';
   const subDivider = '------------------------------------------------------------';
+  const lang: SupportedLanguage = data.language || 'es';
 
   // 1. Header (Candidate Name & Headline)
   if (data.name) {
@@ -38,36 +119,103 @@ export function generatePlainTextCv(data: CVData): string {
     lines.push(stripMarkdownFormatting(data.title));
   }
 
-  // 2. Contacts
+  // 2. Contacts (Normalized without mailto duplication and preserving phone, LinkedIn, GitHub)
   if (data.contacts && data.contacts.length > 0) {
     const contactParts = data.contacts
       .map((c) => {
-        const cleanLabel = stripMarkdownFormatting(c.label);
-        if (c.url && !cleanLabel.includes(c.url)) {
-          return `${cleanLabel}: ${c.url}`;
+        const rawLabel = stripMarkdownFormatting(c.label || '').trim();
+        const rawUrl = c.url?.trim() || '';
+
+        if (c.type === 'email') {
+          return rawLabel.replace(/^mailto:/i, '').trim() || rawUrl.replace(/^mailto:/i, '').trim();
         }
-        return cleanLabel;
+
+        if (c.type === 'phone') {
+          return rawLabel.replace(/^tel:/i, '').trim();
+        }
+
+        if (c.type === 'linkedin') {
+          const url = rawUrl.startsWith('http') ? rawUrl : rawUrl ? `https://${rawUrl}` : '';
+          return url ? `LinkedIn: ${url}` : `LinkedIn: ${rawLabel}`;
+        }
+
+        if (c.type === 'github') {
+          const url = rawUrl.startsWith('http') ? rawUrl : rawUrl ? `https://${rawUrl}` : '';
+          return url ? `GitHub: ${url}` : `GitHub: ${rawLabel}`;
+        }
+
+        if (c.type === 'location') {
+          return rawLabel;
+        }
+
+        if (c.type === 'globe') {
+          const url = rawUrl.startsWith('http') ? rawUrl : rawUrl ? `https://${rawUrl}` : '';
+          return url ? `Portfolio: ${url}` : rawLabel;
+        }
+
+        if (rawUrl) {
+          const cleanU = rawUrl.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+          const cleanL = rawLabel.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+          if (cleanL === cleanU || !rawLabel) {
+            return rawUrl;
+          }
+          return `${rawLabel}: ${rawUrl}`;
+        }
+
+        return rawLabel;
       })
       .filter(Boolean);
+
     if (contactParts.length > 0) {
       lines.push(contactParts.join(' | '));
     }
   }
 
-  // 3. Professional Summary
+  // 3. Personal & Legal Details (Crucial for Swiss & European ATS parsing)
+  const personalDetails: string[] = [];
+  if (data.nationality) {
+    const natLabel = lang === 'fr' ? 'Nationalité' : lang === 'es' ? 'Nacionalidad' : lang === 'de' ? 'Nationalität' : lang === 'it' ? 'Nazionalità' : 'Nationality';
+    personalDetails.push(`${natLabel}: ${stripMarkdownFormatting(data.nationality)}`);
+  }
+  if (data.workPermit) {
+    const permitLabel = lang === 'fr' ? 'Permis de travail' : lang === 'es' ? 'Permiso de trabajo' : lang === 'de' ? 'Arbeitsbewilligung' : lang === 'it' ? 'Permesso di lavoro' : 'Work Permit';
+    personalDetails.push(`${permitLabel}: ${stripMarkdownFormatting(data.workPermit)}`);
+  }
+  if (data.availability) {
+    const availLabel = lang === 'fr' ? 'Disponibilité' : lang === 'es' ? 'Disponibilidad' : lang === 'de' ? 'Verfügbarkeit' : lang === 'it' ? 'Disponibilità' : 'Availability';
+    personalDetails.push(`${availLabel}: ${stripMarkdownFormatting(data.availability)}`);
+  }
+  if (data.civilStatus) {
+    const csLabel = lang === 'fr' ? 'État civil' : lang === 'es' ? 'Estado civil' : lang === 'de' ? 'Zivilstand' : lang === 'it' ? 'Stato civile' : 'Civil Status';
+    personalDetails.push(`${csLabel}: ${stripMarkdownFormatting(data.civilStatus)}`);
+  }
+  if (data.drivingLicense) {
+    const dlLabel = lang === 'fr' ? 'Permis de conduire' : lang === 'es' ? 'Licencia de conducir' : lang === 'de' ? 'Führerschein' : lang === 'it' ? 'Patente' : 'Driving License';
+    personalDetails.push(`${dlLabel}: ${stripMarkdownFormatting(data.drivingLicense)}`);
+  }
+  if (data.dateOfBirth) {
+    const dobLabel = lang === 'fr' ? 'Date de naissance' : lang === 'es' ? 'Fecha de nacimiento' : lang === 'de' ? 'Geburtsdatum' : lang === 'it' ? 'Data di nascita' : 'Date of Birth';
+    personalDetails.push(`${dobLabel}: ${stripMarkdownFormatting(data.dateOfBirth)}`);
+  }
+
+  if (personalDetails.length > 0) {
+    lines.push(personalDetails.join(' | '));
+  }
+
+  // 4. Professional Summary
   if (data.summary && data.summary.trim()) {
     lines.push('');
     lines.push(divider);
-    lines.push('PROFESSIONAL SUMMARY');
+    lines.push(resolveExportTitle(data, 'summary', lang));
     lines.push(divider);
     lines.push(stripMarkdownFormatting(data.summary.trim()));
   }
 
-  // 4. Skills
+  // 5. Skills
   if (data.skillGroups && data.skillGroups.length > 0) {
     lines.push('');
     lines.push(divider);
-    lines.push('CORE SKILLS & TECHNICAL COMPETENCIES');
+    lines.push(resolveExportTitle(data, 'skills', lang));
     lines.push(divider);
     for (const group of data.skillGroups) {
       const cat = stripMarkdownFormatting(group.category || 'Competencies').replace(/[:*_\s]+$/, '');
@@ -79,11 +227,11 @@ export function generatePlainTextCv(data: CVData): string {
     }
   }
 
-  // 5. Professional Experience
+  // 6. Professional Experience
   if (data.experience && data.experience.length > 0) {
     lines.push('');
     lines.push(divider);
-    lines.push('PROFESSIONAL EXPERIENCE');
+    lines.push(resolveExportTitle(data, 'experience', lang));
     lines.push(divider);
 
     data.experience.forEach((exp, idx) => {
@@ -106,11 +254,11 @@ export function generatePlainTextCv(data: CVData): string {
     });
   }
 
-  // 6. Featured Projects
+  // 7. Featured Projects
   if (data.projects && data.projects.length > 0) {
     lines.push('');
     lines.push(divider);
-    lines.push('FEATURED PROJECTS');
+    lines.push(resolveExportTitle(data, 'projects', lang));
     lines.push(divider);
 
     data.projects.forEach((proj, idx) => {
@@ -132,11 +280,11 @@ export function generatePlainTextCv(data: CVData): string {
     });
   }
 
-  // 7. Education & Certifications
+  // 8. Education & Certifications
   if ((data.education && data.education.length > 0) || (data.certifications && data.certifications.length > 0)) {
     lines.push('');
     lines.push(divider);
-    lines.push('EDUCATION & CERTIFICATIONS');
+    lines.push(resolveExportTitle(data, 'education', lang));
     lines.push(divider);
 
     for (const edu of data.education || []) {
@@ -150,15 +298,30 @@ export function generatePlainTextCv(data: CVData): string {
     }
   }
 
-  // 8. Languages
+  // 9. Languages
   if (data.languages && data.languages.length > 0) {
     lines.push('');
     lines.push(divider);
-    lines.push('LANGUAGES');
+    lines.push(resolveExportTitle(data, 'languages', lang));
     lines.push(divider);
-    for (const lang of data.languages) {
-      const cleanLang = stripMarkdownFormatting(lang.replace(/^[-*•]\s*/, ''));
+    for (const l of data.languages) {
+      const cleanLang = stripMarkdownFormatting(l.replace(/^[-*•]\s*/, ''));
       if (cleanLang) lines.push(`• ${cleanLang}`);
+    }
+  }
+
+  // 10. Custom or Additional Generic Sections
+  const knownSectionTypes = new Set(['summary', 'skills', 'experience', 'projects', 'education', 'languages']);
+  const customSections = (data.sections || []).filter((s) => !knownSectionTypes.has(s.type) && s.rawContent?.trim());
+
+  for (const cSec of customSections) {
+    lines.push('');
+    lines.push(divider);
+    lines.push(stripMarkdownFormatting(cSec.title || 'ADDITIONAL INFORMATION').toUpperCase());
+    lines.push(divider);
+    const cleanContent = stripMarkdownFormatting(cSec.rawContent || '').trim();
+    if (cleanContent) {
+      lines.push(cleanContent);
     }
   }
 
