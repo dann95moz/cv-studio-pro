@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProfilePhotoConfig } from '../types/cv';
+import { compressAndResizeImage } from '../utils/imageCompression';
 
 export const MAX_PHOTO_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
@@ -59,31 +60,27 @@ export function usePhotoUpload(options: UsePhotoUploadOptions = {}): UsePhotoUpl
       setIsProcessing(true);
       setUploadError(null);
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setIsProcessing(false);
-        if (typeof event.target?.result === 'string') {
+      compressAndResizeImage(file, { maxWidth: 800, maxHeight: 800, quality: 0.85 })
+        .then((compressedUrl) => {
+          setIsProcessing(false);
           const newPhoto: ProfilePhotoConfig = {
-            url: event.target.result,
+            url: compressedUrl,
             crop: { x: 0, y: 0, zoom: 1.0 },
             enabled: true,
             size: defaultSize,
           };
           onPhotoLoaded?.(newPhoto);
-        }
-      };
+        })
+        .catch(() => {
+          setIsProcessing(false);
+          const errorMsg = t(
+            'preview:format.photoReadError',
+            'Failed to read the selected image file. Please try again.'
+          );
+          setUploadError(errorMsg);
+          onError?.(errorMsg);
+        });
 
-      reader.onerror = () => {
-        setIsProcessing(false);
-        const errorMsg = t(
-          'preview:format.photoReadError',
-          'Failed to read the selected image file. Please try again.'
-        );
-        setUploadError(errorMsg);
-        onError?.(errorMsg);
-      };
-
-      reader.readAsDataURL(file);
       e.target.value = '';
     },
     [t, onError, onPhotoLoaded, defaultSize]

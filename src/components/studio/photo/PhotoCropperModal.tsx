@@ -24,6 +24,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
 import { ProfilePhotoConfig, ProfilePhotoCrop, ThemeId } from '../../../types/cv';
 import { usePhotoUpload } from '../../../hooks/usePhotoUpload';
+import { compressAndResizeImage } from '../../../utils/imageCompression';
 
 export interface PhotoCropperModalProps {
   open: boolean;
@@ -186,10 +187,16 @@ export const PhotoCropperModal: React.FC<PhotoCropperModalProps> = ({
     setCrop({ x: 0, y: 0, zoom: 1.0 });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!imageUrl) return;
+    let finalUrl = imageUrl;
+    try {
+      finalUrl = await compressAndResizeImage(imageUrl);
+    } catch {
+      // Fallback to existing imageUrl if compression encounters an error
+    }
     onSave({
-      url: imageUrl,
+      url: finalUrl,
       crop,
       enabled: true,
       size: displaySize,

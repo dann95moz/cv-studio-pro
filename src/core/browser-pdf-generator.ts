@@ -137,7 +137,7 @@ export async function generateDirectPdf(
 
     if (onProgress) onProgress('rendering');
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const imgData = canvas.toDataURL('image/jpeg', 0.90);
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -176,7 +176,7 @@ export async function generateDirectPdf(
     let position = 0;
 
     // First page
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
 
     // Add invisible selectable text layer for ATS compatibility
     const rawDomText = element.innerText || '';
@@ -202,7 +202,7 @@ export async function generateDirectPdf(
     while (heightLeft > 5) {
       position = heightLeft - imgHeight;
       pdf.addPage([pdfPageWidth, pdfPageHeight], 'portrait');
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
       heightLeft -= pdfPageHeight;
     }
 
