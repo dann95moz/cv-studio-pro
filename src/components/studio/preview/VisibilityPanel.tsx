@@ -70,9 +70,19 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
 }) => {
   const { t } = useTranslation(['preview']);
   const notSetLabel = t('preview:panels.design.visibility.notSet', 'No configurado');
-  const isNotConfigured = !subtitle || subtitle === notSetLabel;
+  const isNotConfigured =
+    !subtitle ||
+    subtitle === notSetLabel ||
+    subtitle.toLowerCase().includes('no configurado') ||
+    subtitle.toLowerCase().includes('non configuré') ||
+    subtitle.toLowerCase().includes('not configured') ||
+    subtitle.toLowerCase().includes('not set');
 
-  const handleRowClick = () => {
+  const handleRowClick = (e: React.MouseEvent) => {
+    // If clicking an edit button or any icon inside it, let the edit button handle it
+    if ((e.target as HTMLElement).closest('.visibility-edit-btn')) {
+      return;
+    }
     if (isNotConfigured && onEdit) {
       onEdit();
     } else {
@@ -83,6 +93,18 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
   return (
     <Box
       onClick={handleRowClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (isNotConfigured && onEdit) {
+            onEdit();
+          } else {
+            onToggle();
+          }
+        }
+      }}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -127,6 +149,7 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
             >
               <IconButton
                 size="small"
+                className="visibility-edit-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit();
@@ -175,12 +198,11 @@ const VisibilityRow: React.FC<VisibilityRowProps> = ({
           <Switch
             size="small"
             checked={checked}
-            onChange={(e) => {
-              e.stopPropagation();
-              onToggle();
+            tabIndex={-1}
+            sx={{
+              flexShrink: 0,
+              pointerEvents: 'none',
             }}
-            onClick={(e) => e.stopPropagation()}
-            sx={{ flexShrink: 0 }}
           />
         </Box>
       </Tooltip>
