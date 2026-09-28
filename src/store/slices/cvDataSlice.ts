@@ -274,11 +274,10 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     if (isEditingVariant && translations[activeLanguage]) {
       const updatedVariant: CvTranslationVariant = {
         ...translations[activeLanguage],
-        cvData: data || undefined,
+        cvData: data ? { ...data, language: activeLanguage as any } : undefined,
         updatedAt: new Date().toISOString(),
       };
       set({
-        activeCvData: data,
         translations: {
           ...translations,
           [activeLanguage]: updatedVariant,
@@ -287,7 +286,10 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       return;
     }
 
-    set({ activeCvData: data });
+    const baseData = data
+      ? { ...data, language: (data.language || currentBaseLanguage || 'es') as any }
+      : null;
+    set({ activeCvData: baseData });
   },
 
   setGapMarkdown: (val) => {
@@ -322,6 +324,16 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   },
 
   setActiveLanguage: (activeLanguage: string) => {
+    const { currentBaseLanguage, cvMarkdown, activeCvData } = get();
+    if (activeLanguage === currentBaseLanguage) {
+      if (activeCvData && activeCvData.language && activeCvData.language !== currentBaseLanguage) {
+        const healedBase = cvMarkdown && cvMarkdown.trim().length > 30
+          ? parseMarkdownToCvData(cvMarkdown, (currentBaseLanguage || 'es') as any)
+          : null;
+        set({ activeLanguage, activeCvData: healedBase });
+        return;
+      }
+    }
     set({ activeLanguage });
   },
 

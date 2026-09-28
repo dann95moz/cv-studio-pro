@@ -68,8 +68,12 @@ export const useParsedCv = (): CVData => {
       }
     }
 
-    // 3. Active structured CV data (only if populated with real content)
+    // 3. Active structured CV data (only if populated with real content and matches base language)
+    const isBaseLanguage = !activeLanguage || activeLanguage === currentBaseLanguage;
+    const baseMatches = !activeCvData?.language || activeCvData.language === (currentBaseLanguage || 'es');
     if (
+      isBaseLanguage &&
+      baseMatches &&
       activeCvData &&
       (activeCvData.name ||
         activeCvData.summary ||
@@ -78,7 +82,7 @@ export const useParsedCv = (): CVData => {
     ) {
       return {
         ...activeCvData,
-        language: activeCvData.language || effectiveLang,
+        language: effectiveLang,
       };
     }
 
