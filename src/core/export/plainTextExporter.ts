@@ -1,5 +1,6 @@
 import { CVData } from '../../types/cv';
 import { SupportedLanguage } from '../../constants/languages';
+import { getLocalizedReferences } from '../../constants/legalPresets';
 
 /**
  * Default ATS section titles synchronized across all 5 supported locales.
@@ -322,6 +323,20 @@ export function generatePlainTextCv(data: CVData): string {
     const cleanContent = stripMarkdownFormatting(cSec.rawContent || '').trim();
     if (cleanContent) {
       lines.push(cleanContent);
+    }
+  }
+
+  // 11. References (Swiss & European standard)
+  const isRefHidden = data.hiddenSections?.includes('references') || data.hiddenDetails?.includes('references');
+  if (data.references && !isRefHidden) {
+    lines.push('');
+    lines.push(divider);
+    const refTitle = lang === 'fr' ? 'RÉFÉRENCES' : lang === 'de' ? 'REFERENZEN' : lang === 'es' ? 'REFERENCIAS' : lang === 'it' ? 'REFERENZE' : 'REFERENCES';
+    lines.push(refTitle);
+    lines.push(divider);
+    const cleanRef = stripMarkdownFormatting(getLocalizedReferences(data.references, lang));
+    if (cleanRef) {
+      lines.push(`• ${cleanRef}`);
     }
   }
 

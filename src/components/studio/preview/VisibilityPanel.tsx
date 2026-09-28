@@ -33,6 +33,8 @@ import {
   AVAILABILITY_PRESETS,
   DRIVING_LICENSE_PRESETS,
   CIVIL_STATUS_PRESETS,
+  REFERENCES_PRESETS,
+  getLocalizedReferences,
   LegalPresetOption,
 } from '../../../constants/legalPresets';
 import { SupportedLanguage } from '../../../constants/languages';
@@ -202,6 +204,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     if (key === 'availability') return AVAILABILITY_PRESETS[docLang] || [];
     if (key === 'drivingLicense') return DRIVING_LICENSE_PRESETS[docLang] || [];
     if (key === 'civilStatus') return CIVIL_STATUS_PRESETS[docLang] || [];
+    if (key === 'references') return REFERENCES_PRESETS[docLang] || [];
     return [];
   };
 
@@ -357,6 +360,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     checked: boolean;
     onToggle: () => void;
     available: boolean;
+    onEdit?: () => void;
   }> = [
     {
       key: 'summary',
@@ -409,10 +413,29 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
     {
       key: 'references',
       title: t('preview:panels.design.visibility.references', 'Referencias'),
-      subtitle: parsedCv?.references,
-      checked: !hiddenSectionsSet.has('references'),
-      onToggle: () => onToggleHiddenSection?.('references'),
+      subtitle: parsedCv?.references
+        ? getLocalizedReferences(parsedCv.references, docLang)
+        : t('preview:panels.design.visibility.notSet', 'No configurado'),
+      checked: !hiddenSectionsSet.has('references') && !hiddenDetailsSet.has('references'),
+      onToggle: () => {
+        const isCurrentlyHidden = hiddenSectionsSet.has('references') || hiddenDetailsSet.has('references');
+        if (isCurrentlyHidden) {
+          if (hiddenSectionsSet.has('references')) onToggleHiddenSection?.('references');
+          if (hiddenDetailsSet.has('references')) onToggleHiddenDetail?.('references');
+        } else {
+          onToggleHiddenSection?.('references');
+        }
+      },
       available: Boolean(parsedCv?.references),
+      onEdit: onUpdatePersonalDetail
+        ? () =>
+            handleOpenEdit(
+              'references',
+              t('preview:panels.design.visibility.references', 'Referencias'),
+              parsedCv?.references ? getLocalizedReferences(parsedCv.references, docLang) : '',
+              'Ej: References available upon request'
+            )
+        : undefined,
     },
   ];
 
@@ -502,6 +525,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
               subtitle={row.subtitle}
               checked={row.checked}
               onToggle={row.onToggle}
+              onEdit={row.onEdit}
             />
           ))}
           {customSectionRows.map((row) => (

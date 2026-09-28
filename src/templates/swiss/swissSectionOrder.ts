@@ -29,7 +29,10 @@ export function resolveSwissSectionOrder(
     ...(data?.sectionPlacement || {}),
   };
 
-  const hidden = new Set(data?.hiddenSections || []);
+  const hidden = new Set([
+    ...(data?.hiddenSections || []),
+    ...(data?.hiddenDetails || []),
+  ]);
 
   const rawSidebar = data?.sidebarSectionOrder && data.sidebarSectionOrder.length > 0
     ? data.sidebarSectionOrder

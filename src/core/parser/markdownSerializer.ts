@@ -1,5 +1,6 @@
 import { CVData } from '../../types/cv';
 import { LANGUAGE_DEFINITIONS, SupportedLanguage } from '../../constants/languages';
+import { getLocalizedReferences } from '../../constants/legalPresets';
 
 /**
  * Serializes a structured CVData object back into standardized Markdown.
@@ -235,9 +236,10 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   // References (Swiss & European standard)
   if (data.references && !data.customSections?.some(c => /reference|r[ée]f[ée]rence/i.test(c.title))) {
     parts.push('\n---\n');
-    const refTitle = lang === 'fr' ? 'RÉFÉRENCES' : lang === 'de' ? 'REFERENZEN' : lang === 'es' ? 'REFERENCIAS' : 'REFERENCES';
+    const refTitle = lang === 'fr' ? 'RÉFÉRENCES' : lang === 'de' ? 'REFERENZEN' : lang === 'es' ? 'REFERENCIAS' : lang === 'it' ? 'REFERENZE' : 'REFERENCES';
     parts.push(`## ${refTitle}`);
-    parts.push(`- ${data.references}`);
+    const displayRef = getLocalizedReferences(data.references, lang);
+    parts.push(`- ${displayRef}`);
   }
 
   // Hidden details & sections configuration comments

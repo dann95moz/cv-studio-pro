@@ -2,12 +2,17 @@ import React from 'react';
 import { SwissLabels } from './swissLabels';
 import { EditableText } from '../../components/studio/preview/EditableText';
 import { useCvLiveEdit } from '../../components/studio/preview/CvLiveEditContext';
+import { SupportedLanguage } from '../../constants/languages';
+import { getLocalizedReferences } from '../../constants/legalPresets';
 
 export interface SwissReferencesSectionProps {
   references?: string;
   labels: SwissLabels;
   inSidebar: boolean;
   liveEdit: ReturnType<typeof useCvLiveEdit>;
+  lang?: SupportedLanguage;
+  hiddenSections?: string[];
+  hiddenDetails?: string[];
 }
 
 export const SwissReferencesSection: React.FC<SwissReferencesSectionProps> = ({
@@ -15,8 +20,14 @@ export const SwissReferencesSection: React.FC<SwissReferencesSectionProps> = ({
   labels,
   inSidebar,
   liveEdit,
+  lang = 'fr',
+  hiddenSections = [],
+  hiddenDetails = [],
 }) => {
-  if (!references) return null;
+  const isHidden = hiddenSections.includes('references') || hiddenDetails.includes('references');
+  if (!references || isHidden) return null;
+
+  const displayReferences = getLocalizedReferences(references, lang);
 
   return (
     <section
@@ -42,7 +53,7 @@ export const SwissReferencesSection: React.FC<SwissReferencesSectionProps> = ({
         <span style={{ fontSize: inSidebar ? '10px' : '11px', color: '#64748b', fontStyle: 'italic' }}>
           <EditableText
             tagName="span"
-            value={references}
+            value={displayReferences}
             onSave={(val) => liveEdit?.updatePersonalDetail('references', val)}
           />
         </span>

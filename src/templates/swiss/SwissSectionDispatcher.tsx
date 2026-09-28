@@ -42,7 +42,17 @@ export const renderSwissSection = ({
     case 'education':
       return <SwissEducationSection education={education} labels={labels} inSidebar={inSidebar} liveEdit={liveEdit} />;
     case 'references':
-      return <SwissReferencesSection references={header.references} labels={labels} inSidebar={inSidebar} liveEdit={liveEdit} />;
+      return (
+        <SwissReferencesSection
+          references={header.references}
+          labels={labels}
+          inSidebar={inSidebar}
+          liveEdit={liveEdit}
+          lang={slots.language || 'fr'}
+          hiddenSections={slots.hiddenSections}
+          hiddenDetails={header.hiddenDetails}
+        />
+      );
     default: {
       const gen = genericSections.find((g) => g.id === id);
       if (gen) {

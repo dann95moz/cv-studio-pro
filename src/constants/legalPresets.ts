@@ -141,3 +141,43 @@ export const CIVIL_STATUS_PRESETS: Record<SupportedLanguage, LegalPresetOption[]
     { label: 'Coniugato/a', value: 'Coniugato/a' },
   ],
 };
+
+export const REFERENCES_PRESETS: Record<SupportedLanguage, LegalPresetOption[]> = {
+  en: [
+    { label: 'References available upon request', value: 'References available upon request' },
+    { label: 'Available upon request', value: 'Available upon request' },
+  ],
+  es: [
+    { label: 'Referencias disponibles a petición', value: 'Referencias disponibles a petición' },
+    { label: 'Disponibles a petición', value: 'Disponibles a petición' },
+  ],
+  fr: [
+    { label: 'Références disponibles sur demande', value: 'Références disponibles sur demande' },
+    { label: 'Disponibles sur demande', value: 'Disponibles sur demande' },
+  ],
+  de: [
+    { label: 'Referenzen auf Anfrage verfügbar', value: 'Referenzen auf Anfrage verfügbar' },
+    { label: 'Auf Anfrage verfügbar', value: 'Auf Anfrage verfügbar' },
+  ],
+  it: [
+    { label: 'Referenze disponibili su richiesta', value: 'Referenze disponibili su richiesta' },
+    { label: 'Disponibili su richiesta', value: 'Disponibili su richiesta' },
+  ],
+};
+
+const STANDARD_REFERENCES_REGEX = /^(?:r[ée]f[ée]rences?\s+)?(?:disponibles?\s+(?:sur\s+demande|a\s+petici[oó]n|a\s+solicitud|su\s+richiesta)|available\s+upon\s+request|auf\s+anfrage(?:\s+verf[üu]gbar)?|upon\s+request|sur\s+demande|a\s+petici[oó]n|a\s+solicitud|su\s+richiesta)$/i;
+
+export function isStandardReferences(val?: string): boolean {
+  if (!val) return false;
+  return STANDARD_REFERENCES_REGEX.test(val.trim());
+}
+
+export function getLocalizedReferences(val: string | undefined, lang: SupportedLanguage = 'es'): string {
+  if (!val || !val.trim()) return '';
+  if (isStandardReferences(val)) {
+    const presets = REFERENCES_PRESETS[lang] || REFERENCES_PRESETS.es;
+    return presets[0].value;
+  }
+  return val.trim();
+}
+
