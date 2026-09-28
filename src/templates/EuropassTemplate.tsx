@@ -184,6 +184,7 @@ export const EuropassTemplate: React.FC<CVTemplateProps> = ({ slots, theme, data
               <img
                 src={activePhoto.url}
                 alt={header.name}
+                crossOrigin="anonymous"
                 style={{
                   width: '100%',
                   height: '100%',

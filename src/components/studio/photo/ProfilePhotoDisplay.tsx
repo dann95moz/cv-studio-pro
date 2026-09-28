@@ -166,6 +166,7 @@ export const ProfilePhotoDisplay: React.FC<ProfilePhotoDisplayProps> = ({
               src={currentPhoto.url}
               alt="Candidate Profile"
               className="cv-profile-photo-img"
+              crossOrigin="anonymous"
               style={{
                 width: '100%',
                 height: '100%',

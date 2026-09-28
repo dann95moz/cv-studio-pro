@@ -57,6 +57,7 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
                 <img
                   src={activePhoto.url}
                   alt={header.name}
+                  crossOrigin="anonymous"
                   style={{
                     width: '100%',
                     height: '100%',

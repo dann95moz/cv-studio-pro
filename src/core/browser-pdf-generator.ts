@@ -53,27 +53,40 @@ export async function generateDirectPdf(
 ): Promise<void> {
   const {
     fileName = 'Resume.pdf',
-    pageFormat = 'a4',
     qualityScale = 2,
     cvData,
     markdownPayload,
     onProgress
   } = options;
 
+  const normalizedPageFormat = ((options.pageFormat || 'a4') as string).toLowerCase() as PageFormat;
   const targetFileName = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
-  const formatConfig = getPageFormatConfig(pageFormat);
-  const mmDimensions = PAGE_MM_DIMENSIONS[pageFormat] || PAGE_MM_DIMENSIONS.a4;
+  const formatConfig = getPageFormatConfig(normalizedPageFormat);
+  const mmDimensions = PAGE_MM_DIMENSIONS[normalizedPageFormat] || PAGE_MM_DIMENSIONS.a4;
 
   if (onProgress) onProgress('capturing');
 
-  // Temporarily reset zoom/scale transforms on the cloned element or during capture
+  // Temporarily reset zoom/scale transforms on the element AND its parent wrappers in the live DOM
   const originalTransform = element.style.transform;
   const originalTransformOrigin = element.style.transformOrigin;
   const originalMargin = element.style.margin;
 
+  const parentWrapper = (element.closest('.paper-sheet-wrapper') || element.parentElement) as HTMLElement | null;
+  const originalParentTransform = parentWrapper ? parentWrapper.style.transform : '';
+  const originalParentPosition = parentWrapper ? parentWrapper.style.position : '';
+  const originalParentTop = parentWrapper ? parentWrapper.style.top : '';
+  const originalParentLeft = parentWrapper ? parentWrapper.style.left : '';
+
   element.style.transform = 'none';
   element.style.transformOrigin = 'top center';
   element.style.margin = '0 auto';
+
+  if (parentWrapper) {
+    parentWrapper.style.transform = 'none';
+    parentWrapper.style.position = 'relative';
+    parentWrapper.style.top = '0';
+    parentWrapper.style.left = '0';
+  }
 
   try {
     const canvas = await html2canvas(element, {
@@ -82,7 +95,13 @@ export async function generateDirectPdf(
       allowTaint: false,
       backgroundColor: '#ffffff',
       logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      x: 0,
+      y: 0,
+      width: formatConfig.widthPx,
       windowWidth: formatConfig.widthPx,
+      imageTimeout: 15000,
       onclone: (clonedDoc) => {
         // Ensure cloned root and body are explicitly visible and unhidden
         const clonedRoot = clonedDoc.getElementById('root');
@@ -94,6 +113,8 @@ export async function generateDirectPdf(
         // Ensure cloned document is in light mode with crisp styling
         clonedDoc.documentElement.setAttribute('data-theme', 'light');
         clonedDoc.documentElement.style.colorScheme = 'light';
+        clonedDoc.documentElement.style.setProperty('--cv-page-width', `${formatConfig.widthPx}px`);
+        clonedDoc.documentElement.style.setProperty('--cv-page-min-height', `${formatConfig.heightPx}px`);
         clonedDoc.documentElement.style.setProperty('--cv-paper-bg', '#ffffff');
         clonedDoc.documentElement.style.setProperty('--cv-text-primary', '#1e293b');
         clonedDoc.documentElement.style.setProperty('--cv-text-heading', '#0f172a');
@@ -106,6 +127,13 @@ export async function generateDirectPdf(
           clonedDoc.body.style.backgroundColor = '#ffffff';
           clonedDoc.body.style.display = '';
         }
+
+        // Hide all floating modals, drawers, toolbars, and popovers cloned into body
+        clonedDoc.querySelectorAll(
+          '.MuiDrawer-root, .MuiModal-root, .MuiPopover-root, .MuiBackdrop-root, .MuiTooltip-popper'
+        ).forEach((el) => {
+          (el as HTMLElement).style.display = 'none';
+        });
 
         // Hide all hover actions, bubbles, drag handles, and interactive toolbars (scoped without rogue aria-hidden)
         clonedDoc.querySelectorAll(
@@ -147,6 +175,40 @@ export async function generateDirectPdf(
           clonedSheet.style.border = 'none';
           clonedSheet.style.backgroundColor = '#ffffff';
         }
+
+        // Safely inline active images to base64 to ensure 0% taint risk and zero CORS network delays in html2canvas
+        const clonedImages = Array.from(clonedDoc.querySelectorAll('img'));
+        for (const clonedImg of clonedImages) {
+          try {
+            clonedImg.crossOrigin = 'anonymous';
+            const src = clonedImg.getAttribute('src') || '';
+            if (src.startsWith('data:image/')) {
+              continue;
+            }
+            const liveImg = Array.from(element.querySelectorAll('img')).find(
+              (img) => img.src === clonedImg.src || img.className === clonedImg.className
+            );
+            if (liveImg && liveImg.complete && liveImg.naturalWidth > 0) {
+              try {
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = liveImg.naturalWidth;
+                offCanvas.height = liveImg.naturalHeight;
+                const ctx = offCanvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(liveImg, 0, 0);
+                  clonedImg.src = offCanvas.toDataURL('image/png');
+                }
+              } catch (taintErr) {
+                console.warn('[browser-pdf-generator] Live image cannot be rasterized (tainted):', taintErr);
+                clonedImg.style.display = 'none';
+              }
+            } else if (!src) {
+              clonedImg.style.display = 'none';
+            }
+          } catch (err) {
+            console.warn('[browser-pdf-generator] Image preprocessing skipped:', err);
+          }
+        }
       }
     });
 
@@ -157,11 +219,18 @@ export async function generateDirectPdf(
     if (onProgress) onProgress('rendering');
 
     let imgData: string;
+    let imgFormat: 'JPEG' | 'PNG' = 'JPEG';
     try {
       imgData = canvas.toDataURL('image/jpeg', 0.90);
-    } catch {
-      // Fallback to PNG if JPEG encoding is blocked or fails
-      imgData = canvas.toDataURL('image/png');
+    } catch (jpegErr) {
+      console.warn('[browser-pdf-generator] JPEG canvas export failed, attempting PNG fallback:', jpegErr);
+      try {
+        imgData = canvas.toDataURL('image/png');
+        imgFormat = 'PNG';
+      } catch (pngErr) {
+        console.error('[browser-pdf-generator] Canvas export failed:', pngErr);
+        throw new Error('Canvas export failed: tainted canvas or memory limit reached.');
+      }
     }
 
     const pdf = new jsPDF({
@@ -202,14 +271,14 @@ export async function generateDirectPdf(
     let position = 0;
 
     // First page
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
+    pdf.addImage(imgData, imgFormat, 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
     heightLeft -= pdfPageHeight;
 
     // Add subsequent pages if document exceeds 1 page
     while (heightLeft > 5) {
       position = heightLeft - imgHeight;
       pdf.addPage([pdfPageWidth, pdfPageHeight], 'portrait');
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
+      pdf.addImage(imgData, imgFormat, 0, position, imgWidth, imgHeight, undefined, 'MEDIUM');
       heightLeft -= pdfPageHeight;
     }
 
@@ -330,6 +399,13 @@ export async function generateDirectPdf(
     element.style.transform = originalTransform;
     element.style.transformOrigin = originalTransformOrigin;
     element.style.margin = originalMargin;
+
+    if (parentWrapper) {
+      parentWrapper.style.transform = originalParentTransform;
+      parentWrapper.style.position = originalParentPosition;
+      parentWrapper.style.top = originalParentTop;
+      parentWrapper.style.left = originalParentLeft;
+    }
   }
 }
 
