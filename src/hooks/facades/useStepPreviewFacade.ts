@@ -7,7 +7,7 @@ import {
 } from '../../store';
 import { getTemplateMetadata } from '../../templates';
 import { serializeCvDataToMarkdown } from '../../core/parser';
-import { CVData } from '../../types/cv';
+import { CVData, ProfilePhotoConfig } from '../../types/cv';
 import { usePreviewCanvasMetrics } from '../preview/usePreviewCanvasMetrics';
 import { usePreviewExports } from '../preview/usePreviewExports';
 import { usePreviewTranslation } from '../preview/usePreviewTranslation';
@@ -50,6 +50,7 @@ export function useStepPreviewFacade() {
   const cvMarkdown = useResumeStore((s) => s.cvMarkdown);
   const setCvMarkdown = useResumeStore((s) => s.setCvMarkdown);
   const setActiveCvData = useResumeStore((s) => s.setActiveCvData);
+  const syncTransversalPersonalDetail = useResumeStore((s) => s.syncTransversalPersonalDetail);
   const masterData = useResumeStore((s) => s.masterData);
   const targetJob = useResumeStore((s) => s.targetJob);
   const setTargetJob = useResumeStore((s) => s.setTargetJob);
@@ -191,7 +192,16 @@ export function useStepPreviewFacade() {
     setActiveCvData(newCvData);
     const serialized = serializeCvDataToMarkdown(newCvData, (newCvData.language || 'es') as any);
     setCvMarkdown(serialized);
-  }, [parsedCv, setActiveCvData, setCvMarkdown]);
+    syncTransversalPersonalDetail(field, trimmed || undefined);
+  }, [parsedCv, setActiveCvData, setCvMarkdown, syncTransversalPersonalDetail]);
+
+  const handleSetProfilePhoto = useCallback(
+    (photoConfig: ProfilePhotoConfig | null) => {
+      setProfilePhoto(photoConfig);
+      syncTransversalPersonalDetail('photo', photoConfig);
+    },
+    [setProfilePhoto, syncTransversalPersonalDetail]
+  );
 
   return {
     docType: {
@@ -215,7 +225,7 @@ export function useStepPreviewFacade() {
       pageFormat,
       setPageFormat,
       photo,
-      setProfilePhoto,
+      setProfilePhoto: handleSetProfilePhoto,
       setProfilePhotoEnabled,
       hiddenDetails: parsedCv.hiddenDetails,
       toggleHiddenDetail,

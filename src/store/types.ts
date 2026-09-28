@@ -82,6 +82,7 @@ export interface CvDataSlice {
   handleResetWorkspace: () => void;
   handleDownloadCvMarkdown: () => void;
   handleUseMasterDataAsCv: () => void;
+  syncTransversalPersonalDetail: (field: string, value: unknown) => void;
 }
 
 export interface DesignSlice {

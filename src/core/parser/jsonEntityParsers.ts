@@ -507,6 +507,7 @@ export function parseJsonLegalDetails(
 ): {
   workPermit?: string;
   nationality?: string;
+  placeOfOrigin?: string;
   dateOfBirth?: string;
   drivingLicense?: string;
   availability?: string;
@@ -519,6 +520,9 @@ export function parseJsonLegalDetails(
 
   const rawNationality = root.nationality || rootRec.citizenship;
   let nationality = typeof rawNationality === 'string' && rawNationality.trim() ? cleanHumanText(rawNationality) : undefined;
+
+  const rawOrigin = root.placeOfOrigin || rootRec.origin || rootRec.canton || rootRec.heimatort;
+  let placeOfOrigin = typeof rawOrigin === 'string' && rawOrigin.trim() ? cleanHumanText(rawOrigin) : undefined;
 
   const rawDob = root.dateOfBirth || rootRec.birthDate || rootRec.dob;
   let dateOfBirth = typeof rawDob === 'string' && rawDob.trim() ? cleanHumanText(rawDob) : undefined;
@@ -538,6 +542,7 @@ export function parseJsonLegalDetails(
   if (fallbackCv) {
     if (!nationality && fallbackCv.nationality) nationality = fallbackCv.nationality;
     if (!workPermit && fallbackCv.workPermit) workPermit = fallbackCv.workPermit;
+    if (!placeOfOrigin && fallbackCv.placeOfOrigin) placeOfOrigin = fallbackCv.placeOfOrigin;
     if (!dateOfBirth && fallbackCv.dateOfBirth) dateOfBirth = fallbackCv.dateOfBirth;
     if (!drivingLicense && fallbackCv.drivingLicense) drivingLicense = fallbackCv.drivingLicense;
     if (!availability && fallbackCv.availability) availability = fallbackCv.availability;
@@ -548,6 +553,7 @@ export function parseJsonLegalDetails(
   return {
     workPermit,
     nationality,
+    placeOfOrigin,
     dateOfBirth,
     drivingLicense,
     availability,

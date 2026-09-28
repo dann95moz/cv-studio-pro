@@ -22,7 +22,7 @@ import {
   sanitizeFileName,
 } from '../../core/parser';
 import { downloadTextFile, buildTimestampedFileName } from '../../utils/fileUtils';
-import { CvTranslationVariant } from '../../types/cv';
+import { CvTranslationVariant, ProfilePhotoConfig } from '../../types/cv';
 import { computeContentHash, detectOutdatedSections } from '../../core/ai/cv-translator';
 
 export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> = (set, get) => ({
@@ -470,5 +470,31 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       });
     }
     set({ wizardStep: 'preview' });
+  },
+
+  syncTransversalPersonalDetail: (field, value) => {
+    if (field === 'photo') {
+      get().setProfilePhoto((value as ProfilePhotoConfig) || null);
+    }
+    const { masterData, setMasterData } = get();
+    if (!masterData || typeof masterData !== 'string') return;
+
+    try {
+      const parsedMaster = parseMarkdownToCvData(masterData);
+      if (!parsedMaster) return;
+
+      const cleanVal = typeof value === 'string' ? value.trim() || undefined : value;
+      const updatedMaster = {
+        ...parsedMaster,
+        [field]: cleanVal,
+        ...(field === 'photo' ? { photo: (value as ProfilePhotoConfig) || undefined } : {}),
+      };
+      const serialized = serializeCvDataToMarkdown(updatedMaster, (updatedMaster.language || 'es') as any);
+      if (serialized && serialized.trim().length > 20) {
+        setMasterData(serialized);
+      }
+    } catch (err) {
+      console.warn('Failed to sync transversal personal detail to master CV:', err);
+    }
   },
 });

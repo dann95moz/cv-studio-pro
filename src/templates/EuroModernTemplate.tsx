@@ -18,7 +18,8 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
         fontSize: '12.5px',
         lineHeight: 1.5,
         display: 'flex',
-        minHeight: '100%',
+        flex: 1,
+        minHeight: 'var(--cv-page-min-height, 1123px)',
         boxSizing: 'border-box',
       }}
     >

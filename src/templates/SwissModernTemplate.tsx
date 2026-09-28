@@ -37,7 +37,8 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
         fontSize: '12px',
         lineHeight: 1.5,
         display: 'flex',
-        minHeight: '100%',
+        flex: 1,
+        minHeight: 'var(--cv-page-min-height, 1123px)',
         boxSizing: 'border-box',
         backgroundColor: '#ffffff',
       }}

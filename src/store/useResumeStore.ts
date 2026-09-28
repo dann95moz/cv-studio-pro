@@ -16,6 +16,7 @@ import {
   AIProviderSettings,
   GeneratedCvVersion,
   WizardStep,
+  ProfilePhotoConfig,
 } from '../types/cv';
 
 /**
@@ -79,6 +80,9 @@ const migrateLegacyLocalStorage = (): Partial<ResumeStore> => {
     const density = loadJson<SpacingDensity>('cv_spacing_density');
     if (density) legacyData.spacingDensity = density;
 
+    const photo = loadJson<ProfilePhotoConfig>('cv_photo');
+    if (photo) legacyData.photo = photo;
+
     const aiSettings = loadJson<AIProviderSettings>('cv_ai_settings');
     if (aiSettings) legacyData.providerSettings = aiSettings;
 
@@ -134,6 +138,8 @@ export const useResumeStore = create<ResumeStore>()(
         customColor: state.customColor,
         fontFamily: state.fontFamily,
         spacingDensity: state.spacingDensity,
+        sidebarWidth: state.sidebarWidth,
+        photo: state.photo,
         // Exclude plain text apiKey from unencrypted localStorage/Preferences
         providerSettings: {
           ...state.providerSettings,

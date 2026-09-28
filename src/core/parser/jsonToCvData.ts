@@ -1,4 +1,4 @@
-import { CVData, CVSection } from '../../types/cv';
+import { CVData, CVSection, ProfilePhotoConfig } from '../../types/cv';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 import { extractCandidateName } from './metadataExtractor';
 import { inferDocumentLanguage } from './skillNormalizer';
@@ -63,7 +63,10 @@ export interface RawJsonCvInput {
   drivingLicense?: string;
   availability?: string;
   civilStatus?: string;
+  placeOfOrigin?: string;
   references?: string;
+  photo?: string | ProfilePhotoConfig;
+  avatar?: string;
   cvData?: RawJsonCvInput;
   cv?: RawJsonCvInput;
   resume?: RawJsonCvInput;
@@ -203,6 +206,20 @@ export function parseJsonToCvData(
   }
   if (languages.length > 0) sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages });
 
+  let parsedPhoto: ProfilePhotoConfig | null | undefined = fallbackCv?.photo || undefined;
+  if (root.photo) {
+    if (typeof root.photo === 'string' && root.photo.trim()) {
+      parsedPhoto = {
+        url: root.photo.trim(),
+        enabled: true,
+        size: 96,
+        crop: { x: 0, y: 0, zoom: 1 },
+      };
+    } else if (typeof root.photo === 'object') {
+      parsedPhoto = root.photo as ProfilePhotoConfig;
+    }
+  }
+
   const rawCvData: CVData = {
     name,
     title,
@@ -225,6 +242,7 @@ export function parseJsonToCvData(
     education,
     certifications,
     languages,
+    photo: parsedPhoto,
     ...legalDetails,
   };
 

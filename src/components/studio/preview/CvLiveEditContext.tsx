@@ -115,6 +115,7 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
   const providerSettings = useResumeStore((s) => s.providerSettings);
   const setCvMarkdown = useResumeStore((s) => s.setCvMarkdown);
   const setActiveCvData = useResumeStore((s) => s.setActiveCvData);
+  const syncTransversalPersonalDetail = useResumeStore((s) => s.syncTransversalPersonalDetail);
   const openManualPromptModal = useResumeStore((s) => s.openManualPromptModal);
 
   const formatSelection = useCallback((command: 'bold' | 'italic' | 'highlight') => {
@@ -295,12 +296,14 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
       field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references' | 'placeOfOrigin',
       value: string
     ) => {
+      const cleanVal = value.trim() || undefined;
       applyCvUpdate((prev) => ({
         ...prev,
-        [field]: value.trim() || undefined,
+        [field]: cleanVal,
       }));
+      syncTransversalPersonalDetail(field, cleanVal);
     },
-    [applyCvUpdate]
+    [applyCvUpdate, syncTransversalPersonalDetail]
   );
 
   const toggleBulletVisibility = useCallback(

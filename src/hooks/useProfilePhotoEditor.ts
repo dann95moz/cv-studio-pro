@@ -44,6 +44,7 @@ export function useProfilePhotoEditor({
 
   const storePhoto = useResumeStore((s) => s.photo);
   const setProfilePhoto = useResumeStore((s) => s.setProfilePhoto);
+  const syncTransversalPersonalDetail = useResumeStore((s) => s.syncTransversalPersonalDetail);
   const storeTheme = useResumeStore((s) => s.theme);
 
   const currentPhoto = propPhoto !== undefined ? propPhoto : storePhoto;
@@ -62,8 +63,9 @@ export function useProfilePhotoEditor({
       } else {
         setProfilePhoto(updated);
       }
+      syncTransversalPersonalDetail('photo', updated);
     },
-    [onPhotoChange, setProfilePhoto]
+    [onPhotoChange, setProfilePhoto, syncTransversalPersonalDetail]
   );
 
   const {
