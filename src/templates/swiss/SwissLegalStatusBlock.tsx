@@ -93,7 +93,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
     /(aucun permis|no\s*(?:work)?\s*permit|sans permis|permis non requis|don['’]?t require|not require|keine\s*(?:arbeits)?bewilligung|sin permiso|nessun permesso)/i.test(cleanNat) ||
     /(aucun permis|no\s*(?:work)?\s*permit|sans permis|permis non requis|don['’]?t require|not require|keine\s*(?:arbeits)?bewilligung|sin permiso|nessun permesso)/i.test(rawPermit);
 
-  const isNationalityPrimary = Boolean(cleanNat && (noPermitNeeded || !header.workPermit));
+  const isNationalityPrimary = Boolean(cleanNat && (noPermitNeeded || !header.workPermit || !showWorkPermit));
 
   // Determine dynamic display for Swiss / dual citizens or candidates requiring no work permit
   let displayNationality = cleanNat;
@@ -117,7 +117,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
     /(citoyen|citizen|suisse|swiss|don['’]?t require|aucun permis|no\s*(?:work)?\s*permit|sans permis|keine\s*(?:arbeits)?bewilligung|sin permiso|nessun permesso)/i.test(rawPermit);
 
   const hasVisibleDetails =
-    (showNationality && isNationalityPrimary) ||
+    (showNationality && cleanNat) ||
     (showWorkPermit && header.workPermit) ||
     (showOrigin && origin) ||
     (showAvailability && cleanAvailability) ||

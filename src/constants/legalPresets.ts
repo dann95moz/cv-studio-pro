@@ -181,3 +181,73 @@ export function getLocalizedReferences(val: string | undefined, lang: SupportedL
   return val.trim();
 }
 
+export const NATIONALITY_PRESETS: Record<SupportedLanguage, LegalPresetOption[]> = {
+  en: [
+    { label: 'Swiss', value: 'Swiss' },
+    { label: 'Swiss / Spanish', value: 'Swiss / Spanish' },
+    { label: 'Spanish', value: 'Spanish' },
+    { label: 'French', value: 'French' },
+    { label: 'German', value: 'German' },
+    { label: 'Italian', value: 'Italian' },
+    { label: 'Colombian', value: 'Colombian' },
+    { label: 'EU Citizen', value: 'EU Citizen' },
+  ],
+  es: [
+    { label: 'Suiza', value: 'Suiza' },
+    { label: 'Suiza / Española', value: 'Suiza / Española' },
+    { label: 'Suiza / Colombiana', value: 'Suiza / Colombiana' },
+    { label: 'Española', value: 'Española' },
+    { label: 'Francesa', value: 'Francesa' },
+    { label: 'Alemana', value: 'Alemana' },
+    { label: 'Italiana', value: 'Italiana' },
+    { label: 'Colombiana', value: 'Colombiana' },
+    { label: 'Ciudadanía UE', value: 'Ciudadanía UE' },
+  ],
+  fr: [
+    { label: 'Suisse', value: 'Suisse' },
+    { label: 'Suisse / Espagnole', value: 'Suisse / Espagnole' },
+    { label: 'Suisse / Colombienne', value: 'Suisse / Colombienne' },
+    { label: 'Française', value: 'Française' },
+    { label: 'Espagnole', value: 'Espagnole' },
+    { label: 'Allemande', value: 'Allemande' },
+    { label: 'Italienne', value: 'Italienne' },
+    { label: 'Colombienne', value: 'Colombienne' },
+    { label: 'Citoyenneté UE', value: 'Citoyenneté UE' },
+  ],
+  de: [
+    { label: 'Schweizerisch', value: 'Schweizerisch' },
+    { label: 'Schweizerisch / Spanisch', value: 'Schweizerisch / Spanisch' },
+    { label: 'Spanisch', value: 'Spanisch' },
+    { label: 'Deutsch', value: 'Deutsch' },
+    { label: 'Französisch', value: 'Französisch' },
+    { label: 'Italienisch', value: 'Italienisch' },
+    { label: 'Kolumbianisch', value: 'Kolumbianisch' },
+    { label: 'EU-Bürgerschaft', value: 'EU-Bürgerschaft' },
+  ],
+  it: [
+    { label: 'Svizzera', value: 'Svizzera' },
+    { label: 'Svizzera / Spagnola', value: 'Svizzera / Spagnola' },
+    { label: 'Spagnola', value: 'Spagnola' },
+    { label: 'Francese', value: 'Francese' },
+    { label: 'Tedesca', value: 'Tedesca' },
+    { label: 'Italiana', value: 'Italiana' },
+    { label: 'Colombiana', value: 'Colombiana' },
+    { label: 'Cittadinanza UE', value: 'Cittadinanza UE' },
+  ],
+};
+
+export const PLACE_OF_ORIGIN_PRESETS: LegalPresetOption[] = [
+  { label: 'Bern (BE)', value: 'Bern (BE)' },
+  { label: 'Zürich (ZH)', value: 'Zürich (ZH)' },
+  { label: 'Genève (GE)', value: 'Genève (GE)' },
+  { label: 'Lausanne (VD)', value: 'Lausanne (VD)' },
+  { label: 'Basel (BS)', value: 'Basel (BS)' },
+  { label: 'Luzern (LU)', value: 'Luzern (LU)' },
+  { label: 'Frutigen (BE)', value: 'Frutigen (BE)' },
+  { label: 'Neuchâtel (NE)', value: 'Neuchâtel (NE)' },
+  { label: 'Fribourg (FR)', value: 'Fribourg (FR)' },
+  { label: 'Sion (VS)', value: 'Sion (VS)' },
+  { label: 'Lugano (TI)', value: 'Lugano (TI)' },
+];
+
+

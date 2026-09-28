@@ -34,6 +34,8 @@ import {
   DRIVING_LICENSE_PRESETS,
   CIVIL_STATUS_PRESETS,
   REFERENCES_PRESETS,
+  NATIONALITY_PRESETS,
+  PLACE_OF_ORIGIN_PRESETS,
   getLocalizedReferences,
   LegalPresetOption,
 } from '../../../constants/legalPresets';
@@ -201,6 +203,8 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
 
   const getFieldPresets = (key?: string): LegalPresetOption[] => {
     if (!key) return [];
+    if (key === 'nationality') return NATIONALITY_PRESETS[docLang] || [];
+    if (key === 'placeOfOrigin') return PLACE_OF_ORIGIN_PRESETS;
     if (key === 'workPermit') return WORK_PERMIT_PRESETS[docLang] || [];
     if (key === 'availability') return AVAILABILITY_PRESETS[docLang] || [];
     if (key === 'drivingLicense') return DRIVING_LICENSE_PRESETS[docLang] || [];
@@ -228,9 +232,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'availability',
       title: t('preview:panels.design.visibility.availability', 'Disponibilidad'),
       subtitle: parsedCv?.availability || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('availability'),
-      onToggle: () => onToggleHiddenDetail?.('availability'),
-      available: Boolean(parsedCv?.availability),
+      checked: Boolean(parsedCv?.availability && parsedCv.availability.trim()) && !hiddenDetailsSet.has('availability'),
+      onToggle: () => {
+        if (!parsedCv?.availability || !parsedCv.availability.trim()) {
+          handleOpenEdit(
+            'availability',
+            t('preview:panels.design.visibility.availability', 'Disponibilidad'),
+            '',
+            'Ej: Immédiate, Décembre 2026, 1 mes'
+          );
+        } else {
+          onToggleHiddenDetail?.('availability');
+        }
+      },
+      available: Boolean(parsedCv?.availability && parsedCv.availability.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -245,9 +260,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'placeOfOrigin',
       title: t('preview:panels.design.visibility.placeOfOrigin', 'Lugar de origen / Cantón'),
       subtitle: parsedCv?.placeOfOrigin || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('placeOfOrigin'),
-      onToggle: () => onToggleHiddenDetail?.('placeOfOrigin'),
-      available: Boolean(parsedCv?.placeOfOrigin),
+      checked: Boolean(parsedCv?.placeOfOrigin && parsedCv.placeOfOrigin.trim()) && !hiddenDetailsSet.has('placeOfOrigin'),
+      onToggle: () => {
+        if (!parsedCv?.placeOfOrigin || !parsedCv.placeOfOrigin.trim()) {
+          handleOpenEdit(
+            'placeOfOrigin',
+            t('preview:panels.design.visibility.placeOfOrigin', 'Lugar de origen / Cantón'),
+            '',
+            'Ej: Frutigen (BE), Bern (BE)'
+          );
+        } else {
+          onToggleHiddenDetail?.('placeOfOrigin');
+        }
+      },
+      available: Boolean(parsedCv?.placeOfOrigin && parsedCv.placeOfOrigin.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -262,9 +288,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'nationality',
       title: t('preview:panels.design.visibility.nationality', 'Nacionalidad'),
       subtitle: parsedCv?.nationality || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('nationality'),
-      onToggle: () => onToggleHiddenDetail?.('nationality'),
-      available: Boolean(parsedCv?.nationality),
+      checked: Boolean(parsedCv?.nationality && parsedCv.nationality.trim()) && !hiddenDetailsSet.has('nationality'),
+      onToggle: () => {
+        if (!parsedCv?.nationality || !parsedCv.nationality.trim()) {
+          handleOpenEdit(
+            'nationality',
+            t('preview:panels.design.visibility.nationality', 'Nacionalidad'),
+            '',
+            'Ej: Suisse / Colombienne, Española'
+          );
+        } else {
+          onToggleHiddenDetail?.('nationality');
+        }
+      },
+      available: Boolean(parsedCv?.nationality && parsedCv.nationality.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -279,9 +316,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'workPermit',
       title: t('preview:panels.design.visibility.workPermit', 'Permiso de trabajo'),
       subtitle: parsedCv?.workPermit || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('workPermit'),
-      onToggle: () => onToggleHiddenDetail?.('workPermit'),
-      available: Boolean(parsedCv?.workPermit),
+      checked: Boolean(parsedCv?.workPermit && parsedCv.workPermit.trim()) && !hiddenDetailsSet.has('workPermit'),
+      onToggle: () => {
+        if (!parsedCv?.workPermit || !parsedCv.workPermit.trim()) {
+          handleOpenEdit(
+            'workPermit',
+            t('preview:panels.design.visibility.workPermit', 'Permiso de trabajo'),
+            '',
+            'Ej: Permis C, Citoyen suisse, Permis B'
+          );
+        } else {
+          onToggleHiddenDetail?.('workPermit');
+        }
+      },
+      available: Boolean(parsedCv?.workPermit && parsedCv.workPermit.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -296,9 +344,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'dateOfBirth',
       title: t('preview:panels.design.visibility.dateOfBirth', 'Fecha de nacimiento'),
       subtitle: parsedCv?.dateOfBirth || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('dateOfBirth'),
-      onToggle: () => onToggleHiddenDetail?.('dateOfBirth'),
-      available: Boolean(parsedCv?.dateOfBirth),
+      checked: Boolean(parsedCv?.dateOfBirth && parsedCv.dateOfBirth.trim()) && !hiddenDetailsSet.has('dateOfBirth'),
+      onToggle: () => {
+        if (!parsedCv?.dateOfBirth || !parsedCv.dateOfBirth.trim()) {
+          handleOpenEdit(
+            'dateOfBirth',
+            t('preview:panels.design.visibility.dateOfBirth', 'Fecha de nacimiento'),
+            '',
+            'Ej: 15.05.1990'
+          );
+        } else {
+          onToggleHiddenDetail?.('dateOfBirth');
+        }
+      },
+      available: Boolean(parsedCv?.dateOfBirth && parsedCv.dateOfBirth.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -313,9 +372,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'drivingLicense',
       title: t('preview:panels.design.visibility.drivingLicense', 'Permiso de conducir'),
       subtitle: parsedCv?.drivingLicense || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('drivingLicense'),
-      onToggle: () => onToggleHiddenDetail?.('drivingLicense'),
-      available: Boolean(parsedCv?.drivingLicense),
+      checked: Boolean(parsedCv?.drivingLicense && parsedCv.drivingLicense.trim()) && !hiddenDetailsSet.has('drivingLicense'),
+      onToggle: () => {
+        if (!parsedCv?.drivingLicense || !parsedCv.drivingLicense.trim()) {
+          handleOpenEdit(
+            'drivingLicense',
+            t('preview:panels.design.visibility.drivingLicense', 'Permiso de conducir'),
+            '',
+            'Ej: Catégorie B, Tipo B'
+          );
+        } else {
+          onToggleHiddenDetail?.('drivingLicense');
+        }
+      },
+      available: Boolean(parsedCv?.drivingLicense && parsedCv.drivingLicense.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -330,9 +400,20 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'civilStatus',
       title: t('preview:panels.design.visibility.civilStatus', 'Estado civil'),
       subtitle: parsedCv?.civilStatus || t('preview:panels.design.visibility.notSet', 'No configurado'),
-      checked: !hiddenDetailsSet.has('civilStatus'),
-      onToggle: () => onToggleHiddenDetail?.('civilStatus'),
-      available: Boolean(parsedCv?.civilStatus),
+      checked: Boolean(parsedCv?.civilStatus && parsedCv.civilStatus.trim()) && !hiddenDetailsSet.has('civilStatus'),
+      onToggle: () => {
+        if (!parsedCv?.civilStatus || !parsedCv.civilStatus.trim()) {
+          handleOpenEdit(
+            'civilStatus',
+            t('preview:panels.design.visibility.civilStatus', 'Estado civil'),
+            '',
+            'Ej: Célibataire, Soltero/a'
+          );
+        } else {
+          onToggleHiddenDetail?.('civilStatus');
+        }
+      },
+      available: Boolean(parsedCv?.civilStatus && parsedCv.civilStatus.trim()),
       onEdit: onUpdatePersonalDetail
         ? () =>
             handleOpenEdit(
@@ -347,7 +428,7 @@ export const VisibilityPanel: React.FC<VisibilityPanelProps> = ({
       key: 'photo',
       title: t('preview:panels.design.visibility.photo', 'Foto de perfil'),
       subtitle: photo?.url ? t('preview:panels.design.visibility.photoAttached', 'Foto cargada') : t('preview:panels.design.visibility.noPhoto', 'Sin foto'),
-      checked: photo?.enabled !== false,
+      checked: photo?.enabled !== false && Boolean(photo?.url),
       onToggle: () => onPhotoToggle?.(photo?.enabled === false),
       available: Boolean(photo?.url || parsedCv?.photo),
     },

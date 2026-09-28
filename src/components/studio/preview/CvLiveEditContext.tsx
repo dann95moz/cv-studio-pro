@@ -297,10 +297,16 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
       value: string
     ) => {
       const cleanVal = value.trim() || undefined;
-      applyCvUpdate((prev) => ({
-        ...prev,
-        [field]: cleanVal,
-      }));
+      applyCvUpdate((prev) => {
+        const nextHidden = cleanVal && prev.hiddenDetails?.includes(field)
+          ? prev.hiddenDetails.filter((k) => k !== field)
+          : prev.hiddenDetails;
+        return {
+          ...prev,
+          [field]: cleanVal,
+          hiddenDetails: nextHidden,
+        };
+      });
       syncTransversalPersonalDetail(field, cleanVal);
     },
     [applyCvUpdate, syncTransversalPersonalDetail]

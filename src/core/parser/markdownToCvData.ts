@@ -4,7 +4,7 @@ import { extractCandidateName, extractTargetRole, cleanHumanText } from './metad
 import { parseJsonToCvData } from './jsonToCvData';
 import { parseContactsLine, isLikelyContactLine } from './contactParser';
 import { parseExperienceBlocks } from './experienceParser';
-import { parseLegalMetadata, LegalMetadataResult } from './legalMetadataParser';
+import { parseLegalMetadata, parseAllLegalMetadata, LegalMetadataResult } from './legalMetadataParser';
 import { inferDocumentLanguage, normalizeSkillCategory } from './skillNormalizer';
 import {
   cleanCvData,
@@ -150,12 +150,18 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   const preambleLines = lines.slice(0, preambleEndIndex).map((l) => l.trim()).filter(Boolean);
 
   for (const pLine of preambleLines) {
-    const parsedLegal = parseLegalMetadata(pLine);
-    if (parsedLegal) {
-      if (parsedLegal.key === 'nationality' && legalDetails.nationality) {
-        legalDetails.nationality = `${legalDetails.nationality} • ${parsedLegal.value}`;
-      } else {
-        legalDetails[parsedLegal.key] = parsedLegal.value;
+    const parsedLegalMap = parseAllLegalMetadata(pLine);
+    const legalKeys = Object.keys(parsedLegalMap) as Array<keyof LegalMetadataResult>;
+    if (legalKeys.length > 0) {
+      for (const k of legalKeys) {
+        const val = parsedLegalMap[k];
+        if (val) {
+          if (k === 'nationality' && legalDetails.nationality) {
+            legalDetails.nationality = `${legalDetails.nationality} • ${val}`;
+          } else {
+            legalDetails[k] = val;
+          }
+        }
       }
       continue;
     }
