@@ -18,6 +18,7 @@ export const TWO_COLUMN_CONFIGS: Partial<Record<ThemeId, ColumnLayoutConfig>> = 
   'euro-modern': { side: 'left', defaultWidth: 34, minWidth: 24, maxWidth: 46 },
   'two-column': { side: 'right', defaultWidth: 34, minWidth: 24, maxWidth: 46 },
   'executive': { side: 'right', defaultWidth: 38, minWidth: 24, maxWidth: 46 },
+  'swiss-modern': { side: 'left', defaultWidth: 34, minWidth: 24, maxWidth: 48 },
 };
 
 export interface ColumnResizeDividerProps {

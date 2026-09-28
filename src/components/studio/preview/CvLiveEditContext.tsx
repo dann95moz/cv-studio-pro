@@ -67,6 +67,18 @@ export interface CvLiveEditContextValue {
     field: 'nationality' | 'workPermit' | 'civilStatus' | 'availability' | 'dateOfBirth' | 'drivingLicense' | 'references',
     value: string
   ) => void;
+  toggleBulletVisibility: (
+    type: 'experience' | 'projects',
+    itemIndex: number,
+    bulletIndex: number
+  ) => void;
+  isBulletDisabled: (
+    type: 'experience' | 'projects',
+    itemIndex: number,
+    bulletIndex: number
+  ) => boolean;
+  updateSectionPlacement: (sectionId: string, target: 'sidebar' | 'main') => void;
+  reorderSection: (sourceId: string, targetColumn: 'sidebar' | 'main', targetIndex?: number) => void;
 }
 
 const CvLiveEditContext = createContext<CvLiveEditContextValue | null>(null);
@@ -273,6 +285,92 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     [applyCvUpdate]
   );
 
+  const toggleBulletVisibility = useCallback(
+    (
+      type: 'experience' | 'projects',
+      itemIndex: number,
+      bulletIndex: number
+    ) => {
+      applyCvUpdate((prev) => {
+        const listKey = type === 'projects' ? 'projects' : 'experience';
+        const items = (prev[listKey] || []).map((item, idx) => {
+          if (idx === itemIndex) {
+            const currentDisabled = new Set(item.disabledBullets || []);
+            if (currentDisabled.has(bulletIndex)) {
+              currentDisabled.delete(bulletIndex);
+            } else {
+              currentDisabled.add(bulletIndex);
+            }
+            return {
+              ...item,
+              disabledBullets: currentDisabled.size > 0 ? Array.from(currentDisabled) : undefined,
+            };
+          }
+          return item;
+        });
+        return { ...prev, [listKey]: items };
+      });
+    },
+    [applyCvUpdate]
+  );
+
+  const isBulletDisabled = useCallback(
+    (
+      type: 'experience' | 'projects',
+      itemIndex: number,
+      bulletIndex: number
+    ) => {
+      const listKey = type === 'projects' ? 'projects' : 'experience';
+      const item = (parsedCv[listKey] || [])[itemIndex];
+      return Boolean(item?.disabledBullets?.includes(bulletIndex));
+    },
+    [parsedCv]
+  );
+
+  const reorderSection = useCallback(
+    (sourceId: string, targetColumn: 'sidebar' | 'main', targetIndex?: number) => {
+      applyCvUpdate((prev) => {
+        const defaultSidebar = ['languages', 'skills', 'education'];
+        const defaultMain = ['summary', 'experience', 'projects'];
+
+        const sidebarList = [...(prev.sidebarSectionOrder || defaultSidebar)].filter((id) => id !== sourceId);
+        const mainList = [...(prev.mainSectionOrder || defaultMain)].filter((id) => id !== sourceId);
+
+        if (targetColumn === 'sidebar') {
+          if (targetIndex !== undefined && targetIndex >= 0 && targetIndex <= sidebarList.length) {
+            sidebarList.splice(targetIndex, 0, sourceId);
+          } else {
+            sidebarList.push(sourceId);
+          }
+        } else {
+          if (targetIndex !== undefined && targetIndex >= 0 && targetIndex <= mainList.length) {
+            mainList.splice(targetIndex, 0, sourceId);
+          } else {
+            mainList.push(sourceId);
+          }
+        }
+
+        return {
+          ...prev,
+          sectionPlacement: {
+            ...(prev.sectionPlacement || {}),
+            [sourceId]: targetColumn,
+          },
+          sidebarSectionOrder: sidebarList,
+          mainSectionOrder: mainList,
+        };
+      });
+    },
+    [applyCvUpdate]
+  );
+
+  const updateSectionPlacement = useCallback(
+    (sectionId: string, target: 'sidebar' | 'main') => {
+      reorderSection(sectionId, target);
+    },
+    [reorderSection]
+  );
+
   const undoItem = useCallback((fieldKey: string, onRevert: (previousValue: string) => void) => {
 
     const previousValue = undoMap[fieldKey];
@@ -403,6 +501,10 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     updateLanguageItem,
     updateSectionTitle,
     updatePersonalDetail,
+    toggleBulletVisibility,
+    isBulletDisabled,
+    updateSectionPlacement,
+    reorderSection,
   }), [
     isLiveEditing,
     setLiveEditing,
@@ -426,6 +528,10 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
     updateLanguageItem,
     updateSectionTitle,
     updatePersonalDetail,
+    toggleBulletVisibility,
+    isBulletDisabled,
+    updateSectionPlacement,
+    reorderSection,
   ]);
 
 
