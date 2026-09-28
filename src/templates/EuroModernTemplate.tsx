@@ -13,7 +13,7 @@ export const EuroModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, da
     <div
       className={`theme-${theme} template-euro-modern`}
       style={{
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "var(--cv-font-family, 'Inter', sans-serif)",
         color: '#1e293b',
         fontSize: '12.5px',
         lineHeight: 1.5,

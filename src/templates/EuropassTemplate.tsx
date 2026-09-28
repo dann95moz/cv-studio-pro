@@ -18,7 +18,7 @@ export const EuropassTemplate: React.FC<CVTemplateProps> = ({ slots, theme, data
     <div
       className={`theme-${theme} template-europass cv-container`}
       style={{
-        fontFamily: "'Inter', Arial, sans-serif",
+        fontFamily: "var(--cv-font-family, 'Inter', Arial, sans-serif)",
         color: '#1e293b',
         fontSize: '13px',
         lineHeight: 1.45,

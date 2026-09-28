@@ -78,7 +78,13 @@ export interface CvLiveEditContextValue {
     bulletIndex: number
   ) => boolean;
   updateSectionPlacement: (sectionId: string, target: 'sidebar' | 'main') => void;
-  reorderSection: (sourceId: string, targetColumn: 'sidebar' | 'main', targetIndex?: number) => void;
+  reorderSection: (
+    sourceId: string,
+    targetColumn: 'sidebar' | 'main',
+    targetIndex?: number,
+    targetSectionId?: string,
+    dropPosition?: 'before' | 'after'
+  ) => void;
 }
 
 const CvLiveEditContext = createContext<CvLiveEditContextValue | null>(null);
@@ -328,26 +334,41 @@ export const CvLiveEditProvider: React.FC<CvLiveEditProviderProps> = ({
   );
 
   const reorderSection = useCallback(
-    (sourceId: string, targetColumn: 'sidebar' | 'main', targetIndex?: number) => {
+    (
+      sourceId: string,
+      targetColumn: 'sidebar' | 'main',
+      targetIndex?: number,
+      targetSectionId?: string,
+      dropPosition?: 'before' | 'after'
+    ) => {
       applyCvUpdate((prev) => {
         const defaultSidebar = ['languages', 'skills', 'education'];
-        const defaultMain = ['summary', 'experience', 'projects'];
+        const defaultMain = ['summary', 'experience', 'projects', 'references', ...(prev.sections?.map(s => s.id) || [])];
 
-        const sidebarList = [...(prev.sidebarSectionOrder || defaultSidebar)].filter((id) => id !== sourceId);
-        const mainList = [...(prev.mainSectionOrder || defaultMain)].filter((id) => id !== sourceId);
+        const prevSidebar = prev.sidebarSectionOrder && prev.sidebarSectionOrder.length > 0
+          ? [...prev.sidebarSectionOrder]
+          : [...defaultSidebar];
+        const prevMain = prev.mainSectionOrder && prev.mainSectionOrder.length > 0
+          ? [...prev.mainSectionOrder]
+          : [...defaultMain];
 
-        if (targetColumn === 'sidebar') {
-          if (targetIndex !== undefined && targetIndex >= 0 && targetIndex <= sidebarList.length) {
-            sidebarList.splice(targetIndex, 0, sourceId);
+        const sidebarList = prevSidebar.filter((id) => id !== sourceId);
+        const mainList = prevMain.filter((id) => id !== sourceId);
+
+        const targetList = targetColumn === 'sidebar' ? sidebarList : mainList;
+
+        if (targetSectionId) {
+          const targetItemIndex = targetList.indexOf(targetSectionId);
+          if (targetItemIndex !== -1) {
+            const insertIndex = dropPosition === 'after' ? targetItemIndex + 1 : targetItemIndex;
+            targetList.splice(insertIndex, 0, sourceId);
           } else {
-            sidebarList.push(sourceId);
+            targetList.push(sourceId);
           }
+        } else if (targetIndex !== undefined && targetIndex >= 0 && targetIndex <= targetList.length) {
+          targetList.splice(targetIndex, 0, sourceId);
         } else {
-          if (targetIndex !== undefined && targetIndex >= 0 && targetIndex <= mainList.length) {
-            mainList.splice(targetIndex, 0, sourceId);
-          } else {
-            mainList.push(sourceId);
-          }
+          targetList.push(sourceId);
         }
 
         return {

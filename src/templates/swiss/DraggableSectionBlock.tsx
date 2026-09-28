@@ -5,7 +5,13 @@ export interface DraggableSectionBlockProps {
   column: 'sidebar' | 'main';
   index: number;
   isLiveEditing: boolean;
-  onReorder: (sourceId: string, targetColumn: 'sidebar' | 'main', targetIndex?: number) => void;
+  onReorder: (
+    sourceId: string,
+    targetColumn: 'sidebar' | 'main',
+    targetIndex?: number,
+    targetSectionId?: string,
+    dropPosition?: 'before' | 'after'
+  ) => void;
   children: React.ReactNode;
 }
 
@@ -26,14 +32,33 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
 
   return (
     <div
+      draggable={isLiveEditing}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setDropPosition(null);
       }}
+      onDragStart={(e) => {
+        const target = e.target as HTMLElement;
+        if (
+          target.isContentEditable ||
+          target.closest('[contenteditable="true"]') ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.closest('button') ||
+          target.closest('.no-drag')
+        ) {
+          e.preventDefault();
+          return;
+        }
+        e.dataTransfer.setData('cv-section-id', sectionId);
+        e.dataTransfer.setData('text/plain', sectionId);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
       onDragOver={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
         const rect = e.currentTarget.getBoundingClientRect();
         const midY = rect.top + rect.height / 2;
         if (e.clientY < midY) {
@@ -49,11 +74,12 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
       onDrop={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        const finalDropPos = dropPosition;
         setDropPosition(null);
+        setIsHovered(false);
         const sourceId = e.dataTransfer.getData('cv-section-id') || e.dataTransfer.getData('text/plain');
         if (sourceId && sourceId !== sectionId) {
-          const targetIndex = dropPosition === 'after' ? index + 1 : index;
-          onReorder(sourceId, column, targetIndex);
+          onReorder(sourceId, column, undefined, sectionId, finalDropPos || 'after');
         }
       }}
       style={{
@@ -61,8 +87,11 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
         display: 'flex',
         flexDirection: 'column',
         borderRadius: '6px',
-        transition: 'background-color 0.15s ease',
+        transition: 'background-color 0.15s ease, outline 0.15s ease',
         backgroundColor: isHovered ? 'rgba(2, 132, 199, 0.02)' : 'transparent',
+        outline: isHovered ? '1px dashed rgba(2, 132, 199, 0.25)' : '1px solid transparent',
+        outlineOffset: '2px',
+        cursor: isHovered ? 'grab' : 'default',
       }}
     >
       {/* Drop insertion line indicator (before) */}
@@ -88,6 +117,7 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
         className="no-print"
         draggable={true}
         onDragStart={(e) => {
+          e.stopPropagation();
           e.dataTransfer.setData('cv-section-id', sectionId);
           e.dataTransfer.setData('text/plain', sectionId);
           e.dataTransfer.effectAllowed = 'move';
@@ -99,9 +129,10 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
           right: 0,
           display: 'inline-flex',
           alignItems: 'center',
+          gap: '2px',
           justifyContent: 'center',
           cursor: 'grab',
-          opacity: isHovered ? 0.75 : 0,
+          opacity: isHovered ? 0.9 : 0,
           transition: 'opacity 0.15s ease, background-color 0.15s ease',
           padding: '2px 6px',
           borderRadius: '4px',
@@ -115,6 +146,7 @@ export const DraggableSectionBlock: React.FC<DraggableSectionBlockProps> = ({
         }}
       >
         <span style={{ fontSize: '11px', letterSpacing: '-1px' }}>⋮⋮</span>
+        <span style={{ fontSize: '9px', fontWeight: 600 }}>Mover</span>
       </div>
 
       {children}

@@ -32,7 +32,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
     <div
       className={`theme-${theme} template-swiss-modern`}
       style={{
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        fontFamily: "var(--cv-font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif)",
         color: '#1e293b',
         fontSize: '12px',
         lineHeight: 1.5,
@@ -46,6 +46,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
       <aside
         onDragOver={(e) => {
           e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
           setIsDragOverAside(true);
         }}
         onDragLeave={() => setIsDragOverAside(false)}
@@ -121,7 +122,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
               column="sidebar"
               index={sIdx}
               isLiveEditing={Boolean(liveEdit?.isLiveEditing)}
-              onReorder={(src, col, idx) => liveEdit?.reorderSection(src, col, idx)}
+              onReorder={(src, col, idx, targetId, pos) => liveEdit?.reorderSection(src, col, idx, targetId, pos)}
             >
               {content}
             </DraggableSectionBlock>
@@ -133,6 +134,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
       <main
         onDragOver={(e) => {
           e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
           setIsDragOverMain(true);
         }}
         onDragLeave={() => setIsDragOverMain(false)}
@@ -182,7 +184,7 @@ export const SwissModernTemplate: React.FC<CVTemplateProps> = ({ slots, theme, p
               column="main"
               index={mIdx}
               isLiveEditing={Boolean(liveEdit?.isLiveEditing)}
-              onReorder={(src, col, idx) => liveEdit?.reorderSection(src, col, idx)}
+              onReorder={(src, col, idx, targetId, pos) => liveEdit?.reorderSection(src, col, idx, targetId, pos)}
             >
               {content}
             </DraggableSectionBlock>

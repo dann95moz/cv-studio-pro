@@ -200,9 +200,11 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     if (isEditingVariant && translations[activeLanguage]) {
       const currentVariantText = translations[activeLanguage].cvMarkdown;
       const nextVariantText = typeof val === 'function' ? val(currentVariantText) : val;
+      const currentActiveCvData = get().activeCvData;
       const updatedVariant: CvTranslationVariant = {
         ...translations[activeLanguage],
         cvMarkdown: nextVariantText,
+        cvData: currentActiveCvData || translations[activeLanguage].cvData,
         updatedAt: new Date().toISOString(),
       };
       set({
@@ -244,7 +246,13 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       if (currentActiveCvData) {
         const currentSerialized = serializeCvDataToMarkdown(currentActiveCvData);
         if (currentSerialized.trim() !== nextVal.trim()) {
-          nextActiveCvData = parseMarkdownToCvData(nextVal);
+          const parsed = parseMarkdownToCvData(nextVal);
+          nextActiveCvData = {
+            ...parsed,
+            sidebarSectionOrder: currentActiveCvData.sidebarSectionOrder,
+            mainSectionOrder: currentActiveCvData.mainSectionOrder,
+            sectionPlacement: currentActiveCvData.sectionPlacement,
+          };
         }
       } else if (nextVal && nextVal.trim().length > 30) {
         nextActiveCvData = parseMarkdownToCvData(nextVal);
@@ -260,6 +268,25 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   },
 
   setActiveCvData: (data) => {
+    const { activeLanguage, currentBaseLanguage, translations } = get();
+    const isEditingVariant = Boolean(activeLanguage && currentBaseLanguage && activeLanguage !== currentBaseLanguage);
+
+    if (isEditingVariant && translations[activeLanguage]) {
+      const updatedVariant: CvTranslationVariant = {
+        ...translations[activeLanguage],
+        cvData: data || undefined,
+        updatedAt: new Date().toISOString(),
+      };
+      set({
+        activeCvData: data,
+        translations: {
+          ...translations,
+          [activeLanguage]: updatedVariant,
+        },
+      });
+      return;
+    }
+
     set({ activeCvData: data });
   },
 
