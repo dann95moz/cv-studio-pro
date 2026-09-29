@@ -4,6 +4,7 @@ export interface SwissLabels {
   contactTitle: string;
   workPermit: string;
   nationality: string;
+  placeOfOrigin: string;
   birthDate: string;
   drivingLicense: string;
   availability: string;
@@ -24,6 +25,7 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     contactTitle: 'Contact & Informations',
     workPermit: 'Permis de travail',
     nationality: 'Nationalité',
+    placeOfOrigin: 'Origine',
     birthDate: 'Date de naissance',
     drivingLicense: 'Permis de conduire',
     availability: 'Disponibilité',
@@ -42,6 +44,7 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     contactTitle: 'Kontakt & Personalien',
     workPermit: 'Aufenthaltsbewilligung',
     nationality: 'Nationalität',
+    placeOfOrigin: 'Heimatort',
     birthDate: 'Geburtsdatum',
     drivingLicense: 'Führerschein',
     availability: 'Verfügbarkeit',
@@ -60,6 +63,7 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     contactTitle: 'Contact & Details',
     workPermit: 'Work permit',
     nationality: 'Nationality',
+    placeOfOrigin: 'Origin',
     birthDate: 'Date of birth',
     drivingLicense: 'Driving licence',
     availability: 'Availability',
@@ -78,6 +82,7 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     contactTitle: 'Contacto y Datos',
     workPermit: 'Permiso de trabajo',
     nationality: 'Nacionalidad',
+    placeOfOrigin: 'Lugar de origen',
     birthDate: 'Fecha de nacimiento',
     drivingLicense: 'Permiso de conducir',
     availability: 'Disponibilidad',
@@ -96,6 +101,7 @@ export const SWISS_LABELS: Record<SupportedLanguage, SwissLabels> = {
     contactTitle: 'Contatti e Dati',
     workPermit: 'Permesso di lavoro',
     nationality: 'Nazionalità',
+    placeOfOrigin: 'Origine',
     birthDate: 'Data di nascita',
     drivingLicense: 'Patente',
     availability: 'Disponibilità',

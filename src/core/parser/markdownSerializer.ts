@@ -84,7 +84,7 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
 
   if (cleanData.workPermit) personalDetails.push(`Permis : ${stripPrefix(cleanData.workPermit, 'Permis(?:\\s+de\\s+travail|\\s+de\\s+séjour)?', 'Work Permit', 'Aufenthaltsbewilligung', 'Permiso de trabajo', 'Permesso(?:\\s+di\\s+soggiorno|\\s+di\\s+lavoro)?')}`);
   if (cleanData.nationality) personalDetails.push(`Nationalité : ${stripPrefix(cleanData.nationality, 'Nationalité', 'Nationality', 'Nationalität', 'Nacionalidad', 'Nazionalità')}`);
-  if (cleanData.placeOfOrigin) personalDetails.push(`Lieu d'origine : ${stripPrefix(cleanData.placeOfOrigin, "Lieu d'origine", 'Originaire de', 'Heimatort', 'Place of origin', 'Lugar de origen', "Luogo d'origine")}`);
+  if (cleanData.placeOfOrigin) personalDetails.push(`Lieu d'origine : ${cleanData.placeOfOrigin}`);
   if (cleanData.dateOfBirth) personalDetails.push(`Date de naissance : ${stripPrefix(cleanData.dateOfBirth, 'Date de naissance', 'Date of birth', 'Geburtsdatum', 'Fecha de nacimiento', 'Data di nascita', 'Birth date', 'Date de nacimiento')}`);
   if (cleanData.drivingLicense) personalDetails.push(`Permis de conduire : ${stripPrefix(cleanData.drivingLicense, 'Permis de conduire', 'Driving license', 'Driving licence', 'Führerschein', 'Permiso de conducir', 'Patente(?:\\s+di\\s+guida)?')}`);
   if (cleanData.availability) personalDetails.push(`Disponibilité : ${stripPrefix(cleanData.availability, 'Disponibilité', 'Availability', 'Délai de congé', 'Kündigungsfrist', 'Disponibilidad', 'Disponibilità')}`);

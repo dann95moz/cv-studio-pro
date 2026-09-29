@@ -1,5 +1,5 @@
 import { cleanHumanText } from './metadataExtractor';
-import { extractAndStripEmbeddedAvailability, sanitizeLegalMetadata } from './cvSanitizers';
+import { extractAndStripEmbeddedAvailability, sanitizeLegalMetadata, cleanPlaceOfOrigin } from './cvSanitizers';
 
 export interface LegalMetadataResult {
   workPermit?: string;
@@ -47,14 +47,10 @@ export function parseLegalMetadata(pLine: string): { key: keyof LegalMetadataRes
 
   // 4. Place of origin
   const originMatch = cleanMeta.match(
-    /^\*{0,2}(?:Lieu\s+d['’]origine|Originaire\s+de|Heimatort|Place\s+of\s+origin|Lugar\s+de\s+origen|Luogo\s+d['’]origine)\*{0,2}[:\s]+([^•·|\n]+)$/i
+    /^\*{0,2}(?:place\s+of\s+origin|lieu\s+d['’]origine|originaire\s+de|lugar\s+de\s+origen|luogo\s+d['’]origine|heimatort|origin|origine|origen)\*{0,2}[:\s]+([^•·|\n]+)$/i
   );
   if (originMatch) {
-    const rawVal = cleanHumanText(originMatch[1]);
-    const val = rawVal.toLowerCase().startsWith('originaire')
-      ? rawVal
-      : (cleanMeta.toLowerCase().startsWith('originaire') ? cleanHumanText(cleanMeta) : `Originaire de ${rawVal}`);
-    return { key: 'placeOfOrigin', value: val };
+    return { key: 'placeOfOrigin', value: cleanPlaceOfOrigin(originMatch[1]) };
   }
 
   // 5. Date of birth

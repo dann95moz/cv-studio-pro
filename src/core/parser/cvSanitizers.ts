@@ -150,12 +150,37 @@ export function extractAndStripEmbeddedAvailability(text: string): { cleaned: st
 }
 
 /**
+ * Regex matching origin prefixes across multiple languages (EN, FR, DE, ES, IT).
+ */
+export const ORIGIN_PREFIX_REGEX =
+  /^\s*(?:place\s+of\s+origin|lieu\s+d['’]origine|originaire\s+de|lugar\s+de\s+origen|luogo\s+d['’]origine|heimatort|origin|origine|origen)\s*[:：]?\s*/i;
+
+/**
+ * Strips duplicate origin prefixes ("Place of Origin:", "Origin:", "Lieu d'origine:", etc.)
+ * returning only the clean city/canton value (e.g. "Frutigen (BE)").
+ */
+export function cleanPlaceOfOrigin(val?: string): string {
+  if (!val || !val.trim()) return '';
+  let cleaned = cleanHumanText(val)
+    .replace(/^[•·/–—,\s|]+|[•·/–—,\s|]+$/g, '')
+    .trim();
+  while (ORIGIN_PREFIX_REGEX.test(cleaned)) {
+    cleaned = cleaned
+      .replace(ORIGIN_PREFIX_REGEX, '')
+      .replace(/^[•·/–—,\s|]+|[•·/–—,\s|]+$/g, '')
+      .trim();
+  }
+  return cleaned;
+}
+
+/**
  * Sanitizes and enforces consistency across personal and legal metadata fields.
  * Guarantees:
  * 1. Zero availability leakage inside workPermit or nationality.
  * 2. If a specific availability exists (e.g. "since december 2026"), generic placeholders
  *    ("available now", "disponible ya", "disponibilité immédiate") are stripped completely.
- * 3. Work permit and availability never contradict each other.
+ * 3. Zero duplicate origin prefixes in placeOfOrigin.
+ * 4. Work permit and availability never contradict each other.
  */
 export function sanitizeLegalMetadata<T extends Partial<CVData>>(data: T): T {
   if (!data) return data;
@@ -163,7 +188,7 @@ export function sanitizeLegalMetadata<T extends Partial<CVData>>(data: T): T {
   let workPermit = data.workPermit ? cleanHumanText(data.workPermit) : undefined;
   let nationality = data.nationality ? cleanHumanText(data.nationality) : undefined;
   let availability = data.availability ? cleanHumanText(data.availability) : undefined;
-  let placeOfOrigin = data.placeOfOrigin ? cleanHumanText(data.placeOfOrigin) : undefined;
+  let placeOfOrigin = data.placeOfOrigin ? cleanPlaceOfOrigin(data.placeOfOrigin) : undefined;
   let civilStatus = data.civilStatus ? cleanHumanText(data.civilStatus) : undefined;
   let dateOfBirth = data.dateOfBirth ? cleanHumanText(data.dateOfBirth) : undefined;
   let drivingLicense = data.drivingLicense ? cleanHumanText(data.drivingLicense) : undefined;

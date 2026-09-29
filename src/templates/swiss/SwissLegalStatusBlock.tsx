@@ -3,7 +3,7 @@ import { CVTemplateProps } from '../types';
 import { SwissLabels } from './swissLabels';
 import { EditableText } from '../../components/studio/preview/EditableText';
 import { useCvLiveEdit } from '../../components/studio/preview/CvLiveEditContext';
-import { extractAndStripEmbeddedAvailability } from '../../core/parser/cvSanitizers';
+import { extractAndStripEmbeddedAvailability, cleanPlaceOfOrigin } from '../../core/parser/cvSanitizers';
 
 export interface SwissLegalStatusBlockProps {
   header: CVTemplateProps['slots']['header'];
@@ -31,11 +31,11 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const { cleaned: rawPermit, detectedAvailability: permitAvail } = extractAndStripEmbeddedAvailability(rawPermitWithAvail);
 
   // 1. Resolve place of origin: prefer first-class placeOfOrigin property, fallback to regex
-  const originRegex = /(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Lugar\s+de\s+origen)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i;
+  const originRegex = /(?:place\s+of\s+origin|lieu\s+d['’]origine|originaire\s+de|lugar\s+de\s+origen|luogo\s+d['’]origine|heimatort|origin|origine|origen)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i;
   const legacyOriginMatch = rawNat.match(originRegex) || rawPermit.match(originRegex);
-  let origin = (header.placeOfOrigin || '').trim();
+  let origin = cleanPlaceOfOrigin(header.placeOfOrigin || '');
   if (!origin && legacyOriginMatch) {
-    origin = legacyOriginMatch[0].trim();
+    origin = cleanPlaceOfOrigin(legacyOriginMatch[1] || legacyOriginMatch[0]);
   }
 
   // Extract Swiss canton origin if enclosed in parentheses (e.g. "(Frutigen BE)" or "(Frutigen - BE)")
@@ -43,7 +43,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const cantonMatch = rawNat.match(swissCantonOriginRegex) || rawPermit.match(swissCantonOriginRegex);
   if (!origin && cantonMatch) {
     const cantonClean = cantonMatch[1].trim().replace(/[,\s–-]+([A-Z]{2})$/, ' ($1)');
-    origin = `Originaire de ${cantonClean}`;
+    origin = cleanPlaceOfOrigin(cantonClean);
   }
 
   // Also extract Swiss municipality/city with canton abbreviation e.g. "Frutigen (BE)", "• Frutigen (BE)"
@@ -204,11 +204,12 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         {/* Place of origin for Swiss citizens */}
         {showOrigin && origin && (
           <div>
-            <span style={{ fontWeight: 700, color: '#334155' }}>
+            <span style={{ fontWeight: 700, color: '#475569' }}>{labels.placeOfOrigin} : </span>
+            <span style={{ fontWeight: 600 }}>
               <EditableText
                 tagName="span"
                 value={origin}
-                onSave={(val) => liveEdit?.updatePersonalDetail('placeOfOrigin', val)}
+                onSave={(val) => liveEdit?.updatePersonalDetail('placeOfOrigin', cleanPlaceOfOrigin(val))}
               />
             </span>
           </div>

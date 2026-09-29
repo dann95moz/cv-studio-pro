@@ -14,6 +14,7 @@ import {
   cleanSkillCategory,
   cleanEducationItem,
   cleanLanguageItem,
+  cleanPlaceOfOrigin,
 } from './cvSanitizers';
 
 // Re-export helpers for backward compatibility across the codebase
@@ -311,10 +312,10 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     }
 
     // 2. Place of origin: ALWAYS extract and remove from nationality
-    const originMatch = legalDetails.nationality.match(/(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Luogo\s+d['’]origine)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i);
+    const originMatch = legalDetails.nationality.match(/(?:place\s+of\s+origin|lieu\s+d['’]origine|originaire\s+de|lugar\s+de\s+origen|luogo\s+d['’]origine|heimatort|origin|origine|origen)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i);
     if (originMatch) {
       if (!legalDetails.placeOfOrigin) {
-        legalDetails.placeOfOrigin = originMatch[0].trim();
+        legalDetails.placeOfOrigin = cleanPlaceOfOrigin(originMatch[1] || originMatch[0]);
       }
       legalDetails.nationality = legalDetails.nationality.replace(originMatch[0], '').trim();
     } else {
@@ -323,7 +324,7 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
       if (cantonMatch) {
         if (!legalDetails.placeOfOrigin) {
           const cantonClean = cantonMatch[1].trim().replace(/[,\s–-]+([A-Z]{2})$/, ' ($1)');
-          legalDetails.placeOfOrigin = `Originaire de ${cantonClean}`;
+          legalDetails.placeOfOrigin = cleanPlaceOfOrigin(cantonClean);
         }
         legalDetails.nationality = legalDetails.nationality.replace(cantonMatch[0], '').trim();
       }

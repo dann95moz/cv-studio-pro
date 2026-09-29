@@ -1,7 +1,7 @@
 import { CVData } from '../../types/cv';
 import { SupportedLanguage } from '../../constants/languages';
 import { getLocalizedReferences } from '../../constants/legalPresets';
-import { sanitizeLegalMetadata } from '../parser/cvSanitizers';
+import { sanitizeLegalMetadata, cleanPlaceOfOrigin } from '../parser/cvSanitizers';
 
 /**
  * Default ATS section titles synchronized across all 5 supported locales.
@@ -195,7 +195,10 @@ export function generatePlainTextCv(data: CVData): string {
   }
   if (cleanData.placeOfOrigin) {
     const originLabel = lang === 'fr' ? "Lieu d'origine" : lang === 'de' ? 'Heimatort' : lang === 'es' ? 'Lugar de origen' : lang === 'it' ? "Luogo d'origine" : 'Place of Origin';
-    personalDetails.push(`${originLabel}: ${stripMarkdownFormatting(cleanData.placeOfOrigin)}`);
+    const cleanOrigin = cleanPlaceOfOrigin(stripMarkdownFormatting(cleanData.placeOfOrigin));
+    if (cleanOrigin) {
+      personalDetails.push(`${originLabel}: ${cleanOrigin}`);
+    }
   }
   if (cleanData.workPermit && !isPermitRedundant) {
     const permitLabel = lang === 'fr' ? 'Permis de travail' : lang === 'es' ? 'Permiso de trabajo' : lang === 'de' ? 'Arbeitsbewilligung' : lang === 'it' ? 'Permesso di lavoro' : 'Work Permit';
