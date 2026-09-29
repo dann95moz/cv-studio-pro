@@ -331,23 +331,59 @@ export async function generateDirectPdf(
 
     if (textLines.length > 0) {
       const totalPages = pdf.getNumberOfPages();
-      const step = 6;
-      const startY = 15;
-      const maxY = pdfPageHeight - 15;
-      let lineIndex = 0;
+      const marginX = 10;
+      const printableWidth = Math.max(pdfPageWidth - (marginX * 2), 100);
+      const startY = 12;
+      const maxY = pdfPageHeight - 12;
+      const availableHeight = maxY - startY;
 
-      for (let p = 1; p <= totalPages; p++) {
-        pdf.setPage(p);
-        let currentY = startY;
-        while (lineIndex < textLines.length && currentY < maxY) {
-          const line = textLines[lineIndex];
-          try {
-            pdf.text(line.slice(0, 120), 10, currentY, { renderingMode: 'invisible' });
-          } catch {
-            // Ignore individual line rendering issues
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8.5);
+
+      // Split every paragraph/line cleanly within printable width to avoid truncating words
+      const allLines: string[] = [];
+      for (const rawLine of textLines) {
+        const clean = stripMarkdownFormatting(rawLine).trim();
+        if (!clean) continue;
+        const wrapped = pdf.splitTextToSize(clean, printableWidth);
+        if (Array.isArray(wrapped)) {
+          allLines.push(...wrapped);
+        } else if (wrapped) {
+          allLines.push(wrapped);
+        }
+      }
+
+      if (allLines.length > 0) {
+        const linesPerPage = Math.ceil(allLines.length / totalPages);
+        let lineIndex = 0;
+
+        for (let p = 1; p <= totalPages; p++) {
+          pdf.setPage(p);
+          const linesForThisPage = p === totalPages
+            ? allLines.length - lineIndex
+            : Math.min(linesPerPage, allLines.length - lineIndex);
+
+          if (linesForThisPage <= 0) break;
+
+          // Compute vertical step to distribute lines nicely across the page, bounded between 2.2mm and 5.5mm
+          const calculatedStep = linesForThisPage > 1
+            ? availableHeight / (linesForThisPage - 1)
+            : 5;
+          const pageStep = Math.min(5.5, Math.max(2.2, calculatedStep));
+
+          let currentY = startY;
+          for (let i = 0; i < linesForThisPage; i++) {
+            const line = allLines[lineIndex];
+            if (line) {
+              try {
+                pdf.text(line, marginX, currentY, { renderingMode: 'invisible' });
+              } catch {
+                // Ignore individual line rendering issues
+              }
+            }
+            currentY = Math.min(currentY + pageStep, maxY);
+            lineIndex++;
           }
-          currentY += step;
-          lineIndex++;
         }
       }
     }
