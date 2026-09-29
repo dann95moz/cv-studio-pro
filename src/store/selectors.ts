@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useResumeStore } from './useResumeStore';
 import { auditCvContent } from '../core/audit-engine';
-import { CVData, QualityAuditReport } from '../types/cv';
+import { CVData, ContactItem, QualityAuditReport } from '../types/cv';
 import { extractGapInfo } from '../utils/sanitize';
 import { DEMO_CV_DATA } from '../constants/templates';
 import { parseMarkdownToCvData } from '../core/parser';
@@ -38,6 +38,35 @@ export const useParsedCv = (): CVData => {
       ? rawLang
       : 'es') as SupportedLanguage;
 
+    // Resolve base contacts to guarantee candidate credentials are NEVER lost across variants
+    let baseContacts = activeCvData?.contacts || [];
+    if (baseContacts.length === 0 && cvMarkdown) {
+      try {
+        baseContacts = parseMarkdownToCvData(cvMarkdown).contacts || [];
+      } catch {
+        baseContacts = [];
+      }
+    }
+    if (baseContacts.length === 0 && masterData) {
+      try {
+        baseContacts = parseMarkdownToCvData(masterData).contacts || [];
+      } catch {
+        baseContacts = [];
+      }
+    }
+
+    const enrichContacts = (variantContacts?: ContactItem[]): ContactItem[] => {
+      const current = variantContacts && variantContacts.length > 0 ? [...variantContacts] : [];
+      if (baseContacts.length === 0) return current;
+      if (current.length === 0) return [...baseContacts];
+      for (const bc of baseContacts) {
+        if (!current.some((c) => c.type === bc.type)) {
+          current.push(bc);
+        }
+      }
+      return current;
+    };
+
     // 1. Language variant cvData (must have real candidate content)
     const variantData = activeLanguage && currentBaseLanguage && activeLanguage !== currentBaseLanguage
       ? translations[activeLanguage]?.cvData
@@ -51,6 +80,7 @@ export const useParsedCv = (): CVData => {
     ) {
       return {
         ...variantData,
+        contacts: enrichContacts(variantData.contacts),
         language: effectiveLang,
       };
     }
@@ -67,6 +97,7 @@ export const useParsedCv = (): CVData => {
       if (parsedVariant.name || parsedVariant.summary || parsedVariant.experience?.length || parsedVariant.skillGroups?.length) {
         return {
           ...parsedVariant,
+          contacts: enrichContacts(parsedVariant.contacts),
           language: parsedVariant.language || effectiveLang,
         };
       }

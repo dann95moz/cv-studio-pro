@@ -185,6 +185,8 @@ export function cleanPlaceOfOrigin(val?: string): string {
 export function sanitizeLegalMetadata<T extends Partial<CVData>>(data: T): T {
   if (!data) return data;
 
+  const result: T = { ...data };
+
   let workPermit = data.workPermit ? cleanHumanText(data.workPermit) : undefined;
   let nationality = data.nationality ? cleanHumanText(data.nationality) : undefined;
   let availability = data.availability ? cleanHumanText(data.availability) : undefined;
@@ -217,17 +219,16 @@ export function sanitizeLegalMetadata<T extends Partial<CVData>>(data: T): T {
     availability = cleanHumanText(availability).replace(/^[•·/–—,\s|]+|[•·/–—,\s|]+$/g, '').trim();
   }
 
-  return {
-    ...data,
-    workPermit,
-    nationality,
-    availability,
-    placeOfOrigin,
-    civilStatus,
-    dateOfBirth,
-    drivingLicense,
-    references,
-  };
+  if (workPermit !== undefined && workPermit.trim()) result.workPermit = workPermit; else delete result.workPermit;
+  if (nationality !== undefined && nationality.trim()) result.nationality = nationality; else delete result.nationality;
+  if (availability !== undefined && availability.trim()) result.availability = availability; else delete result.availability;
+  if (placeOfOrigin !== undefined && placeOfOrigin.trim()) result.placeOfOrigin = placeOfOrigin; else delete result.placeOfOrigin;
+  if (civilStatus !== undefined && civilStatus.trim()) result.civilStatus = civilStatus; else delete result.civilStatus;
+  if (dateOfBirth !== undefined && dateOfBirth.trim()) result.dateOfBirth = dateOfBirth; else delete result.dateOfBirth;
+  if (drivingLicense !== undefined && drivingLicense.trim()) result.drivingLicense = drivingLicense; else delete result.drivingLicense;
+  if (references !== undefined && references.trim()) result.references = references; else delete result.references;
+
+  return result;
 }
 
 /**

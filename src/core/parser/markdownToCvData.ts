@@ -167,6 +167,17 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   const preambleLines = lines.slice(0, preambleEndIndex).map((l) => l.trim()).filter(Boolean);
 
   for (const pLine of preambleLines) {
+    if (pLine.startsWith('# ')) {
+      const candidateHeader = cleanHumanText(pLine.replace(/^#\s+/, ''));
+      if (
+        candidateHeader &&
+        !/^(?:master\s+data|master\s+profile|perfil\s+profesional|curriculum|resume|cv|datos\s+maestros|ejemplo)/i.test(candidateHeader)
+      ) {
+        name = candidateHeader;
+      }
+      continue;
+    }
+
     const parsedLegalMap = parseAllLegalMetadata(pLine);
     const legalKeys = Object.keys(parsedLegalMap) as Array<keyof LegalMetadataResult>;
     if (legalKeys.length > 0) {
@@ -180,25 +191,24 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
           }
         }
       }
-      continue;
     }
 
-    if (pLine.startsWith('# ')) {
-      const candidateHeader = cleanHumanText(pLine.replace(/^#\s+/, ''));
-      if (
-        candidateHeader &&
-        !/^(?:master\s+data|master\s+profile|perfil\s+profesional|curriculum|resume|cv|datos\s+maestros|ejemplo)/i.test(candidateHeader)
-      ) {
-        name = candidateHeader;
-      }
-    } else if (isLikelyContactLine(pLine)) {
+    if (isLikelyContactLine(pLine)) {
       const parsedContacts = parseContactsLine(pLine);
       for (const item of parsedContacts) {
-        if (!contacts.some((c) => c.type === item.type && c.label === item.label)) {
+        if (
+          !contacts.some((c) => c.type === item.type && c.label === item.label) &&
+          !/^(?:nationality|nationalit[ée]|place\s+of\s+origin|lieu\s+d['’]origine|originaire|availability|disponibilit[ée]|work\s+permit|permis(?!\s+de\s+conduire)|civil\s+status|[ée]tat\s+civil|date\s+of\s+birth|date\s+de\s+naissance|references?|r[ée]f[ée]rences?)/i.test(item.label)
+        ) {
           contacts.push(item);
         }
       }
-    } else if (!pLine.startsWith('---') && !pLine.startsWith('===') && !pLine.startsWith('>')) {
+    } else if (
+      legalKeys.length === 0 &&
+      !pLine.startsWith('---') &&
+      !pLine.startsWith('===') &&
+      !pLine.startsWith('>')
+    ) {
       const cleanLine = cleanHumanText(pLine);
       if (
         cleanLine &&

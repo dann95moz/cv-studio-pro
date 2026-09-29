@@ -113,5 +113,16 @@ export function parseAllLegalMetadata(line: string): LegalMetadataResult {
     }
   }
 
-  return sanitizeLegalMetadata(result) as LegalMetadataResult;
+  if (Object.keys(result).length === 0) {
+    return {};
+  }
+
+  const sanitized = sanitizeLegalMetadata(result) as LegalMetadataResult;
+  const cleanedResult: LegalMetadataResult = {};
+  for (const [k, v] of Object.entries(sanitized)) {
+    if (v !== undefined && v !== null && String(v).trim()) {
+      cleanedResult[k as keyof LegalMetadataResult] = String(v).trim();
+    }
+  }
+  return cleanedResult;
 }

@@ -1,4 +1,4 @@
-import { AIProviderSettings, CVData } from '../../types/cv';
+import { AIProviderSettings, CVData, ContactItem } from '../../types/cv';
 import { SupportedLanguage, LANGUAGE_DEFINITIONS } from '../../constants/languages';
 import { getAIStrategy } from './strategies';
 import { PromptBundle } from './prompt-builder';
@@ -300,9 +300,26 @@ export function extractTranslatedCv(
 
   // 1. Primary: parse structured JSON
   const parsedData = parseJsonToCvData(sanitized, fallbackMarkdown, '');
+  // Helper to enrich contacts from fallbackMarkdown if missing
+  const enrichFromFallback = (currentContacts?: ContactItem[]) => {
+    if (currentContacts && currentContacts.length > 0) return currentContacts;
+    if (fallbackMarkdown && fallbackMarkdown.trim()) {
+      try {
+        const fb = parseMarkdownToCvData(fallbackMarkdown);
+        if (fb.contacts && fb.contacts.length > 0) {
+          return fb.contacts;
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return currentContacts || [];
+  };
+
   if (parsedData && (parsedData.name || parsedData.summary || parsedData.experience?.length || parsedData.skillGroups?.length)) {
     const cvData: CVData = {
       ...parsedData,
+      contacts: enrichFromFallback(parsedData.contacts),
       language: targetLanguage,
     };
     const cvMarkdown = serializeCvDataToMarkdown(cvData, targetLanguage);
@@ -314,6 +331,7 @@ export function extractTranslatedCv(
   const parsedMarkdownData = parseMarkdownToCvData(cleanedText, targetLanguage);
   const cvData: CVData = {
     ...parsedMarkdownData,
+    contacts: enrichFromFallback(parsedMarkdownData.contacts),
     language: targetLanguage,
   };
   const cvMarkdown = serializeCvDataToMarkdown(cvData, targetLanguage) || cleanedText;

@@ -350,6 +350,12 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       const variantData = variant.cvData || (variant.cvMarkdown && variant.cvMarkdown.trim().length > 30
         ? parseMarkdownToCvData(variant.cvMarkdown, activeLanguage as any)
         : null);
+      if (variantData && (!variantData.contacts || variantData.contacts.length === 0)) {
+        const baseContacts = get().activeCvData?.contacts || (cvMarkdown ? parseMarkdownToCvData(cvMarkdown).contacts : []);
+        if (baseContacts && baseContacts.length > 0) {
+          variantData.contacts = baseContacts;
+        }
+      }
       set({ activeLanguage, activeCvData: variantData });
       return;
     }
@@ -366,13 +372,25 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
 
   saveTranslationVariant: (variant: CvTranslationVariant) => {
     const current = get().translations;
+    const enrichedVariant = { ...variant };
+    let variantCvData = enrichedVariant.cvData;
+    if (variantCvData && (!variantCvData.contacts || variantCvData.contacts.length === 0)) {
+      const baseContacts = get().activeCvData?.contacts || (get().cvMarkdown ? parseMarkdownToCvData(get().cvMarkdown).contacts : []);
+      if (baseContacts && baseContacts.length > 0) {
+        variantCvData = {
+          ...variantCvData,
+          contacts: baseContacts,
+        };
+        enrichedVariant.cvData = variantCvData;
+      }
+    }
     set({
       translations: {
         ...current,
-        [variant.language]: variant,
+        [variant.language]: enrichedVariant,
       },
       activeLanguage: variant.language,
-      activeCvData: variant.cvData || null,
+      activeCvData: variantCvData || null,
     });
   },
 

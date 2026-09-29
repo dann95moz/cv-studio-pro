@@ -54,7 +54,7 @@ export function isLikelyContactLine(line: string): boolean {
   if (/(?:\+|tel[ée]fono|phone|celular|mobile)[\s:]*[0-9]/i.test(line)) return true;
   if (/^(?:[-*•]\s*)?\*{0,2}(?:Email|Correo|Tel[ée]fono|Phone|Mobile|Celular|Ubicaci[oó]n|Location|City|Ciudad|LinkedIn|GitHub|Portfolio|Web)/i.test(line)) return true;
   if (/[•|·]/.test(line)) {
-    return /@|https?:\/\/|www\.|linkedin|github|\+?\d{2,}/i.test(line);
+    return /@|https?:\/\/|www\.|linkedin|github|(?:\+\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}/i.test(line);
   }
   return false;
 }
