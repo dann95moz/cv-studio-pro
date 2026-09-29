@@ -123,7 +123,23 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
     }
   }
 
-  const rawNormalized = markdown.replace(/\r\n/g, '\n');
+  // 1. Parse metadata config comments for hidden details and sections before parsing sections
+  let hiddenDetails: string[] | undefined;
+  const hiddenDetailsMatch = markdown.match(/<!--\s*config:hiddenDetails=([^\s>]+)\s*-->/i);
+  if (hiddenDetailsMatch) {
+    hiddenDetails = hiddenDetailsMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
+  let hiddenSections: string[] | undefined;
+  const hiddenSectionsMatch = markdown.match(/<!--\s*config:hiddenSections=([^\s>]+)\s*-->/i);
+  if (hiddenSectionsMatch) {
+    hiddenSections = hiddenSectionsMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
+  // Strip all config comments from markdown so they NEVER contaminate section content
+  const cleanedMarkdown = markdown.replace(/<!--\s*config:(?:hiddenDetails|hiddenSections)=[^>]*-->/gi, '');
+
+  const rawNormalized = cleanedMarkdown.replace(/\r\n/g, '\n');
 
   // If document omits ## on known section titles (e.g. LLM returns "PROFIL PROFESSIONNEL" directly), prefix with ##
   const hashCount = (rawNormalized.match(/^##\s+/gm) || []).length;
@@ -222,7 +238,12 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
   for (const rawSec of rawSections) {
     const secLines = rawSec.split('\n');
     const headerLine = secLines[0].replace(/^##\s+/, '').trim();
-    const content = secLines.slice(1).join('\n').replace(/^---\s*$/gm, '').trim();
+    const content = secLines
+      .slice(1)
+      .join('\n')
+      .replace(/^---\s*$/gm, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .trim();
 
     // Clean emojis, decorative prefixes, and strip accents from section title
     const cleanHeaderUpper = headerLine
@@ -255,11 +276,11 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
       languages = parseBulletList(content);
       sections.push({ id: 'languages', type: 'languages', title: langDef.sections.languages, rawContent: content });
     } else if (/REFERENCE|REFERENZ|REFERENCIA/.test(cleanHeaderUpper)) {
+      const cleanRef = content.replace(/^[-*•]\s*/, '').trim();
       if (!legalDetails.references) {
-        legalDetails.references = content.replace(/^[-*•]\s*/, '').trim();
+        legalDetails.references = cleanRef;
       }
-      const secId = `custom_references`;
-      sections.push({ id: secId, type: 'custom', title: headerLine, rawContent: content });
+      sections.push({ id: 'references', type: 'references', title: headerLine, rawContent: cleanRef });
     } else if (/CONTACT|PERSONAL/.test(cleanHeaderUpper)) {
       const contactLines = content.split('\n').map((l) => l.trim()).filter(Boolean);
       for (const cLine of contactLines) {
@@ -276,19 +297,6 @@ export function parseMarkdownToCvData(markdown: string, language?: SupportedLang
       const secId = `custom_${Math.random().toString(36).substring(2, 7)}`;
       sections.push({ id: secId, type: 'custom', title: headerLine, rawContent: content });
     }
-  }
-
-  // Parse metadata config comments for hidden details and sections
-  let hiddenDetails: string[] | undefined;
-  const hiddenDetailsMatch = markdown.match(/<!--\s*config:hiddenDetails=([^\s>]+)\s*-->/i);
-  if (hiddenDetailsMatch) {
-    hiddenDetails = hiddenDetailsMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
-  }
-
-  let hiddenSections: string[] | undefined;
-  const hiddenSectionsMatch = markdown.match(/<!--\s*config:hiddenSections=([^\s>]+)\s*-->/i);
-  if (hiddenSectionsMatch) {
-    hiddenSections = hiddenSectionsMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
   }
 
   // Cleanly disentangle placeOfOrigin and availability if bundled inside nationality string

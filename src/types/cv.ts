@@ -13,6 +13,7 @@ export type SectionType =
   | 'projects' 
   | 'education' 
   | 'languages' 
+  | 'references'
   | 'generic'
   | 'custom';
 

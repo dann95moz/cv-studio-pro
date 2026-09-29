@@ -174,11 +174,13 @@ export function isStandardReferences(val?: string): boolean {
 
 export function getLocalizedReferences(val: string | undefined, lang: SupportedLanguage = 'es'): string {
   if (!val || !val.trim()) return '';
-  if (isStandardReferences(val)) {
+  const cleanVal = val.replace(/<!--[\s\S]*?-->/g, '').trim();
+  if (!cleanVal) return '';
+  if (isStandardReferences(cleanVal)) {
     const presets = REFERENCES_PRESETS[lang] || REFERENCES_PRESETS.es;
     return presets[0].value;
   }
-  return val.trim();
+  return cleanVal;
 }
 
 export const NATIONALITY_PRESETS: Record<SupportedLanguage, LegalPresetOption[]> = {

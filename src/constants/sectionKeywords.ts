@@ -80,6 +80,18 @@ export const SECTION_KEYWORDS: Record<Exclude<SectionType, 'generic' | 'custom'>
     'projets', 'projets récents', 'publications', 'bénévolat', 'initiatives', 'études de cas',
     // Italian
     'progetti', 'progetti principali', 'pubblicazioni', 'volontariato', 'iniziative', 'casi di studio'
+  ],
+  references: [
+    // English
+    'references', 'referees', 'references available upon request',
+    // Spanish
+    'referencias', 'referencias laborales', 'referencias disponibles',
+    // German
+    'referenzen', 'referenzen auf anfrage',
+    // French
+    'références', 'references', 'références disponibles sur demande',
+    // Italian
+    'referenze', 'referenze disponibili'
   ]
 };
 

@@ -291,14 +291,14 @@ export async function generateDirectPdf(
       const plainText = generatePlainTextCv(cvData);
       textLines = plainText
         .split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l && !l.startsWith('===') && !l.startsWith('---'));
+        .map((l) => stripMarkdownFormatting(l).trim())
+        .filter((l) => l && !l.startsWith('===') && !l.startsWith('---') && !l.startsWith('<!--') && !l.includes('config:'));
     } else if (markdownPayload) {
       // 2. Clean markdown payload
       textLines = markdownPayload
         .split('\n')
         .map((l) => stripMarkdownFormatting(l).trim())
-        .filter((l) => l && !l.startsWith('===') && !l.startsWith('---'));
+        .filter((l) => l && !l.startsWith('===') && !l.startsWith('---') && !l.startsWith('<!--') && !l.includes('config:'));
     } else {
       // 3. Robust fallback from DOM with strict sanitization of all interactive controls
       const clone = element.cloneNode(true) as HTMLElement;

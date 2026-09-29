@@ -87,6 +87,8 @@ function resolveExportTitle(
 export function stripMarkdownFormatting(text: string): string {
   if (!text) return '';
   return text
+    // Remove HTML comments <!-- ... -->
+    .replace(/<!--[\s\S]*?-->/g, '')
     // Replace markdown links [label](url) with "label (url)" or just label if same
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, url) => {
       if (label.trim().toLowerCase() === url.trim().toLowerCase()) return label.trim();
@@ -312,8 +314,18 @@ export function generatePlainTextCv(data: CVData): string {
   }
 
   // 10. Custom or Additional Generic Sections
-  const knownSectionTypes = new Set(['summary', 'skills', 'experience', 'projects', 'education', 'languages']);
-  const customSections = (data.sections || []).filter((s) => !knownSectionTypes.has(s.type) && s.rawContent?.trim());
+  const knownSectionTypes = new Set(['summary', 'skills', 'experience', 'projects', 'education', 'languages', 'references']);
+  const hiddenSectionsSet = new Set(data.hiddenSections || []);
+  const customSections = (data.sections || []).filter(
+    (s) =>
+      !knownSectionTypes.has(s.type) &&
+      s.type !== 'references' &&
+      !/reference|r[ée]f[ée]rence/i.test(s.id) &&
+      !/reference|r[ée]f[ée]rence/i.test(s.title || '') &&
+      !hiddenSectionsSet.has(s.id) &&
+      !hiddenSectionsSet.has(s.type) &&
+      s.rawContent?.trim()
+  );
 
   for (const cSec of customSections) {
     lines.push('');
@@ -328,13 +340,14 @@ export function generatePlainTextCv(data: CVData): string {
 
   // 11. References (Swiss & European standard)
   const isRefHidden = data.hiddenSections?.includes('references') || data.hiddenDetails?.includes('references');
-  if (data.references && !isRefHidden) {
+  const refRaw = data.references || data.sections?.find((s) => s.type === 'references' || /reference|r[ée]f[ée]rence/i.test(s.id))?.rawContent;
+  if (refRaw && !isRefHidden) {
     lines.push('');
     lines.push(divider);
     const refTitle = lang === 'fr' ? 'RÉFÉRENCES' : lang === 'de' ? 'REFERENZEN' : lang === 'es' ? 'REFERENCIAS' : lang === 'it' ? 'REFERENZE' : 'REFERENCES';
     lines.push(refTitle);
     lines.push(divider);
-    const cleanRef = stripMarkdownFormatting(getLocalizedReferences(data.references, lang));
+    const cleanRef = stripMarkdownFormatting(getLocalizedReferences(refRaw.replace(/^[-*•]\s*/, '').trim(), lang));
     if (cleanRef) {
       lines.push(`• ${cleanRef}`);
     }

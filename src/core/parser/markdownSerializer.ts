@@ -228,6 +228,9 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   if (data.customSections && data.customSections.length > 0) {
     for (const custom of data.customSections) {
       if (custom.title && custom.items && custom.items.length > 0) {
+        if (/reference|r[ée]f[ée]rence/i.test(custom.title) || (custom.presetType as string) === 'references') {
+          continue; // References is serialized separately below
+        }
         parts.push('\n---\n');
         const cleanTitle = custom.title.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s*#_\-–—|•·:]+/u, '').trim();
         parts.push(`## ${cleanTitle.toUpperCase()}`);
@@ -242,11 +245,14 @@ export function serializeCvDataToMarkdown(data: CVData, language?: SupportedLang
   }
 
   // References (Swiss & European standard)
-  if (data.references && !data.customSections?.some(c => /reference|r[ée]f[ée]rence/i.test(c.title))) {
+  const rawRef = data.references || data.sections?.find((s) => s.type === 'references' || /reference|r[ée]f[ée]rence/i.test(s.id))?.rawContent;
+  const cleanRef = (rawRef || '').replace(/<!--[\s\S]*?-->/g, '').trim();
+
+  if (cleanRef) {
     parts.push('\n---\n');
     const refTitle = lang === 'fr' ? 'RÉFÉRENCES' : lang === 'de' ? 'REFERENZEN' : lang === 'es' ? 'REFERENCIAS' : lang === 'it' ? 'REFERENZE' : 'REFERENCES';
     parts.push(`## ${refTitle}`);
-    const displayRef = getLocalizedReferences(data.references, lang);
+    const displayRef = getLocalizedReferences(cleanRef, lang);
     parts.push(`- ${displayRef}`);
   }
 
