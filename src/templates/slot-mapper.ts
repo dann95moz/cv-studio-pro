@@ -145,12 +145,17 @@ export function mapDataToSlots(data: CVData, language?: SupportedLanguage): CVSl
   }
 
   const isProjectUrl = (c: ContactItem): boolean => {
+    // Core candidate contact details must never be treated as project links
+    if (['email', 'phone', 'location', 'linkedin'].includes(c.type)) {
+      return false;
+    }
     const rawUrl = (c.url || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
     const rawLabel = (c.label || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    if (!rawUrl && !rawLabel) return false;
     if (projectUrls.has(rawUrl) || projectUrls.has(rawLabel)) return true;
     for (const pUrl of projectUrls) {
-      if (rawUrl && (rawUrl === pUrl || rawUrl.includes(pUrl) || pUrl.includes(rawUrl))) return true;
-      if (rawLabel && (rawLabel === pUrl || rawLabel.includes(pUrl) || pUrl.includes(rawLabel))) return true;
+      if (rawUrl && rawUrl === pUrl) return true;
+      if (rawLabel && rawLabel === pUrl) return true;
     }
     return false;
   };

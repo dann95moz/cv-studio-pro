@@ -24,6 +24,11 @@ import {
 import { downloadTextFile, buildTimestampedFileName } from '../../utils/fileUtils';
 import { CvTranslationVariant, ProfilePhotoConfig } from '../../types/cv';
 import { computeContentHash, detectOutdatedSections } from '../../core/ai/cv-translator';
+import {
+  findCandidateContacts,
+  enrichContactList,
+  injectContactsIntoMarkdownPreamble,
+} from '../../core/parser/contactFinder';
 
 export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> = (set, get) => ({
   masterData: BLANK_MASTER_DATA,
@@ -337,11 +342,22 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   },
 
   setActiveLanguage: (activeLanguage: string) => {
-    const { currentBaseLanguage, cvMarkdown, translations } = get();
+    const { currentBaseLanguage, cvMarkdown, translations, activeCvData, masterData, savedVersions } = get();
+    const candidatePool = findCandidateContacts({
+      activeCvData,
+      translations,
+      cvMarkdown,
+      masterData,
+      savedVersions,
+    });
+
     if (activeLanguage === currentBaseLanguage) {
       const healedBase = cvMarkdown && cvMarkdown.trim().length > 30
         ? parseMarkdownToCvData(cvMarkdown, (currentBaseLanguage || 'es') as any)
         : null;
+      if (healedBase) {
+        healedBase.contacts = enrichContactList(healedBase.contacts, candidatePool, (currentBaseLanguage || 'es') as any);
+      }
       set({ activeLanguage, activeCvData: healedBase });
       return;
     }
@@ -350,11 +366,8 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
       const variantData = variant.cvData || (variant.cvMarkdown && variant.cvMarkdown.trim().length > 30
         ? parseMarkdownToCvData(variant.cvMarkdown, activeLanguage as any)
         : null);
-      if (variantData && (!variantData.contacts || variantData.contacts.length === 0)) {
-        const baseContacts = get().activeCvData?.contacts || (cvMarkdown ? parseMarkdownToCvData(cvMarkdown).contacts : []);
-        if (baseContacts && baseContacts.length > 0) {
-          variantData.contacts = baseContacts;
-        }
+      if (variantData) {
+        variantData.contacts = enrichContactList(variantData.contacts, candidatePool, activeLanguage as any);
       }
       set({ activeLanguage, activeCvData: variantData });
       return;
@@ -374,16 +387,30 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
     const current = get().translations;
     const enrichedVariant = { ...variant };
     let variantCvData = enrichedVariant.cvData;
-    if (variantCvData && (!variantCvData.contacts || variantCvData.contacts.length === 0)) {
-      const baseContacts = get().activeCvData?.contacts || (get().cvMarkdown ? parseMarkdownToCvData(get().cvMarkdown).contacts : []);
-      if (baseContacts && baseContacts.length > 0) {
-        variantCvData = {
-          ...variantCvData,
-          contacts: baseContacts,
-        };
-        enrichedVariant.cvData = variantCvData;
-      }
+
+    const candidatePool = findCandidateContacts({
+      activeCvData: get().activeCvData,
+      translations: get().translations,
+      cvMarkdown: get().cvMarkdown,
+      masterData: get().masterData,
+      savedVersions: get().savedVersions,
+    });
+
+    if (variantCvData) {
+      variantCvData = {
+        ...variantCvData,
+        contacts: enrichContactList(variantCvData.contacts, candidatePool, variant.language as any),
+      };
+      enrichedVariant.cvData = variantCvData;
     }
+
+    if (enrichedVariant.cvMarkdown && variantCvData?.contacts?.length) {
+      enrichedVariant.cvMarkdown = injectContactsIntoMarkdownPreamble(
+        enrichedVariant.cvMarkdown,
+        variantCvData.contacts
+      );
+    }
+
     set({
       translations: {
         ...current,
@@ -463,11 +490,21 @@ export const createCvDataSlice: StateCreator<ResumeStore, [], [], CvDataSlice> =
   },
 
   handleDownloadCvMarkdown: () => {
-    const { masterData, targetJob, companyName, cvMarkdown, activeLanguage, currentBaseLanguage, translations } = get();
+    const { masterData, targetJob, companyName, cvMarkdown, activeLanguage, currentBaseLanguage, translations, activeCvData, savedVersions } = get();
     const candidateName = extractCandidateName(masterData, 'Candidate');
     const targetComp = companyName || extractTargetCompany(targetJob, 'Target');
     const isVariant = activeLanguage && currentBaseLanguage && activeLanguage !== currentBaseLanguage && translations[activeLanguage];
-    const content = isVariant ? translations[activeLanguage].cvMarkdown : cvMarkdown;
+    const rawContent = isVariant ? translations[activeLanguage].cvMarkdown : cvMarkdown;
+
+    const candidatePool = findCandidateContacts({
+      activeCvData,
+      translations,
+      cvMarkdown,
+      masterData,
+      savedVersions,
+    });
+    const content = injectContactsIntoMarkdownPreamble(rawContent, candidatePool);
+
     const langSuffix = isVariant ? `_${activeLanguage.toUpperCase()}` : '';
     const baseName = `CV_${sanitizeFileName(candidateName)}_${sanitizeFileName(targetComp)}${langSuffix}`;
     const fileName = buildTimestampedFileName(baseName, 'md');
