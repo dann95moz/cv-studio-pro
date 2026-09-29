@@ -171,6 +171,7 @@ ${languageDirective}
   1. DO NOT discard: nationality, work permit status (e.g. Permis B, Permis C, Permis G frontalier, Citoyen UE/AELE), date of birth, driving license, availability / notice period, or references.
   2. These fields are legal and practical prerequisites in Switzerland and must be preserved authentically from MASTER-DATA.MD.
   3. Include "references": "Références disponibles sur demande" (or vacancy language equivalent) when references are mentioned or expected.
+  4. LEGAL & AVAILABILITY CONSISTENCY: Keep "workPermit" strictly for permit status (e.g. "Permis B", "Permis C", "Permis G frontalier", "Citoyen suisse – Aucun permis requis"). ❌ NEVER append availability (such as "Disponibilité immédiate" or "available now") inside "workPermit". The "availability" field is the SOLE field for start dates and notice periods. NEVER duplicate or contradict availability across multiple fields.
 
 === CORE GUIDELINES & CONSTRAINTS (RULES.MD) ===
 ${rules}
@@ -277,11 +278,11 @@ Deliver your entire response as a single, valid JSON object (optionally inside a
       "**Language 2:** [CEFR Level] (e.g. B2 – Upper Intermediate)"
     ],
     "nationality": "Candidate nationality from MASTER-DATA (e.g. Suisse, Française - omit if absent)",
-    "workPermit": "Work permit from MASTER-DATA (e.g. Citoyen suisse – Aucun permis requis – Disponibilité immédiate, Permis B, Permis C, Permis G frontalier - omit if absent)",
+    "workPermit": "Work permit from MASTER-DATA (e.g. Permis B, Permis C, Permis G frontalier, or 'Citoyen suisse – Aucun permis requis' - strictly permit type only, NEVER include availability or notice period here - omit if absent)",
     "civilStatus": "Civil/marital status from MASTER-DATA (e.g. Célibataire, Marié(e) - omit if absent)",
     "dateOfBirth": "Date of birth from MASTER-DATA (omit if absent)",
     "drivingLicense": "Driving license from MASTER-DATA (e.g. Permis B - omit if absent)",
-    "availability": "Notice period or cantonal availability from MASTER-DATA (e.g. Immédiate (Mobilité Suisse Romande) - omit if absent)",
+    "availability": "Notice period or starting availability date strictly from MASTER-DATA (e.g. Immédiate, since december 2026, 1 month notice - omit if absent)",
     "references": "References mention (e.g. Références disponibles sur demande - omit if absent)"
   }
 }

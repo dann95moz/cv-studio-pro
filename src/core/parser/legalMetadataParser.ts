@@ -1,4 +1,5 @@
 import { cleanHumanText } from './metadataExtractor';
+import { extractAndStripEmbeddedAvailability, sanitizeLegalMetadata } from './cvSanitizers';
 
 export interface LegalMetadataResult {
   workPermit?: string;
@@ -31,7 +32,9 @@ export function parseLegalMetadata(pLine: string): { key: keyof LegalMetadataRes
     /^\*{0,2}(?:Permis(?!\s+de\s+conduire)(?:\s+de\s+travail|\s+de\s+s[ée]jour)?|Work\s+Permit|Aufenthaltsbewilligung|Permiso\s+de\s+trabajo|Permesso(?:\s+di\s+soggiorno|\s+di\s+lavoro)?)\*{0,2}[:\s]+([^•·|\n]+)$/i
   );
   if (permitMatch) {
-    return { key: 'workPermit', value: cleanHumanText(permitMatch[1]) };
+    const rawVal = cleanHumanText(permitMatch[1]);
+    const { cleaned } = extractAndStripEmbeddedAvailability(rawVal);
+    return { key: 'workPermit', value: cleaned || rawVal };
   }
 
   // 3. Nationality
@@ -114,5 +117,5 @@ export function parseAllLegalMetadata(line: string): LegalMetadataResult {
     }
   }
 
-  return result;
+  return sanitizeLegalMetadata(result) as LegalMetadataResult;
 }

@@ -8,6 +8,7 @@ import {
   cleanSkillItem,
   cleanEducationItem,
   cleanLanguageItem,
+  sanitizeLegalMetadata,
 } from './cvSanitizers';
 import { normalizeSkillCategory } from './skillNormalizer';
 import { inferContactType, normalizeContactUrl } from './contactParser';
@@ -550,7 +551,7 @@ export function parseJsonLegalDetails(
     if (!references && fallbackCv.references) references = fallbackCv.references;
   }
 
-  return {
+  return sanitizeLegalMetadata({
     workPermit,
     nationality,
     placeOfOrigin,
@@ -559,5 +560,14 @@ export function parseJsonLegalDetails(
     availability,
     civilStatus,
     references,
+  }) as {
+    workPermit?: string;
+    nationality?: string;
+    placeOfOrigin?: string;
+    dateOfBirth?: string;
+    drivingLicense?: string;
+    availability?: string;
+    civilStatus?: string;
+    references?: string;
   };
 }

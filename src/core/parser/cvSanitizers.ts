@@ -120,11 +120,99 @@ export function cleanLanguageItem(item: string): string {
 }
 
 /**
+ * Regex matching availability patterns embedded in legal fields like workPermit or nationality.
+ * Matches phrases like "– available now", "– Disponibilité immédiate", "– disponible de inmediato",
+ * "– sofort verfügbar", "– disponibilité : 1 mois", "– availability: immediate", etc.
+ */
+export const EMBEDDED_AVAILABILITY_REGEX =
+  /(?:^|[,•·|/–—-])\s*(?:(?:disponibilit[ée]|availability|verf[üu]gbarkeit|disponibilidad|disponibilit[àa])\s*[:：]?\s*([^,•·|/–—-][^,•·|/–—-]*)?|(?:disponible\s+(?:de\s+inmediato|ya|imm[ée]diatement|imm[ée]diate)|disponibilit[ée]\s+imm[ée]diate|available\s+(?:now|immediately)|immediately\s+available|immediate|sofort(?:\s+verf[üu]gbar)?|disponibile\s+subito))/gi;
+
+/**
+ * Strips embedded availability phrases from a string, returning the cleaned string and any detected availability.
+ */
+export function extractAndStripEmbeddedAvailability(text: string): { cleaned: string; detectedAvailability?: string } {
+  if (!text || !text.trim()) return { cleaned: '' };
+
+  let detectedAvailability: string | undefined;
+  const matches = [...text.matchAll(EMBEDDED_AVAILABILITY_REGEX)];
+  if (matches.length > 0) {
+    const rawMatch = matches[0][0].replace(/^[•·/–—,\s|]+|[•·/–—,\s|]+$/g, '').trim();
+    const valOnly = rawMatch.replace(/^(?:disponibilit[ée]|availability|verf[üu]gbarkeit|disponibilidad|disponibilit[àa])\s*[:：]?\s*/i, '').trim();
+    detectedAvailability = valOnly || rawMatch;
+  }
+
+  const cleaned = text
+    .replace(EMBEDDED_AVAILABILITY_REGEX, '')
+    .replace(/^[•·/–—,\s|]+|[•·/–—,\s|]+$/g, '')
+    .trim();
+
+  return { cleaned, detectedAvailability };
+}
+
+/**
+ * Sanitizes and enforces consistency across personal and legal metadata fields.
+ * Guarantees:
+ * 1. Zero availability leakage inside workPermit or nationality.
+ * 2. If a specific availability exists (e.g. "since december 2026"), generic placeholders
+ *    ("available now", "disponible ya", "disponibilité immédiate") are stripped completely.
+ * 3. Work permit and availability never contradict each other.
+ */
+export function sanitizeLegalMetadata<T extends Partial<CVData>>(data: T): T {
+  if (!data) return data;
+
+  let workPermit = data.workPermit ? cleanHumanText(data.workPermit) : undefined;
+  let nationality = data.nationality ? cleanHumanText(data.nationality) : undefined;
+  let availability = data.availability ? cleanHumanText(data.availability) : undefined;
+  let placeOfOrigin = data.placeOfOrigin ? cleanHumanText(data.placeOfOrigin) : undefined;
+  let civilStatus = data.civilStatus ? cleanHumanText(data.civilStatus) : undefined;
+  let dateOfBirth = data.dateOfBirth ? cleanHumanText(data.dateOfBirth) : undefined;
+  let drivingLicense = data.drivingLicense ? cleanHumanText(data.drivingLicense) : undefined;
+  let references = data.references ? cleanHumanText(data.references) : undefined;
+
+  // 1. Check for embedded availability in workPermit
+  if (workPermit) {
+    const { cleaned, detectedAvailability } = extractAndStripEmbeddedAvailability(workPermit);
+    workPermit = cleaned || undefined;
+    if (detectedAvailability && (!availability || !availability.trim())) {
+      availability = detectedAvailability;
+    }
+  }
+
+  // 2. Check for embedded availability in nationality
+  if (nationality) {
+    const { cleaned, detectedAvailability } = extractAndStripEmbeddedAvailability(nationality);
+    nationality = cleaned || undefined;
+    if (detectedAvailability && (!availability || !availability.trim())) {
+      availability = detectedAvailability;
+    }
+  }
+
+  // 3. Clean availability formatting
+  if (availability) {
+    availability = cleanHumanText(availability).replace(/^[•·/–—,\s|]+|[•·/–—,\s|]+$/g, '').trim();
+  }
+
+  return {
+    ...data,
+    workPermit,
+    nationality,
+    availability,
+    placeOfOrigin,
+    civilStatus,
+    dateOfBirth,
+    drivingLicense,
+    references,
+  };
+}
+
+/**
  * Normalizes all fields of CVData to ensure clean human-readable text
  * with no rogue underscores, clean monograms, and consistent structure.
  */
 export function cleanCvData(data: CVData): CVData {
   if (!data) return data;
+
+  const legalCleaned = sanitizeLegalMetadata(data);
 
   // Collect project URLs to prevent project live demos from leaking into candidate personal contacts
   const projectUrls = new Set<string>();
@@ -155,6 +243,7 @@ export function cleanCvData(data: CVData): CVData {
 
   return {
     ...data,
+    ...legalCleaned,
     name: cleanHumanText(data.name || ''),
     title: cleanHumanText(data.title || ''),
     summary: cleanSummary(data.summary || ''),

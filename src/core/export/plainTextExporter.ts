@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
 import { SupportedLanguage } from '../../constants/languages';
 import { getLocalizedReferences } from '../../constants/legalPresets';
+import { sanitizeLegalMetadata } from '../parser/cvSanitizers';
 
 /**
  * Default ATS section titles synchronized across all 5 supported locales.
@@ -175,30 +176,46 @@ export function generatePlainTextCv(data: CVData): string {
   }
 
   // 3. Personal & Legal Details (Crucial for Swiss & European ATS parsing)
+  const cleanData = sanitizeLegalMetadata(data);
   const personalDetails: string[] = [];
-  if (data.nationality) {
+
+  const isSwissCitizen =
+    /(suisse|swiss|schweiz|svizzera)/i.test(cleanData.nationality || '') ||
+    Boolean(cleanData.placeOfOrigin) ||
+    /(suisse|swiss|schweiz|svizzera|citoyen|citizen)/i.test(cleanData.workPermit || '');
+
+  const isPermitRedundant =
+    isSwissCitizen &&
+    Boolean(cleanData.nationality && /(suisse|swiss|schweiz|svizzera)/i.test(cleanData.nationality)) &&
+    /(citoyen|citizen|suisse|swiss|don['’]?t require|aucun permis|no\s*(?:work)?\s*permit|sans permis|keine\s*(?:arbeits)?bewilligung|sin permiso|nessun permesso)/i.test(cleanData.workPermit || '');
+
+  if (cleanData.nationality) {
     const natLabel = lang === 'fr' ? 'Nationalité' : lang === 'es' ? 'Nacionalidad' : lang === 'de' ? 'Nationalität' : lang === 'it' ? 'Nazionalità' : 'Nationality';
-    personalDetails.push(`${natLabel}: ${stripMarkdownFormatting(data.nationality)}`);
+    personalDetails.push(`${natLabel}: ${stripMarkdownFormatting(cleanData.nationality)}`);
   }
-  if (data.workPermit) {
+  if (cleanData.placeOfOrigin) {
+    const originLabel = lang === 'fr' ? "Lieu d'origine" : lang === 'de' ? 'Heimatort' : lang === 'es' ? 'Lugar de origen' : lang === 'it' ? "Luogo d'origine" : 'Place of Origin';
+    personalDetails.push(`${originLabel}: ${stripMarkdownFormatting(cleanData.placeOfOrigin)}`);
+  }
+  if (cleanData.workPermit && !isPermitRedundant) {
     const permitLabel = lang === 'fr' ? 'Permis de travail' : lang === 'es' ? 'Permiso de trabajo' : lang === 'de' ? 'Arbeitsbewilligung' : lang === 'it' ? 'Permesso di lavoro' : 'Work Permit';
-    personalDetails.push(`${permitLabel}: ${stripMarkdownFormatting(data.workPermit)}`);
+    personalDetails.push(`${permitLabel}: ${stripMarkdownFormatting(cleanData.workPermit)}`);
   }
-  if (data.availability) {
+  if (cleanData.availability) {
     const availLabel = lang === 'fr' ? 'Disponibilité' : lang === 'es' ? 'Disponibilidad' : lang === 'de' ? 'Verfügbarkeit' : lang === 'it' ? 'Disponibilità' : 'Availability';
-    personalDetails.push(`${availLabel}: ${stripMarkdownFormatting(data.availability)}`);
+    personalDetails.push(`${availLabel}: ${stripMarkdownFormatting(cleanData.availability)}`);
   }
-  if (data.civilStatus) {
+  if (cleanData.civilStatus) {
     const csLabel = lang === 'fr' ? 'État civil' : lang === 'es' ? 'Estado civil' : lang === 'de' ? 'Zivilstand' : lang === 'it' ? 'Stato civile' : 'Civil Status';
-    personalDetails.push(`${csLabel}: ${stripMarkdownFormatting(data.civilStatus)}`);
+    personalDetails.push(`${csLabel}: ${stripMarkdownFormatting(cleanData.civilStatus)}`);
   }
-  if (data.drivingLicense) {
+  if (cleanData.drivingLicense) {
     const dlLabel = lang === 'fr' ? 'Permis de conduire' : lang === 'es' ? 'Licencia de conducir' : lang === 'de' ? 'Führerschein' : lang === 'it' ? 'Patente' : 'Driving License';
-    personalDetails.push(`${dlLabel}: ${stripMarkdownFormatting(data.drivingLicense)}`);
+    personalDetails.push(`${dlLabel}: ${stripMarkdownFormatting(cleanData.drivingLicense)}`);
   }
-  if (data.dateOfBirth) {
+  if (cleanData.dateOfBirth) {
     const dobLabel = lang === 'fr' ? 'Date de naissance' : lang === 'es' ? 'Fecha de nacimiento' : lang === 'de' ? 'Geburtsdatum' : lang === 'it' ? 'Data di nascita' : 'Date of Birth';
-    personalDetails.push(`${dobLabel}: ${stripMarkdownFormatting(data.dateOfBirth)}`);
+    personalDetails.push(`${dobLabel}: ${stripMarkdownFormatting(cleanData.dateOfBirth)}`);
   }
 
   if (personalDetails.length > 0) {

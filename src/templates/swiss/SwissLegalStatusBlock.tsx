@@ -3,6 +3,7 @@ import { CVTemplateProps } from '../types';
 import { SwissLabels } from './swissLabels';
 import { EditableText } from '../../components/studio/preview/EditableText';
 import { useCvLiveEdit } from '../../components/studio/preview/CvLiveEditContext';
+import { extractAndStripEmbeddedAvailability } from '../../core/parser/cvSanitizers';
 
 export interface SwissLegalStatusBlockProps {
   header: CVTemplateProps['slots']['header'];
@@ -24,8 +25,10 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const showBirthDate = !hidden.has('dateOfBirth');
   const showDrivingLicense = !hidden.has('drivingLicense');
 
-  const rawNat = (header.nationality || '').replace(/[*_]/g, '').trim();
-  const rawPermit = (header.workPermit || '').replace(/[*_]/g, '').trim();
+  const rawNatWithAvail = (header.nationality || '').replace(/[*_]/g, '').trim();
+  const rawPermitWithAvail = (header.workPermit || '').replace(/[*_]/g, '').trim();
+  const { cleaned: rawNat, detectedAvailability: natAvail } = extractAndStripEmbeddedAvailability(rawNatWithAvail);
+  const { cleaned: rawPermit, detectedAvailability: permitAvail } = extractAndStripEmbeddedAvailability(rawPermitWithAvail);
 
   // 1. Resolve place of origin: prefer first-class placeOfOrigin property, fallback to regex
   const originRegex = /(?:Originaire\s+de|Lieu\s+d['’]origine|Heimatort|Place\s+of\s+origin|Lugar\s+de\s+origen)\s*[:\s]*([a-zA-ZÀ-ÿ\s()–-]+(?:\([A-Z]{2}\))?)/i;
@@ -72,12 +75,14 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
   const permitPhraseRegex = /[,•·|/-]?\s*(?:no\s*(?:work\s*)?permit(?:\s*required)?|aucun\s*permis(?:\s*requis)?|sans\s*permis|permis\s*non\s*requis|keine\s*(?:arbeits)?bewilligung(?:\s*erforderlich)?|sin\s*permiso(?:\s*requerido)?|nessun\s*permesso(?:\s*richiesto)?|citoyen\s+suisse|swiss\s+citizen)/gi;
   cleanNat = cleanNat.replace(permitPhraseRegex, '').trim();
 
-  // 3. Resolve availability: ALWAYS strip availability from cleanNat so it never leaks into nationality badge
+  // 3. Resolve availability: ALWAYS strip availability from cleanNat and rawPermit so it never leaks
   const availRegex = /[•·|,]?\s*(?:Disponibilit[ée]|Availability|Verf[üu]gbarkeit|Disponibilidad)\s*[:：]?\s*([^•·\n]+)/i;
   const legacyAvailMatch = cleanNat.match(availRegex) || rawPermit.match(availRegex);
-  let legacyAvailability = '';
-  if (legacyAvailMatch) {
+  let legacyAvailability = natAvail || permitAvail || '';
+  if (!legacyAvailability && legacyAvailMatch) {
     legacyAvailability = legacyAvailMatch[1].trim();
+  }
+  if (legacyAvailMatch) {
     cleanNat = cleanNat.replace(legacyAvailMatch[0], '').trim();
   }
 
@@ -168,7 +173,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
           </div>
         )}
 
-        {showWorkPermit && !isNationalityPrimary && header.workPermit && (
+        {showWorkPermit && !isNationalityPrimary && rawPermit && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontWeight: 800, color: 'var(--cv-primary, #0284c7)', textTransform: 'uppercase', fontSize: '9.5px', letterSpacing: '0.5px' }}>
               {labels.workPermit}
@@ -189,7 +194,7 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
             >
               <EditableText
                 tagName="span"
-                value={header.workPermit}
+                value={rawPermit}
                 onSave={(val) => liveEdit?.updatePersonalDetail('workPermit', val)}
               />
             </span>
@@ -210,13 +215,13 @@ export const SwissLegalStatusBlock: React.FC<SwissLegalStatusBlockProps> = ({
         )}
 
         {/* Secondary: Work Permit if Nationality was primary and permit is genuinely distinct */}
-        {showWorkPermit && isNationalityPrimary && header.workPermit && !isPermitRedundant && (
+        {showWorkPermit && isNationalityPrimary && rawPermit && !isPermitRedundant && (
           <div>
             <span style={{ fontWeight: 700, color: '#475569' }}>{labels.workPermit} : </span>
             <span style={{ fontWeight: 600 }}>
               <EditableText
                 tagName="span"
-                value={header.workPermit}
+                value={rawPermit}
                 onSave={(val) => liveEdit?.updatePersonalDetail('workPermit', val)}
               />
             </span>
